@@ -14,7 +14,7 @@ from synox.sdk import author
 from conftest import PACK_NAMES, PACKS, PLANNER
 
 # pack 名稱 → 宣告的 capabilities（其他一律不准；None＝沒寫 capabilities，掃描也不能要求任何能力）
-ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": None, "notes": None, "remind": None}
+ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": None, "notes": None}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 FORBIDDEN_IMPORTS = ("requests", "urllib", "http", "socket", "ssl", "subprocess", "multiprocessing", "ctypes",
                      "importlib", "pickle", "marshal", "shutil", "pathlib", "asyncio", "threading")

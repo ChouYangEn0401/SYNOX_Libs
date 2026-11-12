@@ -19,7 +19,7 @@ from conftest import PACK_NAMES, PACKS, ROOT
 from synox.sdk import author
 
 # 每個工具裝好之後試一個指令：(指令, 回覆裡要有的字)
-SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "記下了"), "remind": ("/remind_list", "提醒"),
+SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "記下了"),
          "calendar": ("/cal 明天 14:00 看牙醫", "加好了"), "todo": ("/todo 買牛奶", "加好了"), "bullet": ("/bj • 買牛奶", "記到今天")}
 
 

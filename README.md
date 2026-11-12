@@ -5,13 +5,15 @@ SYNOX（主程式）出廠是空的；要什麼工具，從這裡挑 `.synoxpack
 | 工具 | 指令（例） | 做什麼 | 建議群組 |
 |---|---|---|---|
 | [📒 notes](packs/notes/README.md) | `/note 買牛奶`、`/note_list`、`/note_rm 1` | 隨手記一筆、找、刪 | 入門 |
-| [⏰ remind](packs/remind/README.md) | `/remind_add 08:00 吃藥`、`/remind_list` | 每天幾點提醒、或某一天提醒一次 | 入門 |
 | [✅ todo](packs/todo/README.md) | `/todo !! 繳電費 明天 #家事`、`/todo_list` | 待辦：重要度、專案、到期 | 入門、規劃 |
 | [💰 money](packs/money/README.md) | `/money 120 午餐`、`/money_month`、`/money_budget 8000` | 記一筆、看這個月、設預算 | 記帳 |
 | [📅 calendar](packs/calendar/README.md) | `/cal 明天 14:00 看牙醫`、`/cal_week`、`/cal_ics` | 行事曆、匯出 .ics | 規劃 |
 | [• bullet](packs/bullet/README.md) | `/bj • 買牛奶`、`/bj_today`、`/bj_migrate` | 子彈筆記 | 規劃 |
 
-六個都是：資料加密存在你自己的電腦（保管箱）、不連網、不開別的程式；伺服器版每個人一份。
+五個都是：資料加密存在你自己的電腦（保管箱）、不連網、不開別的程式；伺服器版每個人一份。
+
+**提醒（`/remind_add 08:00 吃藥`）不在這裡**：它是 SYNOX 的系統指令（「⏰ 提醒（系統）」），不用裝。
+2026-11-12 以前這裡有一個 `remind` 工具，已下架到 [legacy/](legacy/README.md)。`apple-reminders`（Apple 提醒事項）是另一個東西：接你 iCloud 的待辦。
 
 ## 給使用者：怎麼裝
 
@@ -22,7 +24,7 @@ SYNOX（主程式）出廠是空的；要什麼工具，從這裡挑 `.synoxpack
    - 終端機：`<SYNOX>\.venv\Scripts\python.exe -m synox install <檔>.synoxpack`。
 3. 裝好後 `/help` 就多一頁。不要了在網頁設定頁移除（舊的搬到 `packs/_removed/`，不刪；資料也不動）。
 
-從舊版 SYNOX 更新上來、原本有內建記帳／筆記／提醒的人：資料還在，裝同名工具（`money`、`notes`、`remind`）就回來。
+從舊版 SYNOX 更新上來、原本有內建記帳／筆記的人：資料還在，裝同名工具（`money`、`notes`）就回來；提醒不用裝（系統指令，資料一直都在）。
 
 ## 給開發者
 
@@ -50,7 +52,7 @@ set SYNOX_HOME=<SYNOX 資料夾>             沒設就找並排的 ..\SYNOX
   並寫好範圍（或 `pip install <SYNOX>/sdk`）；附的 `synox_sdk.py` 版本也要在範圍內。
 - **改了工具就升 `version`**（semver，要比裝著的大，SYNOX 才會當成升級），並在 [CHANGELOG.md](CHANGELOG.md) 記一行。
 - 工具之間不能互相 import（SYNOX 的規則）；共用的程式放 `packs/_shared/`，用 `scripts/sync_shared.py` 原樣複製進每個用到的 `pack.py`。
-- `remind` 的程式本體在 SYNOX 的 `synox.schedule`（不是 SDK 的一部分），所以它靠 `requires.synox` 釘住 SYNOX 版本。
+- 工具不要取名 `remind`、不要用 `remind` 群組：那是 SYNOX 系統指令的名字（裝了也載不進去）。要「到時間提醒」，在回覆裡附一行 `/remind_add …` 讓使用者自己決定（`calendar` 的做法）。
 - 測試兩層：`make_bot`（假 store，快）與 `synox_bot`（真的 SYNOX）；`tests/test_build.py` 走完整條「打包 → 空的 SYNOX 安裝」。
 
 ## 目錄
@@ -58,6 +60,7 @@ set SYNOX_HOME=<SYNOX 資料夾>             沒設就找並排的 ..\SYNOX
 | 路徑 | 是什麼 |
 |---|---|
 | `packs/` | 每個工具一個資料夾；`_shared/` 是共用程式的正本（不是工具） |
+| `legacy/` | 下架的工具（不打包、不測試；每項寫原本做什麼、為什麼下架、怎麼救回） |
 | `scripts/build.py` | 打包＋寫 `index.json` |
 | `scripts/_synox.py` | 找 SYNOX（`SYNOX_HOME` 或 `../SYNOX`） |
 | `catalog.json` | 建議群組 |
