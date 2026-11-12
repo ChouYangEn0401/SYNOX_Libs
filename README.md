@@ -36,6 +36,14 @@ set SYNOX_HOME=<SYNOX 資料夾>             沒設就找並排的 ..\SYNOX
 
 （主控台是 cp950：先 `set PYTHONIOENCODING=utf-8` 與 `set PYTHONUTF8=1`。）
 
+**要哪一版的 SYNOX**：打包與測試用到 SYNOX 的 `requires.sdk` 檢查（`synox.packs.manifest.sdk_problem`、`SDK_VERSION` 0.2.0），
+也就是 SYNOX 分支 `feat/libs-extraction`（2026-11-12）合併之後的版本；更舊的 SYNOX 會在 import 時失敗。
+
+| 依賴 | 版本 | 為什麼 |
+|---|---|---|
+| SYNOX（主程式） | 含 `requires.sdk` 的版本（`feat/libs-extraction` 之後；SYNOX 本體版號仍是 0.2.0） | 打包用它的 `zip_pack`（安裝時的第 1、2 關）、測試用它的 `build()` |
+| SYNOX SDK | `>=0.2,<0.3` | 每個工具的 `requires.sdk` |
+
 - **每個工具一個資料夾** `packs/<name>/`：`pack.json`、`SKILL.md`（給 AI）、`README.md`（給人）、程式、（選用）`panel.html`。格式見 SYNOX 的 `docs/pack-format.md`。
 - **一定要宣告 SDK 版本**：`"requires": {"synox": ">=0.2", "sdk": ">=0.2,<0.3"}`。SDK 的正本在 SYNOX（`synox_sdk.SDK_VERSION`）；
   打包時範圍不含拿來打包的那份 SYNOX 的 SDK 就不打包。kind=cli／mcp 的工具用 `synox-sdk init --from tool.py` 會自動放一份 `synox_sdk.py`
