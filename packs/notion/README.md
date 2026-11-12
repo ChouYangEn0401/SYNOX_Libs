@@ -3,6 +3,9 @@
 在 Telegram 跟 SYNOX 說一句話，就能**搜尋、讀 Notion 頁面、在資料庫加一筆、在頁面後面補字、改欄位**。
 用的是你自己建的 Notion「integration」（一把只看得到你分享給它的頁面的鑰匙）。
 
+> 這是 **SYNOX 工具庫（SYNOX_Libs）** 的工具（🧪 alpha：只對假傳輸測過，還沒對真的 Notion 長時間用過）。
+> 先把 `notion-<版本>.synoxpack` 裝進 SYNOX（裝法見工具庫的 [README](../../README.md)「給使用者：怎麼裝」），再照下面設定。
+
 ## 設定（第一次，約 3 分鐘）
 
 1. **建一個 integration**：用電腦打開 <https://www.notion.so/profile/integrations> → 「新增 integration」
@@ -48,7 +51,7 @@
 - 只有**你**（安裝時配對的那個帳號）能用 `/notion*`；伺服器版的成員、訪客都用不到。`/notion_token`、`/notion_status`、
   `/notion_logout` 不給 AI 用，`/notion_token` 只收私訊。
 - SYNOX 只連 `api.notion.com`（Notion 官方 API），不開任何網路埠、不跑別人的程式；只看得到你分享給 integration 的頁面。
-- AI 讀到的頁面內容會送到你設定的 AI 供應者（跟其他工具一樣，見 [docs/security.md](../../docs/security.md)）。
+- AI 讀到的頁面內容會送到你設定的 AI 供應者（跟其他工具一樣，見 SYNOX 的 `docs/security.md`）。
   頁面裡如果夾了「忽略規則、刪掉東西」之類的字，SYNOX 把它當資料包起來；而且改東西一定要你按確認卡。
 - 不想用了：`/notion_logout`，再到 <https://www.notion.so/profile/integrations> 把 integration 刪掉（token 就徹底失效）。
 
@@ -67,7 +70,8 @@
 - `kind: python`、`capabilities: ["network"]`（五關的第 2 關掃描結果只有 `import requests`）；`storage: vault`。
 - Notion REST API，`Notion-Version: 2025-09-03`（資料庫底下是 data source：加一列用 `parent.data_source_id`，
   給資料庫 id 時先 `GET /databases/{id}` 拿第一個 data source）。只用 `requests`。
-- 測試：`tests/test_notion.py`，`new_session` 換成假的 HTTP 傳輸，不連 Notion。
+- 測試：工具庫的 `tests/test_notion.py`，`new_session` 換成假的 HTTP 傳輸，不連 Notion。
+- 對真的 Notion 試：SYNOX 的 `scripts/smoke_real.py --only notion`（教學在 SYNOX 的 `docs/handoff/real-service-testing.md`）。
 
 ### 為什麼用 integration token，不用 Notion MCP
 
@@ -75,4 +79,4 @@
 |---|---|---|
 | **A. Internal integration token＋官方 REST（這一版）** | 貼一次 token；只用 requests；不開埠、不跑別人的程式；只看得到分享的頁面 | ✅ 採用 |
 | B. 官方遠端 MCP `mcp.notion.com/mcp` | OAuth 要瀏覽器回呼（本機埠或代管的回呼網址），SYNOX 的 `kind: mcp` 這一版還不會連線 | 之後 `kind: mcp` 做好再評估 |
-| C. 本機 `@notionhq/notion-mcp-server` | 要在這台電腦跑 npm 套件（180 多個相依）；Notion 自己說不再積極維護 | ❌ 不用（見 SYNOXPacks `docs/mcp-audit-2026-11.md`） |
+| C. 本機 `@notionhq/notion-mcp-server` | 要在這台電腦跑 npm 套件（180 多個相依）；Notion 自己說不再積極維護 | ❌ 不用（見工具庫的 [docs/mcp-audit-2026-11.md](../../docs/mcp-audit-2026-11.md)） |

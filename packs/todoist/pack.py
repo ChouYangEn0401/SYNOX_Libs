@@ -1,7 +1,7 @@
 """✅ Todoist：/todoist <內容> [到期]、/todoist_list [all|today|overdue|#專案|@標籤]、/todoist_done <編號>、
 /todoist_due <編號> <到期>、/todoist_rm <編號>、/todoist_projects、/todoist_labels；設定：/todoist_token <token>、/todoist_logout。
 
-跟 SYNOXPacks 的本機待辦 `todo` pack 同一套寫法（可以互換）：`/todoist !! 繳電費 明天 #家事` → 很重要、到期明天、
+跟工具庫的本機待辦 `todo` pack 同一套寫法（可以互換）：`/todoist !! 繳電費 明天 #家事` → 很重要、到期明天、
 放進「家事」專案（沒有這個專案就當標籤）；`@標籤` 一定是標籤。到期用跟行事曆同一套中文日期（明天、下週一、11/20、下午3點…），
 看不懂的寫法（例如 every monday）原樣交給 Todoist 自己解析。
 
@@ -42,8 +42,7 @@ def now() -> datetime:
     return datetime.now()
 
 
-# >>> zhdate（正本在 SYNOXPacks repo 的 packs/_shared/zhdate.py；這裡是原樣複製（pack 不互相 import）。
-#     不要直接改這段：改正本，再整段複製過來，讓 todo、calendar、todoist 三個看得懂的日期一樣）
+# >>> zhdate（正本 packs/_shared/zhdate.py；不要直接改這段，改正本再跑 scripts/sync_shared.py）
 import re as _re
 from dataclasses import dataclass as _dataclass
 from datetime import date as _date, timedelta as _timedelta

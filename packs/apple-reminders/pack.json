@@ -2,7 +2,7 @@
   "name": "apple-reminders",
   "title": "🍎 Apple 提醒事項",
   "summary": "看、加、完成提醒事項（CalDAV；iCloud 升級過的提醒事項 Apple 不開放，見說明）",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "python",
   "group": "applerem",
   "access": "owner",
@@ -11,7 +11,7 @@
   "order": 60,
   "python": { "module": "pack" },
   "capabilities": ["network"],
-  "publisher": "SYNOX（內建）",
+  "publisher": "SYNOX_Libs",
   "auth": {
     "type": "caldav",
     "fields": [
@@ -20,7 +20,7 @@
       { "name": "password", "ask": "App 專用密碼（不是 Apple ID 本身的密碼）", "secret": true }
     ]
   },
-  "requires": { "pip": ["requests"], "config": [], "env": {} },
+  "requires": { "pip": ["requests"], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
   "skill": "SKILL.md",
   "storage": "vault"
 }

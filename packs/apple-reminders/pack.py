@@ -580,7 +580,7 @@ def install(app, pack):
     def status(api, chat_id, user, values):
         auth = account(user)
         if auth is None:
-            api.send_message(chat_id, "🍎 還沒設定帳號。\n" + SETUP_HINT + "\n說明與限制見 connectors/apple-reminders-caldav/README.md。")
+            api.send_message(chat_id, "🍎 還沒設定帳號。\n" + SETUP_HINT + "\n說明與限制見這個工具的 README.md（工具庫 packs/apple-reminders/README.md）。")
             return
         server = auth.get("server") or DEFAULT_SERVER
         head = f"🍎 帳號：{mask(auth['username'])}（{_host(server)}）"

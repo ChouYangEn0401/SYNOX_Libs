@@ -16,7 +16,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SHARED = os.path.join(ROOT, "packs", "_shared")
 # 正本 → 用到它的 pack
-TARGETS = {"zhdate": ("calendar", "todo")}
+TARGETS = {"zhdate": ("calendar", "todo", "google-calendar", "todoist")}
 
 
 def block(text: str, name: str) -> str:

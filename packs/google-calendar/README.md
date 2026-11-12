@@ -2,6 +2,9 @@
 
 讓 SYNOX 直接看、加、刪**你自己的 Google 日曆**。跟本機的「📅 行事曆」（`/cal`）用法一樣，只是指令換成 `/gcal`。
 
+> 這是 **SYNOX 工具庫（SYNOX_Libs）** 的工具（🧪 alpha：只對假傳輸測過，還沒對真的 Google 日曆長時間用過）。
+> 先把 `google-calendar-<版本>.synoxpack` 裝進 SYNOX（裝法見工具庫的 [README](../../README.md)「給使用者：怎麼裝」），再照下面設定。
+
 | 指令 | 做什麼 |
 |---|---|
 | `/gcal 明天 14:00 看牙醫` | 加一個行程（也收 `location=診所`、`note=帶健保卡`；`/gcal 11/20 整天 員工旅遊`） |
@@ -84,7 +87,7 @@ Google 規定每個程式都要有自己的「OAuth 用戶端」。SYNOX 沒有�
   `readonly` 用 `calendar.events.readonly`。預設用「主要日曆」（primary）。
 - **連到哪裡**：只有 `accounts.google.com`（你在瀏覽器登入）、`oauth2.googleapis.com`（換 token、收回）、
   `www.googleapis.com/calendar/v3`（行程）。只用 `requests`，沒有其他套件，沒有在本機跑別人的程式。
-- 會離開這台電腦的：你的行程經過 Google（本來就在那裡）；AI 看行程時，那幾行會送到你設定的 LLM（跟其他 pack 一樣，見 docs/security.md）。
+- 會離開這台電腦的：你的行程經過 Google（本來就在那裡）；AI 看行程時，那幾行會送到你設定的 LLM（跟其他 pack 一樣，見 SYNOX 的 docs/security.md）。
 
 ## 給開發的人
 
@@ -93,8 +96,9 @@ Google 規定每個程式都要有自己的「OAuth 用戶端」。SYNOX 沒有�
   所以用電腦版用戶端＋loopback redirect＋PKCE，只是**不開 listener**，讓使用者貼網址。
 - 為什麼不用 MCP：Google 官方遠端 Calendar MCP 端點沒有驗證過、SYNOX 的 `kind: mcp` 還不會連線，最後一樣要 OAuth；
   社群的 nspady/google-calendar-mcp 要在本機跑 166 個 npm 套件、登入時對所有網卡開 3500–3505 埠、token 明文
-  （審查見 SYNOXPacks `docs/mcp-audit-2026-11.md`）。REST 直連只要 requests。
-- 指令、欄位跟 SYNOXPacks 的本機 `calendar` pack 一樣（`add`／`today`／`week`／`list`／`rm`、`text`／`date`／`time`／`location`／`note`），
-  日期解析是同一份 `zhdate`（照抄在 pack.py 裡，正本在 SYNOXPacks `packs/_shared/zhdate.py`）。差別：`rm` 是 DANGER（刪的是雲端的資料），
+  （審查見工具庫的 [docs/mcp-audit-2026-11.md](../../docs/mcp-audit-2026-11.md)）。REST 直連只要 requests。
+- 指令、欄位跟工具庫的本機 [`calendar`](../calendar/README.md) 一樣（`add`／`today`／`week`／`list`／`rm`、`text`／`date`／`time`／`location`／`note`），
+  日期解析是同一份 `zhdate`（照抄在 pack.py 裡，正本在工具庫 `packs/_shared/zhdate.py`，改了跑 `scripts/sync_shared.py`）。差別：`rm` 是 DANGER（刪的是雲端的資料），
   編號是「最近一次列出來的那一份」（Google 的 event id 太長，不給人打）。
-- 測試：`tests/test_gcal.py`，假的 HTTP（換 `transport`），不連 Google。
+- 測試：工具庫的 `tests/test_gcal.py`，假的 HTTP（換 `transport`），不連 Google。
+- 對真的 Google 日曆試：SYNOX 的 `scripts/smoke_real.py --only gcal`。

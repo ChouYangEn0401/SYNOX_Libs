@@ -1,7 +1,12 @@
 # 🍎 apple-reminders（CalDAV 提醒事項）
 
 **狀態（2026-11-09）**：程式做好了（`kind: python`、`capabilities: ["network"]`，只用 `requests`＋標準函式庫），
-測試全部用假的 HTTP 傳輸，**還沒有對真的伺服器跑過**。
+測試全部用假的 HTTP 傳輸，**還沒有對真的伺服器跑過**（🧪 alpha）。
+
+> 這是 **SYNOX 工具庫（SYNOX_Libs）** 的工具。先把 `apple-reminders-<版本>.synoxpack` 裝進 SYNOX
+> （裝法見工具庫的 [README](../../README.md)「給使用者：怎麼裝」），再照下面「怎麼接」設定。
+> 2026-11-12 以前它在 SYNOX 主程式的 `connectors/apple-reminders-caldav/`，搬來工具庫後資料夾名改成跟 pack 名字一樣（`apple-reminders`）；
+> pack 名字沒變，所以保管箱裡存的帳號照用。
 
 ## 結論先講：iCloud 的提醒事項，現在大多數人用不了
 
@@ -21,7 +26,7 @@ iCloud 行事曆、聯絡人照樣能用它登入。
 
 ## 怎麼接
 
-1. 在**這台電腦**上雙擊 `Connect-Apple.bat`（或 `python -m synox connect apple-reminders`）：
+1. 在**這台電腦**上雙擊 SYNOX 資料夾裡的 `Connect-Apple.bat`（或 `python -m synox connect apple-reminders`；要先裝好這個工具）：
    - 伺服器網址（預設 `https://caldav.icloud.com`；別家就填那家的 CalDAV 網址，一定要 `https://`）
    - 帳號（iCloud 是 Apple ID 的 email）
    - App 專用密碼（打字時不顯示）
@@ -49,13 +54,14 @@ iCloud 行事曆、聯絡人照樣能用它登入。
   不跟隨重新導向；回應上限 5 MB；XML 有 `DOCTYPE`／`ENTITY` 拒讀；使用者的字跳脫後才寫進 iCalendar；
   重複（RRULE）的提醒事項不打勾（CalDAV 打勾會結束整串）。
 - 網路呼叫在指令裡同步做（逾時 20 秒），這樣 AI 拿得到結果。
-- 測試：`tests/test_apple_reminders.py`（假的 session，不連網）。
+- 測試：工具庫的 `tests/test_apple_reminders.py`（假的 session，不連網）。
+- 對真的伺服器試：SYNOX 的 `scripts/smoke_real.py --only apple`。
 
 ## 替代方案（iCloud 提醒事項用不了的時候）
 
 | 選項 | 一句話 | 建議 |
 |---|---|---|
 | A. 接一個別家的 CalDAV 帳號到 iPhone 提醒事項（Fastmail、mailbox.org、自架 Nextcloud／Radicale／Synology Calendar） | 這個 pack 不用改、iPhone 提醒事項 App 看得到；要一個帳號（Fastmail 付費、Nextcloud 要自己架在別台機器） | ✅ 想真的同步 iPhone 就選這個 |
-| B. 用 SYNOX 本機待辦（SYNOXPacks 的 `todo`）＋ Telegram 提醒 | 不碰 Apple、什麼帳號都不用；提醒從 Telegram 跳出來，不在 iPhone 提醒事項 App 裡 | ✅ **預設**（大部分人夠用） |
+| B. 用 SYNOX 本機待辦（工具庫的 [`todo`](../todo/README.md)）＋ Telegram 提醒 | 不碰 Apple、什麼帳號都不用；提醒從 Telegram 跳出來，不在 iPhone 提醒事項 App 裡 | ✅ **預設**（大部分人夠用） |
 | C. 改寫 iCloud **行事曆**（VEVENT＋VALARM） | iCloud CalDAV 對行事曆仍開放，同一個 App 專用密碼；iPhone 會跳通知，但出現在「行事曆」不是「提醒事項」 | 需要的話另開一張做 |
 | D. iPhone「捷徑」App 收 SYNOX 的訊息再建提醒事項 | 要捷徑能連到 SYNOX（SYNOX 只綁 127.0.0.1、這台不開埠），或靠使用者手動分享 | ❌ 不建議 |

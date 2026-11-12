@@ -2,6 +2,9 @@
 
 讓 SYNOX（Telegram、網頁、AI）直接看、加、完成你 Todoist 裡的待辦。用你自己的 **API token**，不用另外申請什麼、不用開任何網路埠。
 
+> 這是 **SYNOX 工具庫（SYNOX_Libs）** 的工具（🧪 alpha：只對假傳輸測過，還沒對真的 Todoist 長時間用過）。
+> 先把 `todoist-<版本>.synoxpack` 裝進 SYNOX（裝法見工具庫的 [README](../../README.md)「給使用者：怎麼裝」），再照下面設定。
+
 ## 設定（一次就好，約 1 分鐘）
 
 1. 用電腦打開 Todoist 網頁版 <https://app.todoist.com> 並登入。
@@ -39,7 +42,7 @@ AI：跟 AI 說「Todoist 今天有什麼要做」「加一個明天繳電費」
 
 ## 跟本機「待辦（todo）」的關係
 
-指令寫法、欄位名稱（`text`、`due`、`priority`、`filter`、`n`）跟 SYNOXPacks 的本機待辦 `todo` 一樣，換用時不用重學。
+指令寫法、欄位名稱（`text`、`due`、`priority`、`filter`、`n`）跟工具庫的本機待辦 [`todo`](../todo/README.md) 一樣，換用時不用重學。
 差別：`todo` 存在這台電腦（不連網）；這個存在 Todoist（手機 App、別的裝置都看得到）。
 
 ## 安全與隱私（說實話版）
@@ -57,5 +60,7 @@ AI：跟 AI 說「Todoist 今天有什麼要做」「加一個明天繳電費」
   `DELETE tasks/{id}`、`GET projects`、`GET labels`；分頁照 `next_cursor`，最多 10 頁×200）。
 - 重要度對照：SYNOX 0／1／2 → Todoist `priority` 1／3／4（Todoist 的 4＝App 上的 P1）。
 - 到期：看得懂的中文日期自己換成 `due_date`／`due_datetime`（沒有時區＝跟著 Todoist 帳號的時區）；看不懂的送 `due_string`。
-- 測試：`tests/test_todoist.py`，全部用假的 HTTP session（`pack.HTTP`），不打真的 Todoist。
+- 測試：工具庫的 `tests/test_todoist.py`，全部用假的 HTTP session（`pack.HTTP`），不打真的 Todoist。
+- 日期解析是工具庫 `packs/_shared/zhdate.py` 的原樣複製（改正本、再跑 `scripts/sync_shared.py`）。
+- 對真的 Todoist 試：SYNOX 的 `scripts/smoke_real.py --only todoist`。
 - 呼叫是同步的（逾時 15 秒），Todoist 慢的時候那一則會等。

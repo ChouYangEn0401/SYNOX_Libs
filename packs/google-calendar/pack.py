@@ -1,6 +1,6 @@
 """📅 Google 日曆 connector：直接打 Google Calendar API v3（REST），只用 requests＋標準函式庫。
 
-指令跟 SYNOXPacks 的本機 calendar pack 對齊（葉節點名字、欄位一樣，只是群組 gcal 換成 cal 就能互換）：
+指令跟工具庫的本機 calendar pack 對齊（葉節點名字、欄位一樣，只是群組 gcal 換成 cal 就能互換）：
     /gcal <時間 標題>、/gcal_today、/gcal_week、/gcal_list [n]、/gcal_rm <編號>
 連接（只給人打，ai=False，AI 永遠碰不到憑證）：
     /gcal_setup <client_id> <client_secret> [readonly]   → 回一個 Google 登入連結
@@ -17,8 +17,8 @@ OAuth（見 README）：
 - client_id／client_secret／refresh_token／access_token 都經 pack.store.of(user)（storage=vault → 密文
   data/google-calendar.json.enc）；不寫 config.json、不寫 log、不出現在任何回覆或 AI 的工具結果。
 
-日期解析（parse_when、day_label…）是 SYNOXPacks `packs/_shared/zhdate.py` 的原樣複製（pack 不能互相 import），
-跟本機 calendar pack 同一套寫法。改的話改正本、再照抄過來。
+日期解析（parse_when、day_label…）是工具庫 `packs/_shared/zhdate.py` 的原樣複製（pack 不能互相 import），
+跟本機 calendar pack 同一套寫法。改的話改正本、再跑 scripts/sync_shared.py。
 
 測試換掉 `transport`（要有 request(method, url, **kw)）、`now()`、`local_tz()`；不連真的 Google。
 """
@@ -329,7 +329,7 @@ DEFAULT_MINUTES = 60
 _TIME_RANGE = _re.compile(r"^(\d{1,2}):(\d{2})(?:\s*[-~～]\s*(\d{1,2}):(\d{2}))?$")
 _CLIENT_ID = _re.compile(r"^[A-Za-z0-9._-]{10,200}\.apps\.googleusercontent\.com$")
 _TOKENISH = _re.compile(r"^[A-Za-z0-9._~/+=-]{8,2048}$")
-NOT_CONNECTED = ("還沒連上 Google 日曆。設定步驟見 connectors/google-calendar/README.md：\n"
+NOT_CONNECTED = ("還沒連上 Google 日曆。設定步驟見這個工具的 README.md（工具庫 packs/google-calendar/README.md）：\n"
                  "1. /gcal_setup <client_id> <client_secret>\n2. 照回覆打開連結、按允許\n3. /gcal_code <瀏覽器網址列整串網址>")
 
 

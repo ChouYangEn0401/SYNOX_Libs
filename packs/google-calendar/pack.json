@@ -2,7 +2,7 @@
   "name": "google-calendar",
   "title": "📅 Google 日曆",
   "summary": "看今天／這週、加行程、刪行程（直接連你的 Google 日曆）",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "python",
   "group": "gcal",
   "access": "owner",
@@ -11,7 +11,7 @@
   "order": 35,
   "python": { "module": "pack" },
   "capabilities": ["network"],
-  "publisher": "SYNOX",
+  "publisher": "SYNOX_Libs",
   "auth": {
     "type": "oauth",
     "fields": ["client_id", "client_secret"],
@@ -22,7 +22,7 @@
       "scopes_readonly": ["https://www.googleapis.com/auth/calendar.events.readonly"]
     }
   },
-  "requires": { "pip": ["requests"], "config": [], "env": {} },
+  "requires": { "pip": ["requests"], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
   "skill": "SKILL.md",
   "storage": "vault"
 }
