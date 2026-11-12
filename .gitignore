@@ -5,3 +5,5 @@ __pycache__/
 *.synoxpack
 data/
 dist/
+# scripts/public_check.py 的私人字詞（擁有者的名字、暱稱…）：只在自己電腦上，不進 repo
+public_check.local.txt

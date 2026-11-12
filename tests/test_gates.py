@@ -117,10 +117,11 @@ def test_no_network_subprocess_exec_or_stray_files(name):
 
 
 def test_no_personal_data_in_repo():
-    """repo 裡不放真的 Telegram id、token 或 email（範例一律佔位字）。"""
+    """repo 裡不放真的 Telegram id、token 或 email（範例一律佔位字）。哪些 email 算佔位，跟 scripts/public_check.py 同一份規則
+    （完整的公開版檢查在 tests/test_public_check.py；這裡是不靠 git 的快速版，連 .gitignore 掉的檔也看）。"""
+    import public_check
     root = os.path.dirname(PACKS)
     token = re.compile(r"\d{8,10}:[A-Za-z0-9_-]{30,}")
-    mail = re.compile(r"[\w.+-]+@(?!synox\.local|anthropic\.com|example\.(?:com|org|net)\b)[\w-]+\.[\w.]+")
     for base, dirs, files in os.walk(root):
         dirs[:] = [d for d in dirs if d not in (".git", ".venv", "__pycache__", ".pytest_cache", "dist")]
         for f in files:
@@ -129,7 +130,8 @@ def test_no_personal_data_in_repo():
             with open(os.path.join(base, f), "r", encoding="utf-8") as fh:
                 text = fh.read()
             assert not token.search(text), f"{f}: looks like a bot token"
-            assert not mail.search(text), f"{f}: has an email address"
+            assert all(public_check.email_allowed(m.group(0)) for m in public_check.EMAIL.finditer(text)), \
+                f"{f}: has an email address"
 
 
 @pytest.mark.parametrize("name", PACK_NAMES)

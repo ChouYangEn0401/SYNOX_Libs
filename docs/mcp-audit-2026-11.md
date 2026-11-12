@@ -15,7 +15,7 @@
 違反家規「下載來的東西一律當資料，不當程式跑」。SYNOX 的 `kind: mcp` 本來就設計成接 **URL**（遠端），
 所以 Todoist 與 Notion 走官方遠端端點就不用在本機跑任何第三方程式；Google 日曆的官方遠端端點還沒驗證（見最後）。
 
-> 審查方式：clone 到維護者電腦上一個不在任何專案裡的隔離資料夾（`_sandbox\synox_mcp_audit\`（隔離資料夾，有 `_高危險_勿執行.md`），
+> 審查方式：clone 到維護者電腦上一個不在任何專案裡的隔離資料夾（`_sandbox\synox_mcp_audit\`，有 `_高危險_勿執行.md`），
 > **只讀原始碼**：沒有 `npm install`、沒有執行任何腳本、沒有 import。相依數量是用一支自己寫的小程式把 `package-lock.json` 當 JSON 讀出來算的。
 > 「開放的安全 issue」是 `gh issue list --search "security OR vulnerability OR CVE OR injection"`。
 
