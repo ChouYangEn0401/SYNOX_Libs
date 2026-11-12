@@ -17,7 +17,7 @@ SYNOX（主程式）出廠是空的；要什麼工具，從這裡挑 `.synoxpack
 
 ## 給使用者：怎麼裝
 
-工具庫不能單獨用，要先有 SYNOX（主程式）。整條流程（SYNOX 的 `docs/adr/0002`）：
+工具庫不能單獨用，要先有 SYNOX（主程式）。整條流程（SYNOX 的 `docs/adr/0003`）：
 
 1. **裝 SYNOX**（二選一）：
    - 安裝程式 `SYNOX-Setup-<版本>.exe`：已經附好工具（`<SYNOX>\tools\`），直接跳到第 3 步；
