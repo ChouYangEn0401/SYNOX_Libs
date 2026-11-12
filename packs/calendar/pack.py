@@ -5,7 +5,8 @@
      "next_id": 1}
 編號（id）是固定的：/cal_today、/cal_week、/cal_list 看到的 [3] 就是 /cal_rm 3。
 
-不連網、不開別的程式。唯一碰檔案的是 /cal_ics：在 pack.path()（data/packs/calendar/）寫一個暫存的 .ics、
+不連網、不開別的程式。唯一碰檔案的是 /cal_ics：在 pack.path_of(user, …)（這個人自己的資料夾：個人版
+data/calendar/files/、伺服器版 data/users/<id>/calendar/files/）寫一個暫存的 .ics、
 送出去之後馬上刪掉（行事曆內容不留明文在硬碟上）；所以 pack.json 宣告了 filesystem:own。
 提醒：SYNOX 沒有給 pack 用的排程 API，加行程時回一行 /remind_add 給使用者自己決定要不要設。
 """
@@ -370,7 +371,7 @@ def to_ics(events, stamp: datetime) -> str:
 
 
 def _write_own(path: str, text: str) -> None:
-    """pack 唯一寫檔的地方：path 一定是 pack.path(...) 給的（data/packs/calendar/ 底下）。"""
+    """pack 唯一寫檔的地方：path 一定是 pack.path_of(user, ...) 給的（這個人自己的資料夾底下）。"""
     with open(path, "w", encoding="utf-8", newline="") as f:
         f.write(text)
 
@@ -472,8 +473,7 @@ def install(app, pack):
         if not rows:
             api.send_message(chat_id, "📅 行事曆是空的，沒有東西可以匯出。")
             return
-        tg_id = getattr(user, "tg_id", None)
-        path = pack.path(f"export-{tg_id if isinstance(tg_id, int) else 'me'}.ics")
+        path = pack.path_of(user, "export.ics")       # data: user：每個人自己的資料夾（不是全部人共用的 pack.path）
         _write_own(path, to_ics(rows, now()))
         try:
             api.send_document(chat_id, path, caption=f"📅 {len(rows)} 個行程。在 Google 日曆（設定 → 匯入）或 "

@@ -91,7 +91,7 @@ def test_ics_export_is_valid_and_leaves_no_plaintext(make_bot, owner, tmp_path):
     assert "DTSTART;VALUE=DATE:20261120" in text and "DTEND;VALUE=DATE:20261121" in text
     assert "SUMMARY:看牙醫\\, 洗牙\\; 複診" in text and "LOCATION:診所" in text
     assert all(len(line.encode("utf-8")) <= 75 for line in text.split("\r\n"))
-    assert captured["path"].startswith(str(tmp_path / "data" / "packs" / "calendar"))
+    assert captured["path"].startswith(str(tmp_path / "data" / "users" / str(owner) / "calendar" / "files"))  # 自己的資料夾
     assert not os.path.exists(captured["path"])                   # 送完就刪
     assert bot.api.files[-1][0] == "document"
 

@@ -17,5 +17,6 @@
 - 網頁介面的工具頁有「今天＋7 天」面板（`GET /api/packs/calendar/today`）。
 
 資料：`data/calendar.json.enc`（保管箱加密；伺服器版每人一份 `data/users/<id>/calendar.json.enc`）。
-`/cal_ics` 會在 `data/packs/calendar/` 暫時寫一個 .ics、送出後馬上刪掉，所以 `pack.json` 宣告了 `filesystem:own`
-（這是三個 pack 裡唯一需要宣告的能力）。不連網、不開別的程式。
+`/cal_ics` 會在你自己的資料夾（個人版 `data/calendar/files/`、伺服器版 `data/users/<id>/calendar/files/`）暫時寫一個 .ics、
+送出後馬上刪掉，所以 `pack.json` 宣告了 `filesystem:own`（這是工具庫裡唯一需要宣告的能力）。不連網、不開別的程式。
+（0.1.1 起；0.1.0 寫在全部人共用的 `data/packs/calendar/`，SYNOX 的資料歸屬檢查不讓 `data: user` 的工具這樣用。）
