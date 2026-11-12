@@ -2,7 +2,7 @@
   "name": "remind",
   "title": "⏰ 提醒",
   "summary": "每天幾點提醒你一件事，或指定哪一天提醒一次",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "python",
   "group": "remind",
   "access": "member",
@@ -10,7 +10,7 @@
   "data": "user",
   "order": 30,
   "python": { "module": "pack" },
-  "requires": { "pip": [], "config": [], "env": {} },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
   "skill": "SKILL.md",
   "storage": "plain"
 }

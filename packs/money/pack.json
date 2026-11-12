@@ -2,7 +2,7 @@
   "name": "money",
   "title": "💰 記帳",
   "summary": "記一筆、看這個月、設預算（加密存在這台電腦）",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "kind": "python",
   "group": "money",
   "access": "member",
@@ -10,7 +10,7 @@
   "data": "user",
   "order": 20,
   "python": { "module": "pack" },
-  "requires": { "pip": [], "config": [], "env": {} },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
   "skill": "SKILL.md",
   "storage": "vault",
   "web": { "panel": "panel.html", "api": ["GET /summary"] }
