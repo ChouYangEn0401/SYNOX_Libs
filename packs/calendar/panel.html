@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>行事曆面板</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1d2330; --muted: #5d6675; --line: #e6e9ef; --warn: #c0392b; --accent: #2f6fb5; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #171b22; --fg: #e7eaf0; --muted: #9aa3b2; --line: #2b313c; --warn: #e5675a; --accent: #6aa5e8; }
+  }
+  body { margin: 0; padding: 12px; background: var(--bg); color: var(--fg);
+         font: 15px/1.5 system-ui, "Microsoft JhengHei", "PingFang TC", sans-serif; }
+  h1 { font-size: 18px; margin: 0 0 6px; }
+  h2 { font-size: 13px; color: var(--muted); font-weight: 600; margin: 12px 0 4px; }
+  ul { list-style: none; padding: 0; margin: 0; }
+  li { padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .muted { color: var(--muted); font-size: 13px; }
+  .warn { color: var(--warn); }
+  .when { color: var(--accent); margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .mark { display: inline-block; width: 1.4em; text-align: center; }
+  .done { color: var(--muted); text-decoration: line-through; }
+</style>
+</head>
+<body>
+<h1 id="title">📅 行事曆</h1>
+<div class="muted" id="sub">今天起 7 天</div>
+<ul id="list"></ul>
+<script>
+(function () {
+  var list = document.getElementById("list");
+  function item(day, time, title, loc) {
+    var li = document.createElement("li");
+    var when = document.createElement("span");
+    when.className = "when";
+    when.textContent = day + " " + time;
+    li.appendChild(when);
+    li.appendChild(document.createTextNode(title + (loc ? "　@" + loc : "")));
+    list.appendChild(li);
+  }
+  fetch("/api/packs/calendar/today", { credentials: "same-origin" })
+    .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
+    .then(function (d) {
+      document.getElementById("title").textContent = "📅 " + d.label;
+      if (!d.events.length) {
+        document.getElementById("sub").textContent = "這 7 天沒有行程（/cal 明天 14:00 看牙醫）";
+        return;
+      }
+      d.events.forEach(function (e) { item(e.label, e.time, e.title, e.location); });
+    })
+    .catch(function (e) { document.getElementById("sub").textContent = "讀不到（" + e.message + "）"; });
+})();
+</script>
+</body>
+</html>

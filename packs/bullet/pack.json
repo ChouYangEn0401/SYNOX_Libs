@@ -1,0 +1,16 @@
+{
+  "name": "bullet",
+  "title": "• 子彈筆記",
+  "summary": "快速記錄（• 任務 ○ 事件 – 筆記）、今天、月誌、把沒做完的搬到今天（加密存在這台電腦）",
+  "version": "0.1.0",
+  "kind": "python",
+  "group": "bj",
+  "access": "member",
+  "order": 32,
+  "python": { "module": "pack" },
+  "requires": { "pip": [], "config": [], "env": {} },
+  "capabilities": [],
+  "skill": "SKILL.md",
+  "storage": "vault",
+  "web": { "panel": "panel.html", "api": ["GET /today"] }
+}
