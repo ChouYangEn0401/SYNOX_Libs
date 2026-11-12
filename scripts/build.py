@@ -10,7 +10,7 @@
 - 工具資料夾裡附了 synox_sdk.py（cli／mcp 工具）的話，它的 SDK_VERSION 也要在 requires.sdk 範圍內；
 - 每個工具都要明寫 stage（test／alpha／beta／stable；README「穩定度」），index.json 也帶它；
 - catalog.json 的建議群組只能列存在的工具。
-SYNOX 在哪：scripts/_synox.py（SYNOX_HOME 或並排的 ../SYNOX）。
+SYNOX 在哪：scripts/_synox.py（SYNOX_HOME → 跑這支的 Python 裝的那份 → 後備並排的 ../SYNOX）。
 """
 
 from __future__ import annotations

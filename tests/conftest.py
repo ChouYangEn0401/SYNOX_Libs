@@ -1,6 +1,6 @@
 """共用的假東西，不連網、不開埠、不開 Telegram、不叫 AI。
 
-SYNOX 本體從哪裡 import：scripts/_synox.py（環境變數 SYNOX_HOME，沒設就找並排的 ../SYNOX；只 import、不改它）。
+SYNOX 本體從哪裡 import：scripts/_synox.py（SYNOX_HOME → 跑測試的 Python 裝的那份 → 後備並排的 ../SYNOX；只 import、不改它）。
 
 兩層測試：
 - make_bot（快）：SDK 的 BotHarness＋假的 pack.store（記憶體裡的 JSON）＋可以換「現在」。pack.py 的載入方式照 SYNOX loader
