@@ -3,6 +3,7 @@
   "title": "📅 Google 日曆",
   "summary": "看今天／這週、加行程、刪行程（直接連你的 Google 日曆）",
   "version": "0.1.1",
+  "stage": "alpha",
   "kind": "python",
   "group": "gcal",
   "access": "owner",

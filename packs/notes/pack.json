@@ -3,6 +3,7 @@
   "title": "📒 隨手記",
   "summary": "記一筆、找、刪（加密存在這台電腦）",
   "version": "0.1.1",
+  "stage": "alpha",
   "kind": "python",
   "group": "note",
   "access": "member",

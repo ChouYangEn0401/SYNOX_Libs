@@ -68,6 +68,13 @@ def test_declares_sdk_range_that_this_synox_satisfies(name):
 
 
 @pytest.mark.parametrize("name", PACK_NAMES)
+def test_declares_stage(name):
+    """每個工具都明寫穩定度（test／alpha／beta／stable；README「穩定度」），SYNOX 讀得到同一個值。"""
+    m = synox_manifest.read(folder(name), strict=True)
+    assert m.stage_declared and m.stage in synox_manifest.STAGES and m.raw["stage"] == m.stage
+
+
+@pytest.mark.parametrize("name", PACK_NAMES)
 def test_gate2_static_scan_passes(name):
     m = synox_manifest.read(folder(name), strict=True)
     report = synox_scan.scan(m)

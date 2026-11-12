@@ -3,6 +3,7 @@
   "title": "✅ 待辦",
   "summary": "加待辦（!! 重要、#專案、明天到期）、看今天／逾期、打勾完成（加密存在這台電腦）",
   "version": "0.1.1",
+  "stage": "alpha",
   "kind": "python",
   "group": "todo",
   "access": "member",

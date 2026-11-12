@@ -3,6 +3,7 @@
   "title": "📅 行事曆",
   "summary": "加行程（明天 14:00 看牙醫）、看今天／這週、匯出 .ics（加密存在這台電腦）",
   "version": "0.1.1",
+  "stage": "alpha",
   "kind": "python",
   "group": "cal",
   "access": "member",

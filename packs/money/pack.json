@@ -3,6 +3,7 @@
   "title": "💰 記帳",
   "summary": "記一筆、看這個月、設預算（加密存在這台電腦）",
   "version": "0.1.1",
+  "stage": "alpha",
   "kind": "python",
   "group": "money",
   "access": "member",

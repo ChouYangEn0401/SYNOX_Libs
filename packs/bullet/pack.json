@@ -3,6 +3,7 @@
   "title": "• 子彈筆記",
   "summary": "快速記錄（• 任務 ○ 事件 – 筆記）、今天、月誌、把沒做完的搬到今天（加密存在這台電腦）",
   "version": "0.1.1",
+  "stage": "alpha",
   "kind": "python",
   "group": "bj",
   "access": "member",

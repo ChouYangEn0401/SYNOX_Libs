@@ -16,6 +16,7 @@ from isdtelekit.testing import OWNER_ID, FakeChannel
 import build as build_script
 from conftest import PACK_NAMES, PACKS, ROOT
 
+from synox.packs.manifest import STAGES
 from synox.sdk import author
 
 # 每個工具裝好之後試一個指令：(指令, 回覆裡要有的字)
@@ -71,6 +72,7 @@ def test_index_lists_every_tool_with_hash_and_sdk(built):
             blob = f.read()
         assert hashlib.sha256(blob).hexdigest() == e["sha256"] and len(blob) == e["size"]
         assert e["requires"]["sdk"] and e["requires"]["synox"]
+        assert e["stage"] in STAGES, e                        # 穩定度：每個工具都明寫（README「穩定度」）
         assert e["bundles"], f"{e['name']} 不在任何建議群組"
         with zipfile.ZipFile(path) as z:
             raw = json.loads(z.read("pack.json"))
@@ -134,6 +136,21 @@ def test_build_refuses_tool_without_sdk_range(tmp_path):
     result = build_script.build(out_dir=str(tmp_path / "out"), root=str(root))
     assert result["index"] is None and any("requires.sdk" in p for p in result["problems"])
     assert not os.path.exists(tmp_path / "out")                                 # 有問題就什麼都不寫
+
+
+@pytest.mark.parametrize("stage", [None, "gold", "Alpha"])
+def test_build_refuses_tool_without_valid_stage(tmp_path, stage):
+    """工具庫的每個工具都要明寫 stage（SYNOX 那邊沒寫＝alpha，這裡不准省略）；寫錯的第 1 關就不過。"""
+    root = _copy_library(tmp_path)
+    path = root / "packs" / "notes" / "pack.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if stage is None:
+        del raw["stage"]
+    else:
+        raw["stage"] = stage
+    path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    result = build_script.build(out_dir=str(tmp_path / "out"), root=str(root))
+    assert result["index"] is None and any("stage" in p for p in result["problems"]), result["problems"]
 
 
 def test_build_refuses_sdk_range_this_synox_does_not_meet(tmp_path):

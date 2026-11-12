@@ -8,6 +8,7 @@
 這裡另外擋（ADR-0001）：
 - 每個工具都要寫 requires.sdk，而且範圍包含「拿來打包的這份 SYNOX」的 SDK_VERSION；requires.synox 也要合；
 - 工具資料夾裡附了 synox_sdk.py（cli／mcp 工具）的話，它的 SDK_VERSION 也要在 requires.sdk 範圍內；
+- 每個工具都要明寫 stage（test／alpha／beta／stable；README「穩定度」），index.json 也帶它；
 - catalog.json 的建議群組只能列存在的工具。
 SYNOX 在哪：scripts/_synox.py（SYNOX_HOME 或並排的 ../SYNOX）。
 """
@@ -75,7 +76,22 @@ def problems_of(folder: str) -> list:
             out.append(f"{name}: 附的 {SDK_FILE} 是 SDK {bundled}，不在 requires.sdk {spec} 範圍內（重新複製一份新的）")
     if m.name != name:
         out.append(f"{name}: 資料夾名跟 pack.json 的 name（{m.name}）不一樣")
+    out += stage_problems(name, m.raw)
     return out
+
+
+def stage_problems(name: str, raw: dict) -> list:
+    """工具庫的規矩：每個工具都要明寫 stage（SYNOX 那邊沒寫＝alpha，這裡不准省略，讓使用者在目錄就看得到）。
+    值的檢查用 SYNOX 的 manifest.STAGES（同一份規則）；SYNOX 太舊、不認得 stage 就不打包。"""
+    try:
+        from synox.packs.manifest import STAGES
+    except ImportError:
+        return [f"{name}: 拿來打包的 SYNOX 太舊、不認得 stage（要含 pack.json stage 的版本）"]
+    if "stage" not in raw:
+        return [f"{name}: pack.json 沒寫 stage（{'、'.join(STAGES)} 其中一個；工具庫的每個工具都要明寫，意思見 README「穩定度」）"]
+    if raw.get("stage") not in STAGES:
+        return [f"{name}: stage 只能是 {'、'.join(STAGES)}（現在是 {raw.get('stage')!r}）"]
+    return []
 
 
 def sha256_of(path: str) -> str:
@@ -87,7 +103,8 @@ def sha256_of(path: str) -> str:
 
 
 def entry_for(m, path: str, bundles: dict) -> dict:
-    return {"name": m.name, "title": m.title, "summary": m.summary, "version": m.version, "kind": m.kind,
+    return {"name": m.name, "title": m.title, "summary": m.summary, "version": m.version, "stage": m.raw.get("stage"),
+            "kind": m.kind,
             "group": m.group, "access": m.access, "capabilities": sorted(m.capabilities),
             "requires": {k: v for k, v in (m.requires or {}).items() if k in ("synox", "sdk") and v},
             "bundles": sorted(k for k, b in bundles.items() if m.name in b.get("packs", [])),
@@ -152,7 +169,7 @@ def main(argv=None) -> int:
         print("✅ 檢查都過了")
         return 0
     for e in result["index"]["packs"]:
-        print(f"{e['file']}  sdk {e['requires'].get('sdk', '?')}  sha256 {e['sha256'][:12]}…")
+        print(f"{e['file']}  {e['stage']}  sdk {e['requires'].get('sdk', '?')}  sha256 {e['sha256'][:12]}…")
     print(os.path.join(args.out, "index.json"))
     return 0
 

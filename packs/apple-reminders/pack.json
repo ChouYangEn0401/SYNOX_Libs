@@ -3,6 +3,7 @@
   "title": "🍎 Apple 提醒事項",
   "summary": "看、加、完成提醒事項（CalDAV；iCloud 升級過的提醒事項 Apple 不開放，見說明）",
   "version": "0.1.1",
+  "stage": "alpha",
   "kind": "python",
   "group": "applerem",
   "access": "owner",
