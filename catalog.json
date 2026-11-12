@@ -14,6 +14,11 @@
       "title": "規劃：行程與筆記",
       "summary": "行事曆、待辦、子彈筆記",
       "packs": ["calendar", "todo", "bullet"]
+    },
+    "connect": {
+      "title": "接外面的服務",
+      "summary": "Notion、Todoist、Google 日曆、Apple 提醒事項（CalDAV）。要連網、要你自己的帳號或 token",
+      "packs": ["notion", "todoist", "google-calendar", "apple-reminders"]
     }
   }
 }

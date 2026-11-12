@@ -20,7 +20,10 @@ from synox.sdk import author
 
 # 每個工具裝好之後試一個指令：(指令, 回覆裡要有的字)
 SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "記下了"),
-         "calendar": ("/cal 明天 14:00 看牙醫", "加好了"), "todo": ("/todo 買牛奶", "加好了"), "bullet": ("/bj • 買牛奶", "記到今天")}
+         "calendar": ("/cal 明天 14:00 看牙醫", "加好了"), "todo": ("/todo 買牛奶", "加好了"), "bullet": ("/bj • 買牛奶", "記到今天"),
+         # 接外面服務的：還沒連接時回「要先設定」，不連網
+         "notion": ("/notion 會議", "還沒設定 Notion"), "todoist": ("/todoist_list", "還沒接上 Todoist"),
+         "google-calendar": ("/gcal_today", "還沒連上 Google 日曆"), "apple-reminders": ("/applerem_status", "還沒設定帳號")}
 
 
 @pytest.fixture(scope="module")

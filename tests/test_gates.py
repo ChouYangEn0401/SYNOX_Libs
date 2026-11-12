@@ -1,5 +1,9 @@
 """每個工具都要過 SYNOX 的第 1 關（pack.json 宣告檢查，嚴格版）與第 2 關（靜態掃描），宣告 requires.sdk（ADR-0001），
-再加一層這個 repo 自己的規矩：不連網、不開別的程式、不動態執行，碰檔案只准 calendar 的 _write_own／os.remove（pack.path_of 底下）。"""
+再加一層這個 repo 自己的規矩：
+- 本機工具（notes、remind、todo、money、calendar、bullet）：不連網、不開別的程式、不動態執行，
+  碰檔案只准 calendar 的 _write_own／os.remove（pack.path_of 底下）。
+- 接外面服務的（notion、todoist、google-calendar、apple-reminders，2026-11-12 從 SYNOX connectors/ 搬來）：
+  只宣告、也只用得到 network（requests）；一樣不開別的程式、不動態執行、不碰檔案、不讀環境變數；只給擁有者（access: owner）。"""
 
 import ast
 import os
@@ -13,11 +17,17 @@ from synox.sdk import author
 
 from conftest import PACK_NAMES, PACKS, PLANNER
 
+CONNECT = ("notion", "todoist", "google-calendar", "apple-reminders")
 # pack 名稱 → 宣告的 capabilities（其他一律不准；None＝沒寫 capabilities，掃描也不能要求任何能力）
-ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": None, "notes": None}
+ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": None, "notes": None,
+                **{name: ["network"] for name in CONNECT}}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
+# 接外面服務的多准：requests、urllib.parse、編碼／雜湊／亂數、XML（CalDAV）、時區、型別、log
+CONNECT_IMPORTS = ALLOWED_IMPORTS + ("requests", "urllib", "base64", "hashlib", "secrets", "uuid", "xml", "zoneinfo",
+                                     "typing", "logging", "__future__")
 FORBIDDEN_IMPORTS = ("requests", "urllib", "http", "socket", "ssl", "subprocess", "multiprocessing", "ctypes",
                      "importlib", "pickle", "marshal", "shutil", "pathlib", "asyncio", "threading")
+CONNECT_FORBIDDEN = tuple(m for m in FORBIDDEN_IMPORTS if m not in ("requests", "urllib"))
 FORBIDDEN_TEXT = (r"\bos\.system\b", r"\bos\.popen\b", r"\bsubprocess\b", r"\beval\(", r"\bexec\(", r"__import__",
                   r"\bos\.environ\b", r"\bgetenv\b", r"app\.jobs", r"\bapi\.post\(")
 
@@ -38,7 +48,7 @@ def test_every_tool_is_listed():
 @pytest.mark.parametrize("name", PACK_NAMES)
 def test_gate1_manifest_strict(name):
     m = synox_manifest.read(folder(name), strict=True)
-    assert m.kind == "python" and m.access == "member" and m.name == name
+    assert m.kind == "python" and m.access == ("owner" if name in CONNECT else "member") and m.name == name
     assert os.path.isfile(m.skill_path) and os.path.isfile(os.path.join(folder(name), "README.md"))
     if ALLOWED_CAPS[name] is None:
         assert not m.capabilities_declared
@@ -69,6 +79,7 @@ def test_gate2_static_scan_passes(name):
 def test_no_network_subprocess_exec_or_stray_files(name):
     text = source(name)
     tree = ast.parse(text)
+    forbidden, allowed = (CONNECT_FORBIDDEN, CONNECT_IMPORTS) if name in CONNECT else (FORBIDDEN_IMPORTS, ALLOWED_IMPORTS)
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             mods = [a.name for a in node.names]
@@ -77,8 +88,10 @@ def test_no_network_subprocess_exec_or_stray_files(name):
         else:
             continue
         for mod in mods:
-            assert mod.split(".")[0] not in FORBIDDEN_IMPORTS, f"{name}: import {mod}"
-            assert mod.split(".")[0] in ALLOWED_IMPORTS, f"{name}: unexpected import {mod}"
+            assert mod.split(".")[0] not in forbidden, f"{name}: import {mod}"
+            assert mod.split(".")[0] in allowed, f"{name}: unexpected import {mod}"
+            if name in CONNECT and mod.split(".")[0] == "urllib":
+                assert mod == "urllib.parse", f"{name}: 連網只准用 requests（{mod}）"
     for pattern in FORBIDDEN_TEXT:
         assert not re.search(pattern, text), f"{name}: {pattern}"
     opens = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "open"]
@@ -100,7 +113,7 @@ def test_no_personal_data_in_repo():
     """repo 裡不放真的 Telegram id、token 或 email（範例一律佔位字）。"""
     root = os.path.dirname(PACKS)
     token = re.compile(r"\d{8,10}:[A-Za-z0-9_-]{30,}")
-    mail = re.compile(r"[\w.+-]+@(?!synox\.local|anthropic\.com)[\w-]+\.[\w.]+")
+    mail = re.compile(r"[\w.+-]+@(?!synox\.local|anthropic\.com|example\.(?:com|org|net)\b)[\w-]+\.[\w.]+")
     for base, dirs, files in os.walk(root):
         dirs[:] = [d for d in dirs if d not in (".git", ".venv", "__pycache__", ".pytest_cache", "dist")]
         for f in files:

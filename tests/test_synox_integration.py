@@ -104,16 +104,16 @@ def test_inlined_parser_behaves_like_canonical(make_bot, name):
         assert (a.day, a.start, a.end, a.rest) == (b.day, b.start, b.end, b.rest)
 
 
-def test_coexists_with_synox_connectors(tmp_path):
-    """跟 SYNOX 還留在本體的 connectors 一起載入：群組、指令名都不撞。"""
-    from synox.config import ROOT as SYNOX_ROOT
+def test_every_tool_loads_together(tmp_path):
+    """工具庫全部的工具（含 2026-11-12 從 SYNOX connectors/ 搬來的 4 個）一起載入：群組、指令名都不撞。"""
     data = tmp_path / "data"
     config = SynoxConfig.from_dict({"owner_id": OWNER_ID, "data_dir": str(data), "vault": {"mode": "file"},
                                     "llm": {"kind": "fake"}}, require_token=False, root=str(tmp_path))
     api = FakeChannel()
-    app = build(config, home=api, adapter=FakeAdapter(None), vault=Vault(b"k" * 32, str(data)),
-                pack_dirs=[os.path.join(SYNOX_ROOT, "connectors"), PACKS])
+    app = build(config, home=api, adapter=FakeAdapter(None), vault=Vault(b"k" * 32, str(data)), pack_dirs=[PACKS])
     status = {i.name: i.status for i in app.extras["synox_pack_report"].items}
     assert all(status[n] == "loaded" for n in PACK_NAMES), status
+    groups = [p.manifest.group for p in app.extras["synox_packs"]]
+    assert len(groups) == len(set(groups)) == len(PACK_NAMES)
     assert "加好了" in say(app, api, OWNER_ID, "/todo 買牛奶")
     assert "記下了" in say(app, api, OWNER_ID, "/note 買牛奶")

@@ -149,7 +149,17 @@ def make_bot(tmp_path):
 
 
 class SynoxBot(BotHarness):
-    """BotHarness 包一個真的 SYNOX app。"""
+    """BotHarness 包一個真的 SYNOX app；talk() 等 AI 那一輪（app.tasks）做完。"""
+
+    def talk(self, user_id, text, **kw):
+        route = self.say(user_id, text, **kw)
+        assert self.app.tasks.wait(10), "AI turn did not finish"
+        return route
+
+    def press_and_wait(self, user_id, data, **kw):
+        route = self.press(user_id, data, **kw)
+        self.app.tasks.wait(10)
+        return route
 
 
 def trust_core(data_dir, *folders):
@@ -177,6 +187,36 @@ def synox_bot(tmp_path):
             trust_core(data, *_synox.pack_folders())
         api = FakeChannel()
         app = build(config, home=api, adapter=FakeAdapter(None), vault=Vault(b"k" * 32, str(data)), pack_dirs=[PACKS])
+        return SynoxBot(app, api)
+    return factory
+
+
+@pytest.fixture
+def host_bot(tmp_path, monkeypatch):
+    """跟 SYNOX 自己 tests/conftest.py 的 make_bot 同一個介面（script、adapter、llm、raw、supports_tools、pack_dirs），
+    差在「SYNOX 自己的 pack 資料夾」換成這個 repo 的 packs/（loader.PACK_DIRS，connect／discover／reload 也看這裡）。
+    從 SYNOX 搬來的 connector 測試（test_notion、test_todoist、test_gcal、test_apple_reminders）用它；
+    伺服器版先把每個工具鎖成 core（＝擁有者安裝時選「核心」）。"""
+    from synox.app import build
+    from synox.config import SynoxConfig
+    from synox.llm.fake import FakeAdapter
+    from synox.packs import loader
+    from synox.vault import Vault
+    monkeypatch.setattr(loader, "PACK_DIRS", (PACKS,))
+
+    def factory(script=None, *, adapter=None, llm=None, raw=None, supports_tools=True, pack_dirs=None):
+        data = tmp_path / "data"
+        cfg = {"owner_id": OWNER_ID, "data_dir": str(data), "vault": {"mode": "file"},
+               "llm": llm or {"kind": "fake"}, **(raw or {})}
+        config = SynoxConfig.from_dict(cfg, require_token=False, root=str(tmp_path))
+        api = FakeChannel()
+        vault = Vault(b"k" * 32, str(data))
+        if adapter is None and (llm or {}).get("kind") != "none":
+            adapter = FakeAdapter(script, supports_tools=supports_tools)
+        if config.mode == "server":
+            trust_core(data, *_synox.pack_folders())
+        app = build(config, home=api, adapter=adapter, vault=vault,
+                    pack_dirs=list(pack_dirs) if pack_dirs is not None else [PACKS])
         return SynoxBot(app, api)
     return factory
 
