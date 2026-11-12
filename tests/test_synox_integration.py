@@ -1,4 +1,4 @@
-"""用 SYNOX 本體（真的 loader、真的保管箱加密、真的 AI 工具清單）載入這個 repo 的 packs/。
+"""用 SYNOX 本體（真的 loader、真的保管箱加密、真的 AI 工具清單）載入這個 repo 的 packs/（六個工具一起）。
 跟 SYNOX 自己的 tests/conftest.py 同一套假東西：FakeAdapter、FakeChannel，不連網、不開埠。"""
 
 import os
@@ -13,13 +13,15 @@ from synox.config import SynoxConfig
 from synox.llm.fake import FakeAdapter
 from synox.vault import Vault
 
-from conftest import PACKS, ROOT
+from conftest import PACK_NAMES, PACKS, ROOT, trust_core
 
 
 def make_app(tmp_path, mode="personal"):
     data = tmp_path / "data"
     config = SynoxConfig.from_dict({"owner_id": OWNER_ID, "data_dir": str(data), "vault": {"mode": "file"},
                                     "llm": {"kind": "fake"}, "mode": mode}, require_token=False, root=str(tmp_path))
+    if mode == "server":                         # 沒鎖的 python 工具伺服器版只給擁有者：當作擁有者安裝時選了 core
+        trust_core(data, *(os.path.join(PACKS, n) for n in PACK_NAMES))
     api = FakeChannel()
     vault = Vault(b"k" * 32, str(data))
     app = build(config, home=api, adapter=FakeAdapter(None), vault=vault, pack_dirs=[PACKS])
@@ -32,12 +34,12 @@ def say(app, api, user_id, text):
     return api.last(user_id)
 
 
-def test_synox_loads_all_three_packs_encrypted(tmp_path):
+def test_synox_loads_every_pack_encrypted(tmp_path):
+    """六個工具一起載入：群組、指令名都不撞；資料是密文。"""
     app, api, data = make_app(tmp_path)
     report = app.extras["synox_pack_report"]
     status = {i.name: i.status for i in report.items}
-    assert status == {"calendar": "loaded", "todo": "loaded", "bullet": "loaded"}, \
-        [(i.name, i.status, i.detail) for i in report.items]
+    assert status == {n: "loaded" for n in PACK_NAMES}, [(i.name, i.status, i.detail) for i in report.items]
     assert "加好了" in say(app, api, OWNER_ID, "/cal 明天 14:00 看牙醫")
     assert "加好了" in say(app, api, OWNER_ID, "/todo !! 繳電費 明天")
     assert "記到今天" in say(app, api, OWNER_ID, "/bj • 買牛奶")
@@ -102,16 +104,16 @@ def test_inlined_parser_behaves_like_canonical(make_bot, name):
         assert (a.day, a.start, a.end, a.rest) == (b.day, b.start, b.end, b.rest)
 
 
-def test_coexists_with_synox_builtin_packs(tmp_path):
-    """跟 SYNOX 出廠的 notes、money、remind 與 connectors 一起載入：群組、指令名都不撞。"""
-    from synox.packs import loader
+def test_coexists_with_synox_connectors(tmp_path):
+    """跟 SYNOX 還留在本體的 connectors 一起載入：群組、指令名都不撞。"""
+    from synox.config import ROOT as SYNOX_ROOT
     data = tmp_path / "data"
     config = SynoxConfig.from_dict({"owner_id": OWNER_ID, "data_dir": str(data), "vault": {"mode": "file"},
                                     "llm": {"kind": "fake"}}, require_token=False, root=str(tmp_path))
     api = FakeChannel()
     app = build(config, home=api, adapter=FakeAdapter(None), vault=Vault(b"k" * 32, str(data)),
-                pack_dirs=list(loader.PACK_DIRS) + [PACKS])
+                pack_dirs=[os.path.join(SYNOX_ROOT, "connectors"), PACKS])
     status = {i.name: i.status for i in app.extras["synox_pack_report"].items}
-    assert all(status[n] == "loaded" for n in ("calendar", "todo", "bullet", "notes", "money")), status
+    assert all(status[n] == "loaded" for n in PACK_NAMES), status
     assert "加好了" in say(app, api, OWNER_ID, "/todo 買牛奶")
     assert "記下了" in say(app, api, OWNER_ID, "/note 買牛奶")
