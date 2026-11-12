@@ -10,6 +10,17 @@
 - 六個工具都宣告 `requires.synox: ">=0.2"`、`requires.sdk: ">=0.2,<0.3"`，版本 0.1.0 → **0.1.1**。
 - `scripts/build.py`：打包成 `dist/<name>-<version>.synoxpack`＋`dist/index.json`（雜湊、SDK 範圍、建議群組）；`catalog.json` 建議群組。
 - 測試：六個工具的第 1、2 關、SDK 範圍、打包、空的 SYNOX 一個一個裝。
+- 從 SYNOX 主程式的 `connectors/` 搬來 `notion`、`todoist`、`google-calendar`、`apple-reminders`（2026-11-12，維護者決定），
+  連同測試；宣告 `requires.synox`／`requires.sdk`，版本 0.1.0 → **0.1.1**，`publisher` 改成 `SYNOX_Libs`。
+  `catalog.json` 新建議組合 `connect`（接外面的服務）。SYNOX 主程式從此一個工具都不帶。
+- **穩定度 `stage`**：9 個工具都標 `"stage": "alpha"`（維護者決定：所有工具先標為測試版本）；`scripts/build.py` 要求每個工具明寫、
+  `index.json` 帶 `stage`；README「穩定度」寫各級的意思與升級條件。（同一輪還沒發佈，所以 `version` 不再另外升。）
+- `scripts/public_check.py`：公開版檢查（本機路徑、使用者名稱、email、token、私人資料檔、測試用的真實 id），測試每次都跑。
+  掃到並修掉 3 處本機路徑（ADR-0001、`docs/mcp-audit-2026-11.md`）。
+
+### Changed
+- `scripts/sync_shared.py`：`zhdate` 也同步到 `google-calendar`、`todoist`。
+- README：寫明工具庫是「工具的統一管理處」、SYNOX 主程式本身沒有內建工具；要含 `stage` 的 SYNOX（`feat/connectors-to-libs` 之後）。
 
 ### Removed
 - `remind` 下架（2026-11-12，維護者決定）：提醒回到 SYNOX 核心當系統指令（「⏰ 提醒（系統）」，`/remind_*` 不變、資料不用搬）。

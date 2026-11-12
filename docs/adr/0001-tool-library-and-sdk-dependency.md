@@ -50,7 +50,7 @@
 
 | 工具的 kind | 執行時的 SDK 從哪來 | 開發／測試時 |
 |---|---|---|
-| `python`（這裡現在的 6 個都是） | SYNOX 程序本身（host 提供，不用另外裝） | 測試 import 一份 SYNOX：環境變數 `SYNOX_HOME`，沒設就找並排的 `../SYNOX` |
+| `python`（這裡現在的 9 個都是） | SYNOX 程序本身（host 提供，不用另外裝） | 測試 import 一份 SYNOX：環境變數 `SYNOX_HOME`，沒設就找並排的 `../SYNOX` |
 | `cli`／`mcp`（Python 寫的） | 工具資料夾裡的 `synox_sdk.py`（`synox-sdk init --from` 自動放一份） | `pip install <SYNOX>/sdk`（`synox-sdk` 套件，版本＝`SDK_VERSION`） |
 | `cli`／`mcp`（別的語言） | 不需要（照 JSON 信封協定印就好） | — |
 
@@ -65,7 +65,7 @@ SDK 的發佈形式：SYNOX 的 `sdk/` 資料夾就是一個可以單獨安裝�
 ```json
 {
   "library": "SYNOX_Libs", "library_version": "0.1.0", "built_with": {"synox": "0.2.0", "sdk": "0.2.0"},
-  "packs": [{"name": "money", "title": "💰 記帳", "version": "0.1.1", "kind": "python",
+  "packs": [{"name": "money", "title": "💰 記帳", "version": "0.1.1", "stage": "alpha", "kind": "python",
              "summary": "…", "requires": {"synox": ">=0.2", "sdk": ">=0.2,<0.3"},
              "bundles": ["starter"], "capabilities": [], "file": "money-0.1.1.synoxpack",
              "sha256": "…", "size": 12345}],
@@ -96,4 +96,18 @@ SDK 的發佈形式：SYNOX 的 `sdk/` 資料夾就是一個可以單獨安裝�
 - 從舊版 SYNOX 更新上來的人：三個內建工具會消失，但**資料還在**（`data/` 沒動），重新裝同名工具就回來。
 - 工具庫的開發與打包需要一份 SYNOX（`SYNOX_HOME`）；工具庫不複製 SYNOX 的任何程式。
 - SDK 合約改了不相容的地方 → `SDK_VERSION` 升 MINOR（0.x）或 MAJOR（1.x 以後），舊工具會被明確擋下並說原因，不會載入後壞掉。
-- 還沒決定：SYNOX 的 4 個 connector（Notion、Todoist、Google 日曆、Apple 提醒事項）要不要也搬來（SYNOX 的 QuestionToUser.md）。
+- ~~還沒決定：SYNOX 的 4 個 connector（Notion、Todoist、Google 日曆、Apple 提醒事項）要不要也搬來~~ → 已決定、已搬（下面補充）。
+
+## 補充（2026-11-12）：connector 也搬來；每個工具標穩定度
+
+維護者的決定：connector 也搬進工具庫；所有工具目前先標為測試版本（test／alpha／beta）。
+
+1. **connector 搬來**：`notion`、`todoist`、`google-calendar`、`apple-reminders` 跟其他工具一樣放 `packs/<name>/`、宣告 `requires.sdk`、
+   有自己的測試（來源對照 [../sources.md](../sources.md)）。SYNOX 主程式出廠**一個工具都沒有**（`loader.BUNDLED` 是空的、只掃 `packs/`）；
+   工具庫是所有工具的**統一管理處**。
+2. **`stage`（穩定度）**：pack.json 的選填欄位 `test`｜`alpha`｜`beta`｜`stable`。
+   - **SYNOX 端**（格式的正本在那裡）：只收這四個值（安裝時寫錯＝拒、載入時寫壞＝當 alpha）、沒寫＝alpha；
+     `/help`、網頁工具頁（`/api/tools`）、安裝報告、doctor 都顯示「符號＋字」的標籤。
+   - **工具庫端**：每個工具一定要明寫（`scripts/build.py` 擋），`index.json` 每個工具帶 `stage`；
+     各級的意思與升級條件寫在 [README](../../README.md)「穩定度」。現在全部是 `alpha`。
+   - 跟 `version` 分開：`version` 是哪一版，`stage` 是這一版多可靠；換 stage 也要升 `version`。
