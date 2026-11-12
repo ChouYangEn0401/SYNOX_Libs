@@ -1,0 +1,19 @@
+{
+  "bundles": {
+    "starter": {
+      "title": "入門：每天用得到",
+      "summary": "隨手記、提醒、待辦。第一次用 SYNOX 建議先裝這三個",
+      "packs": ["notes", "remind", "todo"]
+    },
+    "money": {
+      "title": "記帳",
+      "summary": "記一筆、看這個月、設預算",
+      "packs": ["money"]
+    },
+    "planner": {
+      "title": "規劃：行程與筆記",
+      "summary": "行事曆、待辦、子彈筆記",
+      "packs": ["calendar", "todo", "bullet"]
+    }
+  }
+}
