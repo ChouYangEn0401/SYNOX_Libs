@@ -94,7 +94,7 @@ def test_backdated_entry_lands_in_its_month(make_bot, owner):
     bot.say(owner, "/money_month")
     assert "共 30 元" in bot.last(owner)
     bot.say(owner, "/money_month 2026-10")
-    assert "2026-10 共 40 元" in bot.last(owner)
+    assert "2026-10 支出共 40 元" in bot.last(owner)
     bot.say(owner, "/money 40 晚餐 date=13/40")
     assert "看不懂" in bot.last(owner)
 
@@ -232,3 +232,48 @@ def test_guess_unit(make_bot):
     assert module.guess(cats, "zzABCzz")[0]["name"] == "B"
     assert module.guess(cats, "xy ab")[0]["name"] == "A"                   # 一樣長：清單順序
     assert module.guess(cats, "nothing") is None and module.guess([], "ab") is None
+
+
+# ---- 0.2.0：收入與轉帳（不算「這個月花了」） ----
+
+def test_income_and_transfers_do_not_count_as_spending(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money_budget 1000")
+    bot.say(owner, "/money 300 午餐")
+    bot.say(owner, "/money_in 50000 薪資")
+    assert "記了收入" in bot.last(owner) and "收入共 50,000 元" in bot.last(owner)
+    bot.say(owner, "/money_transfer 5000 存錢")
+    assert "記了轉帳" in bot.last(owner) and "花了 300 元" in bot.last(owner)
+    bot.say(owner, "/money_month")
+    month = bot.last(owner)
+    assert "支出共 300 元" in month and "收入 共 50,000 元" in month and "轉帳（不算花費） 共 5,000 元" in month
+    assert "還剩 700 元" in month                                           # 預算只吃支出
+    s = bot.route("money", "summary")
+    assert s["total"] == 300 and s["income"] == 50000 and s["transfer"] == 5000 and s["left"] == 700
+    assert [c["category"] for c in s["by_category"]] == ["午餐"]
+
+
+def test_category_kind_decides_and_card_payment_is_a_transfer(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money_template 存錢與投資")
+    bot.say(owner, "/money_template 收入")
+    bot.say(owner, "/money 3000 定存")                                     # /money＋轉帳類的類別 → 轉帳
+    assert "記了轉帳" in bot.last(owner) and "存錢 3,000 元" in bot.last(owner)
+    bot.say(owner, "/money 1200 晚餐 和朋友 account=信用卡")                 # 刷卡：付款方式只是標籤
+    assert "［信用卡］" in bot.last(owner)
+    bot.say(owner, "/money 1200 卡費")                                      # 繳卡費：轉帳，不重複算
+    assert "記了轉帳" in bot.last(owner) and "繳卡費" in bot.last(owner)
+    bot.say(owner, "/money_in 500 退款 午餐")                               # /money_in 只在收入類別裡猜
+    assert "退款回饋 500 元" in bot.last(owner)
+    bot.say(owner, "/money_month")
+    assert "支出共 1,200 元" in bot.last(owner)
+    bot.say(owner, "/money_list")
+    assert "轉帳｜繳卡費 1,200 元" in bot.last(owner) and "收入｜退款回饋 500 元" in bot.last(owner)
+    bot.say(owner, "/money_cat_add 年終 kind=收入")
+    assert "收入" in bot.last(owner)
+    bot.say(owner, "/money 80000 年終")
+    assert "記了收入" in bot.last(owner)
+    bot.say(owner, "/money_cat_add 怪 kind=亂寫")
+    assert "只能是 支出／收入／轉帳" in bot.last(owner)
+    bot.say(owner, "/money_cats")
+    assert "存錢（轉帳）" in bot.last(owner) and "薪資（收入）" in bot.last(owner)
