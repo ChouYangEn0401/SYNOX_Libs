@@ -106,3 +106,47 @@ def test_old_data_in_real_vault_upgrades(synox_bot, owner):
     bot.say(owner, "/money 20 茶")
     assert "#3" in bot.last(owner)
     assert pack.store.of(owner).load(None)["schema"] == 2
+
+
+# ---- 0.2.0：類別是使用者自己的資料 ----
+
+def test_categories_add_list_update_remove(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money_cats")
+    assert "還沒有自己的類別" in bot.last(owner)
+    bot.say(owner, "/money_cat_add 飲料 食 keywords=咖啡,拿鐵")
+    assert "新增了類別「飲料」" in bot.last(owner) and "咖啡、拿鐵" in bot.last(owner)
+    bot.say(owner, "/money_cat_add 飲料 keywords=拿鐵、奶茶")               # 同名＝更新，不重複
+    assert "更新了" in bot.last(owner)
+    bot.say(owner, "/money_cat_add 交通")
+    bot.say(owner, "/money_cats")
+    assert "（2 個）" in bot.last(owner) and "食：飲料" in bot.last(owner) and "交通：交通" in bot.last(owner)
+    bot.say(owner, "/money_cats 飲料")
+    assert "咖啡、拿鐵、奶茶" in bot.last(owner)
+    assert len(_data(bot)["categories"]) == 2
+    bot.say(owner, "/money 60 飲料")
+    bot.say(owner, "/money_cat_rm 飲料")
+    assert "刪掉類別「飲料」" in bot.last(owner)
+    bot.say(owner, "/money_cat_rm 飲料")
+    assert "沒有「飲料」" in bot.last(owner)
+    bot.say(owner, "/money_list")
+    assert "飲料 60 元" in bot.last(owner)                                 # 已經記的帳不動
+
+
+def test_free_text_category_still_records(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money_cat_add Coffee")
+    bot.say(owner, "/money 50 coffee")                                     # 不分大小寫，照存著的寫法
+    assert "Coffee 50 元" in bot.last(owner)
+    bot.say(owner, "/money 99 寵物 飼料")                                   # 不在清單裡也照記
+    assert "寵物 99 元（飼料）" in bot.last(owner)
+
+
+def test_categories_are_per_user_on_server(synox_bot):
+    from isdtelekit.users.roles import BasicRoles as R
+    bot = synox_bot("money", mode="server")
+    bot.make(77, R.MEMBER, "a")
+    bot.make(78, R.MEMBER, "b")
+    bot.say(77, "/money_cat_add 祕密類別A", chat_id=77)
+    bot.say(78, "/money_cats", chat_id=78)
+    assert "祕密類別A" not in bot.last(78) and "還沒有自己的類別" in bot.last(78)
