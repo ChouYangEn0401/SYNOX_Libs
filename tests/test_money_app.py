@@ -228,3 +228,39 @@ def test_export_refused_on_server(synox_bot, monkeypatch):
     monkeypatch.setattr(mod, "export_rows", lambda d, f: calls.append(1))
     status, _h, body = client.export("entries_csv", {}, confirmed=True)
     assert status == 403 and json.loads(body)["code"] == "export_encrypted_only" and calls == []
+
+
+def test_phone_entry_walkthrough(synox_bot, monkeypatch):
+    """ADR 0026：用 SYNOX 的 RemoteClient 從「手機」走一遍：進門、看這個月、記一筆、刪一筆被拒（不開埠、不開子程序）。"""
+    import subprocess
+    monkeypatch.setattr(subprocess, "Popen", lambda *a, **k: (_ for _ in ()).throw(AssertionError("no subprocess")))
+    from synox import guard
+    from synox.guard.origin import Origin
+    from synox.guard.testing import Clock, code_for, enroll
+    from synox.web import apps, remote
+    from synox.web.apps.testing import FakeListen
+    from synox.web.remote.testing import FakeTunnel, RemoteClient
+    bot = synox_bot("money")
+    _now(monkeypatch)
+    bot.app.config.web["remote"]["enabled"] = True
+    clock = Clock()
+    secret = enroll(guard.of(bot.app), OWNER_ID, clock)
+    tool_apps = apps.of(bot.app)
+    tool_apps.listen = FakeListen()
+    manager = remote.of(bot.app)
+    manager.listen, manager.tunnel_factory, manager.binary_check = FakeListen(), FakeTunnel(), (lambda: "")
+    manager._save({"binary": None, "tools": {"money": True}})
+    clock.t += 30
+    out = manager.open("money", bot.app.users.get_or_create(OWNER_ID), code_for(secret, clock),
+                       origin=Origin("telegram", OWNER_ID, surface="telegram"))
+    clock.t += 30
+    phone = RemoteClient(manager)
+    me = phone.enter(out["url"], code_for(secret, clock))
+    assert me["remote"] is True and me["exports"]["entries_csv"]["available"] is False
+    assert phone.read("month")[0] == 200
+    assert phone.do("add", {"amount": "88", "category": "午餐"})[0] == 200
+    bot.say(OWNER_ID, "/money_list")
+    assert "午餐 88 元" in bot.last(OWNER_ID)
+    status, data = phone.do("rm", {"n": "1"}, confirmed=True)
+    assert status == 403 and data["code"] == "remote_no_danger"
+    assert len(entries_of(bot)[0]) == 1
