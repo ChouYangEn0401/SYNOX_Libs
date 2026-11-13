@@ -2,7 +2,7 @@
   "name": "money",
   "title": "💰 記帳",
   "summary": "記支出、收入、轉帳，自己的類別與選配範本，預算與單項上限；附完整的記帳畫面（加密存在這台電腦）",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "stage": "alpha",
   "kind": "python",
   "group": "money",

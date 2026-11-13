@@ -264,3 +264,29 @@ def test_phone_entry_walkthrough(synox_bot, monkeypatch):
     status, data = phone.do("rm", {"n": "1"}, confirmed=True)
     assert status == 403 and data["code"] == "remote_no_danger"
     assert len(entries_of(bot)[0]) == 1
+
+
+@pytest.mark.parametrize("value", ["nan", "inf", "-inf", "1e999", "1.234", "0"])
+def test_amount_rejects_nonfinite_and_bad_values(synox_bot, value):
+    """SYNOX 安全審查第 1 輪：nan／inf 不能進帳（以前會 500、讓預算變 NaN）；指令與畫面同一句。"""
+    bot = synox_bot("money")
+    bot.say(OWNER_ID, f"/money {value} 午餐")
+    assert bot.last(OWNER_ID).startswith("❌") and entries_of(bot)[0] == []
+    _m, client = opened(bot)
+    status, data = client.do("add", {"amount": value})
+    assert status == 400 and data["code"] == "invalid"
+    if value != "0":
+        bot.say(OWNER_ID, f"/money_budget {value}")
+        assert bot.last(OWNER_ID).startswith("❌") and entries_of(bot)[1].get("budget") is None
+    bot.say(OWNER_ID, "/money_budget 0")
+    assert "預算拿掉了" in bot.last(OWNER_ID)
+
+
+def test_core_function_refuses_nonfinite_even_without_field_checks():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("money_core_check", MONEY + "/pack.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    from datetime import date
+    with pytest.raises(mod.Refuse):
+        mod.op_add(mod.empty(), {"amount": "nan"}, None, date(2026, 11, 9))

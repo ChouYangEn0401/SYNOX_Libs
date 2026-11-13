@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- **`money` 0.3.0 → 0.3.1**（SYNOX 獨立安全審查第 1 輪）：金額欄位改用 SYNOX 的 `kit.amount`（大於 0、最多兩位小數、不超過十億；預算與上限另外收 0＝拿掉）；`nan`、`inf` 這類不是一般數字的值一律擋下（以前會讓記一筆出錯、讓預算存成 NaN 之後每筆都壞）。
+
 ### Added
 - **`money` 0.2.0 → 0.3.0**（[ADR-0003](docs/adr/0003-tool-apps-and-money-app.md)；`stage` 仍是 alpha）：附完整的網頁畫面「記帳本」（SYNOX 的工具服務：
   總覽、帳目、類別、預算；畫面只走 SYNOX 的共用元件）；新指令 `/money_edit`（改一筆）；匯出 `entries_csv`（個人版、下載前提醒沒有加密；
