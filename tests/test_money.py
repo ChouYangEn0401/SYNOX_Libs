@@ -150,3 +150,59 @@ def test_categories_are_per_user_on_server(synox_bot):
     bot.say(77, "/money_cat_add 祕密類別A", chat_id=77)
     bot.say(78, "/money_cats", chat_id=78)
     assert "祕密類別A" not in bot.last(78) and "還沒有自己的類別" in bot.last(78)
+
+
+# ---- 0.2.0：範本（預設空，下指令才載入） ----
+
+def test_templates_load_only_on_request_and_twice_adds_nothing(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money 50 咖啡")
+    assert "/money_template" in bot.last(owner)                            # 第一筆提示一次
+    assert _data(bot)["categories"] == []                                  # 沒有自己載入
+    bot.say(owner, "/money 60 茶")
+    assert "/money_template" not in bot.last(owner)
+    bot.say(owner, "/money_template")
+    assert "基本" in bot.last(owner) and "捐贈" in bot.last(owner) and _data(bot)["categories"] == []
+    bot.say(owner, "/money_template 基本")
+    assert "新增 12 個類別" in bot.last(owner)
+    count = len(_data(bot)["categories"])
+    bot.say(owner, "/money_template basic")                               # 英文代號也行；第二次不會多
+    assert "新增 0 個類別" in bot.last(owner) and "已經有的 12 個沒動" in bot.last(owner)
+    assert len(_data(bot)["categories"]) == count
+    bot.say(owner, "/money_template 不存在")
+    assert "沒有「不存在」這個範本" in bot.last(owner)
+
+
+def test_template_does_not_overwrite_user_edits(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money_cat_add 午餐 外食 keywords=自助餐")
+    bot.say(owner, "/money_template 基本")
+    assert "新增 11 個類別" in bot.last(owner) and "午餐" in bot.last(owner).split("沒動")[1]
+    lunch = next(c for c in _data(bot)["categories"] if c["name"] == "午餐")
+    assert lunch["group"] == "外食" and lunch["keywords"] == ["自助餐"]
+
+
+def test_template_contents_are_valid_and_neutral(make_bot):
+    import os
+    from conftest import ROOT
+    module = make_bot("money").modules["money"]
+    names = [c[0] for t in module.TEMPLATES for c in t[3]]
+    assert len(names) == len(set(names))                                  # 範本之間不撞名
+    assert {t[0] for t in module.TEMPLATES} == {"basic", "bills", "saving", "giving", "income"}
+    for key, title, about, items in module.TEMPLATES:
+        for name, group, kind, words in items:
+            assert kind in module.KIND_LABELS and name and group, (key, name)
+    giving = {c[0] for c in module.find_template("捐贈")[3]}
+    assert {"捐款", "十一奉獻"} <= giving                                 # 作者刻意保留，放在選配的「捐贈」
+    saving = {c[0]: c[2] for c in module.find_template("存錢與投資")[3]}
+    assert saving["存錢"] == saving["投資"] == saving["還款"] == saving["繳卡費"] == "transfer"
+    assert "信用卡" not in names                                          # 信用卡是付款方式，不是類別
+    text = " ".join(" ".join(c) for t in module.TEMPLATES for c in t[3])
+    brands = ("7-11", "全家", "萊爾富", "星巴克", "路易莎", "麥當勞", "肯德基", "全聯", "家樂福", "好市多", "50嵐",
+              "Netflix", "Spotify", "YouTube", "Uber", "foodpanda", "中華電信", "台灣大哥大", "遠傳", "悠遊卡", "一卡通")
+    assert not [b for b in brands if b.lower() in text.lower()]
+    local = os.path.join(ROOT, "public_check.local.txt")                   # 擁有者自己的名字（git 忽略；有才比）
+    if os.path.isfile(local):
+        with open(local, encoding="utf-8") as f:
+            words = [w.strip() for w in f if len(w.strip()) >= 2 and not w.startswith("#")]
+        assert not [w for w in words if w.lower() in text.lower()]

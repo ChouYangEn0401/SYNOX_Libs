@@ -48,6 +48,8 @@ def upgrade(data: dict) -> dict:
     for c in data["categories"]:
         c.setdefault("group", c.get("name", ""))
         c.setdefault("keywords", [])
+        if c.get("kind") not in KIND_LABELS:
+            c["kind"] = "expense"
     entries = data["entries"]
     used = [e["id"] for e in entries if _is_id(e.get("id"))]
     next_id = max(int(data.get("next_id") or 1), max(used, default=0) + 1)
@@ -123,6 +125,70 @@ def find_cat(categories, name: str):
     return next((c for c in categories if c["name"].lower() == low), None)
 
 
+# 範本（ADR-0002）：選配，預設一個都不載；/money_template <名字> 才合併進使用者自己的類別（同名跳過）。
+# 每項：(名稱, 大類, kind, 關鍵字)。名稱本身也算關鍵字，所以關鍵字不重寫名稱。
+# 關鍵字只放通用詞，不放品牌、店名、業者名；想更準的人自己 /money_cat_add <名稱> keywords=… 加。
+# 「捐贈」裡的「十一奉獻」是作者刻意保留的（作者自己的工具），不是漏改的。
+TEMPLATES = (
+    ("basic", "基本", "日常支出：三餐、飲料、衣食住行育樂、醫療", (
+        ("早餐", "食", "expense", "蛋餅 三明治 吐司 飯糰"),
+        ("午餐", "食", "expense", "便當"),
+        ("晚餐", "食", "expense", ""),
+        ("點心宵夜", "食", "expense", "點心 宵夜 零食 甜點 蛋糕"),
+        ("飲料", "食", "expense", "咖啡 拿鐵 奶茶 果汁 紅茶 綠茶 手搖"),
+        ("衣著", "衣", "expense", "衣服 褲子 鞋子 外套 襪子"),
+        ("居家", "住", "expense", "日用品 衛生紙 洗衣精 清潔 家具"),
+        ("交通", "行", "expense", "公車 捷運 火車 高鐵 計程車 加油 停車 油錢"),
+        ("學習", "育", "expense", "書籍 課程 文具 學費 補習"),
+        ("娛樂", "樂", "expense", "電影 遊戲 旅遊 唱歌 門票"),
+        ("醫療", "醫療", "expense", "看診 掛號 藥局 牙醫 健檢"),
+        ("其他", "其他", "expense", ""),
+    )),
+    ("bills", "帳單", "每月的固定帳單", (
+        ("房租", "帳單", "expense", "租金"),
+        ("水電瓦斯", "帳單", "expense", "水費 電費 瓦斯"),
+        ("管理費", "帳單", "expense", ""),
+        ("手機網路", "帳單", "expense", "電話費 手機費 網路費"),
+        ("訂閱", "帳單", "expense", "月費 會員費"),
+    )),
+    ("saving", "存錢與投資", "存錢、投資、還款、繳卡費（轉帳，不算花費）；利息", (
+        ("存錢", "存錢與投資", "transfer", "儲蓄 定存"),
+        ("投資", "存錢與投資", "transfer", "股票 基金 定期定額"),
+        ("還款", "存錢與投資", "transfer", "貸款 房貸 車貸 學貸"),
+        ("繳卡費", "存錢與投資", "transfer", "卡費 信用卡費"),
+        ("利息", "存錢與投資", "expense", ""),
+    )),
+    ("giving", "捐贈", "捐款、十一奉獻", (
+        ("捐款", "捐贈", "expense", "捐贈 公益"),
+        ("十一奉獻", "捐贈", "expense", "奉獻"),
+    )),
+    ("income", "收入", "薪資、兼職、退款回饋", (
+        ("薪資", "收入", "income", "薪水 獎金"),
+        ("兼職", "收入", "income", "打工 接案"),
+        ("退款回饋", "收入", "income", "退款 退費 回饋"),
+        ("其他收入", "收入", "income", "紅包"),
+    )),
+)
+KIND_LABELS = {"expense": "支出", "income": "收入", "transfer": "轉帳"}
+
+
+def find_template(name: str):
+    low = (name or "").strip().lower()
+    return next((t for t in TEMPLATES if low in (t[0], t[1].lower())), None)
+
+
+def merge_template(categories: list, template) -> tuple:
+    """範本的每一項合併進 categories；已經有同名的（不分大小寫）跳過、不覆蓋。回 (新增的名稱, 跳過的名稱)。"""
+    added, skipped = [], []
+    for name, group, kind, words in template[3]:
+        if find_cat(categories, name):
+            skipped.append(name)
+            continue
+        categories.append({"name": name, "group": group, "kind": kind, "keywords": split_words(words)})
+        added.append(name)
+    return added, skipped
+
+
 def check_name(value: str):
     value = value.strip()
     if not value or len(value) > 20:
@@ -150,8 +216,11 @@ def install(app, pack):
         day = parse_day(values["date"], today) if values.get("date") else today
         at = int(time.time()) if day == today else int(time.mktime(datetime(day.year, day.month, day.day, 12).timetuple()))
         key = day.strftime("%Y-%m")
+        first = False
 
         def append(d):
+            nonlocal first
+            first = not d["entries"] and not d["categories"]
             typed = values["category"].strip()
             known = find_cat(d["categories"], typed)            # 自己的類別：照存著的寫法；不在清單裡的照打的字記
             entry = {"id": d["next_id"], "kind": "expense", "amount": amount,
@@ -173,6 +242,8 @@ def install(app, pack):
                 lines.append(f"⚠️ 這個月已經超過預算 {fmt(budget)} 元（超過 {fmt(after - float(budget))} 元）")
             else:
                 lines.append(f"預算還剩 {fmt(float(budget) - after)} 元")
+        if first:
+            lines.append("（提示：/money_template 可以載入現成的類別範本；不載也照樣能記）")
         api.send_message(chat_id, "\n".join(lines))
 
     def line_of(e) -> str:
@@ -245,7 +316,8 @@ def install(app, pack):
             return
         if not data["categories"]:
             api.send_message(chat_id, "💰 你還沒有自己的類別（記帳時類別可以直接打字）。\n"
-                                      "加一個：/money_cat_add <名稱> [大類] keywords=咖啡,拿鐵")
+                                      "加一個：/money_cat_add <名稱> [大類] keywords=咖啡,拿鐵\n"
+                                      "或載入現成的範本：/money_template")
             return
         groups = defaultdict(list)
         for c in data["categories"]:
@@ -262,7 +334,7 @@ def install(app, pack):
         def put(d):
             c = find_cat(d["categories"], name)
             if c is None:
-                c = {"name": name, "group": group or name, "keywords": []}
+                c = {"name": name, "group": group or name, "kind": "expense", "keywords": []}
                 d["categories"].append(c)
                 created = True
             else:
@@ -292,6 +364,26 @@ def install(app, pack):
             return
         api.send_message(chat_id, f"🗑 刪掉類別「{gone['name']}」。已經記的帳不動（帳上照樣寫「{gone['name']}」）。")
 
+    def template(api, chat_id, user, values):
+        name = values.get("name", "").strip()
+        if not name:
+            lines = ["📋 類別範本（不會自己載入；載入後可以自己改、刪，也可以另外加）："]
+            for key, title, about, items in TEMPLATES:
+                lines.append(f"・{title}（{key}）：{about}——{'、'.join(i[0] for i in items)}")
+            lines.append("載入：/money_template 基本（載兩次不會重複，也不會蓋掉你改過的）")
+            api.send_message(chat_id, "\n".join(lines))
+            return
+        t = find_template(name)
+        if t is None:
+            api.send_message(chat_id, f"❌ 沒有「{name}」這個範本（/money_template 看有哪些）。")
+            return
+        added, skipped = update(user, lambda d: merge_template(d["categories"], t))
+        lines = [f"📋 載入範本「{t[1]}」：新增 {len(added)} 個類別" + (f"（{'、'.join(added)}）" if added else "")]
+        if skipped:
+            lines.append(f"已經有的 {len(skipped)} 個沒動：{'、'.join(skipped)}")
+        lines.append("看全部：/money_cats")
+        api.send_message(chat_id, "\n".join(lines))
+
     kit.command(g, "add", add, "記一筆支出", default=True, effect=WRITE, positional=3, fields=[
         Field("amount", "金額", required=True, check=kit.number),
         Field("category", "類別", required=True),
@@ -310,6 +402,8 @@ def install(app, pack):
         Field("keywords", "關鍵字（逗號分開，例如 咖啡,拿鐵）")])
     kit.command(g, "cat_rm", cat_rm, "刪掉一個類別（已經記的帳不動）", effect=WRITE,
                 fields=[Field("name", "類別名稱", required=True)])
+    kit.command(g, "template", template, "類別範本：不給名字＝列出有哪些；給名字＝載入（同名跳過）", effect=WRITE,
+                fields=[Field("name", "範本名稱（例如 基本、帳單、存錢與投資、捐贈、收入）")])
 
     def summary(user):
         """Web UI 面板（panel.html）用：這個月的總額、預算、各類別。只回這個人自己的。"""
