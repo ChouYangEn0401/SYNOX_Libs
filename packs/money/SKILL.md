@@ -12,6 +12,7 @@ description: 使用者提到花了多少錢、收入、存錢或投資、想記�
 - 「薪水進來 32000」「退款 300」→ `money__in`。
 - 「存了 5000」「買基金 3000」「繳卡費 12000」「還貸款」→ `money__transfer`（轉帳不算花費）。
   **刷卡買東西**是支出（`money__add`，`account` 填 信用卡），**繳信用卡帳單**才是轉帳。
+- 「#12 那筆其實是 150」「把昨天那筆改成交通」→ 先 `money__list` 找編號，再 `money__edit`（`n` 編號；只給要改的欄位；`memo=-` 清空備註、`category=-` 改回待分類）。
 - 「剛剛那筆記錯了」→ `money__undo`；要刪某一筆 → 先 `money__list` 找編號，再 `money__rm`（會送確認卡）。
 - 「最近記了什麼」「上個月咖啡花多少筆」→ `money__list`（`n` 筆數；`keyword`、`category`、`month`（YYYY-MM）、`kind`（支出／收入／轉帳）可以篩）。
 - 「這個月花多少」「各類別花多少」→ `money__month`（`month` 可以給 YYYY-MM）。

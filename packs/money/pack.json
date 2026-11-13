@@ -1,8 +1,8 @@
 {
   "name": "money",
   "title": "💰 記帳",
-  "summary": "記支出、收入、轉帳，自己的類別與選配範本，預算與單項上限（加密存在這台電腦）",
-  "version": "0.2.0",
+  "summary": "記支出、收入、轉帳，自己的類別與選配範本，預算與單項上限；附完整的記帳畫面（加密存在這台電腦）",
+  "version": "0.3.0",
   "stage": "alpha",
   "kind": "python",
   "group": "money",
@@ -11,8 +11,22 @@
   "data": "user",
   "order": 20,
   "python": { "module": "pack" },
-  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3" },
   "skill": "SKILL.md",
   "storage": "vault",
-  "web": { "panel": "panel.html", "api": ["GET /summary"] }
+  "web": {
+    "panel": "panel.html",
+    "api": ["GET /summary"],
+    "app": {
+      "entry": "app/index.html",
+      "root": "app",
+      "title": "記帳本",
+      "kit": 1,
+      "reads": ["month", "entries", "categories"],
+      "actions": { "add": "WRITE", "in": "WRITE", "transfer": "WRITE", "edit": "WRITE", "undo": "WRITE",
+                   "rm": "DANGER", "budget": "WRITE", "cap": "WRITE", "cat_add": "WRITE", "cat_rm": "WRITE",
+                   "template": "WRITE" },
+      "exports": ["entries_csv"]
+    }
+  }
 }
