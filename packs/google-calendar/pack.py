@@ -21,7 +21,7 @@ OAuth（見 README）：
 日期解析（parse_when、day_label…）是工具庫 `packs/_shared/zhdate.py` 的原樣複製（pack 不能互相 import），
 跟本機 calendar pack 同一套寫法。改的話改正本、再跑 scripts/sync_shared.py。
 
-測試換掉 `transport`（要有 request(method, url, **kw)）、`now()`、`local_tz()`；不連真的 Google。
+測試換掉 `new_session`（回的東西要有 request(method, url, **kw)）、`now()`、`local_tz()`；不連真的 Google。
 """
 
 import base64
@@ -49,8 +49,6 @@ TIMEOUT = 20
 MAX_LIST = 50
 MAX_TITLE = 200
 
-transport = None                                 # 測試換成假的；None＝requests
-
 
 def now() -> datetime:
     """現在時間（測試換掉這一個）。"""
@@ -62,8 +60,10 @@ def local_tz():
     return None
 
 
-def _http():
-    return transport if transport is not None else requests
+def new_session():
+    """HTTP 傳輸：要有 request(method, url, **kw)。requests 模組本身就是（每次呼叫各自連線，不共用 session）。
+    測試把這個換成假的（不連網）。"""
+    return requests
 
 
 class GoogleError(Exception):
@@ -432,7 +432,7 @@ def parse_pasted(text: str):
 
 def _post_token(data: dict) -> dict:
     try:
-        r = _http().request("POST", TOKEN_URL, data=data, timeout=TIMEOUT)
+        r = new_session().request("POST", TOKEN_URL, data=data, timeout=TIMEOUT)
     except requests.RequestException:
         raise GoogleError("連不上 Google（網路有問題？等一下再試）。")
     try:
@@ -503,7 +503,7 @@ class Client:
         for attempt in (0, 1):
             headers = {"Authorization": "Bearer " + self.token(force=attempt == 1), "Accept": "application/json"}
             try:
-                r = _http().request(method, API + path, params=params, json=body, headers=headers, timeout=TIMEOUT)
+                r = new_session().request(method, API + path, params=params, json=body, headers=headers, timeout=TIMEOUT)
             except requests.RequestException:
                 raise GoogleError("連不上 Google（網路有問題？等一下再試）。")
             if r.status_code == 401 and attempt == 0:
@@ -761,7 +761,7 @@ def install(app, pack):
         revoked = False
         if refresh:
             try:
-                r = _http().request("POST", REVOKE_URL, data={"token": refresh}, timeout=TIMEOUT)
+                r = new_session().request("POST", REVOKE_URL, data={"token": refresh}, timeout=TIMEOUT)
                 revoked = r.status_code == 200
             except requests.RequestException:
                 revoked = False

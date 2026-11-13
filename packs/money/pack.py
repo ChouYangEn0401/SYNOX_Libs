@@ -598,5 +598,4 @@ def install(app, pack):
                 "by_category": [{"category": c, "amount": round(v, 2)} for c, v in by_category(data, key)],
                 "caps": [{"category": c["name"], "cap": float(c["cap"])} for c in data["categories"] if c.get("cap")]}
 
-    if hasattr(pack, "web_route"):
-        pack.web_route("summary", summary)
+    pack.web_route("summary", summary)

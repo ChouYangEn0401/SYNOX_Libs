@@ -332,5 +332,4 @@ def install(app, pack):
                              "text": e["text"]} for e in rows],
                 "to_migrate": len(migrate_candidates(all_entries, today))}
 
-    if hasattr(pack, "web_route"):
-        pack.web_route("today", today_route)
+    pack.web_route("today", today_route)

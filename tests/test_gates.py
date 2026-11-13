@@ -1,7 +1,7 @@
 """每個工具都要過 SYNOX 的第 1 關（pack.json 宣告檢查，嚴格版）與第 2 關（靜態掃描），宣告 requires.sdk（ADR-0001），
 再加一層這個 repo 自己的規矩：
 - 本機工具（notes、remind、todo、money、calendar、bullet）：不連網、不開別的程式、不動態執行，
-  碰檔案只准 calendar 的 _write_own／os.remove（pack.path_of 底下）。
+  碰檔案只准 calendar 的 _write_own／os.listdir／os.remove（pack.path_of 底下）。
 - 接外面服務的（notion、todoist、google-calendar、apple-reminders，2026-11-12 從 SYNOX connectors/ 搬來）：
   只宣告、也只用得到 network（requests）；一樣不開別的程式、不動態執行、不碰檔案、不讀環境變數；只給擁有者（access: owner）。
 - 多人契約（docs/adr/0003 第 2 節）：入口欄位都明寫（test_declares_scope）；M3 不用 chat_id 分人、M4 模組層級不放會變的狀態、
@@ -24,6 +24,8 @@ CONNECT = ("notion", "todoist", "google-calendar", "apple-reminders")
 ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": [], "notes": [],
                 **{name: ["network"] for name in CONNECT}}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
+# 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0003 P1）
+LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",)}
 # 接外面服務的多准：requests、urllib.parse、編碼／雜湊／亂數、XML（CalDAV）、時區、型別、log
 CONNECT_IMPORTS = ALLOWED_IMPORTS + ("requests", "urllib", "base64", "hashlib", "secrets", "uuid", "xml", "zoneinfo",
                                      "typing", "logging", "__future__")
@@ -96,7 +98,8 @@ def test_gate2_static_scan_passes(name):
 def test_no_network_subprocess_exec_or_stray_files(name):
     text = source(name)
     tree = ast.parse(text)
-    forbidden, allowed = (CONNECT_FORBIDDEN, CONNECT_IMPORTS) if name in CONNECT else (FORBIDDEN_IMPORTS, ALLOWED_IMPORTS)
+    forbidden, allowed = (CONNECT_FORBIDDEN, CONNECT_IMPORTS) if name in CONNECT else \
+        (FORBIDDEN_IMPORTS, ALLOWED_IMPORTS + LOCAL_EXTRA_IMPORTS.get(name, ()))
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             mods = [a.name for a in node.names]
@@ -115,10 +118,13 @@ def test_no_network_subprocess_exec_or_stray_files(name):
     os_calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
                 and getattr(n.func.value, "id", None) == "os"]
     if name == "calendar":
-        # 唯一的 open 在 _write_own 裡、唯一的 os.* 是送完 .ics 之後的 os.remove；路徑都來自 pack.path_of(user, …)
+        # 唯一的 open 在 _write_own 裡；os.* 只有：匯出前列出自己的資料夾、清掉舊的匯出檔、送完 .ics 之後刪掉；
+        # 路徑都來自 pack.path_of(user, …)（ADR-0003 P1）
         fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_write_own")
         assert len(opens) == 1 and opens[0] in list(ast.walk(fn))
-        assert [n.func.attr for n in os_calls] == ["remove"]
+        assert sorted(n.func.attr for n in os_calls) == ["listdir", "remove", "remove"]
+        assert all(ast.unparse(n.args[0]).startswith("pack.path_of(user") or ast.unparse(n.args[0]) == "path"
+                   for n in os_calls)
         assert "path = pack.path_of(user, " in text and "_write_own(path," in text and "os.remove(path)" in text
         assert "pack.path(" not in text                 # data: user 不能用全部人共用的資料夾
     else:
@@ -172,8 +178,6 @@ MUTABLE_LITERALS = (ast.Dict, ast.List, ast.Set, ast.DictComp, ast.ListComp, ast
 MUTABLE_CALLS = ("dict", "list", "set", "defaultdict", "OrderedDict", "Counter", "deque")
 # 模組層級准用的呼叫（回的東西不會變）：正規表示式、tuple、frozenset
 CONSTANT_CALLS = ("re.compile", "_re.compile", "tuple", "frozenset")
-# 模組層級「測試換掉用」的 X = None：ADR-0003 T5 改成函式之前暫時列在這裡（T5 做完要清空）
-TEST_HOOKS = {"todoist": {"HTTP"}, "google-calendar": {"transport"}}
 
 
 def _uses_chat_id(node) -> bool:
@@ -278,7 +282,7 @@ def test_m3_chat_id_is_never_a_per_person_key(name):
 
 @pytest.mark.parametrize("name", PACK_NAMES)
 def test_m4_no_mutable_module_state(name):
-    assert module_state_problems(ast.parse(source(name)), TEST_HOOKS.get(name, ())) == []
+    assert module_state_problems(ast.parse(source(name))) == []
 
 
 @pytest.mark.parametrize("name", [n for n in PACK_NAMES if os.path.isfile(os.path.join(PACKS, n, "panel.html"))])

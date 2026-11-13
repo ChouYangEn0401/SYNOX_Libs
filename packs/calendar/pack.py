@@ -8,10 +8,14 @@
 不連網、不開別的程式。唯一碰檔案的是 /cal_ics：在 pack.path_of(user, …)（這個人自己的資料夾：個人版
 data/calendar/files/、伺服器版 data/users/<id>/calendar/files/）寫一個暫存的 .ics、
 送出去之後馬上刪掉（行事曆內容不留明文在硬碟上）；所以 pack.json 宣告了 filesystem:own。
+檔名每次不一樣（export-<時間>-<亂數>.ics）：同一個人同時匯出兩次（Telegram 一次、AI 一次）不會互相蓋、互相刪；
+每次匯出前先清掉這個人資料夾裡留下的舊匯出檔（程序在寫完到刪掉之間被關掉時留下的明文；10 分鐘內的不動）。
 提醒：SYNOX 沒有給 pack 用的排程 API，加行程時回一行 /remind_add 給使用者自己決定要不要設。
 """
 
 import os
+import re
+import secrets
 import time
 from datetime import date, datetime, timedelta
 
@@ -370,6 +374,36 @@ def to_ics(events, stamp: datetime) -> str:
     return "".join(ics_fold(x) + "\r\n" for x in lines)
 
 
+EXPORT_NAME = re.compile(r"^export(?:-(\d{14})-[0-9a-f]+)?\.ics$")   # 0.1.2 以前是固定的 export.ics
+STALE_EXPORT_SECONDS = 10 * 60
+
+
+def export_name(when: datetime) -> str:
+    """這次匯出的檔名：時間＋亂數，同一個人同時匯出兩次也不會撞名。"""
+    return f"export-{when:%Y%m%d%H%M%S}-{secrets.token_hex(4)}.ics"
+
+
+def stale_exports(names, when: datetime) -> list:
+    """資料夾裡要清掉的舊匯出檔：固定檔名 export.ics（舊版留下的）一律清；新的檔名比 when 早 10 分鐘以上才清
+    （正在送的那一份不動）。不是匯出檔的不碰。"""
+    out = []
+    for name in names:
+        found = EXPORT_NAME.match(name)
+        if not found:
+            continue
+        if found.group(1) is None:
+            out.append(name)
+            continue
+        try:
+            at = datetime.strptime(found.group(1), "%Y%m%d%H%M%S")
+        except ValueError:
+            out.append(name)
+            continue
+        if (when - at).total_seconds() > STALE_EXPORT_SECONDS:
+            out.append(name)
+    return out
+
+
 def _write_own(path: str, text: str) -> None:
     """pack 唯一寫檔的地方：path 一定是 pack.path_of(user, ...) 給的（這個人自己的資料夾底下）。"""
     with open(path, "w", encoding="utf-8", newline="") as f:
@@ -469,12 +503,18 @@ def install(app, pack):
         api.send_message(chat_id, "🗑 刪掉了：" + line(gone, now().date()))
 
     def ics(api, chat_id, user, values):
+        when = now()
+        for name in stale_exports(os.listdir(pack.path_of(user)), when):     # 上次沒刪掉的（只看這個人自己的資料夾）
+            try:
+                os.remove(pack.path_of(user, name))
+            except OSError:
+                pass
         rows = events(user)
         if not rows:
             api.send_message(chat_id, "📅 行事曆是空的，沒有東西可以匯出。")
             return
-        path = pack.path_of(user, "export.ics")       # data: user：每個人自己的資料夾（不是全部人共用的 pack.path）
-        _write_own(path, to_ics(rows, now()))
+        path = pack.path_of(user, export_name(when))  # data: user：每個人自己的資料夾（不是全部人共用的 pack.path）
+        _write_own(path, to_ics(rows, when))
         try:
             api.send_document(chat_id, path, caption=f"📅 {len(rows)} 個行程。在 Google 日曆（設定 → 匯入）或 "
                                                      f"iPhone（點開檔案 → 加入行事曆）匯入。")
@@ -509,5 +549,4 @@ def install(app, pack):
                             else e["start"] + (f"–{e['end']}" if e.get("end") else ""),
                             "title": e["title"], "location": e.get("location", "")} for e in rows]}
 
-    if hasattr(pack, "web_route"):
-        pack.web_route("today", today_route)
+    pack.web_route("today", today_route)

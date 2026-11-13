@@ -180,3 +180,32 @@ def test_personal_mode_ics_export_uses_real_folder(synox_bot, owner):
     folder = os.path.join(bot.app.config.data_dir, "calendar", "files")
     assert os.path.dirname(seen["path"]) == folder and os.listdir(folder) == []
     assert not os.path.exists(os.path.join(bot.app.config.data_dir, "users"))
+
+
+def test_ics_file_name_is_unique_and_old_exports_are_cleaned(make_bot, owner):
+    """P1（ADR-0003）：每次匯出的檔名都不一樣（同一個人同時匯出兩次不互踩）；匯出前清掉留下的舊匯出檔
+    （舊版的 export.ics、10 分鐘以前的），剛剛（10 分鐘內）的與不是匯出檔的不動。"""
+    bot = make_bot("calendar")
+    bot.say(owner, "/cal 明天 14:00 看牙醫")
+    pack, module = bot.packs["calendar"], bot.modules["calendar"]
+    names = []
+    real = bot.api.send_document
+
+    def capture(chat_id, document, caption=""):
+        names.append(os.path.basename(document))
+        return real(chat_id, document, caption)
+
+    bot.api.send_document = capture
+    folder = pack.path_of(owner)
+    old = module.export_name(datetime(2026, 11, 9, 9, 0))           # 30 分鐘前
+    recent = module.export_name(datetime(2026, 11, 9, 9, 25))       # 5 分鐘前（可能另一次匯出正在送）
+    for leftover in ("export.ics", old, recent, "keep.txt"):
+        with open(os.path.join(folder, leftover), "w", encoding="utf-8") as f:
+            f.write("BEGIN:VCALENDAR")
+    bot.say(owner, "/cal_ics")
+    bot.say(owner, "/cal_ics")
+    assert len(names) == 2 and names[0] != names[1]
+    assert all(module.EXPORT_NAME.match(n) and n.startswith("export-20261109093000-") for n in names)
+    assert sorted(os.listdir(folder)) == sorted([recent, "keep.txt"])
+    assert module.stale_exports(["export.ics", old, recent, "keep.txt", "export-x.ics"],
+                                datetime(2026, 11, 9, 9, 30)) == ["export.ics", old]

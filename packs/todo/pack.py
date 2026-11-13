@@ -475,5 +475,4 @@ def install(app, pack):
                 "overdue": [pack_item(it) for it in overdue], "due_today": [pack_item(it) for it in due_today],
                 "later": [pack_item(it) for it in rest[:20]], "open": len(overdue) + len(due_today) + len(rest)}
 
-    if hasattr(pack, "web_route"):
-        pack.web_route("today", today_route)
+    pack.web_route("today", today_route)

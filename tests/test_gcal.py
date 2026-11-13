@@ -70,12 +70,12 @@ def make_bot(host_bot):
 
 @pytest.fixture
 def gbot(make_bot):
-    """真的 SYNOX＋真的保管箱；pack 模組的 transport／now／local_tz 換成假的。"""
+    """真的 SYNOX＋真的保管箱；pack 模組的 new_session／now／local_tz 換成假的。"""
     def factory(script=None):
         bot = make_bot(script)
         mod = sys.modules["synox_pack_google_calendar"]
         http = FakeHTTP()
-        mod.transport = http
+        mod.new_session = lambda: http
         mod.now = lambda: datetime(2026, 11, 9, 9, 0)          # 2026-11-09 是星期一
         mod.local_tz = lambda: TZ
         return bot, mod, http
@@ -432,7 +432,7 @@ def test_server_mode_tokens_are_per_user(make_bot, owner):
     bot = make_bot(raw={"mode": "server"})
     mod = sys.modules["synox_pack_google_calendar"]
     http = FakeHTTP()
-    mod.transport = http
+    mod.new_session = lambda: http
     mod.now = lambda: datetime(2026, 11, 9, 9, 0)
     mod.local_tz = lambda: TZ
     _setup(bot, owner)

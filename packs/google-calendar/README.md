@@ -100,5 +100,5 @@ Google 規定每個程式都要有自己的「OAuth 用戶端」。SYNOX 沒有�
 - 指令、欄位跟工具庫的本機 [`calendar`](../calendar/README.md) 一樣（`add`／`today`／`week`／`list`／`rm`、`text`／`date`／`time`／`location`／`note`），
   日期解析是同一份 `zhdate`（照抄在 pack.py 裡，正本在工具庫 `packs/_shared/zhdate.py`，改了跑 `scripts/sync_shared.py`）。差別：`rm` 是 DANGER（刪的是雲端的資料），
   編號是「最近一次列出來的那一份」（Google 的 event id 太長，不給人打）。
-- 測試：工具庫的 `tests/test_gcal.py`，假的 HTTP（換 `transport`），不連 Google。
+- 測試：工具庫的 `tests/test_gcal.py`，假的 HTTP（換 `new_session`），不連 Google。
 - 對真的 Google 日曆試：SYNOX 的 `scripts/smoke_real.py --only gcal`。

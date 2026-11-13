@@ -13,7 +13,7 @@
 預設那一份存的東西：{"token": "...", "ids": {"<Todoist 任務 id>": 編號}, "next_n": 1}——編號是 SYNOX 這邊給的短號（[3]），
 第一次看到某個任務時配一個，之後不變；完成、刪除就收回。指令也收 Todoist 原本的任務 id。
 
-測試換掉 HTTP（假的 requests.Session）與 now()，不打真的 Todoist。
+測試換掉 new_session（假的 requests.Session）與 now()，不打真的 Todoist。
 """
 
 import re
@@ -32,7 +32,6 @@ PAGE_LIMIT = 200                # Todoist v1 一頁最多 200
 MAX_PAGES = 10                  # 最多讀 2000 個任務
 SHOW = 30                       # 清單最多顯示幾行
 MAX_IDS = 3000                  # 編號對照表最多記幾個（多了丟最舊的）
-HTTP = None                     # None＝requests.Session()；測試放假的 session
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 TOKEN_RE = re.compile(r"^[A-Za-z0-9_\-.]{20,200}$")
 NO_DATE_WORDS = ("無", "沒有", "不要", "清掉", "取消", "none", "no date")
@@ -44,6 +43,11 @@ SETUP_HINT = ("還沒接上 Todoist。到 Todoist 網頁版：右上頭像 → �
 def now() -> datetime:
     """現在時間（測試換掉這一個）。"""
     return datetime.now()
+
+
+def new_session():
+    """HTTP 傳輸（每個 Client 一個新的，不共用）。測試把這個換成假的（不連網）。"""
+    return requests.Session()
 
 
 def _dict(value) -> dict:
@@ -327,7 +331,7 @@ class Client:
 
     def __init__(self, token: str, session=None):
         self.token = token
-        self.session = session if session is not None else (HTTP if HTTP is not None else requests.Session())
+        self.session = session if session is not None else new_session()
 
     def call(self, method: str, path: str, *, params=None, body=None):
         try:

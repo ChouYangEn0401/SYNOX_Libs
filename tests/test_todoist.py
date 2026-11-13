@@ -157,7 +157,7 @@ def todoist(make_bot):
         bot = make_bot(script, **kw)
         mod = sys.modules["synox_pack_todoist"]
         fake = FakeTodoist()
-        mod.HTTP = fake
+        mod.new_session = lambda: fake
         mod.now = lambda: TODAY
         if connect:
             bot.say(100, f"/todoist_token {TOKEN}")

@@ -27,8 +27,14 @@
   M4 模組層級不准有空容器、會被改的表、共用物件、`global`、拿常數表淺拷貝（`X = None` 的測試掛勾暫列 todoist `HTTP`、
   google-calendar `transport`，T5 拿掉）；M5 `panel.html` 不准 `innerHTML`、`localStorage`、外部網址，`fetch` 只打自己宣告的
   `/api/packs/<名字>/<route>`。每個檢查都有一條「故意寫錯一定抓得到」的測試。
+- 小修（ADR-0003 T5；不改資料格式。這一輪還沒發佈，T1／T4 已經升過版的工具不再另外升）：
+  `todoist`、`google-calendar` 模組層級的 `HTTP`／`transport` 改成 `def new_session()`（跟 notion、apple-reminders 一樣；
+  測試改成換函式，P6），`tests/test_gates.py` 的暫時白名單拿掉；`calendar`、`todo`、`bullet`、`money` 拿掉
+  `if hasattr(pack, "web_route")`（`requires.synox >=0.2` 一定有，C9）。
 
 ### Fixed
+- **`calendar` 0.1.2**（ADR-0003 T5、P1）：`/cal_ics` 的檔名改成每次不同（`export-<時間>-<亂數>.ics`），同一個人同時匯出兩次
+  不會互相蓋、互相刪；匯出前先清掉這個人資料夾裡留下的舊匯出檔（舊版的 `export.ics`、10 分鐘以前的）。
 - **`google-calendar` 0.1.1 → 0.1.2**（ADR-0003 C1、P5）：`/gcal_setup`、`/gcal_code`、`/gcal_token` 打的 client secret、授權碼、
   refresh token 原本整串印在 `[ROUTE]` log（兩種模式都中）；`install` 改成對這三個叫 `kit.redact_in_logs`。
   `/gcal_status` 改成 `ai=False`（跟另外三個外部工具一樣，SKILL 改成請使用者自己打）。測試加一條 S6（log 裡沒有那些值）。

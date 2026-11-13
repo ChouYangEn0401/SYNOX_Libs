@@ -234,11 +234,15 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
   `tests/test_gcal.py::test_commands_ai_flags_and_effects` 原本斷言 `status` 是 `ai=True`，照 P5 改成 `ai=False` 那一組。）
 - 升 `google-calendar` 版本；CHANGELOG 寫在 Fixed。
 
-**T5　小修（不改資料格式）**
+**T5　小修（不改資料格式）**　✅ 已完成
 - `packs/calendar/pack.py:476`：檔名改成不固定（例如 `export-<時間>-<亂數>.ics`）；`ics` 開頭先清掉這個人 `files/` 裡留下的舊 `export*.ics`（P1）。
 - `packs/todoist/pack.py:32,313`、`packs/google-calendar/pack.py:52`：把模組層級的 `HTTP`／`transport` 換成 `def new_session()`
   （notion、apple-reminders 已經是這個形狀：`packs/notion/pack.py:68`、`packs/apple-reminders/pack.py:43`），測試改成換函式（P6）。
 - 本機四個：拿掉 `if hasattr(pack, "web_route")`（C9）。
+- （實際：舊匯出檔只清 10 分鐘以前的——「開頭先清」如果全清，會刪到同一個人另一次正在送的那份，又回到 P1；
+  檔名裡的時間就是判斷依據，所以只多用 `os.listdir`（列 `pack.path_of(user)`），`test_gates` 的檔案白名單跟著放寬成
+  listdir＋remove、calendar 多准 `import secrets`。google-calendar 的 `new_session()` 回 `requests` 模組本身
+  （原本就是 `requests.request`，不共用 session，行為不變）。版本：這一輪 T1／T4 已經升過，不再另外升。）
 
 **T6　文件**
 - 五個本機工具的 README：加一句「伺服器版每人一份；管理者解得開」。四個外部工具的 README：加「伺服器版只有擁有者用得到（這份 ADR 第 4 節）」。
