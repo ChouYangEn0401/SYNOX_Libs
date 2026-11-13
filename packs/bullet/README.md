@@ -18,3 +18,5 @@
 網頁介面的工具頁有「今天」面板（`GET /api/packs/bullet/today`）。
 
 資料：`data/bullet.json.enc`（保管箱加密；伺服器版每人一份）。不連網、不開檔、不開別的程式（`capabilities: []`）。
+
+**個人版與伺服器版**：伺服器版每人一份（`data/users/<id>/bullet.json.enc`，用每個人自己的金鑰加密），別人的指令、面板、AI 都看不到；但伺服器的管理者有主金鑰，**解得開每個人的資料**。個人版改成伺服器版時，舊資料不會自己搬（[ADR-0003](../../docs/adr/0003-personal-and-server-mode.md)）。

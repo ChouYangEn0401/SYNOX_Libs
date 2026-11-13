@@ -1,6 +1,7 @@
 # ADR-0003：個人版與伺服器（多人）版——工具的「多人契約」與入口標準
 
 - 狀態：提議中（2026-11-13；審查已做完，實作待辦見最後一節）
+- 實作：T1～T6 已完成（2026-11-13，各自一個 commit；偏離原文的地方在該項底下用「（實際：…）」註明）；T7 還沒做
 - 範圍：`packs/` 全部 9 個工具、`tests/`、`scripts/build.py`
 - 對照的 SYNOX：`src/synox/packs/loader.py`、`manifest.py`、`secrets.py`、`connect.py`、`policy.py`、`web/server.py`、`docs/pack-format.md`
 
@@ -244,10 +245,15 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
   listdir＋remove、calendar 多准 `import secrets`。google-calendar 的 `new_session()` 回 `requests` 模組本身
   （原本就是 `requests.request`，不共用 session，行為不變）。版本：這一輪 T1／T4 已經升過，不再另外升。）
 
-**T6　文件**
+**T6　文件**　✅ 已完成
 - 五個本機工具的 README：加一句「伺服器版每人一份；管理者解得開」。四個外部工具的 README：加「伺服器版只有擁有者用得到（這份 ADR 第 4 節）」。
 - 根目錄 README 已經在工具清單下面寫了「個人版改成伺服器版，舊資料不會自己搬」（C8）；T7 開給成員時要回來改那一段。
 - 請 SYNOX 那邊改 `docs/pack-format.md:105` 那句（T1 做完它才是真的）。
+  （實際：這個 repo 不改 SYNOX。T1 做完之後那句「工具庫的每個工具……都寫了 `"surfaces": ["dm"], "data": "user"`」已經是真的
+  （`test_gates::test_declares_scope` 守著），所以不用改；要不要補一句「工具庫的 `build.py` 另外要求明寫 `access`、`storage`、
+  `capabilities`」留給 SYNOX 那邊決定。）
+- （實際：本機五個 README 加「伺服器版每人一份、管理者解得開、改模式不會自己搬」；外部四個 README 的安全一節加
+  「伺服器版只有擁有者用得到」與第 4 節的理由，google-calendar 順便把「不給 AI 的指令」補上 status。）
 
 **T7　之後（另開 ADR 或在這份加一節再做）：外部工具開給成員**
 - 順序：apple-reminders → notion → todoist；google-calendar 等 SYNOX 的「連接」支援 oauth。

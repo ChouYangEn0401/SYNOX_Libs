@@ -76,9 +76,10 @@ Google 規定每個程式都要有自己的「OAuth 用戶端」。SYNOX 沒有�
 
 ## 安全：資料在哪、誰看得到
 
+- **伺服器版只有擁有者用得到**：裝得上，但這個工具是 `access: owner`——成員、訪客打了跟不存在一樣，AI 也拿不到；授權存在擁有者自己的 `data/users/<id>/`。為什麼還不開給成員（密鑰還走聊天、管理者解得開每個人的保管箱、還沒對真的服務用過）見 [ADR-0003](../../docs/adr/0003-personal-and-server-mode.md) 第 4 節。個人版改成伺服器版時要重新設定一次。
 - **用戶端 ID／密鑰、refresh token、access token** 全部存在 SYNOX 的加密保管箱（`data/google-calendar.json.enc`，密文；
   伺服器版每個人一份）。不寫進 `config.json`、不寫進 log、不會出現在任何回覆或 AI 看到的工具結果裡。
-- **AI 碰不到憑證**：連接用的四個指令（setup／code／token／logout）不給 AI；AI 只能看行程、加行程、刪行程，
+- **AI 碰不到憑證**：連接用的指令（setup／code／token／status／logout）不給 AI；AI 只能看行程、加行程、刪行程，
   刪行程一定先送確認卡給你按。行程標題是 Google 那邊的資料（可能是別人邀請你時寫的），交給 AI 時包在隨機分隔符裡、當資料看。
 - **不開網路埠**：登入不用本機的 loopback 伺服器。Google 把瀏覽器轉到 `http://127.0.0.1:47231/`，那裡沒有任何程式在聽，
   你把網址貼回來。就算這台電腦上剛好有別的程式在用那個埠、看到了網址，它也換不到 token（有 PKCE：

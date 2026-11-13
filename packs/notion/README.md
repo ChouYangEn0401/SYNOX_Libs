@@ -46,6 +46,7 @@
 
 ## 安全：資料在哪、誰看得到
 
+- **伺服器版只有擁有者用得到**：裝得上，但這個工具是 `access: owner`——成員、訪客打了跟不存在一樣，AI 也拿不到；token 存在擁有者自己的 `data/users/<id>/`。為什麼還不開給成員（密鑰還走聊天、管理者解得開每個人的保管箱、還沒對真的服務用過）見 [ADR-0003](../../docs/adr/0003-personal-and-server-mode.md) 第 4 節。個人版改成伺服器版時要重新設定一次。
 - **token 存在 SYNOX 的保管箱**：`data/notion.json.enc`，密文（跟筆記、記帳同一種加密）；不在 `config.json`、不在 log
   （log 會把長得像 token 的字遮成 `ntn_***`）。
 - 只有**你**（安裝時配對的那個帳號）能用 `/notion*`；伺服器版的成員、訪客都用不到。`/notion_token`、`/notion_status`、

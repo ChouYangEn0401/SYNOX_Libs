@@ -31,6 +31,9 @@
   `todoist`、`google-calendar` 模組層級的 `HTTP`／`transport` 改成 `def new_session()`（跟 notion、apple-reminders 一樣；
   測試改成換函式，P6），`tests/test_gates.py` 的暫時白名單拿掉；`calendar`、`todo`、`bullet`、`money` 拿掉
   `if hasattr(pack, "web_route")`（`requires.synox >=0.2` 一定有，C9）。
+- 文件（ADR-0003 T6）：本機五個工具的 README 寫明伺服器版每人一份、伺服器的管理者解得開、改模式不會自己搬舊資料；
+  外部四個的 README 寫明伺服器版只有擁有者用得到（ADR-0003 第 4 節）。ADR-0003 的 T1～T6 標成已完成。
+  `notion`、`apple-reminders` 只改了 README（會打包進 .synoxpack），版本 0.1.1 → **0.1.2**。
 
 ### Fixed
 - **`calendar` 0.1.2**（ADR-0003 T5、P1）：`/cal_ics` 的檔名改成每次不同（`export-<時間>-<亂數>.ics`），同一個人同時匯出兩次
