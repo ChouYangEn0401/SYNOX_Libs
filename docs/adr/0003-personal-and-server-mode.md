@@ -214,11 +214,15 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
 - （實際，S4：伺服器版訪客打本機工具的指令，SYNOX 回的是「沒有執行此指令的權限」不是「未知指令」——群組看不到、
   `policy.decide` 不給、`/help` 沒有，只是字不一樣；測試兩種字都收。成員打 `access: owner` 的才是「未知指令」。）
 
-**T3　契約的靜態檢查（`tests/test_gates.py`）**
+**T3　契約的靜態檢查（`tests/test_gates.py`）**　✅ 已完成
 - M3：`pack.py` 裡 `chat_id` 不准出現在 `store.of(`、`path_of(`、`secret(` 的參數，也不准當 dict 的鍵。
 - M4：AST 掃模組層級的賦值，值是 `{}`／`[]`／`set()`／`dict()`／`list()` 的不准（常數表用 tuple 或寫進白名單）；
   `HTTP = None`、`transport = None` 這種「測試換掉用」的改成函式（T5）。
 - M5：`panel.html` 不准有 `innerHTML`、`localStorage`、`sessionStorage`、`http://`、`https://`；`fetch(` 的網址只能是 `/api/packs/<自己的名字>/`。
+- （實際：M4 的「常數表」不改成 tuple——全部是對照表（`_CN`、`KIND_NAMES`…），改成 tuple 會動到程式；規則改成
+  「有內容的 dict／list／set 名字要全大寫、整個模組沒有地方改它、不拿它淺拷貝」，空的一律不准，模組層級的呼叫只准
+  `re.compile`／`tuple`／`frozenset`，函式裡不准 `global`。`X = None` 的掛勾在 T5 之前暫列白名單 `TEST_HOOKS`。
+  M5 另外要求 `fetch` 的 route 在 `pack.json` 的 `web.api` 裡。三個檢查各有一條「故意寫錯的樣子要抓到」的測試。）
 
 **T4　google-calendar 的 log 外洩（C1；兩種模式都中，優先做）**　✅ 已完成（google-calendar 0.1.2）
 - `packs/google-calendar/pack.py` 的 `install` 開頭：照 `packs/todoist/pack.py:518-520` 的寫法，

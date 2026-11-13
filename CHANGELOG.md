@@ -23,6 +23,10 @@
   個人版陌生人、伺服器版訪客、成員對 `access: owner`、`policy.decide(via=AI)`）；notion、apple-reminders、google-calendar
   各加一條 token 每人一份（S7）；calendar 加匯出檔不留東西（S8）。`tests/conftest.py` 的假 pack 伺服器版 `path()`／`path_of(None)`
   跟真的一樣丟 `PackPathError`（P7）。
+- `tests/test_gates.py` 加多人契約的靜態檢查（ADR-0003 T3；不改工具）：M3 `chat_id` 不准當 `store.of`／`path_of`／`secret` 的參數或 dict 的鍵；
+  M4 模組層級不准有空容器、會被改的表、共用物件、`global`、拿常數表淺拷貝（`X = None` 的測試掛勾暫列 todoist `HTTP`、
+  google-calendar `transport`，T5 拿掉）；M5 `panel.html` 不准 `innerHTML`、`localStorage`、外部網址，`fetch` 只打自己宣告的
+  `/api/packs/<名字>/<route>`。每個檢查都有一條「故意寫錯一定抓得到」的測試。
 
 ### Fixed
 - **`google-calendar` 0.1.1 → 0.1.2**（ADR-0003 C1、P5）：`/gcal_setup`、`/gcal_code`、`/gcal_token` 打的 client secret、授權碼、
