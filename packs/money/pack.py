@@ -189,6 +189,17 @@ def merge_template(categories: list, template) -> tuple:
     return added, skipped
 
 
+def guess(categories, text: str):
+    """text 裡含哪個類別的名稱或關鍵字（不分大小寫）→ (類別, 對到的字)；最長的字優先，一樣長的照清單順序。沒有回 None。"""
+    low = (text or "").lower()
+    best = None
+    for c in categories:
+        for word in [c["name"], *c.get("keywords", [])]:
+            if word and word.lower() in low and (best is None or len(word) > len(best[1])):
+                best = (c, word)
+    return best
+
+
 def check_name(value: str):
     value = value.strip()
     if not value or len(value) > 20:
@@ -216,16 +227,28 @@ def install(app, pack):
         day = parse_day(values["date"], today) if values.get("date") else today
         at = int(time.time()) if day == today else int(time.mktime(datetime(day.year, day.month, day.day, 12).timetuple()))
         key = day.strftime("%Y-%m")
-        first = False
+        first, hint = False, ""
 
         def append(d):
             nonlocal first
             first = not d["entries"] and not d["categories"]
-            typed = values["category"].strip()
-            known = find_cat(d["categories"], typed)            # 自己的類別：照存著的寫法；不在清單裡的照打的字記
-            entry = {"id": d["next_id"], "kind": "expense", "amount": amount,
-                     "category": known["name"] if known else typed,
-                     "memo": values.get("memo", "").strip(), "date": day.isoformat(), "at": at}
+            nonlocal hint
+            typed = values.get("category", "").strip()
+            memo = values.get("memo", "").strip()
+            known = find_cat(d["categories"], typed) if typed else None
+            if known:                                           # 自己的類別：照存著的寫法
+                name = known["name"]
+            elif typed and guess(d["categories"], f"{typed} {memo}"):
+                known, word = guess(d["categories"], f"{typed} {memo}")
+                name, memo = known["name"], f"{typed} {memo}".strip()      # 打的字留在備註
+                hint = f"（從「{word}」猜是 {name}）"
+            elif typed:                                         # 不在清單裡、也猜不到：照打的字記
+                name = typed
+            else:
+                name = UNSORTED
+                hint = f"（沒給類別，先放「{UNSORTED}」）"
+            entry = {"id": d["next_id"], "kind": "expense", "amount": amount, "category": name,
+                     "memo": memo, "date": day.isoformat(), "at": at}
             d["next_id"] += 1
             d["entries"].append(entry)
             return entry, month_total(d, key) - amount, month_total(d, key), d.get("budget")
@@ -233,8 +256,10 @@ def install(app, pack):
         entry, before, after, budget = update(user, append)
         memo = f"（{entry['memo']}）" if entry["memo"] else ""
         when = "" if day == today else f"（記在 {day.isoformat()}）"
-        lines = [f"💰 記了 #{entry['id']}：{entry['category']} {fmt(amount)} 元{memo}{when}",
-                 f"{key} 共 {fmt(after)} 元"]
+        lines = [f"💰 記了 #{entry['id']}：{entry['category']} {fmt(amount)} 元{memo}{when}"]
+        if hint:
+            lines.append(hint)
+        lines.append(f"{key} 共 {fmt(after)} 元")
         if budget:
             if before <= float(budget) < after:
                 lines.append(f"⚠️ 這一筆讓這個月超過預算了（預算 {fmt(budget)} 元，超過 {fmt(after - float(budget))} 元）")
@@ -386,7 +411,7 @@ def install(app, pack):
 
     kit.command(g, "add", add, "記一筆支出", default=True, effect=WRITE, positional=3, fields=[
         Field("amount", "金額", required=True, check=kit.number),
-        Field("category", "類別", required=True),
+        Field("category", "類別（可以不填）"),
         Field("memo", "備註"),
         Field("date", "哪一天（預設今天；例如 2026-11-08、11/8、昨天）", check=check_day)])
     kit.command(g, "list", list_, "最近幾筆（預設 10）", fields=[Field("n", "筆數", check=kit.positive_int)])

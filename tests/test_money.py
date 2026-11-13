@@ -206,3 +206,29 @@ def test_template_contents_are_valid_and_neutral(make_bot):
         with open(local, encoding="utf-8") as f:
             words = [w.strip() for w in f if len(w.strip()) >= 2 and not w.startswith("#")]
         assert not [w for w in words if w.lower() in text.lower()]
+
+
+# ---- 0.2.0：關鍵字猜類別 ----
+
+def test_guess_category_from_keywords(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money_cat_add 飲料 食 keywords=咖啡,拿鐵")
+    bot.say(owner, "/money_cat_add 咖啡豆 keywords=咖啡豆,濾掛")
+    bot.say(owner, "/money 65 拿鐵 早上")
+    assert "飲料 65 元（拿鐵 早上）" in bot.last(owner) and "從「拿鐵」猜是 飲料" in bot.last(owner)
+    bot.say(owner, "/money 300 咖啡豆子")                                 # 最長的關鍵字優先（咖啡豆 > 咖啡）
+    assert "咖啡豆 300 元" in bot.last(owner)
+    bot.say(owner, "/money 80 外帶 冰拿鐵")                                # 備註裡的字也算
+    assert "飲料 80 元（外帶 冰拿鐵）" in bot.last(owner)
+    bot.say(owner, "/money 99 寵物")                                        # 猜不到：照打的字記
+    assert "寵物 99 元" in bot.last(owner) and "猜" not in bot.last(owner)
+    bot.say(owner, "/money 10")                                            # 沒給類別：待分類，不擋
+    assert "待分類 10 元" in bot.last(owner) and "先放「待分類」" in bot.last(owner)
+
+
+def test_guess_unit(make_bot):
+    module = make_bot("money").modules["money"]
+    cats = [{"name": "A", "keywords": ["ab"]}, {"name": "B", "keywords": ["abc"]}, {"name": "C", "keywords": ["xy"]}]
+    assert module.guess(cats, "zzABCzz")[0]["name"] == "B"
+    assert module.guess(cats, "xy ab")[0]["name"] == "A"                   # 一樣長：清單順序
+    assert module.guess(cats, "nothing") is None and module.guess([], "ab") is None
