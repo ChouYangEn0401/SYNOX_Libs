@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+### Added
+- **`money` 0.2.0 → 0.3.0**（[ADR-0003](docs/adr/0003-tool-apps-and-money-app.md)；`stage` 仍是 alpha）：附完整的網頁畫面「記帳本」（SYNOX 的工具服務：
+  總覽、帳目、類別、預算；畫面只走 SYNOX 的共用元件）；新指令 `/money_edit`（改一筆）；匯出 `entries_csv`（個人版、下載前提醒沒有加密；
+  多人共用的 SYNOX 沒有匯出；加密匯出還沒做）。`pack.py` 拆成模組層的核心函式（指令與畫面同一份邏輯），舊指令的回覆一個字都沒變。
+  `requires.sdk` → `>=0.2.3,<0.3`（要有工具服務的 SYNOX）。從 0.2.0 升級時 SYNOX 的升級報告會出現紅字「新加了完整的網頁畫面」、每個動作、「畫面多了匯出」——這是預期的。
+  資料格式不變（`schema` 2），退回 0.2.0 讀得懂。
+- `scripts/build.py`：`index.json` 每筆多 `"app": true/false`（目錄頁標「有完整畫面」）。
+- 測試：`tests/test_money_app.py`（同一件事兩條路結果一樣、欄位訊息一樣、讀、匯出、伺服器版隔離）、`tests/test_apps_common.py`
+  （每個有畫面的官方工具：畫面程式不自己連線、入口先載 SYNOX 的共用元件、說明不印畫面的網址）。
+
 ## [0.2.0] - 2026-11-13
 
 ### Added

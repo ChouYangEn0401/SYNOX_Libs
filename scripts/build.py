@@ -104,7 +104,7 @@ def sha256_of(path: str) -> str:
 
 def entry_for(m, path: str, bundles: dict) -> dict:
     return {"name": m.name, "title": m.title, "summary": m.summary, "version": m.version, "stage": m.raw.get("stage"),
-            "kind": m.kind,
+            "kind": m.kind, "app": bool((m.web or {}).get("app")),          # 有完整畫面（工具服務，ADR-0003）
             "group": m.group, "access": m.access, "capabilities": sorted(m.capabilities),
             "requires": {k: v for k, v in (m.requires or {}).items() if k in ("synox", "sdk") and v},
             "bundles": sorted(k for k, b in bundles.items() if m.name in b.get("packs", [])),
