@@ -118,6 +118,8 @@ footer a { color: var(--muted); }
 .btn { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 500; font-size: 15px; padding: 10px 18px; border-radius: 11px; border: 1px solid var(--line-2); color: var(--ink); background: var(--surface); min-height: 44px; }
 .btn:hover { border-color: var(--accent); }
 .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.legend { font-size: 13.5px; color: var(--muted); background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 18px; }
+.legend b { color: var(--ink); font-weight: 500; }
 .group-h { font-family: var(--body); font-size: 15px; font-weight: 600; color: var(--muted); margin: 22px 0 10px; }
 .group-h:first-of-type { margin-top: 0; }
 .tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -165,6 +167,8 @@ footer a { color: var(--muted); }
 
 <section id="tools">
   <h2>所有工具（9 個）</h2>
+  <p class="legend"><b>👤 單人用</b>：只有安裝 SYNOX 的那個人能用；SYNOX 開成伺服器版（一台給家人或社團一起用）時，其他人看不到。<br>
+    <b>👥 伺服器版也能用</b>：SYNOX 開成伺服器版時，每個人都能用，各自一份資料、互相看不到。只有你自己用的話，兩種沒有差別。</p>
   <h3 class="group-h">存在這台電腦（不連網）</h3>
   <div class="tools">
     <a class="tool" href="https://claude.ai/artifact/NpYbd3FtMAkXmASXc1pJzh">
@@ -172,7 +176,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>隨手記</b> <span class="t-name">notes · v0.1.1</span>
         <span class="t-line">記一筆、找、刪</span>
         <code class="t-ex">/note 買牛奶</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i><i class="pill" title="伺服器版裡每個人都能用，各自一份資料">👥 伺服器版也能用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
     <a class="tool" href="https://claude.ai/artifact/JuKURoMhZY58fWyR4j3961">
@@ -180,7 +184,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>待辦</b> <span class="t-name">todo · v0.1.1</span>
         <span class="t-line">重要度、專案、到期日、打勾完成</span>
         <code class="t-ex">/todo !! 繳電費 明天</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i><i class="pill" title="伺服器版裡每個人都能用，各自一份資料">👥 伺服器版也能用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
     <a class="tool" href="https://claude.ai/artifact/6kA9jSkwVFPPBthsCjmz6d">
@@ -188,7 +192,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>記帳</b> <span class="t-name">money · v0.2.0</span>
         <span class="t-line">支出、收入、轉帳、預算</span>
         <code class="t-ex">/money 120 午餐</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i><i class="pill" title="伺服器版裡每個人都能用，各自一份資料">👥 伺服器版也能用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
     <a class="tool" href="https://claude.ai/artifact/Fm6dXH5oiua8zPY3U5RYQ5">
@@ -196,7 +200,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>行事曆</b> <span class="t-name">calendar · v0.1.1</span>
         <span class="t-line">存在這台電腦的行程，可匯出 .ics</span>
         <code class="t-ex">/cal 明天 14:00 看牙醫</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i><i class="pill" title="伺服器版裡每個人都能用，各自一份資料">👥 伺服器版也能用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
     <a class="tool" href="https://claude.ai/artifact/BTdPArDtbddRk4ijNqExZ3">
@@ -204,7 +208,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>子彈筆記</b> <span class="t-name">bullet · v0.1.1</span>
         <span class="t-line">快速記錄、今天、月誌、搬到今天</span>
         <code class="t-ex">/bj • 買牛奶</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill ok">不連網</i><i class="pill" title="伺服器版裡每個人都能用，各自一份資料">👥 伺服器版也能用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
   </div>
@@ -215,7 +219,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>Notion</b> <span class="t-name">notion · v0.1.1</span>
         <span class="t-line">搜尋、讀頁面、加一列、改欄位</span>
         <code class="t-ex">/notion 會議</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill">只用模擬測過</i><i class="pill">只給擁有者</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill">只用模擬測過</i><i class="pill" title="只有安裝 SYNOX 的那個人能用；伺服器版的其他人看不到">👤 單人用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
     <a class="tool" href="https://claude.ai/artifact/D3zgGcZ9h1LRrDLu2QD5Mw">
@@ -223,7 +227,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>Todoist</b> <span class="t-name">todoist · v0.1.1</span>
         <span class="t-line">看、加、完成、改期 Todoist 的待辦</span>
         <code class="t-ex">/todoist !! 繳電費 明天</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill">只用模擬測過</i><i class="pill">只給擁有者</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill">只用模擬測過</i><i class="pill" title="只有安裝 SYNOX 的那個人能用；伺服器版的其他人看不到">👤 單人用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
     <a class="tool" href="https://claude.ai/artifact/NyhRhPrRL1n9NMMbMEv3mx">
@@ -231,7 +235,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>Google 日曆</b> <span class="t-name">google-calendar · v0.1.1</span>
         <span class="t-line">看今天／這週、加行程、刪行程</span>
         <code class="t-ex">/gcal 明天 14:00 看牙醫</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill">只用模擬測過</i><i class="pill">只給擁有者</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill">只用模擬測過</i><i class="pill" title="只有安裝 SYNOX 的那個人能用；伺服器版的其他人看不到">👤 單人用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
     <a class="tool" href="https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp">
@@ -239,7 +243,7 @@ footer a { color: var(--muted); }
       <span class="t-body"><b>Apple 提醒事項</b> <span class="t-name">apple-reminders · v0.1.1</span>
         <span class="t-line">CalDAV 提醒事項（升級過的 iCloud 讀不到）</span>
         <code class="t-ex">/applerem_add 買牛奶</code>
-        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill">只用模擬測過</i><i class="pill">只給擁有者</i></span></span>
+        <span class="t-badges"><i class="pill stage">🧪 alpha</i><i class="pill">只用模擬測過</i><i class="pill" title="只有安裝 SYNOX 的那個人能用；伺服器版的其他人看不到">👤 單人用</i></span></span>
       <span class="t-go" aria-hidden="true">→</span>
     </a>
   </div>
@@ -289,7 +293,7 @@ footer a { color: var(--muted); }
   <a href="https://github.com/ChouYangEn0401/SYNOX_Libs" target="_blank" rel="noopener">GitHub</a>
   <a href="https://claude.ai/artifact/SNsSkbcVQm7BU22BBZN3gW">SYNOX 是什麼</a>
 </footer>
-<p class="stamp" data-online="https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL">線上版 <a href="https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL">https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL</a> · 本機版 docs/site/index.html · 頁面版本 <span data-stamp>e5327a3741 · 2026-11-13</span></p>
+<p class="stamp" data-online="https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL">線上版 <a href="https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL">https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL</a> · 本機版 docs/site/index.html · 頁面版本 <span data-stamp>7bb319ab46 · 2026-11-13</span></p>
 
 </div>
 </body>
