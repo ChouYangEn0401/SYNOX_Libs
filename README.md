@@ -20,6 +20,9 @@
 - 後四個（2026-11-12 從 SYNOX 主程式的 `connectors/` 搬來）：只連自己那個服務的官方 API（只用 `requests`）、不開埠、
   token／帳號加密存在保管箱、只給擁有者（`access: owner`）；都只對假傳輸測過，還沒對真的服務長時間用過。
 - 全部先標 **🧪 alpha**（維護者決定），意思與升級條件見下面「穩定度」。
+- **個人版與伺服器（多人）版**（[docs/adr/0003](docs/adr/0003-personal-and-server-mode.md)）：前五個兩種都能用，伺服器版每人一份、互相看不到；
+  後四個伺服器版也能裝，但**只有擁有者用得到**（成員打了跟不存在一樣），要等密鑰改成每個人在網頁自己「連接」才會開給成員。
+  裝了這些工具不會改變個人版的行為。個人版改成伺服器版時，SYNOX 不會自動搬舊資料（舊檔留著，改回個人版就又用它們）。
 
 **提醒（`/remind_add 08:00 吃藥`）不在這裡**：它是 SYNOX 的系統指令（「⏰ 提醒（系統）」），不用裝。
 2026-11-12 以前這裡有一個 `remind` 工具，已下架到 [legacy/](legacy/README.md)。`apple-reminders`（Apple 提醒事項）是另一個東西：接你 iCloud 的待辦。
@@ -97,6 +100,9 @@ set SYNOX_HOME=<SYNOX 資料夾>             建議明寫（見下面「找 SYNO
   並寫好範圍（或 `pip install <SYNOX>/sdk`）；附的 `synox_sdk.py` 版本也要在範圍內。
 - **一定要寫 `stage`**（`test`／`alpha`／`beta`／`stable`，見上面「穩定度」）；新工具從 `test` 或 `alpha` 開始。
 - **改了工具就升 `version`**（semver，要比裝著的大，SYNOX 才會當成升級），並在 [CHANGELOG.md](CHANGELOG.md) 記一行。
+- **多人契約**（[docs/adr/0003](docs/adr/0003-personal-and-server-mode.md)）：工具不自己判斷個人版／伺服器版；個人資料只經 `pack.store.of(user)`、
+  檔案只經 `pack.path_of(user, …)`、不用 `chat_id` 分資料、模組層級不放會變的狀態、密鑰不進回覆與 log；
+  `pack.json` 明寫 `access`、`surfaces`、`data`、`storage`、`capabilities`。新工具要有雙人隔離與權限的測試（ADR 第 6 節）。
 - 工具之間不能互相 import（SYNOX 的規則）；共用的程式放 `packs/_shared/`，用 `scripts/sync_shared.py` 原樣複製進每個用到的 `pack.py`。
 - 工具不要取名 `remind`、不要用 `remind` 群組：那是 SYNOX 系統指令的名字（裝了也載不進去）。要「到時間提醒」，在回覆裡附一行 `/remind_add …` 讓使用者自己決定（`calendar` 的做法）。
 - 測試兩層：`make_bot`（假 store，快）與 `synox_bot`／`host_bot`（真的 SYNOX；`host_bot` 跟 SYNOX 自己測試的 make_bot 同一個介面，

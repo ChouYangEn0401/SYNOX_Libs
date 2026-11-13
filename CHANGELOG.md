@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Added
+- [ADR-0003](docs/adr/0003-personal-and-server-mode.md)（2026-11-13，提議中）：個人版與伺服器（多人）版——九個工具的審查結果、
+  工具的「多人契約」、`pack.json`／`install`／面板的入口標準、接外面服務的工具在伺服器版維持只給擁有者的政策、測試要求與實作待辦。
+  只有文件，沒有改任何工具（待辦裡最優先的是 google-calendar 的密鑰會進 `[ROUTE]` log）。README 加上指向它的說明。
+
 ## [0.2.0] - 2026-11-13
 
 ### Added
