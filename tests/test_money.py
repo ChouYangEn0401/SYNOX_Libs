@@ -359,3 +359,32 @@ def test_category_cap_warns_but_does_not_block(make_bot, owner):
     assert "上限拿掉了" in bot.last(owner)
     bot.say(owner, "/money_month")
     assert "上限" not in bot.last(owner)
+
+
+# ---- 0.2.0：私人資料不外洩 ----
+
+def test_private_data_stays_with_its_owner_and_is_encrypted(synox_bot):
+    """伺服器版：A 的備註、自訂類別、關鍵字、付款方式、收入，B 從任何指令與面板都看不到；落地檔是密文。"""
+    from isdtelekit.users.roles import BasicRoles as R
+    bot = synox_bot("money", mode="server")
+    bot.make(77, R.MEMBER, "a")
+    bot.make(78, R.MEMBER, "b")
+    secrets = ("祕密備註A", "祕密類別A", "祕密關鍵字A", "祕密卡A")
+    bot.say(77, "/money_cat_add 祕密類別A keywords=祕密關鍵字A", chat_id=77)
+    bot.say(77, "/money_cap 祕密類別A 999", chat_id=77)
+    bot.say(77, "/money 50 祕密關鍵字A 祕密備註A account=祕密卡A", chat_id=77)
+    assert "祕密類別A 50 元" in bot.last(77)                               # A 自己的關鍵字猜得到
+    bot.say(77, "/money_in 12345 薪資", chat_id=77)
+    # B 下的指令裡不帶 A 的字（回覆會照抄自己打的字，那不算外洩）
+    for text in ("/money 20 茶", "/money 30 祕密", "/money_list", "/money_list keyword=祕密", "/money_month",
+                 "/money_cats", "/money_undo", "/money_list kind=收入"):
+        bot.say(78, text, chat_id=78)
+    b_view = "\n".join(bot.texts(chat_id=78))
+    assert not [s for s in secrets if s in b_view] and "12,345" not in b_view
+    pack = next(p for p in bot.app.extras["synox_packs"] if p.name == "money")
+    b_summary = str(pack.web_routes["summary"](78))
+    assert not [s for s in secrets if s in b_summary] and "12345" not in b_summary
+    a_file = pack.store.of(77).file()
+    with open(a_file, "rb") as f:
+        raw = f.read()
+    assert not [s for s in secrets if s.encode() in raw] and b"12345" not in raw
