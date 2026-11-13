@@ -277,3 +277,38 @@ def test_category_kind_decides_and_card_payment_is_a_transfer(make_bot, owner):
     assert "只能是 支出／收入／轉帳" in bot.last(owner)
     bot.say(owner, "/money_cats")
     assert "存錢（轉帳）" in bot.last(owner) and "薪資（收入）" in bot.last(owner)
+
+
+# ---- 0.2.0：撤銷與刪除 ----
+
+def test_undo_last_and_remove_by_number(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money_undo")
+    assert "沒有可以撤銷的帳" in bot.last(owner)
+    bot.say(owner, "/money 10 早餐")
+    bot.say(owner, "/money 20 午餐")
+    bot.say(owner, "/money 30 晚餐")
+    bot.say(owner, "/money_undo")
+    assert "撤銷了最後一筆：#3" in bot.last(owner) and "晚餐 30 元" in bot.last(owner)
+    bot.say(owner, "/money_rm #1")
+    assert "刪掉了：#1" in bot.last(owner) and "早餐 10 元" in bot.last(owner)
+    bot.say(owner, "/money_rm 1")
+    assert "沒有 #1 這筆" in bot.last(owner)
+    bot.say(owner, "/money_rm abc")
+    assert "正整數" in bot.last(owner)
+    bot.say(owner, "/money 40 宵夜")
+    assert "#4" in bot.last(owner)                                         # 編號不重用
+    assert [e["id"] for e in _data(bot)["entries"]] == [2, 4]
+    bot.say(owner, "/money_month")
+    assert "支出共 60 元" in bot.last(owner)
+
+
+def test_remove_is_danger_and_undo_is_write(synox_bot, owner):
+    from isdtelekit.core.registry import DANGER, WRITE
+    bot = synox_bot("money")
+    reg = bot.app.registry
+    assert reg.resolve("/money_rm 1")[0].effect == DANGER                  # AI 呼叫一律送確認卡
+    assert reg.resolve("/money_undo")[0].effect == WRITE
+    bot.say(owner, "/money 50 咖啡")
+    bot.say(owner, "/money_rm 1")                                           # 人自己打的照做
+    assert "刪掉了：#1" in bot.last(owner)

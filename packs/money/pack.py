@@ -18,7 +18,7 @@ import time
 from collections import defaultdict
 from datetime import date as Date, datetime, timedelta
 
-from isdtelekit.core.registry import WRITE, Field
+from isdtelekit.core.registry import DANGER, WRITE, Field
 
 from synox.packs import kit
 
@@ -217,6 +217,10 @@ def guess(categories, text: str):
     return best
 
 
+def check_id(value: str):
+    return kit.positive_int(value.strip().lstrip("#"))
+
+
 def check_name(value: str):
     value = value.strip()
     if not value or len(value) > 20:
@@ -246,7 +250,7 @@ def install(app, pack):
         hit = guess(pool, f"{typed} {memo}") if typed else None
         if hit:
             known, word = hit
-            return known["name"], forced or known["kind"], f"{typed} {memo}".strip(), f"（從「{word}」猜是 {known['name']}）"
+            return known["name"], forced or known["kind"], f"{typed} {memo}".strip(), f"（從「{word}」猜是 {known['name']}；猜錯就 /money_undo 重記）"
         if typed:                                               # 不在清單裡、也猜不到：照打的字記
             return typed, forced or "expense", memo, ""
         return UNSORTED, forced or "expense", memo, f"（沒給類別，先放「{UNSORTED}」）"
@@ -310,6 +314,28 @@ def install(app, pack):
         paid = f"［{e['account']}］" if e.get("account") else ""
         mark = {"income": "收入｜", "transfer": "轉帳｜"}.get(e["kind"], "")
         return f"#{e['id']} {e['date'][5:].replace('-', '/')}  {mark}{e['category']} {fmt(e['amount'])} 元{memo}{paid}"
+
+    def undo(api, chat_id, user, values):
+        gone = update(user, lambda d: d["entries"].pop() if d["entries"] else None)
+        if gone is None:
+            api.send_message(chat_id, "💰 沒有可以撤銷的帳。")
+            return
+        api.send_message(chat_id, f"↩️ 撤銷了最後一筆：{line_of(gone)}")
+
+    def rm(api, chat_id, user, values):
+        n = int(values["n"].strip().lstrip("#"))
+
+        def drop(d):
+            e = next((e for e in d["entries"] if e["id"] == n), None)
+            if e is not None:
+                d["entries"].remove(e)
+            return e
+
+        gone = update(user, drop)
+        if gone is None:
+            api.send_message(chat_id, f"❌ 沒有 #{n} 這筆（/money_list 看編號）。")
+            return
+        api.send_message(chat_id, f"🗑 刪掉了：{line_of(gone)}")
 
     def list_(api, chat_id, user, values):
         n = int(values.get("n") or 10)
@@ -467,6 +493,9 @@ def install(app, pack):
     kit.command(g, "transfer", recorder("transfer"), "記一筆轉帳：存錢、投資、還款、繳卡費（不算花費、不吃預算）",
                 effect=WRITE, positional=3, fields=entry_fields())
     kit.command(g, "list", list_, "最近幾筆（預設 10）", fields=[Field("n", "筆數", check=kit.positive_int)])
+    kit.command(g, "undo", undo, "撤銷最後記的那一筆", effect=WRITE)
+    kit.command(g, "rm", rm, "刪掉某一筆（編號看 /money_list）", effect=DANGER,
+                fields=[Field("n", "編號", required=True, check=check_id)])
     kit.command(g, "month", month, "這個月花了多少（分類別；可以給月份，例如 2026-10）",
                 fields=[Field("month", "月份（YYYY-MM）", check=check_month)])
     kit.command(g, "budget", budget, "設每月預算（0＝拿掉）", effect=WRITE,
