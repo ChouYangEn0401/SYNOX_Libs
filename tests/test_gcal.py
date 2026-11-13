@@ -425,3 +425,27 @@ def test_member_cannot_see_gcal_in_server_mode(make_bot):
     bot.make(555, next_up(roles, min(roles)))
     member = bot.app.users.get(555)
     assert not bot.app.registry.visible(member, bot.app.registry.node("gcal"))
+
+
+def test_server_mode_tokens_are_per_user(make_bot, owner):
+    """S7（ADR-0003）：伺服器版擁有者連的 Google 授權在自己的 data/users/<id>/；別人的 store 沒有；data/ 根目錄沒有共用檔。"""
+    bot = make_bot(raw={"mode": "server"})
+    mod = sys.modules["synox_pack_google_calendar"]
+    http = FakeHTTP()
+    mod.transport = http
+    mod.now = lambda: datetime(2026, 11, 9, 9, 0)
+    mod.local_tz = lambda: TZ
+    _setup(bot, owner)
+    http.on("POST", mod.TOKEN_URL, Resp(200, {"access_token": ACCESS, "expires_in": 3599,
+                                              "scope": "https://www.googleapis.com/auth/calendar.events"}))
+    bot.say(owner, f"/gcal_token {REFRESH}")
+    assert "存進保管箱了" in bot.last(owner)
+    vault = bot.app.extras["vault"]
+    assert vault.for_user(owner).load_json("google-calendar")["refresh_token"] == REFRESH
+    with open(vault.for_user(owner).path("google-calendar"), "rb") as f:
+        raw = f.read()
+    assert REFRESH.encode() not in raw and SECRET.encode() not in raw         # 密文
+    assert not os.path.exists(vault.path("google-calendar"))
+    pack = next(p for p in bot.app.extras["synox_packs"] if p.name == "google-calendar")
+    assert pack.store.of(555).load(None) is None
+    assert not os.path.exists(os.path.join(bot.app.config.data_dir, "users", "555"))

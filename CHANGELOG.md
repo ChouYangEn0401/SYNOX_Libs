@@ -18,6 +18,12 @@
 - `scripts/build.py`：`access`、`surfaces`、`data`、`storage`、`capabilities` 沒明寫就不打包（ADR-0003 入口標準）；
   `tests/test_gates.py` 加 `test_declares_scope`，`ALLOWED_CAPS` 不再把「沒寫」當期待值。
 
+- 測試（ADR-0003 T2；不改工具）：`tests/test_isolation.py` 改用真的 SYNOX，本機五個工具（多了 notes、money）跑伺服器版
+  兩個成員＋擁有者（S1 讀的指令、S2 落地檔、S3 面板）與個人版（S5）；新的 `tests/test_access.py` 九個工具的權限（S4：
+  個人版陌生人、伺服器版訪客、成員對 `access: owner`、`policy.decide(via=AI)`）；notion、apple-reminders、google-calendar
+  各加一條 token 每人一份（S7）；calendar 加匯出檔不留東西（S8）。`tests/conftest.py` 的假 pack 伺服器版 `path()`／`path_of(None)`
+  跟真的一樣丟 `PackPathError`（P7）。
+
 ### Fixed
 - **`google-calendar` 0.1.1 → 0.1.2**（ADR-0003 C1、P5）：`/gcal_setup`、`/gcal_code`、`/gcal_token` 打的 client secret、授權碼、
   refresh token 原本整串印在 `[ROUTE]` log（兩種模式都中）；`install` 改成對這三個叫 `kit.redact_in_logs`。

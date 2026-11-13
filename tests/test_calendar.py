@@ -122,3 +122,61 @@ def test_now_moves(make_bot, owner):
     bot.say(owner, "/cal_today")
     assert "早會" in bot.last(owner)
     assert MONDAY.weekday() == 0 and OWNER_ID == owner
+
+
+# ── 伺服器版：匯出檔（ADR-0003 S8） ─────────────────────────────────────
+
+def test_server_mode_ics_export_leaves_nothing_behind(synox_bot):
+    """S8：伺服器版成員匯出 .ics：檔寫在自己的 data/users/<id>/calendar/files/、送完那個資料夾是空的；別人的資料夾沒有東西。"""
+    import sys
+
+    from isdtelekit.users.roles import BasicRoles as R
+    bot = synox_bot("calendar", mode="server")
+    sys.modules["synox_pack_calendar"].now = lambda: MONDAY
+    member, other = 77, 78
+    bot.make(member, R.MEMBER, "a")
+    bot.make(other, R.MEMBER, "b")
+    bot.say(member, "/cal 明天 14:00 甲的行程", chat_id=member)
+    bot.say(other, "/cal 明天 15:00 乙的行程", chat_id=other)
+    captured = {}
+    real = bot.api.send_document
+
+    def capture(chat_id, document, caption=""):
+        with open(document, "rb") as f:
+            captured["bytes"] = f.read()
+        captured["path"] = document
+        return real(chat_id, document, caption)
+
+    bot.api.send_document = capture
+    bot.say(member, "/cal_ics", chat_id=member)
+    data = bot.app.config.data_dir
+    mine = os.path.join(data, "users", str(member), "calendar", "files")
+    assert os.path.dirname(captured["path"]) == mine
+    text = captured["bytes"].decode("utf-8")
+    assert "甲的行程" in text and "乙的行程" not in text
+    assert os.listdir(mine) == []                                   # 送完就刪，什麼都不留
+    for who in (other, OWNER_ID):                                   # 別人的資料夾沒有匯出檔
+        folder = os.path.join(data, "users", str(who), "calendar", "files")
+        assert not os.path.isdir(folder) or os.listdir(folder) == []
+    assert not os.path.exists(os.path.join(data, "calendar"))       # 也沒有寫到個人版那個共用位置
+    assert not os.path.exists(os.path.join(data, "packs", "calendar"))
+
+
+def test_personal_mode_ics_export_uses_real_folder(synox_bot, owner):
+    """個人版（真的 SYNOX）：匯出檔在 data/calendar/files/、送完是空的；沒有 data/users/（ADR-0003 S5、P7）。"""
+    import sys
+    bot = synox_bot("calendar")
+    sys.modules["synox_pack_calendar"].now = lambda: MONDAY
+    bot.say(owner, "/cal 明天 14:00 看牙醫")
+    seen = {}
+    real = bot.api.send_document
+
+    def capture(chat_id, document, caption=""):
+        seen["path"] = document
+        return real(chat_id, document, caption)
+
+    bot.api.send_document = capture
+    bot.say(owner, "/cal_ics")
+    folder = os.path.join(bot.app.config.data_dir, "calendar", "files")
+    assert os.path.dirname(seen["path"]) == folder and os.listdir(folder) == []
+    assert not os.path.exists(os.path.join(bot.app.config.data_dir, "users"))

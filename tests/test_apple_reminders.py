@@ -393,3 +393,27 @@ def test_connect_cli_requires_vault_pack_and_fields(make_bot):
     assert connect.run("apple-reminders", bot.app.config, bot.app.extras["vault"], ask=lambda _: "",
                        ask_secret=lambda _: "", out=out.append) == 1        # 沒填密碼：不存
     assert not os.path.exists(bot.app.extras["vault"].path("apple-reminders.auth"))
+
+
+# ── 伺服器版：帳號每人一份（ADR-0003 S7） ───────────────────────────────
+
+def test_server_mode_account_is_per_user(make_bot, owner):
+    """S7：伺服器版 connect（預設替擁有者）存在擁有者自己的 data/users/<id>/；別人的 store 沒有；data/ 根目錄沒有共用檔。"""
+    bot = make_bot(raw={"mode": "server"})
+    vault = bot.app.extras["vault"]
+    answers = iter(["", "me@example.com"])
+    out = []
+    rc = connect.run("apple-reminders", bot.app.config, vault, ask=lambda _: next(answers),
+                     ask_secret=lambda _: "abcd-efgh-ijkl-mnop", out=out.append)
+    assert rc == 0, out
+    assert vault.for_user(owner).load_json("apple-reminders.auth")["password"] == "abcd-efgh-ijkl-mnop"
+    raw = open(vault.for_user(owner).path("apple-reminders.auth"), "rb").read()
+    assert b"abcd-efgh" not in raw and b"me@example.com" not in raw          # 密文
+    assert not os.path.exists(vault.path("apple-reminders.auth")) and not os.path.exists(vault.path("apple-reminders"))
+    pack = next(p for p in bot.app.extras["synox_packs"] if p.name == "apple-reminders")
+    assert pack.store.of(77).load(None, key="auth") is None and pack.store.of(77).load(None) is None
+    assert not os.path.exists(os.path.join(bot.app.config.data_dir, "users", "77"))
+    fake = FakeICloud()
+    sys.modules[MODULE].make_session = lambda: fake
+    bot.say(owner, "/applerem_status")
+    assert "m***@example.com" in bot.last(owner)

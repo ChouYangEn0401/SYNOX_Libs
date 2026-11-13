@@ -199,7 +199,7 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
   （實際：版本 calendar／todo／bullet／notes／todoist 0.1.2、money 0.2.1。SYNOX 的 Manifest 只有 `surfaces`／`data`／`capabilities`
   有 `*_declared`，`access`、`storage` 沒有，所以 build 與測試都直接看 `pack.json` 原文有沒有那個鍵；`tests/test_build.py` 另加一條「少一個就不打包」。）
 
-**T2　雙人測試改用真的 SYNOX**
+**T2　雙人測試改用真的 SYNOX**　✅ 已完成（只改測試）
 - 重寫 `tests/test_isolation.py`：參數化五個本機工具（加 notes、money），用 `synox_bot(mode="server")`＋兩個成員走 `bot.say`，
   檢查 S1、S2、S3、S5（同一張表也跑一次 `mode="personal"`）。保留現在那條「第一次寫入不共用 list」的回歸測試。
 - 新增 `tests/test_access.py`：參數化九個工具，檢查 S4（個人版陌生人、伺服器版訪客、伺服器版成員對 `access: owner`、
@@ -207,6 +207,12 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
 - `tests/test_notion.py`、`tests/test_apple_reminders.py`、`tests/test_gcal.py`：各加一條 S7（照 `tests/test_todoist.py:414` 的寫法）。
 - `tests/test_calendar.py`：加 S8。
 - `tests/conftest.py:88-97`：`FakePack.path()` 在 `per_user` 而且 `data == "user"` 時丟錯；`path_of` 個人版改成 `data/<name>/files/`（P7）。
+  （實際：`path()` 照做（丟 SYNOX 的 `PackPathError`），伺服器版 `path_of` 沒給人也丟。**`path_of` 個人版的位置沒改**：
+  `tests/test_calendar.py::test_ics_export_is_valid_and_leaves_no_plaintext`（個人版測試）斷言假 pack 的 `data/users/<id>/…`，
+  改位置就要改個人版測試的期待值，這份 ADR 不准。改成另外用真的 SYNOX 守真的位置：
+  `test_calendar.py::test_personal_mode_ics_export_uses_real_folder`（`data/calendar/files/`）與 `test_isolation` 的 S5。）
+- （實際，S4：伺服器版訪客打本機工具的指令，SYNOX 回的是「沒有執行此指令的權限」不是「未知指令」——群組看不到、
+  `policy.decide` 不給、`/help` 沒有，只是字不一樣；測試兩種字都收。成員打 `access: owner` 的才是「未知指令」。）
 
 **T3　契約的靜態檢查（`tests/test_gates.py`）**
 - M3：`pack.py` 裡 `chat_id` 不准出現在 `store.of(`、`path_of(`、`secret(` 的參數，也不准當 dict 的鍵。

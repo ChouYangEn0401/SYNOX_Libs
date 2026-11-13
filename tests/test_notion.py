@@ -416,3 +416,20 @@ def test_ai_bad_args_rejected_before_network(nbot, owner, fake):
     before = len(fake.calls)
     bot.talk(owner, "找牛奶")
     assert len(fake.calls) == before                                         # 第 4 關擋下，沒有打 Notion
+
+
+# ── 伺服器版：token 每人一份（ADR-0003 S7） ───────────────────────────────
+
+def test_server_mode_token_is_per_user(nbot, owner, fake):
+    """S7：伺服器版擁有者設的 token 在自己的 data/users/<id>/；別人的 store 沒有；data/ 根目錄沒有共用檔。"""
+    bot = nbot(raw={"mode": "server"})
+    vault = bot.app.extras["vault"]
+    assert vault.for_user(owner).load_json("notion")["token"] == TOKEN
+    raw = open(vault.for_user(owner).path("notion"), "rb").read()
+    assert TOKEN.encode() not in raw                                          # 密文
+    assert not os.path.exists(vault.path("notion")) and not os.path.exists(vault.path("notion.auth"))
+    pack = next(p for p in bot.app.extras["synox_packs"] if p.name == "notion")
+    assert pack.store.of(77).load(None) is None and pack.store.of(77).load(None, key="auth") is None
+    assert not os.path.exists(os.path.join(bot.app.config.data_dir, "users", "77"))
+    bot.say(owner, "/notion 牛奶")
+    assert "買牛奶" in bot.last(owner)

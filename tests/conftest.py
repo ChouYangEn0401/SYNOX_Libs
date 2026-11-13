@@ -84,13 +84,24 @@ class FakePack:
         return self.app.registry.group(self.manifest.group)
 
     def path(self, *parts):
+        """跟真的一樣：伺服器版（per_user）data: user 的工具不能用全部人共用的資料夾（真的丟 PackPathError）。"""
+        if self.store.per_user and self.manifest.data == "user":
+            from synox.packs.loader import PackPathError
+            raise PackPathError(f"{self.name}：伺服器版 data: user 不能用 pack.path()，要用 pack.path_of(user, …)")
         folder = os.path.join(self.data_dir, "packs", self.manifest.name)
         os.makedirs(folder, exist_ok=True)
         return os.path.join(folder, *parts)
 
     def path_of(self, user, *parts):
-        tg_id = user if isinstance(user, int) else getattr(user, "tg_id", "me")
-        folder = os.path.join(self.data_dir, "users", str(tg_id), self.manifest.name, "files")
+        """這個人自己的檔案。伺服器版（per_user）跟真的一樣：data/users/<id>/<name>/files/，沒給人丟 PackPathError。
+        個人版仍放 data/users/<id>/…（跟真的 data/<name>/files/ 不同；個人版的測試期待值不改，真的位置由
+        test_isolation、test_calendar 的 synox_bot 測試守著——ADR-0003 P7）。"""
+        tg_id = user if isinstance(user, int) else getattr(user, "tg_id", None)
+        if self.store.per_user and not isinstance(tg_id, int):
+            from synox.packs.loader import PackPathError
+            raise PackPathError(f"{self.name}：pack.path_of(user, …) 要給下令的人")
+        folder = os.path.join(self.data_dir, "users", str(tg_id if tg_id is not None else "me"), self.manifest.name,
+                              "files")
         os.makedirs(folder, exist_ok=True)
         return os.path.join(folder, *parts)
 
