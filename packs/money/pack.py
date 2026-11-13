@@ -318,7 +318,29 @@ def money_lines(totals, key, kind, amount, budget, caps) -> list:
 
 
 def _amount(text) -> float:
-    return float(str(text).replace(",", ""))
+    """已經過欄位檢查的金額 → 數字。再擋一次 nan／inf（舊版 SYNOX 的 kit.number 會放它們過去）。"""
+    value = float(str(text).replace(",", ""))
+    if value != value or value in (float("inf"), float("-inf")):     # nan、inf
+        raise Refuse("金額要是一般的數字。")
+    return value
+
+
+def check_amount(value: str):
+    """記帳的金額：先看是不是數字（跟以前同一句），再照 kit.amount（大於 0、最多兩位小數、不超過十億）。"""
+    return kit.number(value) or kit.amount(value)
+
+
+def check_limit(value: str):
+    """預算、上限：0＝拿掉；其他照 kit.amount。"""
+    problem = kit.number(value)
+    if problem:
+        return problem
+    try:
+        if float(value.replace(",", "")) == 0:
+            return None
+    except ValueError:
+        return "要是數字"
+    return kit.amount(value)
 
 
 # ── 核心函式：會改資料的（指令與畫面都叫它們）─────────────────────────────────
@@ -755,7 +777,7 @@ def install(app, pack):
         api.send_message(chat_id, "\n".join(lines))
 
     def entry_fields():
-        return [Field("amount", "金額", required=True, check=kit.number),
+        return [Field("amount", "金額", required=True, check=check_amount),
                 Field("category", "類別（可以不填）"),
                 Field("memo", "備註"),
                 Field("date", "哪一天（預設今天；例如 2026-11-08、11/8、昨天）", check=check_day),
@@ -779,7 +801,7 @@ def install(app, pack):
     kit.command(g, "edit", edit, "改某一筆（只改有給的；memo=- 清空備註，category=- 改回待分類）", effect=WRITE,
                 positional=1, fields=[
                     Field("n", "編號", required=True, check=check_id),
-                    Field("amount", "金額", check=kit.number),
+                    Field("amount", "金額", check=check_amount),
                     Field("category", "類別"),
                     Field("memo", "備註"),
                     Field("date", "哪一天（例如 2026-11-08、11/8、昨天）", check=check_day),
@@ -788,10 +810,10 @@ def install(app, pack):
     kit.command(g, "month", month, "這個月花了多少（分類別；可以給月份，例如 2026-10）",
                 fields=[Field("month", "月份（YYYY-MM）", check=check_month)])
     kit.command(g, "budget", budget, "設每月預算（0＝拿掉）", effect=WRITE,
-                fields=[Field("amount", "金額", required=True, check=kit.number)])
+                fields=[Field("amount", "金額", required=True, check=check_limit)])
     kit.command(g, "cap", cap, "設某個支出類別每月的上限（0＝拿掉；只提醒、不擋）", effect=WRITE, fields=[
         Field("category", "類別", required=True, check=check_name),
-        Field("amount", "金額", required=True, check=kit.number)])
+        Field("amount", "金額", required=True, check=check_limit)])
     kit.command(g, "cats", cats, "列出自己的類別（給名稱看那一個的關鍵字）",
                 fields=[Field("name", "類別名稱")])
     kit.command(g, "cat_add", cat_add, "新增類別，或幫已有的類別改大類、種類、加關鍵字", effect=WRITE, positional=2, fields=[
