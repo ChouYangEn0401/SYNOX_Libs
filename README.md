@@ -8,7 +8,7 @@
 |---|---|---|---|---|
 | [📒 notes](packs/notes/README.md) | `/note 買牛奶`、`/note_list`、`/note_rm 1` | 隨手記一筆、找、刪 | 🧪 alpha | 入門 |
 | [✅ todo](packs/todo/README.md) | `/todo !! 繳電費 明天 #家事`、`/todo_list` | 待辦：重要度、專案、到期 | 🧪 alpha | 入門、規劃 |
-| [💰 money](packs/money/README.md) | `/money 120 午餐`、`/money_month`、`/money_budget 8000` | 記一筆、看這個月、設預算 | 🧪 alpha | 記帳 |
+| [💰 money](packs/money/README.md) | `/money 120 午餐`、`/money_in 32000 薪資`、`/money_month` | 支出／收入／轉帳、自己的類別與範本、預算與上限 | 🧪 alpha | 記帳 |
 | [📅 calendar](packs/calendar/README.md) | `/cal 明天 14:00 看牙醫`、`/cal_week`、`/cal_ics` | 行事曆、匯出 .ics | 🧪 alpha | 規劃 |
 | [• bullet](packs/bullet/README.md) | `/bj • 買牛奶`、`/bj_today`、`/bj_migrate` | 子彈筆記 | 🧪 alpha | 規劃 |
 | [🗂 notion](packs/notion/README.md) | `/notion 會議`、`/notion_read`、`/notion_row` | 用你自己的 integration token 搜尋、讀、加一列、改欄位 | 🧪 alpha | 接外面的服務 |

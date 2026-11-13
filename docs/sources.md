@@ -20,6 +20,10 @@
 
 之後全部 9 個工具的 `pack.json` 都加了 `"stage": "alpha"`（README「穩定度」）。
 
+| 這裡 | 參考了什麼 | 怎麼用 |
+|---|---|---|
+| `packs/money/` 0.2.0（2026-11-13） | 維護者自己另一個不公開的記帳工具的**做法**（類別是資料、範本選配、關鍵字猜類別、收入／轉帳分開、撤銷） | 只參考做法，**沒有複製任何檔案、程式、資料或範本**；全部在 `pack.py` 重寫（[adr/0002](adr/0002-money-general-version.md)） |
+
 ## 以後誰是正本
 
 - 這裡每個工具的正本**都在這裡**；SYNOX 主程式本身不帶工具（SYNOX 的 `legacy/builtin-packs.md`、`legacy/connectors.md`）。SYNOXPacks 停在 `18bc2dc`，不再更新（要不要封存由擁有者決定）。

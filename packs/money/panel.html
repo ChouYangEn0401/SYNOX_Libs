@@ -24,6 +24,7 @@
 <div class="total" id="total">…</div>
 <div class="bar"><div class="fill" id="fill"></div></div>
 <div class="muted" id="budget"></div>
+<div class="muted" id="flow"></div>
 <ul id="cats"></ul>
 <script>
 (function () {
@@ -44,6 +45,10 @@
       } else {
         note.textContent = "還沒設預算（/money_budget 金額）";
       }
+      var flow = [];
+      if (d.income) { flow.push("收入 " + fmt(d.income) + " 元"); }
+      if (d.transfer) { flow.push("轉帳 " + fmt(d.transfer) + " 元（不算花費）"); }
+      document.getElementById("flow").textContent = flow.join("・");
       var ul = document.getElementById("cats");
       d.by_category.forEach(function (c) {
         var li = document.createElement("li");
