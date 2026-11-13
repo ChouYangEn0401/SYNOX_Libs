@@ -1,20 +1,24 @@
 # SYNOX_Libs：SYNOX 的工具庫（工具的統一管理處）
 
+**👉 [先看工具庫說明頁：每個工具做什麼、怎麼裝、完成到哪](https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL)**
+（每個工具各有一頁，從說明頁點進去；同一份也在 repo 裡：[docs/site/](docs/site/)，下載後雙擊 `index.html` 就能開）
+下載：[發佈頁 v0.2.0](https://github.com/ChouYangEn0401/SYNOX_Libs/releases/tag/v0.2.0)（每個工具一個 `.synoxpack`，或全部的 `tools-0.2.0.zip`）
+
 **所有 SYNOX 工具都在這裡統一管理**：每個工具的正本、測試、打包、版本與穩定度都只在這個 repo。
 **SYNOX 主程式本身沒有內建任何工具**（2026-11-12 起；連接 Notion／Todoist／Google 日曆／Apple 的也搬來了），
 出廠是空的，要什麼工具從這裡挑 `.synoxpack` 自己裝。設計見 [docs/adr/0001](docs/adr/0001-tool-library-and-sdk-dependency.md)。
 
-| 工具 | 指令（例） | 做什麼 | 穩定度 | 建議群組 |
-|---|---|---|---|---|
-| [📒 notes](packs/notes/README.md) | `/note 買牛奶`、`/note_list`、`/note_rm 1` | 隨手記一筆、找、刪 | 🧪 alpha | 入門 |
-| [✅ todo](packs/todo/README.md) | `/todo !! 繳電費 明天 #家事`、`/todo_list` | 待辦：重要度、專案、到期 | 🧪 alpha | 入門、規劃 |
-| [💰 money](packs/money/README.md) | `/money 120 午餐`、`/money_in 32000 薪資`、`/money_month` | 支出／收入／轉帳、自己的類別與範本、預算與上限 | 🧪 alpha | 記帳 |
-| [📅 calendar](packs/calendar/README.md) | `/cal 明天 14:00 看牙醫`、`/cal_week`、`/cal_ics` | 行事曆、匯出 .ics | 🧪 alpha | 規劃 |
-| [• bullet](packs/bullet/README.md) | `/bj • 買牛奶`、`/bj_today`、`/bj_migrate` | 子彈筆記 | 🧪 alpha | 規劃 |
-| [🗂 notion](packs/notion/README.md) | `/notion 會議`、`/notion_read`、`/notion_row` | 用你自己的 integration token 搜尋、讀、加一列、改欄位 | 🧪 alpha | 接外面的服務 |
-| [✅ todoist](packs/todoist/README.md) | `/todoist !! 繳電費 明天`、`/todoist_list`、`/todoist_done 3` | Todoist 的待辦：看、加、完成、改期 | 🧪 alpha | 接外面的服務 |
-| [📅 google-calendar](packs/google-calendar/README.md) | `/gcal 明天 14:00 看牙醫`、`/gcal_today`、`/gcal_setup` | 直接看、加、刪你的 Google 日曆 | 🧪 alpha | 接外面的服務 |
-| [🍎 apple-reminders](packs/apple-reminders/README.md) | `/applerem`、`/applerem_add`、`/applerem_status` | CalDAV 提醒事項（iCloud 升級過的 Apple 不開放，見說明） | 🧪 alpha | 接外面的服務 |
+| 工具 | 指令（例） | 做什麼 | 穩定度 | 建議群組 | 說明頁 |
+|---|---|---|---|---|---|
+| [📒 notes](packs/notes/README.md) | `/note 買牛奶`、`/note_list`、`/note_rm 1` | 隨手記一筆、找、刪 | 🧪 alpha | 入門 | [看說明](https://claude.ai/artifact/NpYbd3FtMAkXmASXc1pJzh) |
+| [✅ todo](packs/todo/README.md) | `/todo !! 繳電費 明天 #家事`、`/todo_list` | 待辦：重要度、專案、到期 | 🧪 alpha | 入門、規劃 | [看說明](https://claude.ai/artifact/JuKURoMhZY58fWyR4j3961) |
+| [💰 money](packs/money/README.md) | `/money 120 午餐`、`/money_in 32000 薪資`、`/money_month` | 支出／收入／轉帳、自己的類別與範本、預算與上限 | 🧪 alpha | 記帳 | [看說明](https://claude.ai/artifact/6kA9jSkwVFPPBthsCjmz6d) |
+| [📅 calendar](packs/calendar/README.md) | `/cal 明天 14:00 看牙醫`、`/cal_week`、`/cal_ics` | 行事曆、匯出 .ics | 🧪 alpha | 規劃 | [看說明](https://claude.ai/artifact/Fm6dXH5oiua8zPY3U5RYQ5) |
+| [• bullet](packs/bullet/README.md) | `/bj • 買牛奶`、`/bj_today`、`/bj_migrate` | 子彈筆記 | 🧪 alpha | 規劃 | [看說明](https://claude.ai/artifact/BTdPArDtbddRk4ijNqExZ3) |
+| [🗂 notion](packs/notion/README.md) | `/notion 會議`、`/notion_read`、`/notion_row` | 用你自己的 integration token 搜尋、讀、加一列、改欄位 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/B36np3VigMinvyFuyz74dJ) |
+| [✅ todoist](packs/todoist/README.md) | `/todoist !! 繳電費 明天`、`/todoist_list`、`/todoist_done 3` | Todoist 的待辦：看、加、完成、改期 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/D3zgGcZ9h1LRrDLu2QD5Mw) |
+| [📅 google-calendar](packs/google-calendar/README.md) | `/gcal 明天 14:00 看牙醫`、`/gcal_today`、`/gcal_setup` | 直接看、加、刪你的 Google 日曆 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/NyhRhPrRL1n9NMMbMEv3mx) |
+| [🍎 apple-reminders](packs/apple-reminders/README.md) | `/applerem`、`/applerem_add`、`/applerem_status` | CalDAV 提醒事項（iCloud 升級過的 Apple 不開放，見說明） | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp) |
 
 - 前五個：資料加密存在你自己的電腦（保管箱）、不連網、不開別的程式；伺服器版每個人一份。
 - 後四個（2026-11-12 從 SYNOX 主程式的 `connectors/` 搬來）：只連自己那個服務的官方 API（只用 `requests`）、不開埠、
