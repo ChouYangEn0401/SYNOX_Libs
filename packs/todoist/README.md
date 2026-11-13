@@ -19,8 +19,11 @@
 5. 看到「✅ 接上 Todoist 了」就好了。**接著把你剛剛貼 token 的那則訊息刪掉**（Telegram 長按 → 刪除）。
 6. 試試看：`/todoist_list`。
 
+不想把 token 貼進聊天：在跑 SYNOX 的那台電腦打 `python -m synox connect todoist`（輸入時不顯示、不進聊天紀錄，0.1.2 起）。
+兩個地方都設過的話，用**最後設的那一個**（`/todoist_token` 會清掉 connect 存的那份）；`/todoist_logout` 兩份都清。
+
 > token 等於你 Todoist 帳號的鑰匙：不要傳給別人、不要貼給 AI。
-> SYNOX 把它**加密**存在這台電腦的保管箱（`data/todoist.json.enc`），log 裡也會遮掉。
+> SYNOX 把它**加密**存在這台電腦的保管箱（`data/todoist.json.enc`；用 connect 設的在 `data/todoist.auth.json.enc`），log 裡也會遮掉。
 > 不想用了：打 `/todoist_logout`（刪掉這台電腦存的 token）；要讓 token 完全失效，到同一頁按「重新產生（Regenerate）」。
 
 ## 指令

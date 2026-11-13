@@ -6,8 +6,11 @@
 看不懂的寫法（例如 every monday）原樣交給 Todoist 自己解析。
 
 連線：Todoist API v1（https://api.todoist.com/api/v1，REST v2 已退役），個人 API token，只用 requests、只連 api.todoist.com，
-不開埠、不存明文：token 在 pack.store.of(user)（保管箱，密文 data/todoist.json.enc；伺服器版每人一份）。
-存的東西：{"token": "...", "ids": {"<Todoist 任務 id>": 編號}, "next_n": 1}——編號是 SYNOX 這邊給的短號（[3]），
+不開埠、不存明文：token 在 pack.store.of(user)（保管箱，密文；伺服器版每人一份）。認兩個位置（token_of，跟 notion 一樣）：
+  1. key="auth"（data/todoist.auth.json.enc）：`python -m synox connect todoist` 存的（照 pack.json 的 auth.fields）——優先；
+  2. 預設那一份（data/todoist.json.enc）：/todoist_token 存的（舊使用者的 token 在這裡，照樣認）。
+/todoist_token 存新的時會把 1 清掉（最後設的那個才算數）；/todoist_logout 兩個都清。
+預設那一份存的東西：{"token": "...", "ids": {"<Todoist 任務 id>": 編號}, "next_n": 1}——編號是 SYNOX 這邊給的短號（[3]），
 第一次看到某個任務時配一個，之後不變；完成、刪除就收回。指令也收 Todoist 原本的任務 id。
 
 測試換掉 HTTP（假的 requests.Session）與 now()，不打真的 Todoist。
@@ -33,6 +36,7 @@ HTTP = None                     # None＝requests.Session()；測試放假的 se
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 TOKEN_RE = re.compile(r"^[A-Za-z0-9_\-.]{20,200}$")
 NO_DATE_WORDS = ("無", "沒有", "不要", "清掉", "取消", "none", "no date")
+AUTH_KEY = "auth"               # python -m synox connect todoist 存的位置（synox/connect.py 的 AUTH_KEY）
 SETUP_HINT = ("還沒接上 Todoist。到 Todoist 網頁版：右上頭像 → 設定 → 整合 → 開發者，複製「API token」，"
               "然後在這裡打 /todoist_token 貼上那串字。")
 
@@ -40,6 +44,19 @@ SETUP_HINT = ("還沒接上 Todoist。到 Todoist 網頁版：右上頭像 → �
 def now() -> datetime:
     """現在時間（測試換掉這一個）。"""
     return datetime.now()
+
+
+def _dict(value) -> dict:
+    return value if isinstance(value, dict) else {}
+
+
+def token_of(store) -> str:
+    """這個人的 token；沒有回 ""。connect 存的（key="auth"）優先，再來是 /todoist_token 存的（預設那一份）。"""
+    for key in (AUTH_KEY, None):
+        token = _dict(store.load(None, key=key)).get("token")
+        if isinstance(token, str) and token.strip():
+            return token.strip()
+    return ""
 
 
 # >>> zhdate（正本 packs/_shared/zhdate.py；不要直接改這段，改正本再跑 scripts/sync_shared.py）
@@ -526,7 +543,7 @@ def install(app, pack):
         return store(user).load(None) or {}
 
     def client(api, chat_id, user):
-        token = data(user).get("token")
+        token = token_of(store(user))
         if not token:
             api.send_message(chat_id, f"🔌 {SETUP_HINT}")
             return None
@@ -727,7 +744,7 @@ def install(app, pack):
     def token(api, chat_id, user, values):
         value = (values.get("token") or "").strip()
         if not value:
-            saved = data(user).get("token")
+            saved = token_of(store(user))
             api.send_message(chat_id, ("🔌 Todoist 已經接上了（token 存在保管箱，密文）。換 token："
                                        f"{cmd}_token <新的>；拔掉：{cmd}_logout") if saved else f"🔌 {SETUP_HINT}")
             return
@@ -739,13 +756,21 @@ def install(app, pack):
         except TodoistError as e:
             api.send_message(chat_id, f"❌ 沒存：{e}")
             return
-        store(user).update(lambda d: d.update(token=value), {})
+        mine = store(user)
+        with mine.lock:
+            mine.update(lambda d: d.update(token=value), {})
+            if _dict(mine.load(None, key=AUTH_KEY)).get("token"):
+                mine.save({}, key=AUTH_KEY)        # connect 存的那份優先：不清掉的話新的這個會被蓋住
         api.send_message(chat_id, f"✅ 接上 Todoist 了（看得到 {count} 個專案）。token 加密存在這台電腦的保管箱。\n"
                                   f"建議把你剛剛貼 token 的那則訊息刪掉。試試 {cmd}_list")
 
     def logout(api, chat_id, user, values):
-        had = bool(data(user).get("token"))
-        store(user).save({})
+        mine = store(user)
+        with mine.lock:
+            had = bool(token_of(mine))
+            mine.save({})
+            if mine.load(None, key=AUTH_KEY) is not None:
+                mine.save({}, key=AUTH_KEY)        # connect 存的那份也清掉
         api.send_message(chat_id, "🔌 拔掉了：這台電腦不再存你的 Todoist token（Todoist 那邊的待辦不受影響）。"
                          "要讓那個 token 完全失效，到 Todoist 設定 → 整合 → 開發者 按「重新產生」。" if had
                          else "本來就沒有接上 Todoist。")

@@ -188,7 +188,7 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
 
 改了工具就升那個工具的 `version`、在 CHANGELOG 記一行。**不准改個人版測試的期待值。**
 
-**T1　宣告補齊（不改行為）**
+**T1　宣告補齊（不改行為）**　✅ 已完成
 - `packs/calendar/pack.json`、`packs/todo/pack.json`、`packs/bullet/pack.json`：加 `"surfaces": ["dm"], "data": "user"`。
 - `packs/notes/pack.json`、`packs/money/pack.json`：加 `"capabilities": []`；`tests/test_gates.py:22` 的 `ALLOWED_CAPS` 把 `None` 改成 `[]`。
 - `packs/todoist/pack.json:16`：`auth.fields` 改成物件 `[{"name": "token", "ask": "Todoist API token", "secret": true}]`（跟 notion 一樣）。
@@ -196,6 +196,8 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
   （照 `packs/notion/pack.py:59-65` 的 `token_of`：先 `key="auth"`、再舊位置；`/todoist_logout` 兩份都清），並加測試。
 - `scripts/build.py` 的 `problems_of`：沒明寫 `access`、`surfaces`、`data`、`storage`、`capabilities` 就不打包（學 `stage_problems` 的寫法）；
   `tests/test_gates.py` 加一條 `test_declares_scope`（九個都要 `surfaces == ["dm"]`、`data == "user"`、`storage == "vault"`、三個欄位都 `*_declared`）。
+  （實際：版本 calendar／todo／bullet／notes／todoist 0.1.2、money 0.2.1。SYNOX 的 Manifest 只有 `surfaces`／`data`／`capabilities`
+  有 `*_declared`，`access`、`storage` 沒有，所以 build 與測試都直接看 `pack.json` 原文有沒有那個鍵；`tests/test_build.py` 另加一條「少一個就不打包」。）
 
 **T2　雙人測試改用真的 SYNOX**
 - 重寫 `tests/test_isolation.py`：參數化五個本機工具（加 notes、money），用 `synox_bot(mode="server")`＋兩個成員走 `bot.say`，

@@ -9,6 +9,15 @@
   工具的「多人契約」、`pack.json`／`install`／面板的入口標準、接外面服務的工具在伺服器版維持只給擁有者的政策、測試要求與實作待辦。
   只有文件，沒有改任何工具（待辦裡最優先的是 google-calendar 的密鑰會進 `[ROUTE]` log）。README 加上指向它的說明。
 
+### Changed
+- **宣告補齊**（ADR-0003 T1，C4、C5；不改行為，SYNOX 讀到的值跟原本的預設值一樣）：`calendar`、`todo`、`bullet` 0.1.1 → **0.1.2**
+  明寫 `"surfaces": ["dm"]`、`"data": "user"`；`notes` 0.1.1 → **0.1.2**、`money` 0.2.0 → **0.2.1** 明寫 `"capabilities": []`。
+- **`todoist` 0.1.1 → 0.1.2**（ADR-0003 T1、C3）：`auth.fields` 改成物件（`{name, ask, secret}`，跟 notion 一樣），
+  `python -m synox connect todoist` 從此能用（存在 `key="auth"`）；程式先認 connect 存的、再認 `/todoist_token` 存的（舊的 token 照樣能用），
+  `/todoist_token` 存新的時清掉 connect 那份（最後設的算數），`/todoist_logout` 兩份都清。
+- `scripts/build.py`：`access`、`surfaces`、`data`、`storage`、`capabilities` 沒明寫就不打包（ADR-0003 入口標準）；
+  `tests/test_gates.py` 加 `test_declares_scope`，`ALLOWED_CAPS` 不再把「沒寫」當期待值。
+
 ### Fixed
 - **`google-calendar` 0.1.1 → 0.1.2**（ADR-0003 C1、P5）：`/gcal_setup`、`/gcal_code`、`/gcal_token` 打的 client secret、授權碼、
   refresh token 原本整串印在 `[ROUTE]` log（兩種模式都中）；`install` 改成對這三個叫 `kit.redact_in_logs`。

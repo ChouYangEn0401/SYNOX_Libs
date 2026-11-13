@@ -153,6 +153,19 @@ def test_build_refuses_tool_without_valid_stage(tmp_path, stage):
     assert result["index"] is None and any("stage" in p for p in result["problems"]), result["problems"]
 
 
+@pytest.mark.parametrize("key", ["access", "surfaces", "data", "storage", "capabilities"])
+def test_build_refuses_tool_without_explicit_scope(tmp_path, key):
+    """ADR-0003 入口標準：access、surfaces、data、storage、capabilities 都要明寫（SYNOX 有預設值也一樣），沒寫就不打包。"""
+    root = _copy_library(tmp_path)
+    path = root / "packs" / "notes" / "pack.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    del raw[key]
+    path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    result = build_script.build(out_dir=str(tmp_path / "out"), root=str(root))
+    assert result["index"] is None and any(f"沒寫 {key}" in p for p in result["problems"]), result["problems"]
+    assert not os.path.exists(tmp_path / "out")
+
+
 def test_build_refuses_sdk_range_this_synox_does_not_meet(tmp_path):
     root = _copy_library(tmp_path)
     path = root / "packs" / "notes" / "pack.json"

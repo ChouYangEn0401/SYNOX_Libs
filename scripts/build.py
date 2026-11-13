@@ -9,6 +9,8 @@
 - 每個工具都要寫 requires.sdk，而且範圍包含「拿來打包的這份 SYNOX」的 SDK_VERSION；requires.synox 也要合；
 - 工具資料夾裡附了 synox_sdk.py（cli／mcp 工具）的話，它的 SDK_VERSION 也要在 requires.sdk 範圍內；
 - 每個工具都要明寫 stage（test／alpha／beta／stable；README「穩定度」），index.json 也帶它；
+- 每個工具都要明寫 access、surfaces、data、storage、capabilities（ADR-0003「入口標準」；SYNOX 有預設值的也要寫，
+  預設值哪天改了不會悄悄變）；
 - catalog.json 的建議群組只能列存在的工具。
 SYNOX 在哪：scripts/_synox.py（SYNOX_HOME → 跑這支的 Python 裝的那份 → 後備並排的 ../SYNOX）。
 """
@@ -77,6 +79,7 @@ def problems_of(folder: str) -> list:
     if m.name != name:
         out.append(f"{name}: 資料夾名跟 pack.json 的 name（{m.name}）不一樣")
     out += stage_problems(name, m.raw)
+    out += scope_problems(name, m.raw)
     return out
 
 
@@ -92,6 +95,20 @@ def stage_problems(name: str, raw: dict) -> list:
     if raw.get("stage") not in STAGES:
         return [f"{name}: stage 只能是 {'、'.join(STAGES)}（現在是 {raw.get('stage')!r}）"]
     return []
+
+
+SCOPE_FIELDS = (("access", "誰看得到：本機工具 member、接外面服務的 owner"),
+                ("surfaces", '在哪裡能用：["dm"]'),
+                ("data", '資料屬於誰："user"（每人一份）'),
+                ("storage", '落地怎麼存："vault"（密文）'),
+                ("capabilities", '要什麼能力：沒有也要寫 []'))
+
+
+def scope_problems(name: str, raw: dict) -> list:
+    """工具庫的規矩（ADR-0003 入口標準）：access、surfaces、data、storage、capabilities 都要明寫。
+    值對不對由 SYNOX 的第 1 關檢查（read(strict=True)）；這裡只擋「沒寫、靠預設值」。"""
+    return [f"{name}: pack.json 沒寫 {key}（{why}；工具庫的每個工具都要明寫，見 docs/adr/0003）"
+            for key, why in SCOPE_FIELDS if key not in raw]
 
 
 def sha256_of(path: str) -> str:

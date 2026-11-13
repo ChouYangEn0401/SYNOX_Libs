@@ -2,7 +2,7 @@
   "name": "money",
   "title": "💰 記帳",
   "summary": "記支出、收入、轉帳，自己的類別與選配範本，預算與單項上限（加密存在這台電腦）",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "stage": "alpha",
   "kind": "python",
   "group": "money",
@@ -12,6 +12,7 @@
   "order": 20,
   "python": { "module": "pack" },
   "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
+  "capabilities": [],
   "skill": "SKILL.md",
   "storage": "vault",
   "web": { "panel": "panel.html", "api": ["GET /summary"] }

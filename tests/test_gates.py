@@ -18,8 +18,8 @@ from synox.sdk import author
 from conftest import PACK_NAMES, PACKS, PLANNER
 
 CONNECT = ("notion", "todoist", "google-calendar", "apple-reminders")
-# pack 名稱 → 宣告的 capabilities（其他一律不准；None＝沒寫 capabilities，掃描也不能要求任何能力）
-ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": None, "notes": None,
+# pack 名稱 → 宣告的 capabilities（其他一律不准；每個都要明寫，沒有就寫 []——ADR-0003 C5）
+ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": [], "notes": [],
                 **{name: ["network"] for name in CONNECT}}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 接外面服務的多准：requests、urllib.parse、編碼／雜湊／亂數、XML（CalDAV）、時區、型別、log
@@ -50,10 +50,7 @@ def test_gate1_manifest_strict(name):
     m = synox_manifest.read(folder(name), strict=True)
     assert m.kind == "python" and m.access == ("owner" if name in CONNECT else "member") and m.name == name
     assert os.path.isfile(m.skill_path) and os.path.isfile(os.path.join(folder(name), "README.md"))
-    if ALLOWED_CAPS[name] is None:
-        assert not m.capabilities_declared
-    else:
-        assert m.capabilities_declared and m.capabilities == ALLOWED_CAPS[name]
+    assert m.capabilities_declared and m.capabilities == ALLOWED_CAPS[name]
     if name in PLANNER:
         assert m.storage == "vault" and m.web["panel"] == "panel.html" and m.web["api"] == ["today"]
 
@@ -75,11 +72,22 @@ def test_declares_stage(name):
 
 
 @pytest.mark.parametrize("name", PACK_NAMES)
+def test_declares_scope(name):
+    """ADR-0003 入口標準：只能私訊、資料每人一份、落地是密文；access、surfaces、data、storage、capabilities 都明寫
+    （SYNOX 有預設值的也寫，預設值改了不會悄悄變）。"""
+    m = synox_manifest.read(folder(name), strict=True)
+    assert m.surfaces == ["dm"] and m.data == "user" and m.storage == "vault"
+    assert m.surfaces_declared and m.data_declared and m.capabilities_declared
+    assert all(key in m.raw for key in ("access", "surfaces", "data", "storage", "capabilities"))
+    assert m.raw["surfaces"] == ["dm"] and m.raw["data"] == "user" and m.raw["storage"] == "vault"
+
+
+@pytest.mark.parametrize("name", PACK_NAMES)
 def test_gate2_static_scan_passes(name):
     m = synox_manifest.read(folder(name), strict=True)
     report = synox_scan.scan(m)
     assert report.problems(m) == [], report.format(m)
-    assert report.required_capabilities == (ALLOWED_CAPS[name] or []), report.format(m)
+    assert report.required_capabilities == ALLOWED_CAPS[name], report.format(m)
 
 
 @pytest.mark.parametrize("name", PACK_NAMES)

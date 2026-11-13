@@ -213,6 +213,66 @@ def test_token_is_checked_encrypted_and_not_logged(todoist, owner, caplog):
     assert "還沒接上" in bot.last(owner)
 
 
+def _connect(bot, token=TOKEN):
+    """走 python -m synox connect todoist 那條路（synox/connect.py；pack.json 的 auth.fields 是物件）存 token。"""
+    from synox import connect
+    out = []
+    rc = connect.run("todoist", bot.app.config, bot.app.extras["vault"], ask=lambda _: "",
+                     ask_secret=lambda _: token, out=out.append)
+    assert rc == 0, out
+
+
+def test_auth_fields_are_objects_so_connect_works():
+    """ADR-0003 T1：auth.fields 寫成物件（跟 notion 一樣），synox connect todoist 才有欄位可以問。"""
+    from synox import connect
+    folder = next(f for f in discover([PACKS]) if os.path.basename(f) == "todoist")
+    m = read(folder, strict=True)
+    assert [f["name"] for f in connect.auth_fields(m)] == ["token"]
+    assert connect.auth_fields(m)[0]["secret"] is True
+
+
+def test_token_saved_by_connect_is_used(todoist, owner):
+    bot, fake, _ = todoist(connect=False)
+    _connect(bot)
+    vault = bot.app.extras["vault"]
+    assert vault.load_json("todoist.auth")["token"] == TOKEN and not vault.exists("todoist")
+    raw = open(vault.path("todoist.auth"), "rb").read()
+    assert TOKEN.encode() not in raw                               # 密文
+    fake.seed("繳電費")
+    bot.say(owner, "/todoist_list")
+    assert "繳電費" in bot.last(owner) and fake.last()["auth"] == f"Bearer {TOKEN}"
+    bot.say(owner, "/todoist_token")
+    assert "已經接上了" in bot.last(owner) and TOKEN not in bot.last(owner)
+
+
+def test_connect_token_wins_and_legacy_still_works(todoist, owner):
+    bot, fake, _ = todoist()                                       # /todoist_token 存的（舊位置）
+    vault = bot.app.extras["vault"]
+    fake.seed("繳電費")
+    _connect(bot, OTHER_TOKEN)                                     # connect 存了另一個：它優先（假 Todoist 不認它）
+    bot.say(owner, "/todoist_list")
+    assert fake.last()["auth"] == f"Bearer {OTHER_TOKEN}" and "繳電費" not in bot.last(owner)
+    bot.say(owner, f"/todoist_token {TOKEN}")                      # 再用 /todoist_token 設：最後設的算數
+    assert "接上 Todoist 了" in bot.last(owner)
+    assert not (vault.load_json("todoist.auth") or {}).get("token")
+    bot.say(owner, "/todoist_list")
+    assert "繳電費" in bot.last(owner)
+
+
+def test_logout_clears_both_places(todoist, owner):
+    bot, fake, _ = todoist()
+    _connect(bot)
+    vault = bot.app.extras["vault"]
+    bot.say(owner, "/todoist_logout")
+    assert "拔掉了" in bot.last(owner)
+    assert not (vault.load_json("todoist") or {}).get("token")
+    assert not (vault.load_json("todoist.auth") or {}).get("token")
+    bot.say(owner, "/todoist_list")
+    assert "還沒接上" in bot.last(owner)
+    bot.say(owner, "/todoist_logout")
+    assert "本來就沒有" in bot.last(owner)
+
+
 def test_token_command_is_not_an_ai_tool(todoist, owner):
     bot, _, _ = todoist(["好"])
     bot.talk(owner, "Todoist 今天有什麼")
