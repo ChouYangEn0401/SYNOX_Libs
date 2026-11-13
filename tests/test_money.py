@@ -312,3 +312,50 @@ def test_remove_is_danger_and_undo_is_write(synox_bot, owner):
     bot.say(owner, "/money 50 咖啡")
     bot.say(owner, "/money_rm 1")                                           # 人自己打的照做
     assert "刪掉了：#1" in bot.last(owner)
+
+
+# ---- 0.2.0：篩選與單項上限 ----
+
+def test_list_filters(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money 50 飲料 拿鐵")
+    bot.say(owner, "/money 60 飲料 紅茶")
+    bot.say(owner, "/money 100 午餐 拿鐵套餐 date=2026-10-20")
+    bot.say(owner, "/money_in 1000 兼職")
+    bot.say(owner, "/money_list keyword=拿鐵")
+    out = bot.last(owner)
+    assert "（含「拿鐵」）" in out and "#1" in out and "#3" in out and "#2" not in out and "合計：支出 150 元" in out
+    bot.say(owner, "/money_list category=飲料 month=2026-11")
+    assert "#1" in bot.last(owner) and "#2" in bot.last(owner) and "#3" not in bot.last(owner)
+    bot.say(owner, "/money_list kind=收入")
+    assert "#4" in bot.last(owner) and "#1" not in bot.last(owner) and "收入 1,000 元" in bot.last(owner)
+    bot.say(owner, "/money_list 1 category=飲料")
+    assert "#2" in bot.last(owner) and "#1" not in bot.last(owner)
+    bot.say(owner, "/money_list keyword=不存在")
+    assert "沒有符合的帳" in bot.last(owner)
+    bot.say(owner, "/money_list month=2026-13")
+    assert "要像 2026-11" in bot.last(owner)
+
+
+def test_category_cap_warns_but_does_not_block(make_bot, owner):
+    bot = make_bot("money")
+    bot.say(owner, "/money_cap 飲料 100")                                   # 沒有這個類別：自動建一個支出類別
+    assert "每月上限設為 100 元" in bot.last(owner) and "還剩 100 元" in bot.last(owner)
+    bot.say(owner, "/money 60 飲料")
+    assert "飲料 上限 100 元，還剩 40 元" in bot.last(owner)
+    bot.say(owner, "/money 70 飲料")
+    assert "記了 #2" in bot.last(owner) and "⚠️ 飲料 超過這個月的上限 100 元（超過 30 元）" in bot.last(owner)
+    bot.say(owner, "/money 500 午餐")
+    assert "上限" not in bot.last(owner)                                   # 別的類別不提
+    bot.say(owner, "/money_month")
+    assert "⚠️ 飲料 超過" in bot.last(owner)
+    assert bot.route("money", "summary")["caps"] == [{"category": "飲料", "cap": 100.0}]
+    bot.say(owner, "/money_cats 飲料")
+    assert "每月上限：100 元" in bot.last(owner)
+    bot.say(owner, "/money_template 收入")
+    bot.say(owner, "/money_cap 薪資 100")
+    assert "上限只用在支出類別" in bot.last(owner)
+    bot.say(owner, "/money_cap 飲料 0")
+    assert "上限拿掉了" in bot.last(owner)
+    bot.say(owner, "/money_month")
+    assert "上限" not in bot.last(owner)

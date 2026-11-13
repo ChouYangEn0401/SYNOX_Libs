@@ -1,10 +1,10 @@
 """💰 記帳：/money <金額> [類別] [備註]、/money_in、/money_transfer、/money_list、/money_month、/money_budget、
-/money_cats、/money_cat_add、/money_cat_rm、/money_template。
+/money_undo、/money_rm、/money_cap、/money_cats、/money_cat_add、/money_cat_rm、/money_template。
 
 資料經 pack.store.of(user)（保管箱，密文；個人版 data/money.json.enc，伺服器版每人一份 data/users/<id>/money.json.enc）：
     {"schema": 2, "next_id": 下一個編號, "budget": 數字或 null,
      "entries": [{id, kind, amount, category, memo, date, at, account?}],
-     "categories": [{name, group, kind, keywords}]}
+     "categories": [{name, group, kind, keywords, cap?}]}
 - categories：使用者自己的類別（預設空）；記帳時類別照樣可以直接打字，不在清單裡也記得下。
 - id：流水號（刪掉的不重用）；date：YYYY-MM-DD（記在哪一天）；at：寫進來的時間（epoch）；account：用什麼付（只是標籤）。
 - kind：expense（支出）／income（收入）／transfer（轉帳：存錢、投資、還款、繳卡費）。**「這個月花了」與預算只算 expense。**
@@ -278,9 +278,10 @@ def install(app, pack):
                 d["next_id"] += 1
                 d["entries"].append(entry)
                 totals = month_totals(d, key)
-                return entry, hint, first, totals, d.get("budget")
+                caps = cap_lines(d, key, name) if kind == "expense" else []
+                return entry, hint, first, totals, d.get("budget"), caps
 
-            entry, hint, first, totals, budget = update(user, append)
+            entry, hint, first, totals, budget, caps = update(user, append)
             kind = entry["kind"]
             memo = f"（{entry['memo']}）" if entry["memo"] else ""
             when = "" if day == today else f"（記在 {day.isoformat()}）"
@@ -304,6 +305,7 @@ def install(app, pack):
                         lines.append(f"⚠️ 這個月已經超過預算 {fmt(budget)} 元（超過 {fmt(spent - float(budget))} 元）")
                     else:
                         lines.append(f"預算還剩 {fmt(float(budget) - spent)} 元")
+                lines += caps
             if first:
                 lines.append("（提示：/money_template 可以載入現成的類別範本；不載也照樣能記）")
             api.send_message(chat_id, "\n".join(lines))
@@ -339,12 +341,73 @@ def install(app, pack):
 
     def list_(api, chat_id, user, values):
         n = int(values.get("n") or 10)
-        entries = load(user)["entries"][-n:]
-        if not entries:
+        everything = load(user)["entries"]
+        if not everything:
             api.send_message(chat_id, "💰 還沒有記帳。用 /money <金額> <類別> 記一筆。")
             return
-        lines = [f"💰 最近 {len(entries)} 筆"] + [line_of(e) for e in reversed(entries)]
+        kw = values.get("keyword", "").strip().lower()
+        cat = values.get("category", "").strip().lower()
+        key = values.get("month", "").strip()
+        kind = KIND_WORDS.get(values.get("kind", "").strip().lower(), "")
+        rows = [e for e in everything
+                if (not kw or kw in f"{e['category']} {e['memo']} {e.get('account', '')}".lower())
+                and (not cat or e["category"].lower() == cat)
+                and (not key or in_month(e, key))
+                and (not kind or e["kind"] == kind)][-n:]
+        filters = "、".join(x for x in (f"含「{values['keyword'].strip()}」" if kw else "",
+                                        f"類別「{values['category'].strip()}」" if cat else "", key,
+                                        KIND_LABELS[kind] if kind else "") if x)
+        if not rows:
+            api.send_message(chat_id, f"💰 沒有符合的帳（{filters}）。")
+            return
+        head = f"💰 最近 {len(rows)} 筆" + (f"（{filters}）" if filters else "")
+        lines = [head] + [line_of(e) for e in reversed(rows)]
+        if kw or cat or key or kind:
+            lines.append("合計：" + "、".join(f"{KIND_LABELS[k]} {fmt(sum(float(e['amount']) for e in rows if e['kind'] == k))} 元"
+                                             for k in KINDS if any(e["kind"] == k for e in rows)))
         api.send_message(chat_id, "\n".join(lines))
+
+    def cap_lines(data, key, only=None) -> list:
+        """有設上限的支出類別：這個月花了多少、還剩多少或超過多少（only＝只看這個類別）。"""
+        spent = dict(by_category(data, key))
+        out = []
+        for c in data["categories"]:
+            if not c.get("cap") or (only and c["name"] != only):
+                continue
+            used, cap = spent.get(c["name"], 0.0), float(c["cap"])
+            if used > cap:
+                out.append(f"⚠️ {c['name']} 超過這個月的上限 {fmt(cap)} 元（超過 {fmt(used - cap)} 元）")
+            else:
+                out.append(f"{c['name']} 上限 {fmt(cap)} 元，還剩 {fmt(cap - used)} 元")
+        return out
+
+    def cap(api, chat_id, user, values):
+        name = values["category"].strip()
+        amount = float(values["amount"].replace(",", ""))
+        if amount < 0:
+            api.send_message(chat_id, "❌ 上限不能是負的。")
+            return
+
+        def set_cap(d):
+            c = find_cat(d["categories"], name)
+            if c is None:
+                c = {"name": name, "group": name, "kind": "expense", "keywords": []}
+                d["categories"].append(c)
+            if c["kind"] != "expense":
+                return c, None
+            if amount:
+                c["cap"] = amount
+            else:
+                c.pop("cap", None)
+            return dict(c), cap_lines(d, month_key(), c["name"])
+
+        c, lines = update(user, set_cap)
+        if lines is None:
+            api.send_message(chat_id, f"❌ 「{c['name']}」是{KIND_LABELS[c['kind']]}類，上限只用在支出類別。")
+        elif not amount:
+            api.send_message(chat_id, f"💰 「{c['name']}」的上限拿掉了。")
+        else:
+            api.send_message(chat_id, "\n".join([f"💰 「{c['name']}」每月上限設為 {fmt(amount)} 元（只提醒、不擋）。"] + lines))
 
     def by_category(data, key, kind="expense"):
         out = defaultdict(float)
@@ -370,6 +433,7 @@ def install(app, pack):
             lines.append(f"預算 {fmt(budget)} 元，" + (f"還剩 {fmt(left)} 元" if left >= 0 else f"⚠️ 超過 {fmt(-left)} 元"))
         else:
             lines.append("（還沒設預算：/money_budget <金額>）")
+        lines += cap_lines(data, key)
         api.send_message(chat_id, "\n".join(lines))
 
     def budget(api, chat_id, user, values):
@@ -403,7 +467,8 @@ def install(app, pack):
                 return
             lines = [f"💰 類別「{c['name']}」", f"種類：{KIND_LABELS[c['kind']]}"
                      + ("（不算花費）" if c["kind"] == "transfer" else ""), f"大類：{c['group']}",
-                     "關鍵字：" + ("、".join(c["keywords"]) if c["keywords"] else "（沒有）")]
+                     "關鍵字：" + ("、".join(c["keywords"]) if c["keywords"] else "（沒有）"),
+                     f"每月上限：{fmt(c['cap'])} 元" if c.get("cap") else "每月上限：（沒設；/money_cap 類別 金額）"]
             api.send_message(chat_id, "\n".join(lines))
             return
         if not data["categories"]:
@@ -492,7 +557,12 @@ def install(app, pack):
                 positional=3, fields=entry_fields())
     kit.command(g, "transfer", recorder("transfer"), "記一筆轉帳：存錢、投資、還款、繳卡費（不算花費、不吃預算）",
                 effect=WRITE, positional=3, fields=entry_fields())
-    kit.command(g, "list", list_, "最近幾筆（預設 10）", fields=[Field("n", "筆數", check=kit.positive_int)])
+    kit.command(g, "list", list_, "最近幾筆（預設 10；可以用關鍵字、類別、月份、種類篩）", positional=1, fields=[
+        Field("n", "筆數", check=kit.positive_int),
+        Field("keyword", "關鍵字（找類別、備註、付款方式）"),
+        Field("category", "類別"),
+        Field("month", "月份（YYYY-MM）", check=check_month),
+        Field("kind", "種類：支出／收入／轉帳", check=check_kind)])
     kit.command(g, "undo", undo, "撤銷最後記的那一筆", effect=WRITE)
     kit.command(g, "rm", rm, "刪掉某一筆（編號看 /money_list）", effect=DANGER,
                 fields=[Field("n", "編號", required=True, check=check_id)])
@@ -500,6 +570,9 @@ def install(app, pack):
                 fields=[Field("month", "月份（YYYY-MM）", check=check_month)])
     kit.command(g, "budget", budget, "設每月預算（0＝拿掉）", effect=WRITE,
                 fields=[Field("amount", "金額", required=True, check=kit.number)])
+    kit.command(g, "cap", cap, "設某個支出類別每月的上限（0＝拿掉；只提醒、不擋）", effect=WRITE, fields=[
+        Field("category", "類別", required=True, check=check_name),
+        Field("amount", "金額", required=True, check=kit.number)])
     kit.command(g, "cats", cats, "列出自己的類別（給名稱看那一個的關鍵字）",
                 fields=[Field("name", "類別名稱")])
     kit.command(g, "cat_add", cat_add, "新增類別，或幫已有的類別改大類、種類、加關鍵字", effect=WRITE, positional=2, fields=[
@@ -522,7 +595,8 @@ def install(app, pack):
         return {"month": key, "total": round(total, 2), "income": round(totals["income"], 2),
                 "transfer": round(totals["transfer"], 2), "budget": budget,
                 "left": round(budget - total, 2) if budget else None,
-                "by_category": [{"category": c, "amount": round(v, 2)} for c, v in by_category(data, key)]}
+                "by_category": [{"category": c, "amount": round(v, 2)} for c, v in by_category(data, key)],
+                "caps": [{"category": c["name"], "cap": float(c["cap"])} for c in data["categories"] if c.get("cap")]}
 
     if hasattr(pack, "web_route"):
         pack.web_route("summary", summary)
