@@ -26,7 +26,8 @@
       "actions": { "add": "WRITE", "in": "WRITE", "transfer": "WRITE", "edit": "WRITE", "undo": "WRITE",
                    "rm": "DANGER", "budget": "WRITE", "cap": "WRITE", "cat_add": "WRITE", "cat_rm": "WRITE",
                    "template": "WRITE" },
-      "exports": ["entries_csv"]
+      "exports": ["entries_csv"],
+      "remote": true
     }
   }
 }
