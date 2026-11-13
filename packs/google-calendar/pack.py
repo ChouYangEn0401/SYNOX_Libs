@@ -6,7 +6,7 @@
     /gcal_setup <client_id> <client_secret> [readonly]   → 回一個 Google 登入連結
     /gcal_code <整串網址或授權碼>                       → 換到 refresh token，存進保管箱
     /gcal_token <refresh_token>                           → 另一條路：直接貼 refresh token
-    /gcal_status、/gcal_logout
+    /gcal_status、/gcal_logout（這兩個也只給人打）
 
 OAuth（見 README）：
 - Google 的 device flow 不收 Calendar 的 scope；OOB（urn:ietf:wg:oauth:2.0:oob）已停用。
@@ -15,7 +15,8 @@ OAuth（見 README）：
   就算這台電腦上剛好有別的程式在聽那個埠，拿到 code 也沒用（沒有 PKCE 的 code_verifier 換不到 token）。
 - state 隨機 32 bytes、15 分鐘內有效、只能用一次；網址裡的 state 不符就不換。
 - client_id／client_secret／refresh_token／access_token 都經 pack.store.of(user)（storage=vault → 密文
-  data/google-calendar.json.enc）；不寫 config.json、不寫 log、不出現在任何回覆或 AI 的工具結果。
+  data/google-calendar.json.enc）；不寫 config.json、不寫 log（install 對 /gcal_setup、/gcal_code、/gcal_token
+  叫 kit.redact_in_logs，[ROUTE] 那一行只留指令）、不出現在任何回覆或 AI 的工具結果。
 
 日期解析（parse_when、day_label…）是工具庫 `packs/_shared/zhdate.py` 的原樣複製（pack 不能互相 import），
 跟本機 calendar pack 同一套寫法。改的話改正本、再跑 scripts/sync_shared.py。
@@ -540,6 +541,9 @@ class Client:
 
 def install(app, pack):
     g = pack.group
+    cmd = g.node.command                            # /gcal
+    for leaf in ("setup", "code", "token"):         # client secret、授權碼、refresh token 不准出現在 [ROUTE] 那一行 log
+        kit.redact_in_logs(f"{cmd}_{leaf}")
 
     def client(user) -> Client:
         return Client(pack.store.of(user))
@@ -782,7 +786,7 @@ def install(app, pack):
                 fields=[Field("n", "幾個", check=kit.positive_int)])
     kit.command(g, "rm", guarded(rm), "從 Google 日曆刪掉一個行程（編號看 /gcal_list）", effect=DANGER,
                 fields=[Field("n", "編號（最近一次列出來的 [n]）", required=True, check=kit.positive_int)])
-    kit.command(g, "status", guarded(status), "Google 日曆連上了沒")
+    kit.command(g, "status", guarded(status), "Google 日曆連上了沒", ai=False)
     kit.command(g, "setup", guarded(setup), "連 Google 日曆：填 client_id、client_secret，拿登入連結", effect=WRITE,
                 ai=False, usage="<client_id> <client_secret> [readonly]",
                 fields=[Field("client_id", "OAuth client ID"), Field("client_secret", "OAuth client secret"),

@@ -3,6 +3,7 @@
 
 import base64
 import hashlib
+import logging
 import os
 import sys
 import time
@@ -122,9 +123,9 @@ def test_scan_rejects_if_network_not_declared(tmp_path):
 def test_commands_ai_flags_and_effects(gbot, owner):
     bot, mod, http = gbot()
     reg = bot.app.registry
-    for name in ("add", "today", "week", "list", "rm", "status"):
+    for name in ("add", "today", "week", "list", "rm"):
         assert reg.node(f"gcal.{name}").ai is True
-    for name in ("setup", "code", "token", "logout"):                 # 憑證只給人打
+    for name in ("setup", "code", "token", "status", "logout"):       # 憑證只給人打；status 跟另外三個外部工具一樣（ADR-0003 P5）
         assert reg.node(f"gcal.{name}").ai is False
     assert reg.node("gcal.rm").effect == DANGER and reg.node("gcal.add").effect == WRITE
     # 跟本機 calendar pack 同樣的欄位
@@ -228,6 +229,25 @@ def test_paste_refresh_token(gbot, owner):
     assert http.calls[0][2]["data"]["grant_type"] == "refresh_token"
     bot.say(owner, "/gcal_status")
     assert "已連上" in bot.last(owner) and REFRESH not in bot.last(owner) and SECRET not in bot.last(owner)
+
+
+def test_credentials_never_reach_the_log(gbot, owner, caplog):
+    """S6（ADR-0003 C1）：/gcal_setup、/gcal_code、/gcal_token 打完，log 裡沒有 client secret、授權碼、refresh token。"""
+    bot, mod, http = gbot()
+    code = "4/0AfakeCode-LOGME-123"
+    caplog.set_level(logging.INFO)
+    _text, q = _setup(bot, owner)
+    http.on("POST", mod.TOKEN_URL, Resp(200, {"access_token": ACCESS, "refresh_token": REFRESH, "expires_in": 3599}))
+    bot.say(owner, f"/gcal_code http://127.0.0.1:47231/?state={q['state'][0]}&code={code}&scope=x")
+    assert "連上 Google 日曆了" in bot.last(owner)
+    http.on("POST", mod.TOKEN_URL, Resp(200, {"access_token": ACCESS, "expires_in": 3599,
+                                              "scope": "https://www.googleapis.com/auth/calendar.events"}))
+    bot.say(owner, f"/gcal_token {REFRESH}")
+    assert "存進保管箱了" in bot.last(owner)
+    logged = "\n".join(r.getMessage() for r in caplog.records)
+    assert "/gcal_setup" in logged and "/gcal_code" in logged and "/gcal_token" in logged    # 有記到指令，只是參數遮掉
+    for value in (SECRET, CID, code, q["state"][0], REFRESH, ACCESS):
+        assert value not in logged and value not in caplog.text
 
 
 # ── 看行程 ───────────────────────────────────────────────────────────

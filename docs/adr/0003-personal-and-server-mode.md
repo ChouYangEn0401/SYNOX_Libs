@@ -212,12 +212,14 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
   `HTTP = None`、`transport = None` 這種「測試換掉用」的改成函式（T5）。
 - M5：`panel.html` 不准有 `innerHTML`、`localStorage`、`sessionStorage`、`http://`、`https://`；`fetch(` 的網址只能是 `/api/packs/<自己的名字>/`。
 
-**T4　google-calendar 的 log 外洩（C1；兩種模式都中，優先做）**
+**T4　google-calendar 的 log 外洩（C1；兩種模式都中，優先做）**　✅ 已完成（google-calendar 0.1.2）
 - `packs/google-calendar/pack.py` 的 `install` 開頭：照 `packs/todoist/pack.py:518-520` 的寫法，
   對 `/gcal_setup`、`/gcal_code`、`/gcal_token` 各叫一次 `kit.redact_in_logs`。
 - `packs/google-calendar/pack.py:785`：`status` 加 `ai=False`（P5）。
 - `tests/test_gcal.py`：加 S6（`caplog`：打完三個指令，log 沒有 client secret、refresh token、code）。
   `tests/test_notion.py`、`tests/test_todoist.py` 沒有的話也各補一條 S6。
+  （實際：notion、todoist 已經有 S6——`test_token_flow_vault_and_redaction`、`test_token_is_checked_encrypted_and_not_logged`——不用補；
+  `tests/test_gcal.py::test_commands_ai_flags_and_effects` 原本斷言 `status` 是 `ai=True`，照 P5 改成 `ai=False` 那一組。）
 - 升 `google-calendar` 版本；CHANGELOG 寫在 Fixed。
 
 **T5　小修（不改資料格式）**
