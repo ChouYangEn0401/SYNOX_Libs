@@ -7,7 +7,7 @@
     },
     "money": {
       "title": "記帳",
-      "summary": "記一筆、看這個月、設預算",
+      "summary": "記支出、收入、轉帳，看這個月，設預算與單項上限",
       "packs": ["money"]
     },
     "planner": {

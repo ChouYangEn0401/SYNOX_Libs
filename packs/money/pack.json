@@ -1,8 +1,8 @@
 {
   "name": "money",
   "title": "💰 記帳",
-  "summary": "記一筆、看這個月、設預算（加密存在這台電腦）",
-  "version": "0.1.1",
+  "summary": "記支出、收入、轉帳，自己的類別與選配範本，預算與單項上限（加密存在這台電腦）",
+  "version": "0.2.0",
   "stage": "alpha",
   "kind": "python",
   "group": "money",

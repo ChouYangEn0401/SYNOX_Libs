@@ -5,6 +5,12 @@
 ## [Unreleased]
 
 ### Added
+- **`money` 0.1.1 → 0.2.0**（2026-11-13，[ADR-0002](docs/adr/0002-money-general-version.md)；`stage` 仍是 alpha、`requires.sdk` 不變）：
+  資料第 2 版（`schema: 2`，每筆有編號、種類、日期；0.1.x 的資料讀的時候自己轉）；收入 `/money_in` 與轉帳 `/money_transfer`
+  （存錢、投資、還款、繳卡費不算「這個月花了」、不吃預算）；自己的類別 `/money_cats`、`/money_cat_add`、`/money_cat_rm`；
+  選配範本 `/money_template`（基本、帳單、存錢與投資、捐贈、收入；預設不載、載兩次不重複）；沒給或打的不是類別名時用關鍵字猜類別；
+  `/money_undo`、`/money_rm`；`/money_list` 篩選；`/money_cap` 單一類別每月上限；付款方式標籤 `account=`、補記 `date=`。
+  退回 0.1.1 資料不會壞，但收入與轉帳會被當成花費。
 - 工具庫成立（2026-11-12，ADR-0001）：從 SYNOX 搬來 `money`、`notes`、`remind`，從 SYNOXPacks 搬來 `calendar`、`todo`、`bullet`
   （來源對照 [docs/sources.md](docs/sources.md)）。
 - 六個工具都宣告 `requires.synox: ">=0.2"`、`requires.sdk: ">=0.2,<0.3"`，版本 0.1.0 → **0.1.1**。
