@@ -35,10 +35,13 @@ import re
 import sys
 import zipfile
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import links  # noqa: E402
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COSTUMES = os.path.join(ROOT, "costumes")
 SITE = os.path.join(ROOT, "docs", "site")
-REPO_URL = "https://github.com/ChouYangEn0401/SYNOX_Libs"
+REPO_URL = links.REPO_URL
 ONLINE_URL = "https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR"           # 公開頁的線上版（Artifact）
 COLLECTION = {"id": "wardrobe", "title": "SYNOX 衣櫃", "category": "衣櫃／外觀",
               "summary": "26 套外觀：整個聊天介面的顏色、吉祥物、開場一起換。不帶任何程式，換回預設隨時可以。"}
@@ -83,21 +86,20 @@ def costume_id(letter: str) -> str:
 
 
 def library_version() -> str:
-    with open(os.path.join(ROOT, "VERSION"), encoding="utf-8") as f:
-        return f.read().strip()
+    return links.library_version(ROOT)
 
 
 def release_tag() -> str:
-    return "v" + library_version()
+    return links.release_tag(ROOT)
 
 
 def download_url(file: str) -> str:
-        # WARDROBE_LINKS=release：改指向 GitHub 發佈頁的資產。
-    if os.environ.get("WARDROBE_LINKS") == "release":
-        return f"{REPO_URL}/releases/download/{release_tag()}/{file}"
-    # 預設：直接從 repo 裡的 docs/site/packs/ 下載（WARDROBE_BRANCH，預設 main）
-    branch = os.environ.get("WARDROBE_BRANCH", "main")
-    return f"{REPO_URL}/raw/{branch}/docs/site/packs/{file}"
+    """公開頁的下載網址：跟工具同一個規則（scripts/links.py 的 LINK_MODE；docs/RELEASING.md）。
+    file 是帶版本的檔名（costume-a-bubble-1.0.0.synoxpack）；latest 模式自動換成別名。"""
+    m = re.fullmatch(r"(.+?)-(\d+\.\d+\.\d+[^/]*)\.synoxpack", file)
+    if m and links.LINK_MODE == "latest":
+        return links.asset_url(links.alias_file(m.group(1)))
+    return links.asset_url(file)
 
 
 # ── 規則：不帶程式（check、pack、測試都用這一份）────────────────────────
@@ -443,7 +445,7 @@ def page_html() -> str:
             stamp_old = m.group(1) if m else ""
     repl = {
         "{{COUNT}}": str(len(folders)), "{{TAG}}": tag, "{{VERSION}}": library_version(),
-        "{{RELEASE}}": f"{REPO_URL}/releases/tag/{tag}", "{{NAV}}": "".join(nav),
+        "{{RELEASE}}": links.release_page_url(), "{{NAV}}": "".join(nav),
         "{{TOKENS_CSS}}": "\n".join(tokens_css), "{{THEME_CSS}}": "\n".join(theme_css),
         "{{CARDS}}": "\n".join(cards), "{{STAMP}}": stamp_old, "{{ONLINE}}": ONLINE_URL,
     }

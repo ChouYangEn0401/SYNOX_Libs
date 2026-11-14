@@ -9,3 +9,5 @@ dist/
 public_check.local.txt
 # scripts/build_costumes.py extract 下載的字型（只拿來把字標轉成路徑，不進 repo）
 .cache/
+# docs/RELEASING.md：上傳前備份的發佈頁 index.json
+release-backup/

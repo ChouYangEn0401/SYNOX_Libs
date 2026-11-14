@@ -10,7 +10,12 @@
 - 工具資料夾裡附了 synox_sdk.py（cli／mcp 工具）的話，它的 SDK_VERSION 也要在 requires.sdk 範圍內；
 - 每個工具都要明寫 stage（test／alpha／beta／stable；README「穩定度」），index.json 也帶它；
 - catalog.json 的建議群組只能列存在的工具。
-沒指定工具名時，衣櫃的 26 套外觀（costumes/，kind=theme）也一起打包、列進同一份 index.json（scripts/build_costumes.py）。
+沒指定工具名時，衣櫃的 26 套外觀（costumes/，kind=theme）也一起打包、列進同一份 index.json（scripts/build_costumes.py），
+而且 dist/ 是「發佈頁上該有的全部檔」（docs/RELEASING.md）：
+- 每個工具／外觀兩份：<name>-<version>.synoxpack 與不帶版本的別名 <name>.synoxpack（給 releases/latest/download/ 用）；
+- tools-<VERSION>.zip 與別名 tools.zip（tools/ 底下全部工具＋只列工具的 tools/index.json）；
+- index.json、SHA256SUMS（上面每個檔的 sha256）。
+命令列全部打包完會跑 scripts/links.py：README 與 docs/site/*.html 的下載連結改成現在的版本（版本只看 pack.json）。
 SYNOX 在哪：scripts/_synox.py（SYNOX_HOME → 跑這支的 Python 裝的那份 → 後備並排的 ../SYNOX）。
 """
 
@@ -21,10 +26,13 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import sys
+import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _synox  # noqa: E402
+import links  # noqa: E402
 
 ROOT = _synox.LIBS_ROOT
 SDK_FILE = "synox_sdk.py"
@@ -140,6 +148,9 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
     if problems or check_only:
         return {"index": None, "problems": problems}
     out_dir = out_dir or os.path.join(root, "dist")
+    full = not names and costumes and root == ROOT
+    if full:
+        clean_dist(out_dir)
     entries = []
     for folder in folders:
         try:
@@ -168,7 +179,53 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
         index["collections"] = collections
     with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8", newline="\n") as f:
         f.write(json.dumps(index, ensure_ascii=False, indent=2) + "\n")
+    if full:
+        release_extras(index, out_dir, root)
     return {"index": index, "problems": []}
+
+
+RELEASE_PATTERNS = re.compile(r"(\.synoxpack|^tools(-.+)?\.zip|^index\.json|^SHA256SUMS.*)$")
+
+
+def clean_dist(out_dir: str) -> None:
+    """全部打包前先清掉上一次的發佈檔（舊版本的 money-0.2.0.synoxpack 不能留著混進 SHA256SUMS）。"""
+    if not os.path.isdir(out_dir):
+        return
+    for n in os.listdir(out_dir):
+        if RELEASE_PATTERNS.search(n) and os.path.isfile(os.path.join(out_dir, n)):
+            os.remove(os.path.join(out_dir, n))
+
+
+def _zip_put(z, arcname: str, data: bytes) -> None:
+    info = zipfile.ZipInfo(arcname, date_time=(2026, 1, 1, 0, 0, 0))     # 固定時間：同樣內容打出一樣的檔
+    info.compress_type = zipfile.ZIP_DEFLATED
+    info.external_attr = 0o644 << 16
+    z.writestr(info, data)
+
+
+def release_extras(index: dict, out_dir: str, root: str = ROOT) -> list:
+    """別名、tools-<VERSION>.zip（＋別名 tools.zip）、SHA256SUMS；回寫出的檔名。"""
+    written = []
+    for e in index["packs"]:
+        alias = links.alias_file(e["name"])
+        shutil.copyfile(os.path.join(out_dir, e["file"]), os.path.join(out_dir, alias))
+        written.append(alias)
+    tools = [e for e in index["packs"] if e.get("kind") != "theme"]
+    tools_index = {k: v for k, v in index.items() if k != "collections"}
+    tools_index["packs"] = tools
+    zip_name = links.tools_zip(root)
+    with zipfile.ZipFile(os.path.join(out_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as z:
+        for e in tools:
+            with open(os.path.join(out_dir, e["file"]), "rb") as f:
+                _zip_put(z, "tools/" + e["file"], f.read())
+        _zip_put(z, "tools/index.json", (json.dumps(tools_index, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+    shutil.copyfile(os.path.join(out_dir, zip_name), os.path.join(out_dir, links.TOOLS_ALIAS))
+    written += [zip_name, links.TOOLS_ALIAS]
+    files = sorted({e["file"] for e in index["packs"]} | set(written) | {links.INDEX_FILE})
+    with open(os.path.join(out_dir, links.SUMS_FILE), "w", encoding="utf-8", newline="\n") as f:
+        for n in files:
+            f.write(f"{sha256_of(os.path.join(out_dir, n))}  {n}\n")
+    return written + [links.SUMS_FILE]
 
 
 def main(argv=None) -> int:
@@ -185,6 +242,12 @@ def main(argv=None) -> int:
             print("  - " + p)
         return 2
     if args.check:
+        stale = links.check() if not args.names else []
+        for p in stale:
+            print("  - " + p)
+        if stale:
+            print("❌ 有過期的下載連結（跑 python scripts/links.py，或不加 --check 重新打包）")
+            return 2
         print("✅ 檢查都過了")
         return 0
     for e in result["index"]["packs"]:
@@ -193,6 +256,10 @@ def main(argv=None) -> int:
             continue
         print(f"{e['file']}  {e['stage']}  sdk {e['requires'].get('sdk', '?')}  sha256 {e['sha256'][:12]}…")
     print(os.path.join(args.out, "index.json"))
+    if not args.names and not args.no_costumes:
+        print(os.path.join(args.out, links.SUMS_FILE) + f"（另有別名 *.synoxpack、{links.tools_zip()}、{links.TOOLS_ALIAS}）")
+        for path in links.refresh():          # 下載連結＝pack.json 的版本（LINK_MODE 見 scripts/links.py）
+            print("下載連結更新：" + os.path.relpath(path, ROOT))
     return 0
 
 

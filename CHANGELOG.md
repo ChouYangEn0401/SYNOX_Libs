@@ -22,6 +22,10 @@
   `scripts/build_costumes.py`（extract／check／pack／page）、`tests/test_costumes.py`（不帶程式的規則、7 個 slot、token、大小、雜湊）、
   公開頁 `docs/site/wardrobe.html`（從 `docs/site/index.html` 與 README 連過去）。
   `scripts/build.py` 沒指定工具名時一起打包、列進 `index.json`（`kind: "theme"`、`category: "衣櫃／外觀"`、`collections.wardrobe`）。
+- **下載連結永遠是最新版**（[docs/RELEASING.md](docs/RELEASING.md)）：`scripts/links.py` 是網址的唯一來源（版本只看 `pack.json`／`VERSION`；
+  `LINK_MODE` = `tag`（現在，v0.2.0 是 pre-release）或 `latest`（標成 Latest 之後））。`scripts/build.py` 全部打包時 dist/ 多了
+  不帶版本的別名 `<name>.synoxpack`、`tools-<VERSION>.zip`／`tools.zip`、`SHA256SUMS`，打完自動改寫 README 與 `docs/site/*.html` 的連結。
+  衣櫃頁改連發佈頁（不再連 repo 分支裡的 `docs/site/packs/`，那份拿掉了）。`tests/test_links.py` 擋過期連結。
 
 ## [0.2.0] - 2026-11-13
 

@@ -3,6 +3,7 @@
 **👉 [先看工具庫說明頁：每個工具做什麼、怎麼裝、完成到哪](https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL)**
 （每個工具各有一頁，從說明頁點進去；同一份也在 repo 裡：[docs/site/](docs/site/)，下載後雙擊 `index.html` 就能開）
 下載：[發佈頁 v0.2.0](https://github.com/ChouYangEn0401/SYNOX_Libs/releases/tag/v0.2.0)（每個工具一個 `.synoxpack`，或全部的 `tools-0.2.0.zip`）
+下載連結永遠是最新版：版本只寫在 `pack.json`，頁面上的連結由 `scripts/links.py` 產生，發佈步驟見 [docs/RELEASING.md](docs/RELEASING.md)。
 
 **所有 SYNOX 工具都在這裡統一管理**：每個工具的正本、測試、打包、版本與穩定度都只在這個 repo。
 **SYNOX 主程式本身沒有內建任何工具**（2026-11-12 起；連接 Notion／Todoist／Google 日曆／Apple 的也搬來了），
