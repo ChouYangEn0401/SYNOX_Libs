@@ -1,0 +1,16 @@
+{
+  "說明": "SYNOX_Libs 的每一份線上頁（claude.ai Artifact）↔ 本機檔。scripts/build_site.py 用它把工具卡片連到線上說明頁、--list-republish 列出要重新發佈的頁；tests/test_site_pages.py 檢查每一頁頁尾的線上網址跟這裡一樣。新增一頁：先用 Artifact 發佈本機檔，拿到網址寫進來（tool＝packs/ 底下的工具名；不是工具的頁寫 null），再跑 python scripts/build_site.py。規則見 docs/ARTIFACTS.md。SYNOX 那邊的 docs/artifacts.json 也列了這些頁（repo=SYNOX_Libs），網址改了兩邊一起改。",
+  "pages": [
+    {"title": "SYNOX 工具庫（入口）", "url": "https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL", "local": "docs/site/index.html", "tool": null, "made_by": "scripts/build_site.py（樣板 scripts/site_index_template.html）"},
+    {"title": "SYNOX 衣櫃", "url": "https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR", "local": "docs/site/wardrobe.html", "tool": null, "made_by": "scripts/build_costumes.py page（樣板 scripts/wardrobe_template.html）"},
+    {"title": "隨手記", "url": "https://claude.ai/artifact/NpYbd3FtMAkXmASXc1pJzh", "local": "docs/site/notes.html", "tool": "notes", "made_by": "手寫"},
+    {"title": "待辦", "url": "https://claude.ai/artifact/JuKURoMhZY58fWyR4j3961", "local": "docs/site/todo.html", "tool": "todo", "made_by": "手寫"},
+    {"title": "記帳", "url": "https://claude.ai/artifact/6kA9jSkwVFPPBthsCjmz6d", "local": "docs/site/money.html", "tool": "money", "made_by": "手寫"},
+    {"title": "行事曆", "url": "https://claude.ai/artifact/Fm6dXH5oiua8zPY3U5RYQ5", "local": "docs/site/calendar.html", "tool": "calendar", "made_by": "手寫"},
+    {"title": "子彈筆記", "url": "https://claude.ai/artifact/BTdPArDtbddRk4ijNqExZ3", "local": "docs/site/bullet.html", "tool": "bullet", "made_by": "手寫"},
+    {"title": "Notion", "url": "https://claude.ai/artifact/B36np3VigMinvyFuyz74dJ", "local": "docs/site/notion.html", "tool": "notion", "made_by": "手寫"},
+    {"title": "Todoist", "url": "https://claude.ai/artifact/D3zgGcZ9h1LRrDLu2QD5Mw", "local": "docs/site/todoist.html", "tool": "todoist", "made_by": "手寫"},
+    {"title": "Google 日曆", "url": "https://claude.ai/artifact/NyhRhPrRL1n9NMMbMEv3mx", "local": "docs/site/google-calendar.html", "tool": "google-calendar", "made_by": "手寫"},
+    {"title": "Apple 提醒事項", "url": "https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp", "local": "docs/site/apple-reminders.html", "tool": "apple-reminders", "made_by": "手寫"}
+  ]
+}

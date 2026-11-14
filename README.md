@@ -4,6 +4,8 @@
 （每個工具各有一頁，從說明頁點進去；同一份也在 repo 裡：[docs/site/](docs/site/)，下載後雙擊 `index.html` 就能開）
 下載：[發佈頁 v0.2.0](https://github.com/ChouYangEn0401/SYNOX_Libs/releases/tag/v0.2.0)（每個工具一個 `.synoxpack`，或全部的 `tools-0.2.0.zip`）
 下載連結永遠是最新版：版本只寫在 `pack.json`，頁面上的連結由 `scripts/links.py` 產生，發佈步驟見 [docs/RELEASING.md](docs/RELEASING.md)。
+文件索引：[docs/README.md](docs/README.md)——新增一個工具：[docs/CONTRIBUTING-TOOLS.md](docs/CONTRIBUTING-TOOLS.md)（加一個 `packs/<名字>/` 資料夾，入口頁就自動多一張卡片）；
+線上頁與網址：[docs/ARTIFACTS.md](docs/ARTIFACTS.md)。
 
 **所有 SYNOX 工具都在這裡統一管理**：每個工具的正本、測試、打包、版本與穩定度都只在這個 repo。
 **SYNOX 主程式本身沒有內建任何工具**（2026-11-12 起；連接 Notion／Todoist／Google 日曆／Apple 的也搬來了），
@@ -79,6 +81,8 @@ set SYNOX_HOME=<SYNOX 資料夾>             建議明寫（見下面「找 SYNO
 <SYNOX>\.venv\Scripts\python.exe scripts\build.py            全部打包 → dist\*.synoxpack ＋ dist\index.json
 <SYNOX>\.venv\Scripts\python.exe scripts\build.py --check    只檢查
 <SYNOX>\.venv\Scripts\python.exe scripts\sync_shared.py      改了 packs\_shared\zhdate.py 之後跑（--check 只檢查）
+python scripts\build_site.py                                   重新產生入口頁 docs\site\index.html（build.py 全部打包時也會跑；--check 只檢查）
+python scripts\build_site.py --list-republish                  列出每個公開頁：本機檔 → 線上網址（--since <git 版本> 只列有改的）
 <SYNOX>\.venv\Scripts\python.exe scripts\public_check.py     公開版檢查（--history 另外看 git 歷史與 commit 作者信箱）
 python scripts\build_costumes.py check                         衣櫃：26 套外觀的「不帶程式」檢查（只用標準函式庫）
 python scripts\build_costumes.py pack                          衣櫃：只打包外觀 → dist\costume-*.synoxpack（build.py 也會順便打）
@@ -118,7 +122,8 @@ SYNOX 那邊的 theme pack 實作如果跟這個格式不一樣：改 `build_cos
 | SYNOX（主程式） | 含 `requires.sdk` 與 `stage` 的版本（`feat/connectors-to-libs` 之後；SYNOX 本體版號仍是 0.2.0） | 打包用它的 `zip_pack`（安裝時的第 1、2 關）、測試用它的 `build()` |
 | SYNOX SDK | `>=0.2,<0.3` | 每個工具的 `requires.sdk` |
 
-- **每個工具一個資料夾** `packs/<name>/`：`pack.json`、`SKILL.md`（給 AI）、`README.md`（給人）、程式、（選用）`panel.html`。格式見 SYNOX 的 `docs/pack-format.md`。
+- **每個工具一個資料夾** `packs/<name>/`：`pack.json`、`SKILL.md`（給 AI）、`README.md`（給人）、程式、（選用）`panel.html`。格式見 SYNOX 的 `docs/pack-format.md`；
+  從頭到尾的步驟（含 `help` 區塊、入口頁卡片的 `site` 區塊、要改哪些測試）見 [docs/CONTRIBUTING-TOOLS.md](docs/CONTRIBUTING-TOOLS.md)。
 - **一定要宣告 SDK 版本**：`"requires": {"synox": ">=0.2", "sdk": ">=0.2,<0.3"}`。SDK 的正本在 SYNOX（`synox_sdk.SDK_VERSION`）；
   打包時範圍不含拿來打包的那份 SYNOX 的 SDK 就不打包。kind=cli／mcp 的工具用 `synox-sdk init --from tool.py` 會自動放一份 `synox_sdk.py`
   並寫好範圍（或 `pip install <SYNOX>/sdk`）；附的 `synox_sdk.py` 版本也要在範圍內。
@@ -150,10 +155,14 @@ SYNOX 那邊的 theme pack 實作如果跟這個格式不一樣：改 `build_cos
 | `scripts/build.py` | 打包＋寫 `index.json`（每個工具要寫 `requires.sdk`、`stage`） |
 | `costumes/` | SYNOX 衣櫃：26 套外觀（theme pack 的原始檔，`scripts/build_costumes.py` 產生） |
 | `scripts/build_costumes.py` | 衣櫃：產生、檢查、打包外觀，產生公開頁 `docs/site/wardrobe.html`（樣板 `scripts/wardrobe_template.html`） |
+| `scripts/build_site.py` | 入口頁 `docs/site/index.html`（樣板 `scripts/site_index_template.html`）＋沒有手寫說明頁的工具頁（樣板 `scripts/site_tool_template.html`）；`--list-republish` |
+| `scripts/links.py`、`scripts/site_stamp.py` | 下載連結永遠指到最新版；頁尾的頁面版本 |
+| `docs/site/` | 公開頁（線上 Artifact 的本機正本）；網址登記在 `docs/artifacts.json`，卡片的字在 `docs/site-tools.json` |
 | `scripts/public_check.py` | 公開版檢查（隱私、token、私人資料檔） |
 | `scripts/sync_shared.py` | `packs/_shared/` 的共用程式複製進用到的工具（calendar、todo、google-calendar、todoist） |
 | `scripts/_synox.py` | 找 SYNOX（`SYNOX_HOME` → 跑腳本的 Python 裝的那份 → 後備 `../SYNOX`） |
 | `catalog.json` | 建議群組 |
+| `docs/` | 文件（索引 [docs/README.md](docs/README.md)：CONTRIBUTING-TOOLS、RELEASING、ARTIFACTS） |
 | `docs/adr/` | 設計決定 |
 | `docs/sources.md` | 每個檔從哪裡搬來 |
 | `VERSION`、`CHANGELOG.md` | 工具庫本身的版本（每個工具的版本在自己的 `pack.json`） |

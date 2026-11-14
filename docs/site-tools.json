@@ -1,0 +1,15 @@
+{
+  "說明": "工具在公開入口頁（docs/site/index.html）卡片上的字，scripts/build_site.py 讀。不打包進 .synoxpack，所以改這裡不用升工具的 version。每一欄都可以不寫：沒寫就用 pack.json 的 site 區塊，再沒有就從 pack.json 猜（title 的 emoji 與名字、summary、help 的第一個範例、capabilities 有沒有 network）。欄位與優先順序見 docs/CONTRIBUTING-TOOLS.md「公開頁上的樣子」。order：卡片順序（沒列的照 pack.json 的 order、再照名字排在後面）。",
+  "order": ["notes", "todo", "money", "calendar", "bullet", "notion", "todoist", "google-calendar", "apple-reminders"],
+  "tools": {
+    "notes": {"line": "記一筆、找、刪", "example": "/note 買牛奶"},
+    "todo": {"line": "重要度、專案、到期日、打勾完成", "example": "/todo !! 繳電費 明天"},
+    "money": {"line": "支出、收入、轉帳、預算", "example": "/money 120 午餐"},
+    "calendar": {"line": "存在這台電腦的行程，可匯出 .ics", "example": "/cal 明天 14:00 看牙醫"},
+    "bullet": {"line": "快速記錄、今天、月誌、搬到今天", "example": "/bj • 買牛奶"},
+    "notion": {"line": "搜尋、讀頁面、加一列、改欄位", "example": "/notion 會議", "status": "只用模擬測過"},
+    "todoist": {"line": "看、加、完成、改期 Todoist 的待辦", "example": "/todoist !! 繳電費 明天", "status": "只用模擬測過"},
+    "google-calendar": {"line": "看今天／這週、加行程、刪行程", "example": "/gcal 明天 14:00 看牙醫", "status": "只用模擬測過"},
+    "apple-reminders": {"line": "CalDAV 提醒事項（升級過的 iCloud 讀不到）", "example": "/applerem_add 買牛奶", "status": "只用模擬測過"}
+  }
+}

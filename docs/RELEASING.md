@@ -1,5 +1,35 @@
 # 發佈：把 dist/ 放上 GitHub 發佈頁，下載連結永遠是最新版
 
+## 流程（先看這裡）
+
+```
+(a) 加／改工具 ─→ (b) 打包 ─→ (c) 測試 ─→ (d) commit、合併到 main
+   packs/<名字>/     build.py     pytest        │
+   升 version                                   ▼
+   CHANGELOG        (e) 上傳發佈頁 ─→ (f) 重新發佈線上頁 ─→ (g) 標成 Latest 之後：LINK_MODE 切到 latest（只做一次）
+                       gh release upload   Artifact，同一個網址
+```
+
+| 步驟 | 做什麼 | 指令／文件 |
+|---|---|---|
+| (a) | 加或改工具；改了就升 `pack.json` 的 `version`、CHANGELOG 一行；要開新 tag 才改 `VERSION` | [CONTRIBUTING-TOOLS.md](CONTRIBUTING-TOOLS.md) |
+| (b) | 全部打包：`dist/`＋入口頁重新產生＋每頁下載連結改成現在的版本＋重新蓋頁面版本 | `python scripts/build.py`（先 `python scripts/build.py --check`） |
+| (c) | 測試（`test_links`、`test_site_pages`、`test_build_site` 一定要過） | `python -m pytest -q` |
+| (d) | commit（`dist/` 不進 git）、合併到 main | |
+| (e) | 上傳：先備份發佈頁上的 `index.json`，再傳全部檔，**最後**才換 `index.json` | 下面「上傳到發佈頁」 |
+| (f) | 列出改到的頁、用 Artifact 重新發佈到同一個網址、看頁面版本一樣 | `python scripts/build_site.py --list-republish --since <上次發佈的 commit>`；[ARTIFACTS.md](ARTIFACTS.md) |
+| (g) | 發佈頁標成 Latest 之後（只做一次）：`LINK_MODE = "latest"`、重新產生頁面、重新發佈全部線上頁 | 下面「標成 Latest」 |
+
+檢查清單：
+
+- [ ] 改到的工具都升了 `version`，CHANGELOG 有寫
+- [ ] `python scripts/build.py --check` ✅、`python scripts/build.py` 跑完（印出「公開頁產生」「下載連結更新」的頁）
+- [ ] `python -m pytest -q` 全過
+- [ ] 合併到 main
+- [ ] `sha256sum -c SHA256SUMS` ✅ → 備份 `index.json` → 上傳檔 → 最後換 `index.json` → 每個連結 HEAD 都 200
+- [ ] `--list-republish` 列出的每一頁都重新發佈了，線上頁尾的頁面版本＝本機
+- [ ] 新工具第一次上線：網址登記進 `docs/artifacts.json`、`build_site.py`、再發佈一次（[ARTIFACTS.md](ARTIFACTS.md)「新增一頁」）
+
 擁有者的規矩：**每個公開頁**（`docs/site/*.html`、衣櫃頁 `docs/site/wardrobe.html`、`README.md`）上的下載連結，
 永遠指到最新版。做法是「版本只寫在一個地方」：
 
@@ -10,7 +40,8 @@
 | 網址怎麼組 | `scripts/links.py`（`LINK_MODE`、`asset_url`、`pack_url`、`tools_url`） |
 
 頁面裡看得到的版本（`money · v0.3.1`、`money-0.3.1.synoxpack`、`tools-0.2.0.zip`、`發佈頁 v0.2.0`）都是
-`scripts/links.py` 寫進去的，**不要手改**；衣櫃頁整頁由 `scripts/build_costumes.py page` 產生，連結也走 `links.py`。
+`scripts/links.py` 寫進去的，**不要手改**；衣櫃頁整頁由 `scripts/build_costumes.py page` 產生、入口頁 `docs/site/index.html`
+整頁由 `scripts/build_site.py` 從 pack.json 產生（新工具自動出現，[CONTRIBUTING-TOOLS.md](CONTRIBUTING-TOOLS.md)），連結都走 `links.py`。
 `tests/test_links.py` 會擋：頁面寫的版本跟 pack.json 不同、連到 build 不會產生的檔、連到別的 tag、
 `tools-<VERSION>.zip` 過期、衣櫃頁不是產生器現在的輸出、index.json 少了工具或 26 套外觀。
 
@@ -21,7 +52,7 @@
 | `<name>-<version>.synoxpack` | 每個工具（9 個）與每套外觀（26 套）帶版本的檔 |
 | `<name>.synoxpack` | 同一份內容、不帶版本的別名（給 `releases/latest/download/` 用） |
 | `tools-<VERSION>.zip`、`tools.zip` | 全部工具：`tools/*.synoxpack` ＋ 只列工具的 `tools/index.json`；`tools.zip` 是別名 |
-| `index.json` | 目錄：每個工具與外觀的版本、檔名、sha256（外觀 `kind: "theme"`、`collections.wardrobe`） |
+| `index.json` | 目錄：每個工具與外觀的版本、檔名、sha256、工具卡片的一句話 `line`（外觀 `kind: "theme"`、`collections.wardrobe`） |
 | `SHA256SUMS` | 上面每個檔的 sha256（`sha256sum -c SHA256SUMS` 可以驗） |
 
 ## 連結的兩種模式（`scripts/links.py` 的 `LINK_MODE`）
@@ -40,12 +71,14 @@
 
 ```bash
 # 1. 改版本：packs/<name>/pack.json（＋CHANGELOG）；要開新的 tag 才改 VERSION
-# 2. 全部打包：清掉舊的 dist/、打出全部檔、SHA256SUMS，並把每個公開頁的下載連結改成現在的版本、重新蓋頁面版本
+# 2. 全部打包：清掉舊的 dist/、打出全部檔、SHA256SUMS，重新產生入口頁（scripts/build_site.py：新工具自動出現），
+#    並把每個公開頁的下載連結改成現在的版本、重新蓋頁面版本
 python scripts/build.py
 python scripts/build_costumes.py page && python scripts/site_stamp.py wardrobe.html   # 衣櫃頁的版面有改才需要
-# 3. 測試（tests/test_links.py、tests/test_site_pages.py 一定要過）
+# 3. 測試（tests/test_links.py、tests/test_site_pages.py、tests/test_build_site.py 一定要過）
 python -m pytest -q
-# 4. commit（頁面有改的話，線上版 Artifact 也要重新發佈同一個網址）
+# 4. commit；頁面有改的話，線上版 Artifact 也要重新發佈同一個網址（docs/ARTIFACTS.md）：
+python scripts/build_site.py --list-republish --since HEAD~1    # 例：跟上一個 commit 比有改的頁 → 線上網址
 ```
 
 ### 上傳到發佈頁（擁有者的 agent 跑）
@@ -102,8 +135,10 @@ curl -sI https://github.com/ChouYangEn0401/SYNOX_Libs/releases/latest/download/m
 確認 `releases/latest/download/<name>.synoxpack` 會轉到檔案之後：
 
 1. `scripts/links.py`：`LINK_MODE = "latest"`；
-2. `python scripts/links.py`（改寫 README 與 `docs/site/*.html`、重新蓋頁面版本）；`python scripts/build_costumes.py page && python scripts/site_stamp.py wardrobe.html`；
-3. `python -m pytest -q`，commit，重新發佈線上版的每一頁。
+2. `python scripts/links.py`（改寫 README 與 `docs/site/*.html`、重新蓋頁面版本）；`python scripts/build_site.py`（產生的頁也照新模式，通常已經一樣）；
+   `python scripts/build_costumes.py page && python scripts/site_stamp.py wardrobe.html`；
+3. `python -m pytest -q`，commit，重新發佈線上版的每一頁（`python scripts/build_site.py --list-republish` 全部列出來）；
+4. SYNOX 那邊（另一個 repo）：`synox/packs/catalog.py` 的 `OFFICIAL_INDEX_URL` 改回 `releases/latest/download/index.json`。
 
 之後每次發佈只要上傳新的檔（別名也一起 `--clobber`），頁面不用再動——除非頁面上寫的版本字樣（`money · v0.3.1`）要跟著變，
 那還是跑一次 `python scripts/build.py`（測試會提醒）。新的 tag 也要標成 Latest，`releases/latest` 才會跟過去。

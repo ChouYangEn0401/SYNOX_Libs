@@ -15,7 +15,9 @@
 - 每個工具／外觀兩份：<name>-<version>.synoxpack 與不帶版本的別名 <name>.synoxpack（給 releases/latest/download/ 用）；
 - tools-<VERSION>.zip 與別名 tools.zip（tools/ 底下全部工具＋只列工具的 tools/index.json）；
 - index.json、SHA256SUMS（上面每個檔的 sha256）。
-命令列全部打包完會跑 scripts/links.py：README 與 docs/site/*.html 的下載連結改成現在的版本（版本只看 pack.json）。
+命令列全部打包完會跑 scripts/build_site.py（重新產生入口頁 docs/site/index.html，新工具自動出現；沒有手寫說明頁的工具產生簡單頁）
+與 scripts/links.py（README 與 docs/site/*.html 的下載連結改成現在的版本；版本只看 pack.json）；--check 也檢查這兩樣。
+index.json 每個工具多帶一行 `line`（卡片上的一句話，跟入口頁同一份；SYNOX 的「工具庫（官方）」卡片會用）。
 SYNOX 在哪：scripts/_synox.py（SYNOX_HOME → 跑這支的 Python 裝的那份 → 後備並排的 ../SYNOX）。
 """
 
@@ -32,6 +34,7 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _synox  # noqa: E402
+import build_site  # noqa: E402
 import links  # noqa: E402
 
 ROOT = _synox.LIBS_ROOT
@@ -111,8 +114,9 @@ def sha256_of(path: str) -> str:
     return h.hexdigest()
 
 
-def entry_for(m, path: str, bundles: dict) -> dict:
+def entry_for(m, path: str, bundles: dict, lines: dict = None) -> dict:
     return {"name": m.name, "title": m.title, "summary": m.summary, "version": m.version, "stage": m.raw.get("stage"),
+            "line": (lines or {}).get(m.name) or m.summary,                # 卡片上的一句話（scripts/build_site.py）
             "kind": m.kind, "app": bool((m.web or {}).get("app")),          # 有完整畫面（工具服務，ADR-0003）
             "group": m.group, "access": m.access, "capabilities": sorted(m.capabilities),
             "requires": {k: v for k, v in (m.requires or {}).items() if k in ("synox", "sdk") and v},
@@ -145,6 +149,11 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
     if not names and costumes and root == ROOT:
         import build_costumes
         problems += [p for f in build_costumes.costume_folders() for p in build_costumes.pack_problems(f)]
+    lines = {}
+    try:                                             # 公開頁的資料（pack.json 的 site 區塊、docs/site-tools.json）
+        lines = {t["name"]: t["line"] for t in build_site.tools(root)}
+    except (ValueError, KeyError) as e:
+        problems.append(f"公開頁資料：{e}")
     if problems or check_only:
         return {"index": None, "problems": problems}
     out_dir = out_dir or os.path.join(root, "dist")
@@ -158,7 +167,7 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
         except ValueError as e:                      # 第 1、2 關沒過
             problems.append(f"{os.path.basename(folder)}: {e}")
             continue
-        entries.append(entry_for(read(folder, strict=True), path, bundles))
+        entries.append(entry_for(read(folder, strict=True), path, bundles, lines))
     collections = {}
     if not names and costumes and root == ROOT:
         # SYNOX 衣櫃：外觀（kind=theme）跟工具放在同一份 index.json，category「衣櫃／外觀」（scripts/build_costumes.py）
@@ -248,6 +257,12 @@ def main(argv=None) -> int:
         if stale:
             print("❌ 有過期的下載連結（跑 python scripts/links.py，或不加 --check 重新打包）")
             return 2
+        pages = build_site.check() if not args.names else []
+        for p in pages:
+            print("  - " + p)
+        if pages:
+            print("❌ 公開頁不是最新的（跑 python scripts/build_site.py，或不加 --check 重新打包）")
+            return 2
         print("✅ 檢查都過了")
         return 0
     for e in result["index"]["packs"]:
@@ -258,8 +273,11 @@ def main(argv=None) -> int:
     print(os.path.join(args.out, "index.json"))
     if not args.names and not args.no_costumes:
         print(os.path.join(args.out, links.SUMS_FILE) + f"（另有別名 *.synoxpack、{links.tools_zip()}、{links.TOOLS_ALIAS}）")
+        for rel in build_site.write():        # 入口頁（＋沒有手寫頁的工具頁）從 pack.json 產生
+            print("公開頁產生：" + rel)
         for path in links.refresh():          # 下載連結＝pack.json 的版本（LINK_MODE 見 scripts/links.py）
             print("下載連結更新：" + os.path.relpath(path, ROOT))
+        print("改到的公開頁要重新發佈線上版：python scripts/build_site.py --list-republish --since HEAD（docs/ARTIFACTS.md）")
     return 0
 
 

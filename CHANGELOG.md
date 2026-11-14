@@ -8,6 +8,12 @@
 - **`money` 0.3.0 → 0.3.1**（SYNOX 獨立安全審查第 1 輪）：金額欄位改用 SYNOX 的 `kit.amount`（大於 0、最多兩位小數、不超過十億；預算與上限另外收 0＝拿掉）；`nan`、`inf` 這類不是一般數字的值一律擋下（以前會讓記一筆出錯、讓預算存成 NaN 之後每筆都壞）。
 
 ### Added
+- **入口頁改成產生的**：`scripts/build_site.py`（`build.py` 全部打包時也跑；`--check`、`--list-republish [--since <git 版本>]`）從每個工具的
+  `pack.json`（＋選填的 `site` 區塊、`docs/site-tools.json`）產生 `docs/site/index.html`，加一個 `packs/<名字>/` 就多一張卡片、不用改 HTML；
+  沒有手寫說明頁的工具產生一頁簡單的（標「說明頁還沒寫」），手寫的 9 頁不動。樣板分開給設計改：`scripts/site_index_template.html`、
+  `scripts/site_tool_template.html`（版面沒變；衣櫃按鈕改連線上衣櫃頁）。線上頁網址登記在 `docs/artifacts.json`。
+  `index.json` 每個工具多 `line`（卡片上的一句話）。測試 `tests/test_build_site.py`（假的新工具會出現在入口頁與 index.json、連結對）。
+- 文件：`docs/README.md`（索引）、`docs/CONTRIBUTING-TOOLS.md`（新增工具從頭到尾）、`docs/ARTIFACTS.md`（線上頁）；`docs/RELEASING.md` 最上面加流程圖與檢查清單。
 - **`money` 0.2.0 → 0.3.0**（[ADR-0003](docs/adr/0003-tool-apps-and-money-app.md)；`stage` 仍是 alpha）：附完整的網頁畫面「記帳本」（SYNOX 的工具服務：
   總覽、帳目、類別、預算；畫面只走 SYNOX 的共用元件）；新指令 `/money_edit`（改一筆）；匯出 `entries_csv`（個人版、下載前提醒沒有加密；
   多人共用的 SYNOX 沒有匯出；加密匯出還沒做）。`pack.py` 拆成模組層的核心函式（指令與畫面同一份邏輯），舊指令的回覆一個字都沒變。
