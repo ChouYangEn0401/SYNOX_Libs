@@ -53,7 +53,7 @@ tests/test_<名字>.py          測試（第 4 節）
 | `access` | `"member"` | `owner`＝👤 單人用；`member`／`everyone`＝👥 伺服器版也能用（入口頁標籤照這個） |
 | `surfaces`、`data`、`storage` | `["dm"]`、`"user"`、`"vault"` | 權限與資料（pack-format.md） |
 | `order` | `10` | SYNOX `/help` 的順序；入口頁沒在 `docs/site-tools.json` 的 `order` 列到時也用它排 |
-| `capabilities` | `["network"]` | 有 `network`＝入口頁放在「接外面的服務」、標「要連網」；沒有＝「存在這台電腦（不連網）」、標「不連網」 |
+| `capabilities` | `["network"]` | 有 `network`＝入口頁放在「接外面的服務」、標「要上網」；沒有＝「存在你電腦裡的」、標「不用上網」 |
 | `requires` | `{"pip": [], "synox": ">=0.2", "sdk": ">=0.2,<0.3"}` | ★ 一定要寫 `requires.sdk`，範圍要包含拿來打包的 SYNOX 的 SDK（ADR-0001） |
 | `python` | `{"module": "pack"}` | kind=python |
 | `skill` | `"SKILL.md"` | |
@@ -94,7 +94,7 @@ tests/test_<名字>.py          測試（第 4 節）
 | `name` | 粗體名字 | `title` 去掉 emoji |
 | `line` | 一句話（也會寫進 `index.json` 的 `line`，SYNOX 的工具卡片用） | `summary` |
 | `example` | 灰底的指令例子（整句，含 `/`） | `help` 的第一個範例（上面）；都沒有就不顯示 |
-| `status` | 第二個標籤，例 `"只用模擬測過"` | 不連網的工具標「不連網」，連網的標「要連網」 |
+| `status` | 第二個標籤，例 `"還沒真的連上去測過，只用假資料試過"` | 不用上網的工具標「不用上網」，要上網的標「要上網」 |
 | `network` | `true`／`false`：放哪一組、標不標連網 | `capabilities` 有沒有 `network` |
 
 寫在哪裡（後面的蓋過前面的）：
@@ -172,7 +172,7 @@ python scripts/build_site.py --check     # 只檢查公開頁
 
 ## 8. SYNOX 怎麼拿到新工具
 
-- **線上目錄**：SYNOX 網頁「設定 → 功能與安裝 → 工具庫（官方）」按「載入工具清單」時，抓寫死在 SYNOX 的
+- **線上目錄**：SYNOX 網頁「設定 → 功能與安裝 → 工具庫（官方）」按「看有哪些工具」時，抓寫死在 SYNOX 的
   `synox/packs/catalog.py` 的 `OFFICIAL_INDEX_URL`（現在釘在 `releases/download/v0.2.0/index.json`）。
   所以**新工具上傳到發佈頁、`index.json` 換新的之後就會出現**；按「安裝」會下載那個檔、對大小與 sha256、跑一樣的安全檢查報告。
 - 卡片上的字：emoji、名字來自 `index.json` 的 `title`，一句話來自 `line`（這裡的入口頁同一份）。
