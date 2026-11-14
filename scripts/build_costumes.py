@@ -34,7 +34,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COSTUMES = os.path.join(ROOT, "costumes")
 SITE = os.path.join(ROOT, "docs", "site")
 REPO_URL = "https://github.com/ChouYangEn0401/SYNOX_Libs"
-ONLINE_URL = "https://claude.ai/artifact/PENDING"           # 公開頁的線上版（Artifact）
+ONLINE_URL = "https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR"           # 公開頁的線上版（Artifact）
 COLLECTION = {"id": "wardrobe", "title": "SYNOX 衣櫃", "category": "衣櫃／外觀",
               "summary": "26 套外觀：整個聊天介面的顏色、吉祥物、開場一起換。不帶任何程式，換回預設隨時可以。"}
 VERSION = "1.0.0"
