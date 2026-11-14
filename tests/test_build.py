@@ -183,3 +183,10 @@ def test_catalog_only_names_existing_tools(tmp_path):
 
 def test_check_mode_passes_on_this_repo():
     assert build_script.build(check_only=True)["problems"] == []
+
+
+def test_index_marks_tools_with_an_app(built):
+    """ADR-0003：index.json 每筆多 "app"，給目錄頁標「有完整畫面」。"""
+    _out, index = built
+    entries = {e["name"]: e for e in index["packs"]}
+    assert entries["money"]["app"] is True and entries["notes"]["app"] is False

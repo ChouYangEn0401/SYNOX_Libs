@@ -1,0 +1,14 @@
+/* 記帳本的樣式（共用的在 /_synox/kit.css）。只用這個資料夾裡的東西。 */
+#money { max-width: 960px; margin: 0 auto; padding: 0 0 40px; }
+.money-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin: 12px; }
+.money-big { font-size: 1.6em; font-weight: 600; font-variant-numeric: tabular-nums; }
+.money-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; }
+.money-bar { display: grid; grid-template-columns: minmax(6em, 10em) 1fr auto; gap: 8px; align-items: center; margin: 4px 0; }
+.money-bar .meter { height: 10px; }
+.money-filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; }
+.money-filters .field { margin: 0; min-width: 8em; }
+.money-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.money-actions .btn { padding: 2px 8px; font-size: 13px; }
+.money-note { color: var(--muted); font-size: 13px; }
+.money-group h3 { margin: 12px 0 4px; font-size: 15px; }
+.money-empty { color: var(--muted); padding: 12px 0; }
