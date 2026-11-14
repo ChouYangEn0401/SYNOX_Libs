@@ -124,6 +124,7 @@ URL_PACK_RAW = re.compile(_REPO + r"/raw/[^/\"'\s]+/docs/site/packs/" + _PACK_IN
 URL_TOOLS = re.compile(_REPO + r"/releases/(?:download/v" + VER + r"|latest/download)/tools(?:-" + VER + r")?\.zip", re.I)
 URL_RELEASE_PAGE = re.compile(_REPO + r"/releases/(?:tag/v" + VER + r"|latest)(?=[\"'\s)<])", re.I)
 ANY_ASSET_URL = re.compile(_REPO + r"/(?:releases/(?:download/(v" + VER + r")|latest/download)|raw/[^\"'\s)<]+)/([^\"'\s)<>]+)", re.I)
+URL_SUMS = re.compile(_REPO + r"/releases/(?:download/v" + VER + r"|latest/download)/SHA256SUMS(?![\w.-])", re.I)
 TEXT_PACK_FILE = re.compile(r"(?<![\w/.-])" + _PACK_IN + "-(" + VER + r")\.synoxpack")
 TEXT_TOOLS_ZIP = re.compile(r"(?<![\w/.-])tools-(" + VER + r")\.zip")
 TEXT_RELEASE_LABEL = re.compile(r"(發佈頁 )v" + VER)
@@ -147,6 +148,7 @@ def render(text: str, mode: str = None, root: str = ROOT) -> str:
     text = URL_PACK_VERSIONED.sub(pack_link, text)
     text = URL_PACK_ALIAS.sub(pack_link, text)
     text = URL_TOOLS.sub(lambda m: tools_url(mode, root), text)
+    text = URL_SUMS.sub(lambda m: asset_url("SHA256SUMS", mode, root), text)
     text = URL_RELEASE_PAGE.sub(lambda m: release_page_url(mode, root), text)
 
     def file_text(m):

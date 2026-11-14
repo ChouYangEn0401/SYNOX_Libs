@@ -445,7 +445,7 @@ def page_html() -> str:
             stamp_old = m.group(1) if m else ""
     repl = {
         "{{COUNT}}": str(len(folders)), "{{TAG}}": tag, "{{VERSION}}": library_version(),
-        "{{RELEASE}}": links.release_page_url(), "{{NAV}}": "".join(nav),
+        "{{RELEASE}}": links.release_page_url(), "{{SUMS}}": links.asset_url("SHA256SUMS"), "{{NAV}}": "".join(nav),
         "{{TOKENS_CSS}}": "\n".join(tokens_css), "{{THEME_CSS}}": "\n".join(theme_css),
         "{{CARDS}}": "\n".join(cards), "{{STAMP}}": stamp_old, "{{ONLINE}}": ONLINE_URL,
     }
