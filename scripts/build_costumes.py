@@ -92,11 +92,12 @@ def release_tag() -> str:
 
 
 def download_url(file: str) -> str:
-    # 預設：檔案跟著衣櫃頁一起發佈在 packs/ 底下（線上頁直接下載）。
-    # WARDROBE_LINKS=release：改指向 GitHub 發佈頁的資產。
+        # WARDROBE_LINKS=release：改指向 GitHub 發佈頁的資產。
     if os.environ.get("WARDROBE_LINKS") == "release":
         return f"{REPO_URL}/releases/download/{release_tag()}/{file}"
-    return f"packs/{file}"
+    # 預設：直接從 repo 裡的 docs/site/packs/ 下載（WARDROBE_BRANCH，預設 main）
+    branch = os.environ.get("WARDROBE_BRANCH", "main")
+    return f"{REPO_URL}/raw/{branch}/docs/site/packs/{file}"
 
 
 # ── 規則：不帶程式（check、pack、測試都用這一份）────────────────────────
