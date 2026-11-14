@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "糰糰",
-  "description": "一顆軟軟的麻糬糰子，被戳會彈回來。SYNOX 衣櫃 · 系列 F：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "一顆軟軟的麻糬糰子，被戳會彈回來。SYNOX 衣櫃 · 系列 F：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#fbf3f0",

@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "來福",
-  "description": "會等你說「好」的小黃狗：坐下、等一下、好！。SYNOX 衣櫃 · 系列 O：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "會等你說「好」的小黃狗：坐下、等一下、好！。SYNOX 衣櫃 · 系列 O：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f8f2e9",

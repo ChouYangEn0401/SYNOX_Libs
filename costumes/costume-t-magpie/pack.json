@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "啾啾",
-  "description": "一隻台灣藍鵲：黑頭、黃眼睛、紅嘴巴，有事就飛來跟你啾一聲。SYNOX 衣櫃 · 系列 T：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "一隻台灣藍鵲：黑頭、黃眼睛、紅嘴巴，有事就飛來跟你啾一聲。SYNOX 衣櫃 · 系列 T：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f1f7fc",

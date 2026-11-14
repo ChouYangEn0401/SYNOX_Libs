@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "牽牽",
-  "description": "大點牽著小點：你說好，線才接上。SYNOX 衣櫃 · 系列 J：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "大點牽著小點：你說好，線才接上。SYNOX 衣櫃 · 系列 J：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f2f4fb",

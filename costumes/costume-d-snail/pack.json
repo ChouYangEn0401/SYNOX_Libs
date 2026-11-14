@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "小殼",
-  "description": "把家背在身上的蝸牛：資料不出門。SYNOX 衣櫃 · 系列 D：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "把家背在身上的蝸牛：資料不出門。SYNOX 衣櫃 · 系列 D：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f1f4ee",

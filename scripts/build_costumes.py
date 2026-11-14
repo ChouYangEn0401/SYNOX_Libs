@@ -13,9 +13,14 @@
   再把開場（HTML 排版＋CSS 動畫）量好位置、轉成純 SVG。
 - pack 與 check 只用標準函式庫；scripts/build.py 打包工具時也會順便打包衣櫃、把它們寫進同一份 index.json
   （kind=theme、category「衣櫃／外觀」）。
-- 格式（theme pack）見 SYNOX 的 pack 格式；這裡照的契約：pack.json 的 theme.tokens（light／dark）、theme.slots（7 個 SVG）、
-  theme.css（只有 custom properties 與 [data-slot] 底下的規則，keyframes 都用 c<字母>- 開頭）、fonts（空的：不附字型）。
-  SYNOX 那邊的實作之後如果不一樣，改這支腳本、重新產生就好（costumes/ 不要手改）。
+- 格式＝SYNOX 的外觀包（kind=theme，SYNOX 的 docs/themes.md、src/synox/theme/）合約第 1 版：
+  pack.json 有 summary、theme.contract=1、theme.tokens（light／dark 都給齊核心 12 色）、theme.slots（7 個 SVG）、
+  theme.css、fonts（空的：不附字型）。SYNOX 安裝時把每個檔消毒（白名單重建），所以這裡產生的東西要「消毒前後一樣」：
+  · theme.css：:root 只設 --th- 開頭的變數（這一套自己多用的顏色）；其他規則都在 [data-slot] 底下；
+    @keyframes 用 th-<字母>- 開頭；沒有 !important（減少動態由 SYNOX 網頁自己全域關掉）。
+  · SVG：沒有 style="…"（SYNOX 的 CSP 不收 inline style）：transform-origin 寫成屬性，--i 這種變數換成 class＋theme.css 的規則；
+    只用 SYNOX 白名單裡的濾鏡（沒有 feTurbulence）。id 用 c<字母>- 開頭（SYNOX 會再加 ts-<slot>- 前綴，url(#…) 一起改）。
+  SYNOX 那邊的實作之後如果又不一樣，改這支腳本、重新產生就好（costumes/ 不要手改）。
 """
 
 from __future__ import annotations
@@ -55,9 +60,22 @@ SLUGS = {"A": "bubble", "B": "lantern", "C": "stamp", "D": "snail", "E": "cursor
          "H": "teapot", "I": "marquee", "J": "tether", "K": "pulse", "L": "blocks", "M": "bell", "N": "gecko",
          "O": "puppy", "P": "lock", "Q": "sticky", "R": "bento", "S": "pangolin", "T": "magpie", "U": "mountain",
          "V": "kintsugi", "W": "pixel", "X": "circle", "Y": "clay", "Z": "cat"}
+CONTRACT = 1                          # SYNOX 外觀合約的版本（pack.json 的 theme.contract）
+PUBLISHER = "SYNOX 衣櫃"
+STAGE = "alpha"                       # 跟 index.json 寫的一樣
 MAX_PACK_BYTES = 300 * 1024           # 一套外觀的 .synoxpack 上限（SYNOX 上傳上限是 5 MB；這裡刻意小很多）
 PACKED = ("pack.json", "theme.css") + tuple(SLOT_FILES.values())
 SVG_NS = ('xmlns="http://www.w3.org/2000/svg"', 'xmlns:xlink="http://www.w3.org/1999/xlink"')
+MAX_SLOT_BYTES = 64 * 1024            # SYNOX：一個 slot 檔、theme.css 各 64 KB
+ROOT_SELECTORS = (':root', ':root[data-theme="light"]', ':root[data-theme="dark"]', ':root:not([data-theme="light"])',
+                  ':root:not([data-theme="dark"])')
+# SYNOX 白名單裡的 SVG 濾鏡（沒列的會被消毒拿掉）
+FILTER_PRIMITIVES = ("feGaussianBlur", "feOffset", "feMerge", "feMergeNode", "feFlood", "feComposite", "feBlend",
+                     "feColorMatrix", "feDropShadow", "feMorphology")
+
+
+def keyframe_prefix(letter: str) -> str:
+    return f"th-{letter.lower()}-"
 
 
 def costume_id(letter: str) -> str:
@@ -102,8 +120,8 @@ def code_problems(name: str, text: str) -> list:
     return [f"{name}: 有 {what}" for rx, what in FORBIDDEN if rx.search(text)]
 
 
-def _css_blocks(css: str):
-    """(前綴, 內容) 一層一層拆開：@media 會再往裡拆；@keyframes 回 ("@keyframes 名字", 內容)。"""
+def _css_media_blocks(css: str, media: str = ""):
+    """(外面包的 @media 條件或 "", 前綴, 內容)：一層一層拆開，@media 往裡拆；@keyframes 回 ("@keyframes 名字", 內容)。"""
     css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)
     i, n = 0, len(css)
     while i < n:
@@ -117,16 +135,30 @@ def _css_blocks(css: str):
             k += 1
         body = css[j + 1:k - 1]
         if head.startswith("@media"):
-            for h, b in _css_blocks(body):
-                yield (head + " " + h if h.startswith("@media") else h), b
+            cond = head[len("@media"):].strip()
+            yield from _css_media_blocks(body, f"{media} and {cond}" if media else cond)
         else:
-            yield head, body
+            yield media, head, body
         i = k
+
+
+def _css_blocks(css: str):
+    """(前綴, 內容)：跟 _css_media_blocks 一樣，不管外面的 @media。"""
+    for _media, head, body in _css_media_blocks(css):
+        yield head, body
+
+
+ANIM_WORDS = {"none", "infinite", "normal", "reverse", "alternate", "alternate-reverse", "forwards", "backwards", "both",
+              "running", "paused", "ease", "ease-in", "ease-out", "ease-in-out", "linear", "step-start", "step-end",
+              "auto", "initial", "inherit", "unset"}
 
 
 def css_problems(name: str, css: str, letter: str) -> list:
     out = []
-    prefix = f"c{letter.lower()}-"
+    prefix = keyframe_prefix(letter)
+    if "!important" in css.replace(" ", "").lower():
+        out.append(f"{name}: 有 !important（SYNOX 不收）")
+    defined = set(re.findall(r"@keyframes\s+([\w-]+)", css))
     for head, body in _css_blocks(css):
         if head.startswith("@keyframes"):
             kf = head.split(None, 1)[1].strip()
@@ -136,14 +168,20 @@ def css_problems(name: str, css: str, letter: str) -> list:
         if head.startswith("@"):
             out.append(f"{name}: 不准的 at-rule {head[:40]}")
             continue
-        for sel in head.split(","):
+        sels = [" ".join(s.split()) for s in head.split(",")]
+        if all(s in ROOT_SELECTORS for s in sels):
+            for k, _v in decls_of(body):
+                if not k.startswith("--th-"):
+                    out.append(f"{name}: :root 只能設 --th- 開頭的變數（{k}）")
+            continue
+        for sel in sels:
             if "[data-slot]" not in sel and ".theme-slot-" not in sel:
                 out.append(f"{name}: 規則 {sel.strip()[:60]} 沒有限定在 [data-slot] 底下")
         for m in re.finditer(r"animation(?:-name)?\s*:([^;]*)", body):
             for part in m.group(1).split(","):
                 for tok in part.split():
-                    if re.match(r"^[A-Za-z_][\w-]*$", tok) and tok.startswith("c") and "-" in tok and not tok.startswith(prefix) and tok not in ("cubic-bezier",):
-                        out.append(f"{name}: 動畫 {tok} 不是 {prefix} 開頭")
+                    if re.match(r"^[A-Za-z_][\w-]*$", tok) and tok not in ANIM_WORDS and tok not in defined:
+                        out.append(f"{name}: 動畫 {tok} 沒有對應的 @keyframes（要用 {prefix} 開頭）")
     media = re.findall(r"@media\s*([^{]*)\{", re.sub(r"/\*.*?\*/", "", css, flags=re.S))
     for m in media:
         if "prefers-color-scheme" not in m and "prefers-reduced-motion" not in m:
@@ -170,10 +208,12 @@ def pack_problems(folder: str) -> list:
         out.append(f"{name}: kind 要是 theme")
     if not re.match(r"^\d+\.\d+\.\d+$", str(raw.get("version", ""))):
         out.append(f"{name}: version 要是 x.y.z")
-    for key in ("title", "description"):
+    for key in ("title", "summary"):
         if not isinstance(raw.get(key), str) or not raw[key].strip():
             out.append(f"{name}: 要寫 {key}")
     theme = raw.get("theme") or {}
+    if theme.get("contract") != CONTRACT:
+        out.append(f"{name}: theme.contract 要是 {CONTRACT}（SYNOX 外觀合約的版本）")
     tokens = theme.get("tokens") or {}
     for mode in ("light", "dark"):
         got = tokens.get(mode) or {}
@@ -208,8 +248,16 @@ def pack_problems(folder: str) -> list:
             for i in re.findall(r'\sid="([^"]+)"', text):
                 if not i.startswith(f"c{letter.lower()}-"):
                     out.append(f"{name}/{rel}: id {i} 要用 c{letter.lower()}- 開頭（多個 SVG 放在同一頁時才不會撞）")
+            if re.search(r"\sstyle\s*=", text):
+                out.append(f"{name}/{rel}: 有 style=\"…\"（SYNOX 的網頁不收 inline style：寫成屬性或 class）")
+            for el in sorted(set(re.findall(r"<(fe[A-Za-z]+)", text)) - set(FILTER_PRIMITIVES)):
+                out.append(f"{name}/{rel}: 有 <{el}>（SYNOX 的白名單沒有這個濾鏡）")
+            if len(text.encode("utf-8")) > MAX_SLOT_BYTES:
+                out.append(f"{name}/{rel}: 太大（一個 slot 最多 {MAX_SLOT_BYTES // 1024} KB）")
         elif rel.endswith(".css"):
             out += css_problems(f"{name}/{rel}", text, letter)
+            if len(text.encode("utf-8")) > MAX_SLOT_BYTES:
+                out.append(f"{name}/{rel}: 太大（theme.css 最多 {MAX_SLOT_BYTES // 1024} KB）")
     if theme.get("fonts"):
         out.append(f"{name}: 衣櫃的外觀不附字型（fonts 要是空的）")
     size = sum(os.path.getsize(os.path.join(folder, *p.split("/"))) for p in PACKED if os.path.isfile(os.path.join(folder, *p.split("/"))))
@@ -274,8 +322,8 @@ def index_entry(folder: str, path: str) -> dict:
     info = about(folder)
     with open(path, "rb") as f:
         blob = f.read()
-    return {"name": raw["name"], "title": raw["title"], "summary": raw["description"], "version": raw["version"],
-            "stage": "alpha", "kind": "theme", "category": COLLECTION["category"], "collection": COLLECTION["id"],
+    return {"name": raw["name"], "title": raw["title"], "summary": raw["summary"], "version": raw["version"],
+            "stage": raw.get("stage", STAGE), "kind": "theme", "category": COLLECTION["category"], "collection": COLLECTION["id"],
             "series": info.get("letter", ""), "line": info.get("one", ""),
             "group": "", "access": "owner", "capabilities": [], "requires": {}, "bundles": [],
             "file": os.path.basename(path), "sha256": sha256_bytes(blob), "size": len(blob)}
@@ -300,20 +348,18 @@ def pack_all(out_dir: str) -> dict:
 # ── 公開頁 docs/site/wardrobe.html ─────────────────────────────────────
 
 def _scope_css(css: str, scope: str) -> str:
-    """theme.css 原本假設整頁只有一套外觀；公開頁同時放 26 套，所以每條規則多限定在 .<scope> 底下。"""
+    """theme.css 原本假設整頁只有一套外觀；公開頁同時放 26 套，所以每條規則多限定在 .<scope> 底下。
+    :root 那幾段（--th- 變數）不搬：公開頁用 about.json 的 extras 在 .<scope> 上設（26 套的同名變數才不會互蓋）。"""
     out = []
-    for head, body in _css_blocks(css):
+    for media, head, body in _css_media_blocks(css):
         if head.startswith("@keyframes"):
             out.append(f"{head}{{{body}}}")
             continue
-        media = ""
-        m = re.match(r"^(@media[^{]*?)\s+([^@]*)$", head)
-        if head.startswith("@media"):
-            m = re.match(r"^(@media\s*\([^)]*\)(?:\s*and\s*\([^)]*\))*)\s*(.*)$", head)
-            media, head = m.group(1), m.group(2)
+        if all(" ".join(s.split()) in ROOT_SELECTORS for s in head.split(",")):
+            continue
         sels = ",".join(s.replace("[data-slot]", f".{scope} [data-slot]") for s in head.split(","))
         rule = f"{sels}{{{body}}}"
-        out.append(f"{media}{{{rule}}}" if media else rule)
+        out.append(f"@media {media}{{{rule}}}" if media else rule)
     return "\n".join(out)
 
 
@@ -339,8 +385,8 @@ def page_html() -> str:
 
         def block(d):
             return ";".join(f"{k}:{v}" for k, v in d.items() if k not in ("--font-ui", "--font-brand"))
-        extras_l = ";".join(f"--{k}:{v}" for k, v in info.get("extras", {}).get("light", {}).items())
-        extras_d = ";".join(f"--{k}:{v}" for k, v in info.get("extras", {}).get("dark", {}).items())
+        extras_l = ";".join(f"--th-{k}:{v}" for k, v in info.get("extras", {}).get("light", {}).items())
+        extras_d = ";".join(f"--th-{k}:{v}" for k, v in info.get("extras", {}).get("dark", {}).items())
         tokens_css.append(f".{scope}{{{block(toks['light'])};{extras_l}}}")
         tokens_css.append(f"@media (prefers-color-scheme:dark){{:root:not([data-theme=\"light\"]) .{scope}{{{block(toks['dark'])};{extras_d}}}}}")
         tokens_css.append(f":root[data-theme=\"dark\"] .{scope}{{{block(toks['dark'])};{extras_d}}}")
@@ -818,6 +864,73 @@ def prefix_ids(svg: str, p: str) -> str:
     return svg
 
 
+def rename_extras(text: str, names) -> str:
+    """這一套自己多用的變數（不是 SYNOX 的 token）改成 --th-<名字>：SYNOX 的 :root 只收合約 token 與 --th- 開頭的。"""
+    if not names:
+        return text
+    rx = r"(?<![\w-])--(" + "|".join(sorted(map(re.escape, names), key=len, reverse=True)) + r")(?![\w-])"
+    return re.sub(rx, r"--th-\1", text)
+
+
+def strip_filters(svg: str) -> str:
+    """SYNOX 白名單外的濾鏡元件（例如 Y 的 feTurbulence 顆粒）連同吃它結果的那一串拿掉，剩下的濾鏡照常算。
+    不拿掉的話 SYNOX 消毒時只拿掉那一個元件，後面 in="…" 指到不存在的結果，整個濾鏡會算錯。"""
+    dead = set()
+
+    def prim(m):
+        tag, name = m.group(0), m.group(1) or m.group(2)
+        uses = set(re.findall(r'\sin2?="([^"]+)"', tag))
+        if name in FILTER_PRIMITIVES and not (uses & dead):
+            return tag
+        if m.group(2):                                   # 裡面還有東西的（<feComponentTransfer>…）：要另外處理
+            raise SystemExit(f"不會拿掉裡面有東西的 <{name}>：build_costumes.py 要跟著改")
+        r = re.search(r'\sresult="([^"]+)"', tag)
+        if r:
+            dead.add(r.group(1))
+        return ""
+    return re.sub(r"<(fe[A-Za-z]+)\b[^<>]*?(?:/>|>\s*</\1>)|<(fe[A-Za-z]+)\b[^<>]*>", prim, svg)
+
+
+# style="…" 裡可以直接變成 SVG 屬性的（SYNOX 的消毒也是這樣轉；先在這裡轉好，消毒前後才會一樣）
+LIFT_ATTRS = {"fill", "fill-opacity", "fill-rule", "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin",
+              "stroke-miterlimit", "stroke-dasharray", "stroke-dashoffset", "stroke-opacity", "opacity", "stop-color",
+              "stop-opacity", "clip-path", "clip-rule", "mask", "filter", "flood-color", "flood-opacity", "font-family",
+              "font-size", "font-weight", "font-style", "text-anchor", "dominant-baseline", "letter-spacing",
+              "word-spacing", "visibility", "display", "vector-effect", "paint-order", "shape-rendering", "overflow",
+              "color", "mix-blend-mode", "isolation", "transform-origin"}
+
+
+def lift_styles(svg: str, p: str, classes: dict) -> str:
+    """SVG 的 style="…" 拿掉（SYNOX 網頁的 CSP 不收 inline style，消毒時只留顏色、線條這類）：
+    transform-origin 這類變成同名屬性；transform-box:view-box 是 SVG 的預設，直接拿掉；
+    --i、--dx 這種自訂變數換成一個 class（classes：宣告 → class 名），規則由呼叫的人寫進 theme.css。"""
+    def tag(m):
+        t = m.group(0)
+        sm = re.search(r'\sstyle="([^"]*)"', t)
+        if not sm:
+            return t
+        attrs, custom = [], []
+        for k, v in decls_of(html.unescape(sm.group(1))):
+            if k.startswith("--"):
+                custom.append(f"{k}:{v}")
+            elif k.lower() == "transform-box" and v == "view-box":
+                continue
+            elif k.lower() in LIFT_ATTRS:
+                attrs.append(f' {k.lower()}="{html.escape(v, quote=True)}"')
+            else:
+                raise SystemExit(f"style 裡有 {k}：SYNOX 不收 inline style，build_costumes.py 要跟著處理")
+        t = t[:sm.start()] + "".join(attrs) + t[sm.end():]
+        if custom:
+            cls = classes.setdefault(";".join(custom), f"{p}-v{len(classes)}")
+            cm = re.search(r'\sclass="([^"]*)"', t)
+            if cm:
+                t = t[:cm.start()] + f' class="{cm.group(1)} {cls}"' + t[cm.end():]
+            else:
+                t = re.sub(r"^<([A-Za-z][\w:-]*)", lambda mm: f'<{mm.group(1)} class="{cls}"', t)
+        return t
+    return re.sub(r"<[A-Za-z][^<>]*>", tag, svg)
+
+
 def clean_svg(svg: str) -> str:
     svg = svg.replace(' xmlns="http://www.w3.org/2000/svg"', "")
     svg = re.sub(r"\s(role|aria-label|aria-hidden)=\"[^\"]*\"", "", svg)
@@ -889,10 +1002,21 @@ def extract(brand: str, cache: str, only=None) -> None:
                 for i, g in enumerate(res[part]["glyphs"]):
                     svg = svg.replace(f"@@G{i}@@", glyph_path(g, cache, fonts))
                 slots[key] = svg
-            light = {RENAME.get(k, k): v for k, v in s["L"].items()}
+            kfp = keyframe_prefix(sid)
+            extras_l = {k: v for k, v in s["L"].items() if k not in KEYMAP}
+            extras_d = {k: v for k, v in s["D"].items() if k not in KEYMAP}
+            extra_names = sorted(set(extras_l) | set(extras_d))
+
+            def fix(text):
+                return rename_extras(rename_vars(text), extra_names)
+            light = {RENAME.get(k, k): v for k, v in s["L"].items() if k in KEYMAP or k in RENAME}
+            light.update({f"th-{k}": fix(v) for k, v in extras_l.items()})
+            var_classes = {}
             for key in slots:
-                svg = rename_vars(slots[key])
+                svg = fix(slots[key])
                 svg = prefix_ids(svg, p_)
+                svg = strip_filters(svg)
+                svg = lift_styles(svg, p_, var_classes)
                 svg = add_fallbacks(svg, light)
                 slots[key] = svg
             # ── CSS：挑出這個系列用到的規則，轉成 [data-slot] 底下的
@@ -923,7 +1047,7 @@ def extract(brand: str, cache: str, only=None) -> None:
                     for i, tok in enumerate(toks):
                         if tok in kf_names:
                             used.add(tok)
-                            toks[i] = f"{p_}-{tok}"
+                            toks[i] = f"{kfp}{tok}"
                     parts.append(" ".join(toks))
                 return ", ".join(parts)
             for (media, sel, css), kind in zip(cands, kinds):
@@ -956,23 +1080,25 @@ def extract(brand: str, cache: str, only=None) -> None:
                 for suffix, prop, val in derived:
                     out_rules.append((media, sel + suffix, [(prop, val)]))
             css_lines = [f"/* {s['name']}（系列 {sid}）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */"]
-            extras_l = {k: v for k, v in s["L"].items() if k not in KEYMAP}
-            extras_d = {k: v for k, v in s["D"].items() if k not in KEYMAP}
+            # 減少動態：SYNOX 網頁自己全域關掉動畫（這裡寫不了 !important）
             if extras_l:
-                css_lines.append("/* 這一套自己多用的顏色（不是共用 token） */")
-                css_lines.append("[data-slot]{" + ";".join(f"--{k}:{v}" for k, v in extras_l.items()) + "}")
-                dark = ";".join(f"--{k}:{v}" for k, v in extras_d.items())
-                css_lines.append('@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) [data-slot]{' + dark + "}}")
-                css_lines.append(':root[data-theme="dark"] [data-slot]{' + dark + "}")
-            css_lines.append("@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}")
+                css_lines.append("/* 這一套自己多用的顏色（不是合約 token；SYNOX 的 :root 只收 token 與 --th- 開頭的） */")
+                css_lines.append(":root{" + ";".join(f"--th-{k}:{fix(v)}" for k, v in extras_l.items()) + "}")
+                dark = ";".join(f"--th-{k}:{fix(v)}" for k, v in extras_d.items())
+                css_lines.append('@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){' + dark + "}}")
+                css_lines.append(':root[data-theme="dark"]{' + dark + "}")
             for media, sel, decls in out_rules:
-                body = ";".join(f"{k}:{rename_vars(v)}" for k, v in decls)
+                body = ";".join(f"{fix(k) if k.startswith('--') else k}:{fix(v)}" for k, v in decls)
                 rule = f"{sel}{{{body}}}"
                 css_lines.append(f"@media {media}{{{rule}}}" if media else rule)
+            if var_classes:
+                css_lines.append("/* 開場、字標裡每個元素自己的變數（原本寫在 style=\"…\"） */")
+                for decl, cls in var_classes.items():
+                    css_lines.append(f"[data-slot] .{cls}{{{fix(decl)}}}")
             for r in rules:
                 if r.get("kf") in used:
-                    text = re.sub(r"^@keyframes\s+[\w-]+", f"@keyframes {p_}-{r['kf']}", r["css"])
-                    css_lines.append(rename_vars(text))
+                    text = re.sub(r"^@keyframes\s+[\w-]+", f"@keyframes {kfp}{r['kf']}", r["css"])
+                    css_lines.append(fix(text))
             theme_css = "\n".join(css_lines) + "\n"
             write_costume(s, slots, theme_css, extras_l, extras_d)
         browser.close()
@@ -993,8 +1119,9 @@ def write_costume(s: dict, slots: dict, theme_css: str, extras_l: dict, extras_d
     os.makedirs(os.path.join(folder, "slots"), exist_ok=True)
     why = {w.split("|", 1)[0]: w.split("|", 1)[1] for w in s["why"]}
     pack = {"name": cid, "kind": "theme", "version": VERSION, "title": s["name"],
-            "description": f"{s['one']}。SYNOX 衣櫃 · 系列 {s['id']}：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
-            "theme": {"tokens": {"light": tokens_of(s, "light"), "dark": tokens_of(s, "dark")},
+            "summary": f"{s['one']}。SYNOX 衣櫃 · 系列 {s['id']}：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+            "publisher": PUBLISHER, "stage": STAGE,
+            "theme": {"contract": CONTRACT, "tokens": {"light": tokens_of(s, "light"), "dark": tokens_of(s, "dark")},
                       "slots": dict(SLOT_FILES), "css": "theme.css", "fonts": []}}
     with open(os.path.join(folder, "pack.json"), "w", encoding="utf-8", newline="\n") as f:
         f.write(json.dumps(pack, ensure_ascii=False, indent=2) + "\n")

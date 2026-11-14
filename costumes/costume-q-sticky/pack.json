@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "貼貼",
-  "description": "一張會笑的便利貼：要做什麼先寫給你看，你打勾才動手。SYNOX 衣櫃 · 系列 Q：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "一張會笑的便利貼：要做什麼先寫給你看，你打勾才動手。SYNOX 衣櫃 · 系列 Q：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f4f6f4",

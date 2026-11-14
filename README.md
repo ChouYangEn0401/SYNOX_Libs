@@ -90,7 +90,10 @@ python scripts\build_costumes.py extract --brand <品牌提案頁.html>   衣櫃
 另外 `about.json` 給公開頁用（不進 pack）。**不要手改**：全部由 `scripts/build_costumes.py extract` 從品牌提案頁產生
 （在瀏覽器裡呼叫頁面畫吉祥物的函式；開場原本是 HTML＋CSS 動畫，量好位置轉成純 SVG；字標的字用字型輪廓轉成路徑，所以不用附字型）。
 規則（`build_costumes.py` 的 `pack_problems`，`tests/test_costumes.py` 每次都跑）：沒有 `<script`、`on…=`、`javascript:`、外部網址（SVG 的 `xmlns` 例外）、
-`@import`、`foreignObject`、`data:`；CSS 只有 custom properties 與 `[data-slot]` 底下的規則，keyframes 用 `c<字母>-` 開頭；每套 300 KB 以內。
+`@import`、`foreignObject`、`data:`；照 SYNOX 外觀合約第 1 版（SYNOX 的 `docs/themes.md`）：`pack.json` 有 `summary`、`theme.contract: 1`，
+CSS 的 `:root` 只設 `--th-` 開頭的變數（這一套自己多用的顏色）、其他規則都在 `[data-slot]` 底下、keyframes 用 `th-<字母>-` 開頭、沒有 `!important`；
+SVG 沒有 `style="…"`（SYNOX 網頁的 CSP 不收）、只用 SYNOX 白名單裡的濾鏡；每套 300 KB 以內。
+有 SYNOX 的原始碼時（`SYNOX_SRC` 或旁邊的 `../SYNOX`），`tests/test_costumes.py` 也會直接跑 SYNOX 安裝時的第 1、2 關與消毒，確認 26 套都裝得進去、消毒時什麼都沒被拿掉。
 **字型**：不附（`fonts: []`）。`--font-ui`／`--font-brand` 寫的是字型名＋系統字後備，電腦上沒有就用系統字；字標和開場的字是路徑，不受影響。
 `scripts/build.py` 沒指定工具名時，會把 26 套一起打包、寫進同一份 `index.json`（`kind: "theme"`、`category: "衣櫃／外觀"`、
 `collection: "wardrobe"`，另有 `collections.wardrobe`），檔名 `costume-<字母>-<名字>-<版本>.synoxpack`，跟工具放在同一個發佈頁。

@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "小鎖",
-  "description": "一把會笑的小鎖：平常鎖著，你說好才打開。SYNOX 衣櫃 · 系列 P：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "一把會笑的小鎖：平常鎖著，你說好才打開。SYNOX 衣櫃 · 系列 P：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f5f5f7",

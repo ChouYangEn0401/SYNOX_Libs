@@ -1,25 +1,24 @@
 /* 啾啾（系列 T）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
-/* 這一套自己多用的顏色（不是共用 token） */
-[data-slot]{--wing:#1a6db5;--eye:#ffd84a;--tip:#ffffff;--twig:#9a7a58;--leaf:#58a86c}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) [data-slot]{--wing:#2278c2;--eye:#ffd84a;--tip:#ffffff;--twig:#8a6f52;--leaf:#58a86c}}
-:root[data-theme="dark"] [data-slot]{--wing:#2278c2;--eye:#ffd84a;--tip:#ffffff;--twig:#8a6f52;--leaf:#58a86c}
-@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
+/* 這一套自己多用的顏色（不是合約 token；SYNOX 的 :root 只收 token 與 --th- 開頭的） */
+:root{--th-wing:#1a6db5;--th-eye:#ffd84a;--th-tip:#ffffff;--th-twig:#9a7a58;--th-leaf:#58a86c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--th-wing:#2278c2;--th-eye:#ffd84a;--th-tip:#ffffff;--th-twig:#8a6f52;--th-leaf:#58a86c}}
+:root[data-theme="dark"]{--th-wing:#2278c2;--th-eye:#ffd84a;--th-tip:#ffffff;--th-twig:#8a6f52;--th-leaf:#58a86c}
 [data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
-[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running ct-m-blink}
-[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running ct-m-bob}
-[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running ct-m-tilt}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-t-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running th-t-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running th-t-m-tilt}
 [data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
-[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running ct-m-hop}
-[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running ct-m-shake}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-t-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running th-t-m-shake}
 [data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
-[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running ct-m-dot}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running th-t-m-dot}
 [data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
 [data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
-[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running ct-m-pop}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-t-m-pop}
 [data-slot] .op .ow{color:var(--text)}
-[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running ct-o-fade}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-t-o-fade}
 [data-slot] .op .hi{opacity:0}
 [data-slot] .op .hi > .v > .bg{fill:var(--surface)}
 [data-slot] .op .hi > .v > .bd{stroke:var(--line)}
@@ -28,107 +27,113 @@
 [data-slot][data-slot] .masc .btail{transform-box:fill-box}
 [data-slot][data-slot] .masc .bhead{transform-box:fill-box}
 [data-slot][data-slot] .masc .bwing{transform-origin:50% 4%}
-[data-slot][data-slot] .masc .btail{transform-origin:0% 0%;animation:3s ease-in-out 0s infinite normal none running ct-t-tail}
+[data-slot][data-slot] .masc .btail{transform-origin:0% 0%;animation:3s ease-in-out 0s infinite normal none running th-t-t-tail}
 [data-slot][data-slot] .masc .bhead{transform-origin:50% 100%}
 [data-slot][data-slot] .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
-[data-slot][data-slot] .st-idle .bhead{animation:5.5s ease-in-out 0s infinite normal none running ct-t-peek}
+[data-slot][data-slot] .st-idle .bhead{animation:5.5s ease-in-out 0s infinite normal none running th-t-t-peek}
 [data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
-[data-slot][data-slot] .st-think .bhead{animation:3s ease-in-out 0s infinite normal none running ct-t-tilt}
-[data-slot][data-slot] .st-happy .bwing.bl{animation:0.3s ease-in-out 0s infinite alternate none running ct-t-flapl}
-[data-slot][data-slot] .st-happy .bwing.br{animation:0.3s ease-in-out 0s infinite alternate none running ct-t-flapr}
+[data-slot][data-slot] .st-think .bhead{animation:3s ease-in-out 0s infinite normal none running th-t-t-tilt}
+[data-slot][data-slot] .st-happy .bwing.bl{animation:0.3s ease-in-out 0s infinite alternate none running th-t-t-flapl}
+[data-slot][data-slot] .st-happy .bwing.br{animation:0.3s ease-in-out 0s infinite alternate none running th-t-t-flapr}
 [data-slot][data-slot] .st-happy .btail{animation-duration:0.6s}
 [data-slot][data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
-[data-slot][data-slot] .st-warn .bwing.bl{transform:rotate(66deg);animation:1.8s ease-in-out 0s infinite normal none running ct-t-guardl}
-[data-slot][data-slot] .st-warn .bwing.br{transform:rotate(-66deg);animation:1.8s ease-in-out 0s infinite normal none running ct-t-guardr}
+[data-slot][data-slot] .st-warn .bwing.bl{transform:rotate(66deg);animation:1.8s ease-in-out 0s infinite normal none running th-t-t-guardl}
+[data-slot][data-slot] .st-warn .bwing.br{transform:rotate(-66deg);animation:1.8s ease-in-out 0s infinite normal none running th-t-t-guardr}
 [data-slot][data-slot] .st-warn .btail{animation:auto ease 0s 1 normal none running none}
-[data-slot][data-slot] .op-T .om{animation:0.8s cubic-bezier(0.3, 0.7, 0.3, 1) 0s 1 normal both running ct-t-o-fly}
-[data-slot][data-slot] .op-T .bwing.bl{animation:0.13s ease-in-out 0s 6 alternate both running ct-t-flapl}
-[data-slot][data-slot] .op-T .bwing.br{animation:0.13s ease-in-out 0s 6 alternate both running ct-t-flapr}
+[data-slot][data-slot] .op-T .om{animation:0.8s cubic-bezier(0.3, 0.7, 0.3, 1) 0s 1 normal both running th-t-t-o-fly}
+[data-slot][data-slot] .op-T .bwing.bl{animation:0.13s ease-in-out 0s 6 alternate both running th-t-t-flapl}
+[data-slot][data-slot] .op-T .bwing.br{animation:0.13s ease-in-out 0s 6 alternate both running th-t-t-flapr}
 [data-slot][data-slot] .op-T .st-idle .bhead{animation-delay:2.4s}
-[data-slot][data-slot] .op-T .bperch{animation:0.3s ease 0.62s 1 normal both running ct-t-o-perch}
-[data-slot][data-slot] .op-T .l{animation:ct-t-o-let .5s cubic-bezier(.3, 1.6, .5, 1) calc(.72s + var(--i) * 70ms) both}
-[data-slot][data-slot] .op-T .hi{animation:1.05s ease 1.4s 1 normal both running ct-o-hi}
+[data-slot][data-slot] .op-T .bperch{animation:0.3s ease 0.62s 1 normal both running th-t-t-o-perch}
+[data-slot][data-slot] .op-T .l{animation:th-t-t-o-let .5s cubic-bezier(.3, 1.6, .5, 1) calc(.72s + var(--i) * 70ms) both}
+[data-slot][data-slot] .op-T .hi{animation:1.05s ease 1.4s 1 normal both running th-t-o-hi}
 [data-slot][data-slot] .op-T .ot{animation-delay:1.85s}
-@keyframes ct-m-blink { 
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .ct-v0{--i:0}
+[data-slot] .ct-v1{--i:1}
+[data-slot] .ct-v2{--i:2}
+[data-slot] .ct-v3{--i:3}
+[data-slot] .ct-v4{--i:4}
+@keyframes th-t-m-blink { 
   0%, 93%, 100% { transform: scaleY(1); }
   96% { transform: scaleY(0.1); }
 }
-@keyframes ct-m-bob { 
+@keyframes th-t-m-bob { 
   50% { transform: translateY(-3px); }
 }
-@keyframes ct-m-tilt { 
+@keyframes th-t-m-tilt { 
   0%, 100% { transform: rotate(-3deg); }
   50% { transform: rotate(4deg); }
 }
-@keyframes ct-m-hop { 
+@keyframes th-t-m-hop { 
   0%, 100% { transform: none; }
   12% { transform: scale(1.06, 0.92); }
   40% { transform: translateY(-9px) scale(0.97, 1.04); }
   70% { transform: scale(1.03, 0.96); }
 }
-@keyframes ct-m-shake { 
+@keyframes th-t-m-shake { 
   0%, 16%, 100% { transform: none; }
   3%, 9% { transform: translateX(-2.5px); }
   6%, 12% { transform: translateX(2.5px); }
 }
-@keyframes ct-m-dot { 
+@keyframes th-t-m-dot { 
   0%, 100% { opacity: 0.25; }
   40% { opacity: 1; }
 }
-@keyframes ct-m-pop { 
+@keyframes th-t-m-pop { 
   0% { transform: scale(0); }
   12%, 100% { transform: scale(1); }
 }
-@keyframes ct-o-fade { 
+@keyframes th-t-o-fade { 
   0% { opacity: 0; transform: translateY(6px); }
 }
-@keyframes ct-o-hi { 
+@keyframes th-t-o-hi { 
   0% { opacity: 0; transform: scale(0.3) rotate(-12deg); }
   22% { opacity: 1; transform: scale(1.1); }
   32%, 78% { opacity: 1; transform: none; }
   100% { opacity: 0; transform: translateY(-6px); }
 }
-@keyframes ct-t-tail { 
+@keyframes th-t-t-tail { 
   0%, 100% { transform: rotate(-3deg); }
   50% { transform: rotate(4deg); }
 }
-@keyframes ct-t-peek { 
+@keyframes th-t-t-peek { 
   0%, 20%, 100% { transform: none; }
   28%, 46% { transform: rotate(7deg); }
   56%, 74% { transform: rotate(-6deg); }
   84% { transform: none; }
 }
-@keyframes ct-t-tilt { 
+@keyframes th-t-t-tilt { 
   0%, 12%, 100% { transform: rotate(0deg); }
   30%, 70% { transform: rotate(-14deg); }
   88% { transform: rotate(0deg); }
 }
-@keyframes ct-t-flapl { 
+@keyframes th-t-t-flapl { 
   0% { transform: rotate(14deg); }
   100% { transform: rotate(72deg); }
 }
-@keyframes ct-t-flapr { 
+@keyframes th-t-t-flapr { 
   0% { transform: rotate(-14deg); }
   100% { transform: rotate(-72deg); }
 }
-@keyframes ct-t-guardl { 
+@keyframes th-t-t-guardl { 
   0%, 100% { transform: rotate(66deg); }
   50% { transform: rotate(56deg); }
 }
-@keyframes ct-t-guardr { 
+@keyframes th-t-t-guardr { 
   0%, 100% { transform: rotate(-66deg); }
   50% { transform: rotate(-56deg); }
 }
-@keyframes ct-t-o-fly { 
+@keyframes th-t-t-o-fly { 
   0% { opacity: 0; transform: translate(150px, -130px) rotate(16deg) scale(0.7); }
   15% { opacity: 1; }
   78% { transform: translate(-3px, 5px) scale(1.04, 0.94); }
   100% { transform: none; }
 }
-@keyframes ct-t-o-perch { 
+@keyframes th-t-t-o-perch { 
   0% { opacity: 0; }
 }
-@keyframes ct-t-o-let { 
+@keyframes th-t-t-o-let { 
   0% { opacity: 0; transform: translateY(10px); }
   45% { opacity: 1; transform: translateY(-9px); }
   100% { transform: none; }

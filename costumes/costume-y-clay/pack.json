@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "捏捏",
-  "description": "一坨親手捏出來的軟陶小傢伙：肚子上留著一個指印，等你按。SYNOX 衣櫃 · 系列 Y：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "一坨親手捏出來的軟陶小傢伙：肚子上留著一個指印，等你按。SYNOX 衣櫃 · 系列 Y：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f4f1fb",

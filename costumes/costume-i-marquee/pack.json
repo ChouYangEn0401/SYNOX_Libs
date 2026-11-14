@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "小跑",
-  "description": "夜市招牌上的跑馬燈長了腳：幫你跑腿，有事就跑字幕。SYNOX 衣櫃 · 系列 I：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "夜市招牌上的跑馬燈長了腳：幫你跑腿，有事就跑字幕。SYNOX 衣櫃 · 系列 I：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f6f3f9",

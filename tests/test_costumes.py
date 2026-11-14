@@ -2,10 +2,12 @@
 
 規則（scripts/build_costumes.py 的 pack_problems，打包時也擋）：
 - 不准 <script、on…= 事件屬性、javascript:、外部網址（http；SVG 的 xmlns 命名空間例外）、@import、foreignObject、data: 網址；
-- 7 個 slot（吉祥物 4 種狀態、開場、字標、App 圖示）都在，light 與 dark 的 token 都齊；
-- CSS 只有 custom properties 與 [data-slot] 底下的規則，keyframes 用 c<字母>- 開頭；
+- 7 個 slot（吉祥物 4 種狀態、開場、字標、App 圖示）都在，light 與 dark 的 token 都齊；pack.json 有 summary、theme.contract；
+- 照 SYNOX 外觀合約第 1 版（SYNOX 的 docs/themes.md）：CSS 的 :root 只設 --th- 變數、其他規則在 [data-slot] 底下、
+  keyframes 用 th-<字母>- 開頭、沒有 !important；SVG 沒有 style="…"、只用 SYNOX 白名單裡的濾鏡；
 - 一套打包後不超過 MAX_PACK_BYTES。
-這裡只用標準函式庫（不需要 SYNOX）。"""
+這裡只用標準函式庫（不需要 SYNOX）；最後一個測試有 SYNOX 的原始碼時（SYNOX_SRC 或旁邊的 ../SYNOX/src）
+直接跑 SYNOX 安裝時的第 1、2 關與消毒，確認每一套都裝得進去、消毒前後一樣。"""
 import hashlib
 import json
 import os
@@ -47,7 +49,8 @@ def test_costume_has_all_slots_and_tokens(name):
         assert os.path.isfile(os.path.join(bc.COSTUMES, name, *rel.split("/")))
     for mode in ("light", "dark"):
         assert set(bc.TOKENS) <= set(theme["tokens"][mode])
-    assert theme["fonts"] == []
+    assert theme["fonts"] == [] and theme["contract"] == bc.CONTRACT
+    assert raw["summary"].strip() and "description" not in raw
 
 
 @pytest.mark.parametrize("name", NAMES)
@@ -93,6 +96,8 @@ BAD_SVG = [
     ('<svg xmlns="http://www.w3.org/2000/svg"><foreignObject/></svg>', "foreignObject"),
     ('<svg xmlns="http://www.w3.org/2000/svg"><rect fill="url(data:x)"/></svg>', "url()"),
     ('<svg xmlns="http://www.w3.org/2000/svg"><style>rect{}</style></svg>', "不准的元素"),
+    ('<svg xmlns="http://www.w3.org/2000/svg"><g style="--i:2"/></svg>', "style="),
+    ('<svg xmlns="http://www.w3.org/2000/svg"><filter id="cb-f"><feTurbulence/></filter></svg>', "feTurbulence"),
 ]
 
 
@@ -116,6 +121,10 @@ def test_check_refuses_code_in_svg(broken, svg, what):
     ("[data-slot] .a{background:url(https://example.com/x.png)}", "外部網址"),
     (".masc .eye{fill:red}", "沒有限定在 [data-slot]"),
     ("@keyframes blink{to{opacity:0}}", "keyframes blink"),
+    ("@keyframes cb-blink{to{opacity:0}}", "th-b-"),
+    ("[data-slot] .a{animation:nope 1s infinite}", "nope"),
+    ("[data-slot] .a{opacity:0!important}", "!important"),
+    (":root{--bg:red}", ":root 只能設 --th-"),
     ("@media (max-width:300px){[data-slot] .a{fill:red}}", "@media"),
     ("@font-face{font-family:x}", "at-rule"),
 ])
@@ -156,3 +165,62 @@ def test_public_page_lists_every_costume_with_download_link():
     assert "<script" in page                    # 頁面本身可以有（深淺色切換、重播）；pack 裡不行
     for internal in ("內部版", "選這個", "複製我的選擇"):
         assert internal not in page
+
+
+def test_generator_helpers_make_svg_that_survives_synox_sanitizer():
+    classes = {}
+    svg = bc.lift_styles('<g class="l x" style="transform-box:view-box;transform-origin:5px 6px;--i:3"><svg class="v"/></g>'
+                         '<g style="--i:3"/>', "cb", classes)
+    assert svg == '<g class="l x cb-v0" transform-origin="5px 6px"><svg class="v"/></g><g class="cb-v0"/>'
+    assert classes == {"--i:3": "cb-v0"}
+    chain = ('<filter id="f"><feOffset in="SourceAlpha" result="o"/><feTurbulence result="n"></feTurbulence>'
+             '<feColorMatrix in="n" result="na"/><feComposite in="na" in2="o" result="gr"/>'
+             '<feMerge><feMergeNode in="o"/><feMergeNode in="gr"/></feMerge></filter>')
+    assert bc.strip_filters(chain) == ('<filter id="f"><feOffset in="SourceAlpha" result="o"/>'
+                                       '<feMerge><feMergeNode in="o"/></feMerge></filter>')
+    assert bc.rename_extras("fill:var(--moon);--moon:1;var(--moonx);--th-moon", ["moon"]) == \
+        "fill:var(--th-moon);--th-moon:1;var(--moonx);--th-moon"
+
+
+def test_public_page_keeps_series_variables_scoped():
+    """theme.css 的 :root（--th- 變數）不能原樣搬到公開頁（26 套的同名變數會互蓋）：公開頁在 .cw-<字母> 上設。"""
+    with open(os.path.join(bc.SITE, "wardrobe.html"), encoding="utf-8") as f:
+        page = f.read()
+    assert not re.search(r"(^|[}\s]):root\s*\{\s*--th-", page)
+    assert ".cw-g{" in page and "--th-moon:" in page
+
+
+def _synox_src():
+    for cand in (os.environ.get("SYNOX_SRC"), os.path.join(os.path.dirname(ROOT), "SYNOX", "src")):
+        if cand and os.path.isfile(os.path.join(cand, "synox", "theme", "pack.py")):
+            return cand
+    return None
+
+
+@pytest.mark.skipif(_synox_src() is None, reason="沒有 SYNOX 的原始碼（設 SYNOX_SRC 或放在 ../SYNOX）")
+def test_every_costume_installs_in_real_synox(tmp_path):
+    """用 SYNOX 自己的程式：上傳 .synoxpack 那條路（第 1 關宣告、第 2 關消毒＋integrity），再照網頁每次載入那樣重新消毒；
+    消毒不能拿掉任何東西（notes 是空的），@keyframes 一個都不能少。"""
+    sys.path.insert(0, _synox_src())
+    try:
+        from synox.packs import admin
+        from synox.packs.manifest import read
+        from synox.theme import pack as theme_pack
+    except ImportError as e:                                   # SYNOX 的相依套件沒裝
+        pytest.skip(f"SYNOX 載不起來：{e}")
+    result = bc.pack_all(str(tmp_path / "dist"))
+    assert result["problems"] == []
+    for e in result["entries"]:
+        data = tmp_path / ("data-" + e["name"])
+        blob = (tmp_path / "dist" / e["file"]).read_bytes()
+        token, summary = admin.stage(blob, str(data))
+        assert summary["scan"]["ok"] and summary["kind"] == "theme", e["name"]
+        staged = os.path.join(admin.staging_root(str(data)), token, "pack")
+        m = read(staged, strict=True)
+        bundle = theme_pack.compile_theme(staged, m.name, m.theme)
+        assert bundle.notes == [], (e["name"], bundle.notes)
+        assert set(bundle.slots) == set(bc.SLOTS)
+        with open(os.path.join(staged, "theme.css"), encoding="utf-8") as f:
+            src = f.read()
+        kept = set(re.findall(r"@keyframes\s+([\w-]+)", bundle.stylesheet()))
+        assert set(re.findall(r"@keyframes\s+([\w-]+)", src)) <= kept, e["name"]

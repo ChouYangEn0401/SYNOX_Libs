@@ -1,38 +1,37 @@
 /* 格格（系列 L）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
-@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
 [data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
-[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running cl-m-blink}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-l-m-blink}
 [data-slot] .masc.sq .eye{animation-timing-function:steps(1)}
 [data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
 [data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
 [data-slot] .op .ow{color:var(--text)}
-[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running cl-o-fade}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-l-o-fade}
 [data-slot] .wm{color:var(--text)}
 [data-slot][data-slot] .masc .l-blk{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot][data-slot] .masc .l-body{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot][data-slot] .masc .l-ok{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot][data-slot] .masc .l-bang{transform-box:fill-box;transform-origin:50% 100%}
-[data-slot][data-slot] .st-idle .l-body{animation:1.6s steps(1) 0s infinite normal none running cl-l-bob}
-[data-slot][data-slot] .st-idle .l-blk{animation:1.6s steps(1) 0s infinite normal none running cl-l-float}
-[data-slot][data-slot] .st-think .l-body{animation:1.2s steps(1) 0s infinite normal none running cl-l-bob}
-[data-slot][data-slot] .st-think .l-spin rect{animation:1.2s steps(1) 0s infinite normal none running cl-l-spin}
+[data-slot][data-slot] .st-idle .l-body{animation:1.6s steps(1) 0s infinite normal none running th-l-l-bob}
+[data-slot][data-slot] .st-idle .l-blk{animation:1.6s steps(1) 0s infinite normal none running th-l-l-float}
+[data-slot][data-slot] .st-think .l-body{animation:1.2s steps(1) 0s infinite normal none running th-l-l-bob}
+[data-slot][data-slot] .st-think .l-spin rect{animation:1.2s steps(1) 0s infinite normal none running th-l-l-spin}
 [data-slot][data-slot] .st-think .l-spin rect:nth-of-type(2){animation-delay:0.3s}
 [data-slot][data-slot] .st-think .l-spin rect:nth-of-type(3){animation-delay:0.6s}
 [data-slot][data-slot] .st-think .l-spin rect:nth-of-type(4){animation-delay:0.9s}
-[data-slot][data-slot] .st-happy .l-body{animation:1.2s steps(1) 0s infinite normal none running cl-l-hop}
-[data-slot][data-slot] .st-happy .l-ok{animation:1.2s steps(1) 0.15s infinite normal none running cl-l-hop}
-[data-slot][data-slot] .st-happy .l-spark > *{animation:1.2s steps(1) 0s infinite normal none running cl-l-twinkle}
+[data-slot][data-slot] .st-happy .l-body{animation:1.2s steps(1) 0s infinite normal none running th-l-l-hop}
+[data-slot][data-slot] .st-happy .l-ok{animation:1.2s steps(1) 0.15s infinite normal none running th-l-l-hop}
+[data-slot][data-slot] .st-happy .l-spark > *{animation:1.2s steps(1) 0s infinite normal none running th-l-l-twinkle}
 [data-slot][data-slot] .st-happy .l-spark > :nth-of-type(2){animation-delay:0.4s}
-[data-slot][data-slot] .st-warn .l-body{animation:2.4s steps(1) 0s infinite normal none running cl-l-shake}
-[data-slot][data-slot] .st-warn .l-blk{animation:1.2s steps(1) 0s infinite normal none running cl-l-float}
-[data-slot][data-slot] .st-warn .l-bang{animation:1.2s steps(1) 0s infinite normal none running cl-l-flash}
-[data-slot][data-slot] .op-L .om{animation:0.85s steps(9) 0s 1 normal both running cl-l-o-build}
+[data-slot][data-slot] .st-warn .l-body{animation:2.4s steps(1) 0s infinite normal none running th-l-l-shake}
+[data-slot][data-slot] .st-warn .l-blk{animation:1.2s steps(1) 0s infinite normal none running th-l-l-float}
+[data-slot][data-slot] .st-warn .l-bang{animation:1.2s steps(1) 0s infinite normal none running th-l-l-flash}
+[data-slot][data-slot] .op-L .om{animation:0.85s steps(9) 0s 1 normal both running th-l-l-o-build}
 [data-slot][data-slot] .op-L .l-body{animation:auto ease 0s 1 normal none running none}
 [data-slot][data-slot] .op-L .l-blk{animation:auto ease 0s 1 normal none running none}
-[data-slot][data-slot] .op-L .l-blk{animation:0.6s steps(1) 0.85s 1 normal both running cl-l-o-blink, 1.6s steps(1) 1.6s infinite normal none running cl-l-float}
-[data-slot][data-slot] .op-L .l{animation:cl-l-o-drop .22s steps(3) calc(1.05s + var(--i) * 90ms) both}
+[data-slot][data-slot] .op-L .l-blk{animation:0.6s steps(1) 0.85s 1 normal both running th-l-l-o-blink, 1.6s steps(1) 1.6s infinite normal none running th-l-l-float}
+[data-slot][data-slot] .op-L .l{animation:th-l-l-o-drop .22s steps(3) calc(1.05s + var(--i) * 90ms) both}
 [data-slot][data-slot] .op-L .l-bar{transform:translateX(-50%)}
-[data-slot][data-slot] .op-L .l-bar .t-i{animation:cl-l-o-blink .3s steps(1) calc(var(--n) * 120ms) both, cl-l-o-out .01s linear .95s forwards}
+[data-slot][data-slot] .op-L .l-bar .t-i{animation:th-l-l-o-blink .3s steps(1) calc(var(--n) * 120ms) both, th-l-l-o-out .01s linear .95s forwards}
 [data-slot][data-slot] .op-L .l-bar .t-i > .v > .bg{fill:var(--m1)}
 [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(1){--n:1}
 [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(2){--n:2}
@@ -40,60 +39,66 @@
 [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(4){--n:4}
 [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(5){--n:5}
 [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(6){--n:6}
-[data-slot][data-slot] .op-L .l-bar{opacity:0;animation:1s steps(1) 0s 1 normal both running cl-l-o-bar}
+[data-slot][data-slot] .op-L .l-bar{opacity:0;animation:1s steps(1) 0s 1 normal both running th-l-l-o-bar}
 [data-slot][data-slot] .op-L .ot{animation-delay:1.65s}
-@keyframes cl-m-blink { 
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .cl-v0{--i:0}
+[data-slot] .cl-v1{--i:1}
+[data-slot] .cl-v2{--i:2}
+[data-slot] .cl-v3{--i:3}
+[data-slot] .cl-v4{--i:4}
+@keyframes th-l-m-blink { 
   0%, 93%, 100% { transform: scaleY(1); }
   96% { transform: scaleY(0.1); }
 }
-@keyframes cl-o-fade { 
+@keyframes th-l-o-fade { 
   0% { opacity: 0; transform: translateY(6px); }
 }
-@keyframes cl-l-bob { 
+@keyframes th-l-l-bob { 
   0%, 100% { transform: none; }
   50% { transform: translateY(-3px); }
 }
-@keyframes cl-l-float { 
+@keyframes th-l-l-float { 
   0%, 100% { transform: translateY(-4px); }
   50% { transform: none; }
 }
-@keyframes cl-l-spin { 
+@keyframes th-l-l-spin { 
   0%, 100% { opacity: 1; }
   25% { opacity: 0.22; }
 }
-@keyframes cl-l-hop { 
+@keyframes th-l-l-hop { 
   0%, 50%, 100% { transform: none; }
   25% { transform: translateY(-10px); }
 }
-@keyframes cl-l-twinkle { 
+@keyframes th-l-l-twinkle { 
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
-@keyframes cl-l-shake { 
+@keyframes th-l-l-shake { 
   0%, 16%, 100% { transform: none; }
   4%, 12% { transform: translateX(-4px); }
   8% { transform: translateX(4px); }
 }
-@keyframes cl-l-flash { 
+@keyframes th-l-l-flash { 
   0%, 100% { opacity: 1; }
   50% { opacity: 0.25; }
 }
-@keyframes cl-l-o-build { 
+@keyframes th-l-l-o-build { 
   0% { clip-path: inset(100% 0px 0px); }
   100% { clip-path: inset(25% 0px 0px); }
 }
-@keyframes cl-l-o-blink { 
+@keyframes th-l-l-o-blink { 
   0%, 40% { opacity: 0; }
   20%, 60%, 100% { opacity: 1; }
 }
-@keyframes cl-l-o-out { 
+@keyframes th-l-l-o-out { 
   100% { opacity: 0; }
 }
-@keyframes cl-l-o-bar { 
+@keyframes th-l-l-o-bar { 
   0%, 94% { opacity: 1; }
   100% { opacity: 0; }
 }
-@keyframes cl-l-o-drop { 
+@keyframes th-l-l-o-drop { 
   0% { opacity: 0; transform: translateY(-14px); }
   34% { opacity: 1; transform: translateY(-14px); }
   67% { transform: translateY(-5px); }

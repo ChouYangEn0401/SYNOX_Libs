@@ -1,77 +1,82 @@
 /* 小印（系列 C）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
-@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
 [data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
-[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running cc-m-blink}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-c-m-blink}
 [data-slot] .masc.sq .eye{animation-timing-function:steps(1)}
-[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running cc-m-bob}
-[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running cc-m-tilt}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running th-c-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running th-c-m-tilt}
 [data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
-[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running cc-m-hop}
-[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running cc-m-shake}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-c-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running th-c-m-shake}
 [data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
-[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running cc-m-dot}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running th-c-m-dot}
 [data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
 [data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
-[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running cc-m-pop}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-c-m-pop}
 [data-slot] .op .ow{color:var(--text)}
-[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running cc-o-fade}
-[data-slot] .op-C .om{animation:0.8s cubic-bezier(0.3, 0.9, 0.3, 1) 0s 1 normal both running cc-oC-stamp}
-[data-slot] .op-C .ring{opacity:0;animation:0.7s ease-out 0.28s 1 normal both running cc-oC-ring}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-c-o-fade}
+[data-slot] .op-C .om{animation:0.8s cubic-bezier(0.3, 0.9, 0.3, 1) 0s 1 normal both running th-c-oC-stamp}
+[data-slot] .op-C .ring{opacity:0;animation:0.7s ease-out 0.28s 1 normal both running th-c-oC-ring}
 [data-slot] .op-C .ring > .v > .bd{stroke:var(--accent)}
-[data-slot] .op-C .stage{animation:0.26s linear 0.28s 1 normal none running cc-oC-shake}
-[data-slot] .op-C .ow{animation:0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.78s 1 normal both running cc-oC-wipe}
+[data-slot] .op-C .stage{animation:0.26s linear 0.28s 1 normal none running th-c-oC-shake}
+[data-slot] .op-C .ow{animation:0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.78s 1 normal both running th-c-oC-wipe}
 [data-slot] .op-C .ot{animation-delay:1.3s}
 [data-slot] .wm{color:var(--text)}
-@keyframes cc-m-blink { 
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .cc-v0{--i:0}
+[data-slot] .cc-v1{--i:1}
+[data-slot] .cc-v2{--i:2}
+[data-slot] .cc-v3{--i:3}
+[data-slot] .cc-v4{--i:4}
+@keyframes th-c-m-blink { 
   0%, 93%, 100% { transform: scaleY(1); }
   96% { transform: scaleY(0.1); }
 }
-@keyframes cc-m-bob { 
+@keyframes th-c-m-bob { 
   50% { transform: translateY(-3px); }
 }
-@keyframes cc-m-tilt { 
+@keyframes th-c-m-tilt { 
   0%, 100% { transform: rotate(-3deg); }
   50% { transform: rotate(4deg); }
 }
-@keyframes cc-m-hop { 
+@keyframes th-c-m-hop { 
   0%, 100% { transform: none; }
   12% { transform: scale(1.06, 0.92); }
   40% { transform: translateY(-9px) scale(0.97, 1.04); }
   70% { transform: scale(1.03, 0.96); }
 }
-@keyframes cc-m-shake { 
+@keyframes th-c-m-shake { 
   0%, 16%, 100% { transform: none; }
   3%, 9% { transform: translateX(-2.5px); }
   6%, 12% { transform: translateX(2.5px); }
 }
-@keyframes cc-m-dot { 
+@keyframes th-c-m-dot { 
   0%, 100% { opacity: 0.25; }
   40% { opacity: 1; }
 }
-@keyframes cc-m-pop { 
+@keyframes th-c-m-pop { 
   0% { transform: scale(0); }
   12%, 100% { transform: scale(1); }
 }
-@keyframes cc-o-fade { 
+@keyframes th-c-o-fade { 
   0% { opacity: 0; transform: translateY(6px); }
 }
-@keyframes cc-oC-stamp { 
+@keyframes th-c-oC-stamp { 
   0% { transform: translateY(-100px) scale(1.5) rotate(-10deg); opacity: 0; }
   35% { transform: translateY(6px) scale(0.94, 0.86); opacity: 1; }
   56% { transform: translateY(-10px) scale(1.03); }
 }
-@keyframes cc-oC-ring { 
+@keyframes th-c-oC-ring { 
   0% { opacity: 0.8; transform: scale(0.7); }
   100% { opacity: 0; transform: scale(2); }
 }
-@keyframes cc-oC-shake { 
+@keyframes th-c-oC-shake { 
   25% { transform: translate(-3px, 2px); }
   50% { transform: translate(3px, -1px); }
   75% { transform: translate(-2px, 1px); }
 }
-@keyframes cc-oC-wipe { 
+@keyframes th-c-oC-wipe { 
   0% { clip-path: inset(0px 100% 0px 0px); }
   100% { clip-path: inset(0px -10% 0px 0px); }
 }

@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "方方",
-  "description": "現在那顆會眨眼的方塊，長出一條對話尾巴。SYNOX 衣櫃 · 系列 A：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "現在那顆會眨眼的方塊，長出一條對話尾巴。SYNOX 衣櫃 · 系列 A：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f3f6f8",

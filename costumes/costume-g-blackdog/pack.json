@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "小黑",
-  "description": "幫你顧厝的台灣土狗：平常一耳垂著，有狀況兩耳都豎起來。SYNOX 衣櫃 · 系列 G：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "幫你顧厝的台灣土狗：平常一耳垂著，有狀況兩耳都豎起來。SYNOX 衣櫃 · 系列 G：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f7f4e8",

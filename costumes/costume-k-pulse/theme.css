@@ -1,104 +1,109 @@
 /* 怦怦（系列 K）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
-@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
 [data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
-[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running ck-m-blink}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-k-m-blink}
 [data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
 [data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
-[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running ck-m-dot}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running th-k-m-dot}
 [data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
 [data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
-[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running ck-m-pop}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-k-m-pop}
 [data-slot] .op .ow{color:var(--text)}
-[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running ck-o-fade}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-k-o-fade}
 [data-slot] .wm{color:var(--text)}
 [data-slot][data-slot] .masc .k-dome{transform-box:fill-box;transform-origin:50% 100%}
 [data-slot][data-slot] .masc .k-sig{stroke-dasharray:26, 300;stroke-dashoffset:26}
-[data-slot][data-slot] .st-idle .k-dome{animation:2.6s ease-in-out 0s infinite normal none running ck-k-beat}
-[data-slot][data-slot] .st-idle .k-s1{animation:2.6s linear 0s infinite normal none running ck-k-run1}
-[data-slot][data-slot] .st-think .k-s1{animation:2.6s linear 0s infinite normal none running ck-k-run1}
-[data-slot][data-slot] .st-idle .k-s2{animation:2.6s linear 0s infinite normal none running ck-k-run2}
-[data-slot][data-slot] .st-think .k-s2{animation:2.6s linear 0s infinite normal none running ck-k-run2}
-[data-slot][data-slot] .st-think .k-dome{animation:2.6s ease-in-out 0s infinite normal none running ck-k-lean}
-[data-slot][data-slot] .st-think .k-wig{stroke-dasharray:5, 3;animation:1s linear 0s infinite normal none running ck-k-wig}
-[data-slot][data-slot] .st-happy .k-dome{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running ck-k-jump}
-[data-slot][data-slot] .st-happy .k-s1{animation:1.3s linear 0s infinite normal none running ck-k-run1}
-[data-slot][data-slot] .st-happy .k-s2{animation:1.3s linear 0s infinite normal none running ck-k-run1}
-[data-slot][data-slot] .st-warn .k-dome{animation:2.4s linear 0s infinite normal none running ck-k-shiver}
-[data-slot][data-slot] .st-happy .k-tick{animation:1.3s steps(1) 0s infinite normal none running ck-k-tick}
+[data-slot][data-slot] .st-idle .k-dome{animation:2.6s ease-in-out 0s infinite normal none running th-k-k-beat}
+[data-slot][data-slot] .st-idle .k-s1{animation:2.6s linear 0s infinite normal none running th-k-k-run1}
+[data-slot][data-slot] .st-think .k-s1{animation:2.6s linear 0s infinite normal none running th-k-k-run1}
+[data-slot][data-slot] .st-idle .k-s2{animation:2.6s linear 0s infinite normal none running th-k-k-run2}
+[data-slot][data-slot] .st-think .k-s2{animation:2.6s linear 0s infinite normal none running th-k-k-run2}
+[data-slot][data-slot] .st-think .k-dome{animation:2.6s ease-in-out 0s infinite normal none running th-k-k-lean}
+[data-slot][data-slot] .st-think .k-wig{stroke-dasharray:5, 3;animation:1s linear 0s infinite normal none running th-k-k-wig}
+[data-slot][data-slot] .st-happy .k-dome{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-k-k-jump}
+[data-slot][data-slot] .st-happy .k-s1{animation:1.3s linear 0s infinite normal none running th-k-k-run1}
+[data-slot][data-slot] .st-happy .k-s2{animation:1.3s linear 0s infinite normal none running th-k-k-run1}
+[data-slot][data-slot] .st-warn .k-dome{animation:2.4s linear 0s infinite normal none running th-k-k-shiver}
+[data-slot][data-slot] .st-happy .k-tick{animation:1.3s steps(1) 0s infinite normal none running th-k-k-tick}
 [data-slot][data-slot] .op-K .k-trace{opacity:0.5}
-[data-slot][data-slot] .op-K .k-trace path{stroke-dasharray:100;animation:0.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running ck-k-o-draw}
-[data-slot][data-slot] .op-K .k-ln{animation:0.01s linear 0.42s 1 normal both running ck-k-o-in}
-[data-slot][data-slot] .op-K .k-dome{animation:0.75s cubic-bezier(0.3, 1.3, 0.4, 1) 0.42s 1 normal both running ck-k-o-rise}
+[data-slot][data-slot] .op-K .k-trace path{stroke-dasharray:100;animation:0.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-k-k-o-draw}
+[data-slot][data-slot] .op-K .k-ln{animation:0.01s linear 0.42s 1 normal both running th-k-k-o-in}
+[data-slot][data-slot] .op-K .k-dome{animation:0.75s cubic-bezier(0.3, 1.3, 0.4, 1) 0.42s 1 normal both running th-k-k-o-rise}
 [data-slot][data-slot] .op-K .k-sig{animation-delay:1.6s}
-[data-slot][data-slot] .op-K .l{animation:ck-k-o-wave .55s cubic-bezier(.3, 0, .3, 1) calc(.95s + var(--i) * 75ms) both}
+[data-slot][data-slot] .op-K .l{animation:th-k-k-o-wave .55s cubic-bezier(.3, 0, .3, 1) calc(.95s + var(--i) * 75ms) both}
 [data-slot][data-slot] .op-K .ot{animation-delay:1.65s}
-@keyframes ck-m-blink { 
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .ck-v0{--i:0}
+[data-slot] .ck-v1{--i:1}
+[data-slot] .ck-v2{--i:2}
+[data-slot] .ck-v3{--i:3}
+[data-slot] .ck-v4{--i:4}
+@keyframes th-k-m-blink { 
   0%, 93%, 100% { transform: scaleY(1); }
   96% { transform: scaleY(0.1); }
 }
-@keyframes ck-m-dot { 
+@keyframes th-k-m-dot { 
   0%, 100% { opacity: 0.25; }
   40% { opacity: 1; }
 }
-@keyframes ck-m-pop { 
+@keyframes th-k-m-pop { 
   0% { transform: scale(0); }
   12%, 100% { transform: scale(1); }
 }
-@keyframes ck-o-fade { 
+@keyframes th-k-o-fade { 
   0% { opacity: 0; transform: translateY(6px); }
 }
-@keyframes ck-k-beat { 
+@keyframes th-k-k-beat { 
   0%, 30%, 64%, 100% { transform: none; }
   37% { transform: scale(0.97, 1.1); }
   45% { transform: scale(1.02, 0.97); }
   52% { transform: scale(0.985, 1.055); }
 }
-@keyframes ck-k-run1 { 
+@keyframes th-k-k-run1 { 
   0% { stroke-dashoffset: 26; }
   30%, 100% { stroke-dashoffset: -110; }
 }
-@keyframes ck-k-run2 { 
+@keyframes th-k-k-run2 { 
   0%, 55% { stroke-dashoffset: 26; }
   85%, 100% { stroke-dashoffset: -110; }
 }
-@keyframes ck-k-lean { 
+@keyframes th-k-k-lean { 
   0%, 100% { transform: skewX(4deg); }
   50% { transform: skewX(-5deg); }
 }
-@keyframes ck-k-wig { 
+@keyframes th-k-k-wig { 
   100% { stroke-dashoffset: -8; }
 }
-@keyframes ck-k-jump { 
+@keyframes th-k-k-jump { 
   0%, 100% { transform: none; }
   14% { transform: scale(1.07, 0.88); }
   42% { transform: scale(0.93, 1.2); }
   72% { transform: scale(1.03, 0.95); }
 }
-@keyframes ck-k-tick { 
+@keyframes th-k-k-tick { 
   0%, 30%, 100% { opacity: 0; }
   36%, 80% { opacity: 1; }
 }
-@keyframes ck-k-shiver { 
+@keyframes th-k-k-shiver { 
   0%, 16%, 100% { transform: none; }
   3%, 9% { transform: skewX(-4deg); }
   6%, 12% { transform: skewX(4deg); }
 }
-@keyframes ck-k-o-draw { 
+@keyframes th-k-k-o-draw { 
   0% { stroke-dashoffset: 100; }
   100% { stroke-dashoffset: 0; }
 }
-@keyframes ck-k-o-in { 
+@keyframes th-k-k-o-in { 
   0% { opacity: 0; }
 }
-@keyframes ck-k-o-rise { 
+@keyframes th-k-k-o-rise { 
   0% { transform: scaleY(0); opacity: 0; }
   8% { opacity: 1; }
   40% { transform: scale(0.94, 1.18); }
   58% { transform: scale(1.03, 0.94); }
   76% { transform: scale(0.98, 1.07); }
 }
-@keyframes ck-k-o-wave { 
+@keyframes th-k-k-o-wave { 
   0% { opacity: 0; transform: translateY(10px); }
   45% { opacity: 1; transform: translateY(-9px); }
 }

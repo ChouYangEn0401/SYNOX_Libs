@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "提燈",
-  "description": "幫你顧家的一盞小燈，會像心跳一樣一亮一亮。SYNOX 衣櫃 · 系列 B：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "幫你顧家的一盞小燈，會像心跳一樣一亮一亮。SYNOX 衣櫃 · 系列 B：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#f5f3ef",

@@ -3,8 +3,11 @@
   "kind": "theme",
   "version": "1.0.0",
   "title": "嗶嗶",
-  "description": "住在你電腦裡的像素小怪獸：有事「嗶」一聲，等你按確認。SYNOX 衣櫃 · 系列 W：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "summary": "住在你電腦裡的像素小怪獸：有事「嗶」一聲，等你按確認。SYNOX 衣櫃 · 系列 W：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
   "theme": {
+    "contract": 1,
     "tokens": {
       "light": {
         "--bg": "#eceae1",
