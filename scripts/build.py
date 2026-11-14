@@ -10,6 +10,7 @@
 - 工具資料夾裡附了 synox_sdk.py（cli／mcp 工具）的話，它的 SDK_VERSION 也要在 requires.sdk 範圍內；
 - 每個工具都要明寫 stage（test／alpha／beta／stable；README「穩定度」），index.json 也帶它；
 - catalog.json 的建議群組只能列存在的工具。
+沒指定工具名時，衣櫃的 26 套外觀（costumes/，kind=theme）也一起打包、列進同一份 index.json（scripts/build_costumes.py）。
 SYNOX 在哪：scripts/_synox.py（SYNOX_HOME → 跑這支的 Python 裝的那份 → 後備並排的 ../SYNOX）。
 """
 
@@ -111,8 +112,9 @@ def entry_for(m, path: str, bundles: dict) -> dict:
             "file": os.path.basename(path), "sha256": sha256_of(path), "size": os.path.getsize(path)}
 
 
-def build(names=None, out_dir: str = None, check_only: bool = False, root: str = ROOT) -> dict:
-    """打包 → {"index": index.json 的內容, "problems": [...]}；有問題就什麼都不寫。"""
+def build(names=None, out_dir: str = None, check_only: bool = False, root: str = ROOT, costumes: bool = True) -> dict:
+    """打包 → {"index": index.json 的內容, "problems": [...]}；有問題就什麼都不寫。
+    沒指定工具名時，衣櫃的外觀（costumes/）也一起打包、列進 index.json（costumes=False 不要）。"""
     _synox.ensure()
     import synox
     from synox.packs.manifest import read
@@ -132,6 +134,9 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
                 for n in b.get("packs", []) if n not in all_names]
     for folder in folders:
         problems += problems_of(folder)
+    if not names and costumes and root == ROOT:
+        import build_costumes
+        problems += [p for f in build_costumes.costume_folders() for p in build_costumes.pack_problems(f)]
     if problems or check_only:
         return {"index": None, "problems": problems}
     out_dir = out_dir or os.path.join(root, "dist")
@@ -143,11 +148,24 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
             problems.append(f"{os.path.basename(folder)}: {e}")
             continue
         entries.append(entry_for(read(folder, strict=True), path, bundles))
+    collections = {}
+    if not names and costumes and root == ROOT:
+        # SYNOX 衣櫃：外觀（kind=theme）跟工具放在同一份 index.json，category「衣櫃／外觀」（scripts/build_costumes.py）
+        import build_costumes
+        wardrobe = build_costumes.pack_all(out_dir)
+        problems += wardrobe["problems"]
+        entries += wardrobe["entries"]
+        if wardrobe["entries"]:
+            info = build_costumes.COLLECTION
+            collections[info["id"]] = {"title": info["title"], "category": info["category"], "summary": info["summary"],
+                                       "packs": [e["name"] for e in wardrobe["entries"]]}
     if problems:
         return {"index": None, "problems": problems}
     index = {"library": "SYNOX_Libs", "library_version": library_version(root),
              "built_with": {"synox": synox.__version__, "sdk": author.SDK_VERSION},
              "packs": entries, "bundles": bundles}
+    if collections:
+        index["collections"] = collections
     with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8", newline="\n") as f:
         f.write(json.dumps(index, ensure_ascii=False, indent=2) + "\n")
     return {"index": index, "problems": []}
@@ -158,8 +176,9 @@ def main(argv=None) -> int:
     parser.add_argument("names", nargs="*", help="只打這幾個（預設全部）")
     parser.add_argument("--out", default=os.path.join(ROOT, "dist"))
     parser.add_argument("--check", action="store_true", help="只檢查，不寫檔")
+    parser.add_argument("--no-costumes", action="store_true", help="不打包衣櫃的外觀（costumes/）")
     args = parser.parse_args(argv)
-    result = build(args.names or None, args.out, args.check)
+    result = build(args.names or None, args.out, args.check, costumes=not args.no_costumes)
     if result["problems"]:
         print("❌ 沒有打包：")
         for p in result["problems"]:
@@ -169,6 +188,9 @@ def main(argv=None) -> int:
         print("✅ 檢查都過了")
         return 0
     for e in result["index"]["packs"]:
+        if e.get("kind") == "theme":
+            print(f"{e['file']}  外觀（衣櫃）  {e['size']} bytes  sha256 {e['sha256'][:12]}…")
+            continue
         print(f"{e['file']}  {e['stage']}  sdk {e['requires'].get('sdk', '?')}  sha256 {e['sha256'][:12]}…")
     print(os.path.join(args.out, "index.json"))
     return 0

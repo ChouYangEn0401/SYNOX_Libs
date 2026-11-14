@@ -1,0 +1,67 @@
+{
+  "name": "costume-u-mountain",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "靠山",
+  "summary": "一座會看天氣的小玉山：牠不動，所以你的東西也不會跑。SYNOX 衣櫃 · 系列 U：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#fbf5ee",
+        "--surface": "#ffffff",
+        "--text": "#2b2238",
+        "--muted": "#6e6272",
+        "--line": "#ecdfd0",
+        "--accent": "#bf4a0b",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#4b4580",
+        "--soft": "#ffe6cf",
+        "--ok": "#1c7a4c",
+        "--warn": "#8a6a00",
+        "--bad": "#c2362f",
+        "--radius": "10px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Archivo Black','Noto Sans TC',sans-serif",
+        "--m1": "#55508f",
+        "--m2": "#9d99cc",
+        "--mi": "#fff6e6",
+        "--mb": "#ff9a8a"
+      },
+      "dark": {
+        "--bg": "#16121c",
+        "--surface": "#211b2a",
+        "--text": "#f5eee6",
+        "--muted": "#a99fae",
+        "--line": "#3a3044",
+        "--accent": "#ff9d4d",
+        "--accent-ink": "#3a1500",
+        "--accent2": "#b3adf0",
+        "--soft": "#44260f",
+        "--ok": "#5fd08d",
+        "--warn": "#f2c14e",
+        "--bad": "#ff8a8a",
+        "--radius": "10px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Archivo Black','Noto Sans TC',sans-serif",
+        "--m1": "#6d68ad",
+        "--m2": "#45416f",
+        "--mi": "#fff6e6",
+        "--mb": "#ff9a8a"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

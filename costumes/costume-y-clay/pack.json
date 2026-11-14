@@ -1,0 +1,67 @@
+{
+  "name": "costume-y-clay",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "捏捏",
+  "summary": "一坨親手捏出來的軟陶小傢伙：肚子上留著一個指印，等你按。SYNOX 衣櫃 · 系列 Y：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f4f1fb",
+        "--surface": "#ffffff",
+        "--text": "#2a2140",
+        "--muted": "#685f82",
+        "--line": "#e4def3",
+        "--accent": "#6a4fd8",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#a8521a",
+        "--soft": "#e9e3ff",
+        "--ok": "#1f7a4a",
+        "--warn": "#8f5a00",
+        "--bad": "#c2334d",
+        "--radius": "20px",
+        "--font-ui": "'Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--font-brand": "'Fredoka','Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--m1": "#b3a2ff",
+        "--m2": "#7b63e0",
+        "--mi": "#33254f",
+        "--mb": "#ff8fb0"
+      },
+      "dark": {
+        "--bg": "#15111f",
+        "--surface": "#201a2e",
+        "--text": "#f1ecff",
+        "--muted": "#a79dc4",
+        "--line": "#352c4b",
+        "--accent": "#b3a1ff",
+        "--accent-ink": "#1d1147",
+        "--accent2": "#ffb877",
+        "--soft": "#2f2552",
+        "--ok": "#6fd6a0",
+        "--warn": "#f6c453",
+        "--bad": "#ff7a96",
+        "--radius": "20px",
+        "--font-ui": "'Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--font-brand": "'Fredoka','Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--m1": "#bdaeff",
+        "--m2": "#806ae3",
+        "--mi": "#2b1f47",
+        "--mb": "#ff8fb0"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

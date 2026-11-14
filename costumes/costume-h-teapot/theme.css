@@ -1,0 +1,114 @@
+/* 小壺（系列 H）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-h-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running th-h-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running th-h-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-h-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running th-h-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running th-h-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-h-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-h-o-fade}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .masc .hlid{transform-box:fill-box}
+[data-slot][data-slot] .masc .hsteam path{transform-box:fill-box}
+[data-slot][data-slot] .masc .hlid{transform-origin:50% 100%}
+[data-slot][data-slot] .masc .hsteam path{animation:2.8s ease-in-out 0s infinite normal none running th-h-h-steam}
+[data-slot][data-slot] .masc .hsteam path:nth-of-type(2){animation-delay:-1.3s}
+[data-slot][data-slot] .st-happy .hlid{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-h-h-lid}
+[data-slot][data-slot] .st-warn .hlid{animation:0.28s linear 0s infinite normal none running th-h-h-rattle}
+[data-slot][data-slot] .masc .hpuff path{animation:0.56s ease-out 0s infinite normal none running th-h-h-puff}
+[data-slot][data-slot] .masc .hpuff path:nth-of-type(2){animation-delay:-0.28s}
+[data-slot][data-slot] .op-H .omw{animation:1.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-h-h-o-shift}
+[data-slot][data-slot] .op-H .om{animation:1.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-h-h-o-pour}
+[data-slot][data-slot] .op-H .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .op-H .pour{opacity:0;animation:1.8s ease-in 0s 1 normal both running th-h-h-o-stream}
+[data-slot][data-slot] .op-H .pour > .v > .bg{fill:var(--accent2)}
+[data-slot][data-slot] .op-H .ow{animation:0.9s cubic-bezier(0.3, 0.6, 0.3, 1) 0.68s 1 normal both running th-h-h-o-fill}
+[data-slot][data-slot] .op-H .ot{animation-delay:1.75s}
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .ch-v0{--i:0}
+[data-slot] .ch-v1{--i:1}
+[data-slot] .ch-v2{--i:2}
+[data-slot] .ch-v3{--i:3}
+[data-slot] .ch-v4{--i:4}
+@keyframes th-h-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes th-h-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes th-h-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes th-h-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes th-h-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes th-h-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes th-h-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes th-h-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes th-h-h-steam { 
+  0% { opacity: 0; transform: translateY(5px); }
+  35% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(-7px); }
+}
+@keyframes th-h-h-lid { 
+  0%, 100% { transform: none; }
+  30% { transform: translateY(-8px) rotate(-7deg); }
+  55% { transform: translateY(0px); }
+  68% { transform: translateY(-2.5px); }
+}
+@keyframes th-h-h-puff { 
+  0% { opacity: 0; }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; }
+}
+@keyframes th-h-h-rattle { 
+  0%, 100% { transform: translateY(-1.5px) rotate(-3deg); }
+  50% { transform: translateY(-3px) rotate(3deg); }
+}
+@keyframes th-h-h-o-shift { 
+  0%, 66% { transform: translateX(-30px); }
+  88%, 100% { transform: none; }
+}
+@keyframes th-h-h-o-pour { 
+  0% { opacity: 0; transform: translateY(-14px); }
+  12% { opacity: 1; transform: none; }
+  30%, 66% { transform: rotate(30deg) translateY(-4px); }
+  86%, 100% { transform: none; }
+}
+@keyframes th-h-h-o-stream { 
+  0%, 29% { opacity: 0; transform: scaleY(0); }
+  31% { opacity: 0.9; transform: scaleY(0.05); }
+  42%, 62% { opacity: 0.9; transform: scaleY(1); }
+  72%, 100% { opacity: 0; transform: translateY(46px) scaleY(0.3); }
+}
+@keyframes th-h-h-o-fill { 
+  0% { clip-path: inset(100% -10% -20%); color: var(--accent2); }
+  60% { color: var(--accent2); }
+  100% { clip-path: inset(-20% -10%); }
+}

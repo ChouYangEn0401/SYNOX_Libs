@@ -1,0 +1,67 @@
+{
+  "name": "costume-r-bento",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "飽飽",
+  "summary": "一個裝得飽飽的便當盒：工具一格一格放進去，蓋上就能用。SYNOX 衣櫃 · 系列 R：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f6f3f9",
+        "--surface": "#ffffff",
+        "--text": "#2a1f36",
+        "--muted": "#6b5f78",
+        "--line": "#e6dfee",
+        "--accent": "#6a45a8",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#b0541a",
+        "--soft": "#ece3f8",
+        "--ok": "#1f7a4a",
+        "--warn": "#8f6408",
+        "--bad": "#c2362f",
+        "--radius": "20px",
+        "--font-ui": "'Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--font-brand": "'Fredoka','Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--m1": "#b094e3",
+        "--m2": "#fff4dc",
+        "--mi": "#2f2140",
+        "--mb": "#ff7f9c"
+      },
+      "dark": {
+        "--bg": "#15111b",
+        "--surface": "#1f1929",
+        "--text": "#f1eaf8",
+        "--muted": "#a99cb8",
+        "--line": "#352b45",
+        "--accent": "#c4a8f5",
+        "--accent-ink": "#24123f",
+        "--accent2": "#ffb37a",
+        "--soft": "#2e2246",
+        "--ok": "#6fd6a0",
+        "--warn": "#f6c453",
+        "--bad": "#ff8a8a",
+        "--radius": "20px",
+        "--font-ui": "'Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--font-brand": "'Fredoka','Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--m1": "#b99df0",
+        "--m2": "#fff4dc",
+        "--mi": "#2f2140",
+        "--mb": "#ff7f9c"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

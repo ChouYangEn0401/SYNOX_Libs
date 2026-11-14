@@ -1,25 +1,33 @@
 # SYNOX_Libs：SYNOX 的工具庫（工具的統一管理處）
 
+**👉 [先看工具庫說明頁：每個工具做什麼、怎麼裝、完成到哪](https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL)**
+（每個工具各有一頁，從說明頁點進去；同一份也在 repo 裡：[docs/site/](docs/site/)，下載後雙擊 `index.html` 就能開）
+下載：[發佈頁 v0.2.0](https://github.com/ChouYangEn0401/SYNOX_Libs/releases/tag/v0.2.0)（每個工具一個 `.synoxpack`，或全部的 `tools-0.2.0.zip`）
+
 **所有 SYNOX 工具都在這裡統一管理**：每個工具的正本、測試、打包、版本與穩定度都只在這個 repo。
 **SYNOX 主程式本身沒有內建任何工具**（2026-11-12 起；連接 Notion／Todoist／Google 日曆／Apple 的也搬來了），
 出廠是空的，要什麼工具從這裡挑 `.synoxpack` 自己裝。設計見 [docs/adr/0001](docs/adr/0001-tool-library-and-sdk-dependency.md)。
 
-| 工具 | 指令（例） | 做什麼 | 穩定度 | 建議群組 |
-|---|---|---|---|---|
-| [📒 notes](packs/notes/README.md) | `/note 買牛奶`、`/note_list`、`/note_rm 1` | 隨手記一筆、找、刪 | 🧪 alpha | 入門 |
-| [✅ todo](packs/todo/README.md) | `/todo !! 繳電費 明天 #家事`、`/todo_list` | 待辦：重要度、專案、到期 | 🧪 alpha | 入門、規劃 |
-| [💰 money](packs/money/README.md) | `/money 120 午餐`、`/money_in 32000 薪資`、`/money_month` | 支出／收入／轉帳、自己的類別與範本、預算與上限 | 🧪 alpha | 記帳 |
-| [📅 calendar](packs/calendar/README.md) | `/cal 明天 14:00 看牙醫`、`/cal_week`、`/cal_ics` | 行事曆、匯出 .ics | 🧪 alpha | 規劃 |
-| [• bullet](packs/bullet/README.md) | `/bj • 買牛奶`、`/bj_today`、`/bj_migrate` | 子彈筆記 | 🧪 alpha | 規劃 |
-| [🗂 notion](packs/notion/README.md) | `/notion 會議`、`/notion_read`、`/notion_row` | 用你自己的 integration token 搜尋、讀、加一列、改欄位 | 🧪 alpha | 接外面的服務 |
-| [✅ todoist](packs/todoist/README.md) | `/todoist !! 繳電費 明天`、`/todoist_list`、`/todoist_done 3` | Todoist 的待辦：看、加、完成、改期 | 🧪 alpha | 接外面的服務 |
-| [📅 google-calendar](packs/google-calendar/README.md) | `/gcal 明天 14:00 看牙醫`、`/gcal_today`、`/gcal_setup` | 直接看、加、刪你的 Google 日曆 | 🧪 alpha | 接外面的服務 |
-| [🍎 apple-reminders](packs/apple-reminders/README.md) | `/applerem`、`/applerem_add`、`/applerem_status` | CalDAV 提醒事項（iCloud 升級過的 Apple 不開放，見說明） | 🧪 alpha | 接外面的服務 |
+| 工具 | 指令（例） | 做什麼 | 穩定度 | 建議群組 | 說明頁 |
+|---|---|---|---|---|---|
+| [📒 notes](packs/notes/README.md) | `/note 買牛奶`、`/note_list`、`/note_rm 1` | 隨手記一筆、找、刪 | 🧪 alpha | 入門 | [看說明](https://claude.ai/artifact/NpYbd3FtMAkXmASXc1pJzh) |
+| [✅ todo](packs/todo/README.md) | `/todo !! 繳電費 明天 #家事`、`/todo_list` | 待辦：重要度、專案、到期 | 🧪 alpha | 入門、規劃 | [看說明](https://claude.ai/artifact/JuKURoMhZY58fWyR4j3961) |
+| [💰 money](packs/money/README.md) | `/money 120 午餐`、`/money_in 32000 薪資`、`/money_month` | 支出／收入／轉帳、自己的類別與範本、預算與上限 | 🧪 alpha | 記帳 | [看說明](https://claude.ai/artifact/6kA9jSkwVFPPBthsCjmz6d) |
+| [📅 calendar](packs/calendar/README.md) | `/cal 明天 14:00 看牙醫`、`/cal_week`、`/cal_ics` | 行事曆、匯出 .ics | 🧪 alpha | 規劃 | [看說明](https://claude.ai/artifact/Fm6dXH5oiua8zPY3U5RYQ5) |
+| [• bullet](packs/bullet/README.md) | `/bj • 買牛奶`、`/bj_today`、`/bj_migrate` | 子彈筆記 | 🧪 alpha | 規劃 | [看說明](https://claude.ai/artifact/BTdPArDtbddRk4ijNqExZ3) |
+| [🗂 notion](packs/notion/README.md) | `/notion 會議`、`/notion_read`、`/notion_row` | 用你自己的 integration token 搜尋、讀、加一列、改欄位 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/B36np3VigMinvyFuyz74dJ) |
+| [✅ todoist](packs/todoist/README.md) | `/todoist !! 繳電費 明天`、`/todoist_list`、`/todoist_done 3` | Todoist 的待辦：看、加、完成、改期 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/D3zgGcZ9h1LRrDLu2QD5Mw) |
+| [📅 google-calendar](packs/google-calendar/README.md) | `/gcal 明天 14:00 看牙醫`、`/gcal_today`、`/gcal_setup` | 直接看、加、刪你的 Google 日曆 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/NyhRhPrRL1n9NMMbMEv3mx) |
+| [🍎 apple-reminders](packs/apple-reminders/README.md) | `/applerem`、`/applerem_add`、`/applerem_status` | CalDAV 提醒事項（iCloud 升級過的 Apple 不開放，見說明） | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp) |
 
 - 前五個：資料加密存在你自己的電腦（保管箱）、不連網、不開別的程式；伺服器版每個人一份。
 - 後四個（2026-11-12 從 SYNOX 主程式的 `connectors/` 搬來）：只連自己那個服務的官方 API（只用 `requests`）、不開埠、
   token／帳號加密存在保管箱、只給擁有者（`access: owner`）；都只對假傳輸測過，還沒對真的服務長時間用過。
 - 全部先標 **🧪 alpha**（維護者決定），意思與升級條件見下面「穩定度」。
+
+**SYNOX 衣櫃（外觀）**：26 套外觀（`costume-<字母>-<名字>`，例如 `costume-b-lantern` 提燈），換上之後整個聊天畫面的顏色、吉祥物、開場一起換；
+只有 SVG 和 CSS、不帶程式（kind=`theme`）。公開頁：[docs/site/wardrobe.html](docs/site/wardrobe.html)（每套都有預覽和「下載 .synoxpack」）。
+SYNOX 預設的吉祥物不變，不換就是原本的樣子。原始檔在 `costumes/`，由 `scripts/build_costumes.py` 產生（見下面「給開發者」）。
 
 **提醒（`/remind_add 08:00 吃藥`）不在這裡**：它是 SYNOX 的系統指令（「⏰ 提醒（系統）」），不用裝。
 2026-11-12 以前這裡有一個 `remind` 工具，已下架到 [legacy/](legacy/README.md)。`apple-reminders`（Apple 提醒事項）是另一個東西：接你 iCloud 的待辦。
@@ -71,7 +79,25 @@ set SYNOX_HOME=<SYNOX 資料夾>             建議明寫（見下面「找 SYNO
 <SYNOX>\.venv\Scripts\python.exe scripts\build.py --check    只檢查
 <SYNOX>\.venv\Scripts\python.exe scripts\sync_shared.py      改了 packs\_shared\zhdate.py 之後跑（--check 只檢查）
 <SYNOX>\.venv\Scripts\python.exe scripts\public_check.py     公開版檢查（--history 另外看 git 歷史與 commit 作者信箱）
+python scripts\build_costumes.py check                         衣櫃：26 套外觀的「不帶程式」檢查（只用標準函式庫）
+python scripts\build_costumes.py pack                          衣櫃：只打包外觀 → dist\costume-*.synoxpack（build.py 也會順便打）
+python scripts\build_costumes.py page                          衣櫃：重新產生 docs\site\wardrobe.html（之後跑 site_stamp.py wardrobe.html）
+python scripts\build_costumes.py extract --brand <品牌提案頁.html>   衣櫃：從品牌提案頁重新產生 costumes\（要 Playwright、fontTools、連網一次）
 ```
+
+**衣櫃（`costumes/`）**：每套一個資料夾 `costumes/costume-<字母>-<名字>/`：`pack.json`（kind=`theme`；`theme.tokens` 淺色／深色、
+`theme.slots` 7 個 SVG：吉祥物 idle／think／happy／warn、開場、字標、App 圖示；`theme.css`；`fonts` 空的）、`slots/*.svg`、`theme.css`，
+另外 `about.json` 給公開頁用（不進 pack）。**不要手改**：全部由 `scripts/build_costumes.py extract` 從品牌提案頁產生
+（在瀏覽器裡呼叫頁面畫吉祥物的函式；開場原本是 HTML＋CSS 動畫，量好位置轉成純 SVG；字標的字用字型輪廓轉成路徑，所以不用附字型）。
+規則（`build_costumes.py` 的 `pack_problems`，`tests/test_costumes.py` 每次都跑）：沒有 `<script`、`on…=`、`javascript:`、外部網址（SVG 的 `xmlns` 例外）、
+`@import`、`foreignObject`、`data:`；照 SYNOX 外觀合約第 1 版（SYNOX 的 `docs/themes.md`）：`pack.json` 有 `summary`、`theme.contract: 1`，
+CSS 的 `:root` 只設 `--th-` 開頭的變數（這一套自己多用的顏色）、其他規則都在 `[data-slot]` 底下、keyframes 用 `th-<字母>-` 開頭、沒有 `!important`；
+SVG 沒有 `style="…"`（SYNOX 網頁的 CSP 不收）、只用 SYNOX 白名單裡的濾鏡；每套 300 KB 以內。
+有 SYNOX 的原始碼時（`SYNOX_SRC` 或旁邊的 `../SYNOX`），`tests/test_costumes.py` 也會直接跑 SYNOX 安裝時的第 1、2 關與消毒，確認 26 套都裝得進去、消毒時什麼都沒被拿掉。
+**字型**：不附（`fonts: []`）。`--font-ui`／`--font-brand` 寫的是字型名＋系統字後備，電腦上沒有就用系統字；字標和開場的字是路徑，不受影響。
+`scripts/build.py` 沒指定工具名時，會把 26 套一起打包、寫進同一份 `index.json`（`kind: "theme"`、`category: "衣櫃／外觀"`、
+`collection: "wardrobe"`，另有 `collections.wardrobe`），檔名 `costume-<字母>-<名字>-<版本>.synoxpack`，跟工具放在同一個發佈頁。
+SYNOX 那邊的 theme pack 實作如果跟這個格式不一樣：改 `build_costumes.py`、重新 extract，不要手改產生的檔。
 
 （主控台是 cp950：先 `set PYTHONIOENCODING=utf-8` 與 `set PYTHONUTF8=1`。）
 
@@ -121,6 +147,8 @@ set SYNOX_HOME=<SYNOX 資料夾>             建議明寫（見下面「找 SYNO
 | `packs/` | 每個工具一個資料夾；`_shared/` 是共用程式的正本（不是工具） |
 | `legacy/` | 下架的工具（不打包、不測試；每項寫原本做什麼、為什麼下架、怎麼救回） |
 | `scripts/build.py` | 打包＋寫 `index.json`（每個工具要寫 `requires.sdk`、`stage`） |
+| `costumes/` | SYNOX 衣櫃：26 套外觀（theme pack 的原始檔，`scripts/build_costumes.py` 產生） |
+| `scripts/build_costumes.py` | 衣櫃：產生、檢查、打包外觀，產生公開頁 `docs/site/wardrobe.html`（樣板 `scripts/wardrobe_template.html`） |
 | `scripts/public_check.py` | 公開版檢查（隱私、token、私人資料檔） |
 | `scripts/sync_shared.py` | `packs/_shared/` 的共用程式複製進用到的工具（calendar、todo、google-calendar、todoist） |
 | `scripts/_synox.py` | 找 SYNOX（`SYNOX_HOME` → 跑腳本的 Python 裝的那份 → 後備 `../SYNOX`） |

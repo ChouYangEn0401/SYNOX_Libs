@@ -1,0 +1,67 @@
+{
+  "name": "costume-l-blocks",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "格格",
+  "summary": "一格一格拼起來的小傢伙，裝一個工具就補上一格。SYNOX 衣櫃 · 系列 L：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f3f5ec",
+        "--surface": "#ffffff",
+        "--text": "#171b10",
+        "--muted": "#5c6350",
+        "--line": "#dde2cf",
+        "--accent": "#171b10",
+        "--accent-ink": "#d3f84a",
+        "--accent2": "#4f7a00",
+        "--soft": "#e4f3ad",
+        "--ok": "#1c7c45",
+        "--warn": "#8a6200",
+        "--bad": "#c2362f",
+        "--radius": "0px",
+        "--font-ui": "'Pixelify Sans','Noto Sans TC',sans-serif",
+        "--font-brand": "'Pixelify Sans','Pixelify Sans','Noto Sans TC',sans-serif",
+        "--m1": "#a3d91a",
+        "--m2": "#171b10",
+        "--mi": "#171b10",
+        "--mb": "#ff6f9c"
+      },
+      "dark": {
+        "--bg": "#0e100a",
+        "--surface": "#171a10",
+        "--text": "#eef2df",
+        "--muted": "#9aa387",
+        "--line": "#2b3020",
+        "--accent": "#c8f53c",
+        "--accent-ink": "#141a03",
+        "--accent2": "#8fd400",
+        "--soft": "#28330d",
+        "--ok": "#5fd68e",
+        "--warn": "#f5c04f",
+        "--bad": "#ff7a70",
+        "--radius": "0px",
+        "--font-ui": "'Pixelify Sans','Noto Sans TC',sans-serif",
+        "--font-brand": "'Pixelify Sans','Pixelify Sans','Noto Sans TC',sans-serif",
+        "--m1": "#c8f53c",
+        "--m2": "#f2f6e4",
+        "--mi": "#141a03",
+        "--mb": "#ff6f9c"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

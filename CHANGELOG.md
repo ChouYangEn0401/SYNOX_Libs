@@ -17,6 +17,11 @@
 - `scripts/build.py`：`index.json` 每筆多 `"app": true/false`（目錄頁標「有完整畫面」）。
 - 測試：`tests/test_money_app.py`（同一件事兩條路結果一樣、欄位訊息一樣、讀、匯出、伺服器版隔離）、`tests/test_apps_common.py`
   （每個有畫面的官方工具：畫面程式不自己連線、入口先載 SYNOX 的共用元件、說明不印畫面的網址）。
+- **SYNOX 衣櫃**（`wardrobe`）：品牌提案的 26 個系列（A–Z）做成 26 套外觀 `costume-<字母>-<名字>` 1.0.0（kind=`theme`）：
+  淺色／深色 token、吉祥物 4 種狀態、開場動畫、字標、App 圖示，只有 SVG＋CSS、不帶程式、不附字型。
+  `scripts/build_costumes.py`（extract／check／pack／page）、`tests/test_costumes.py`（不帶程式的規則、7 個 slot、token、大小、雜湊）、
+  公開頁 `docs/site/wardrobe.html`（從 `docs/site/index.html` 與 README 連過去）。
+  `scripts/build.py` 沒指定工具名時一起打包、列進 `index.json`（`kind: "theme"`、`category: "衣櫃／外觀"`、`collections.wardrobe`）。
 
 ## [0.2.0] - 2026-11-13
 

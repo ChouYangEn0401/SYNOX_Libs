@@ -1,0 +1,67 @@
+{
+  "name": "costume-s-pangolin",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "捲捲",
+  "summary": "一隻芋頭色的穿山甲：有狀況就捲成一顆球，把你的資料抱在懷裡。SYNOX 衣櫃 · 系列 S：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f6f2f8",
+        "--surface": "#ffffff",
+        "--text": "#2a1f36",
+        "--muted": "#6b5d78",
+        "--line": "#e4daec",
+        "--accent": "#6f3f96",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#a94f1c",
+        "--soft": "#eee0f8",
+        "--ok": "#1c7a4c",
+        "--warn": "#8f6408",
+        "--bad": "#c2362f",
+        "--radius": "20px",
+        "--font-ui": "'Huninn','Noto Sans TC',sans-serif",
+        "--font-brand": "'Fredoka','Huninn','Noto Sans TC',sans-serif",
+        "--m1": "#a98ec6",
+        "--m2": "#6a4c8c",
+        "--mi": "#3a2648",
+        "--mb": "#ff8f8f"
+      },
+      "dark": {
+        "--bg": "#17111f",
+        "--surface": "#221a2e",
+        "--text": "#f1e9f7",
+        "--muted": "#a999b8",
+        "--line": "#3a2d4b",
+        "--accent": "#c9a2f0",
+        "--accent-ink": "#2a1040",
+        "--accent2": "#ffb37a",
+        "--soft": "#3a2456",
+        "--ok": "#5fd08d",
+        "--warn": "#f2c14e",
+        "--bad": "#ff8a8a",
+        "--radius": "20px",
+        "--font-ui": "'Huninn','Noto Sans TC',sans-serif",
+        "--font-brand": "'Fredoka','Huninn','Noto Sans TC',sans-serif",
+        "--m1": "#b79bd6",
+        "--m2": "#6f5196",
+        "--mi": "#3a2648",
+        "--mb": "#ff8f8f"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

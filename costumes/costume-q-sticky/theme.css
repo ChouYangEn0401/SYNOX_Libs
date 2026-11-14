@@ -1,0 +1,110 @@
+/* 貼貼（系列 Q）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+/* 這一套自己多用的顏色（不是合約 token；SYNOX 的 :root 只收 token 與 --th- 開頭的） */
+:root{--th-m3:#52c2d2;--th-qn:#ffe37a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--th-m3:#52c2d2;--th-qn:#6b5a12}}
+:root[data-theme="dark"]{--th-m3:#52c2d2;--th-qn:#6b5a12}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-q-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running th-q-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running th-q-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-q-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running th-q-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running th-q-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-q-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-q-o-fade}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .masc .qcurl{transform-box:fill-box}
+[data-slot][data-slot] .masc .qtape{transform-box:fill-box}
+[data-slot][data-slot] .masc .qbox{transform-box:fill-box}
+[data-slot][data-slot] .masc .qcurl{transform-origin:100% 100%;animation:4.6s ease-in-out 0s infinite normal none running th-q-q-flap}
+[data-slot][data-slot] .masc .qtape{transform-origin:50% 50%}
+[data-slot][data-slot] .masc .qw{stroke-dasharray:1}
+[data-slot][data-slot] .masc .qchk{stroke-dasharray:1}
+[data-slot][data-slot] .st-think .qw{animation:2.6s linear 0s infinite normal none running th-q-q-write}
+[data-slot][data-slot] .st-happy .qchk{animation:2.6s ease-out 0s infinite normal none running th-q-q-tick}
+[data-slot][data-slot] .st-warn .qbox{transform-origin:50% 50%;animation:1.2s ease-in-out 0s infinite normal none running th-q-q-wait}
+[data-slot][data-slot] .op-Q .om{animation:0.8s cubic-bezier(0.3, 0.6, 0.3, 1) 0s 1 normal both running th-q-q-o-fall}
+[data-slot][data-slot] .op-Q .qtape{animation:0.26s cubic-bezier(0.2, 1.4, 0.4, 1) 0.72s 1 normal both running th-q-q-o-tape}
+[data-slot][data-slot] .op-Q .ow{animation:0.75s cubic-bezier(0.4, 0.1, 0.5, 1) 0.92s 1 normal both running th-q-q-o-write}
+[data-slot][data-slot] .op-Q .qul{transform:rotate(-1.4deg);animation:0.32s cubic-bezier(0.3, 0.8, 0.3, 1) 1.66s 1 normal both running th-q-q-o-ul}
+[data-slot][data-slot] .op-Q .qul > .v > .bg{fill:var(--th-m3)}
+[data-slot][data-slot] .op-Q .ot{animation-delay:1.9s}
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .cq-v0{--i:0}
+[data-slot] .cq-v1{--i:1}
+[data-slot] .cq-v2{--i:2}
+[data-slot] .cq-v3{--i:3}
+[data-slot] .cq-v4{--i:4}
+@keyframes th-q-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes th-q-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes th-q-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes th-q-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes th-q-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes th-q-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes th-q-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes th-q-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes th-q-q-flap { 
+  0%, 80%, 100% { transform: none; }
+  86% { transform: scale(1.22); }
+  92% { transform: scale(0.96); }
+}
+@keyframes th-q-q-write { 
+  0% { stroke-dashoffset: 1; }
+  55%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes th-q-q-tick { 
+  0% { stroke-dashoffset: 1; }
+  16%, 100% { stroke-dashoffset: 0; }
+}
+@keyframes th-q-q-wait { 
+  50% { transform: scale(1.16); }
+}
+@keyframes th-q-q-o-fall { 
+  0% { opacity: 0; transform: translate(-46px, -120px) rotate(-30deg); }
+  16% { opacity: 1; }
+  46% { transform: translate(16px, -44px) rotate(17deg); }
+  76% { transform: translate(-3px, -4px) rotate(-6deg); }
+  89% { transform: scale(1.06, 0.94); }
+}
+@keyframes th-q-q-o-tape { 
+  0% { opacity: 0; transform: translateY(-9px) scale(1.5); }
+}
+@keyframes th-q-q-o-write { 
+  0% { clip-path: inset(-20% 100% -20% -6%); }
+  100% { clip-path: inset(-20% -6%); }
+}
+@keyframes th-q-q-o-ul { 
+  0% { transform: rotate(-1.4deg) scaleX(0); }
+}

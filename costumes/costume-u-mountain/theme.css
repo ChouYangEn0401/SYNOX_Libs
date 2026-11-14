@@ -1,0 +1,112 @@
+/* 靠山（系列 U）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+/* 這一套自己多用的顏色（不是合約 token；SYNOX 的 :root 只收 token 與 --th- 開頭的） */
+:root{--th-snow:#ffffff;--th-sun:#ffa62e;--th-cloud:#ffffff;--th-cloudl:#cfc6dc;--th-storm:#6b6880}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--th-snow:#ffffff;--th-sun:#ffb347;--th-cloud:#e9e6f5;--th-cloudl:#e9e6f5;--th-storm:#a3a0bd}}
+:root[data-theme="dark"]{--th-snow:#ffffff;--th-sun:#ffb347;--th-cloud:#e9e6f5;--th-cloudl:#e9e6f5;--th-storm:#a3a0bd}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-u-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running th-u-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running th-u-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-u-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running th-u-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running th-u-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-u-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-u-o-fade}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .st-happy .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .masc .ucloud{transform-box:fill-box;transform-origin:50% 50%}
+[data-slot][data-slot] .masc .usun{transform-box:fill-box;transform-origin:50% 50%}
+[data-slot][data-slot] .masc .urays{transform-box:fill-box;transform-origin:50% 50%}
+[data-slot][data-slot] .st-idle .ucloud{animation:6s ease-in-out 0s infinite alternate none running th-u-u-drift}
+[data-slot][data-slot] .st-think .ucloud{animation:2.6s ease-in-out 0s infinite normal none running th-u-u-puff}
+[data-slot][data-slot] .st-warn .ucloud{animation:2.4s linear 0s infinite normal none running th-u-u-rumble}
+[data-slot][data-slot] .st-happy .urays{animation:12s linear 0s infinite normal none running th-u-u-spin}
+[data-slot][data-slot] .st-happy .usun{animation:2.6s ease-in-out 0s infinite normal none running th-u-u-glow}
+[data-slot][data-slot] .op-U .om{animation:0.8s cubic-bezier(0.2, 0.8, 0.3, 1) 0s 1 normal both running th-u-u-o-rise}
+[data-slot][data-slot] .op-U .usun{animation:1.2s cubic-bezier(0.3, 0.7, 0.3, 1) 0.45s 1 normal both running th-u-u-o-sun}
+[data-slot][data-slot] .op-U .st-idle .ucloud{animation:1.3s ease-out 0.5s 1 normal both running th-u-u-o-cloud, 6s ease-in-out 1.8s infinite alternate none running th-u-u-drift}
+[data-slot][data-slot] .op-U .l{animation:th-u-u-o-let .7s ease calc(.95s + var(--i) * 80ms) both}
+[data-slot][data-slot] .op-U .ot{animation-delay:1.8s}
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .cu-v0{--i:0}
+[data-slot] .cu-v1{--i:1}
+[data-slot] .cu-v2{--i:2}
+[data-slot] .cu-v3{--i:3}
+[data-slot] .cu-v4{--i:4}
+@keyframes th-u-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes th-u-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes th-u-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes th-u-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes th-u-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes th-u-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes th-u-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes th-u-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes th-u-u-drift { 
+  0% { transform: translateX(-7px); }
+  100% { transform: translateX(5px); }
+}
+@keyframes th-u-u-puff { 
+  50% { transform: scale(1.07, 1.04); }
+}
+@keyframes th-u-u-rumble { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes th-u-u-spin { 
+  100% { transform: rotate(360deg); }
+}
+@keyframes th-u-u-glow { 
+  50% { transform: scale(1.06); }
+}
+@keyframes th-u-u-o-rise { 
+  0% { opacity: 0; transform: translateY(56px); }
+  30% { opacity: 1; }
+}
+@keyframes th-u-u-o-sun { 
+  0% { transform: translate(10px, 30px); }
+}
+@keyframes th-u-u-o-cloud { 
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { transform: translateX(-7px); }
+}
+@keyframes th-u-u-o-let { 
+  0% { opacity: 0; transform: translateY(12px); color: var(--th-sun); }
+  55% { opacity: 1; color: var(--accent); }
+  100% { transform: none; }
+}

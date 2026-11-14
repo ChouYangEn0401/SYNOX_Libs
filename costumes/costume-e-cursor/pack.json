@@ -1,0 +1,67 @@
+{
+  "name": "costume-e-cursor",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "游標",
+  "summary": "那顆會眨的方塊，變成打字時閃爍的游標。SYNOX 衣櫃 · 系列 E：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f4f4f6",
+        "--surface": "#ffffff",
+        "--text": "#111114",
+        "--muted": "#5f5f6b",
+        "--line": "#dcdce3",
+        "--accent": "#5b3df5",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#111114",
+        "--soft": "#ebe7ff",
+        "--ok": "#0d7d4d",
+        "--warn": "#9a6400",
+        "--bad": "#c9264b",
+        "--radius": "3px",
+        "--font-ui": "'IBM Plex Mono','Noto Sans TC',monospace",
+        "--font-brand": "'IBM Plex Mono','IBM Plex Mono','Noto Sans TC',monospace",
+        "--m1": "#5b3df5",
+        "--m2": "#111114",
+        "--mi": "#ffffff",
+        "--mb": "#b9a8ff"
+      },
+      "dark": {
+        "--bg": "#0a0a0d",
+        "--surface": "#141418",
+        "--text": "#ededf2",
+        "--muted": "#9292a0",
+        "--line": "#28282f",
+        "--accent": "#a594ff",
+        "--accent-ink": "#120a3a",
+        "--accent2": "#ededf2",
+        "--soft": "#1e1a3d",
+        "--ok": "#4ade80",
+        "--warn": "#fbbf24",
+        "--bad": "#ff6b8b",
+        "--radius": "3px",
+        "--font-ui": "'IBM Plex Mono','Noto Sans TC',monospace",
+        "--font-brand": "'IBM Plex Mono','IBM Plex Mono','Noto Sans TC',monospace",
+        "--m1": "#a594ff",
+        "--m2": "#ededf2",
+        "--mi": "#120a3a",
+        "--mb": "#6a56d9"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

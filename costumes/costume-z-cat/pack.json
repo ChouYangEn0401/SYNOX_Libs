@@ -1,0 +1,67 @@
+{
+  "name": "costume-z-cat",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "呼嚕",
+  "summary": "窩在你家打呼嚕的三花貓：看起來在睡，其實一隻耳朵醒著。SYNOX 衣櫃 · 系列 Z：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f3efe8",
+        "--surface": "#fffdf9",
+        "--text": "#2b2733",
+        "--muted": "#6b6470",
+        "--line": "#e4ddd0",
+        "--accent": "#35507f",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#a94f16",
+        "--soft": "#e2e8f3",
+        "--ok": "#1f7a4a",
+        "--warn": "#8f5a00",
+        "--bad": "#c2334d",
+        "--radius": "16px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Kiwi Maru','Noto Sans TC',sans-serif",
+        "--m1": "#fff6e8",
+        "--m2": "#f2a25a",
+        "--mi": "#2e2a35",
+        "--mb": "#f2939b"
+      },
+      "dark": {
+        "--bg": "#11151f",
+        "--surface": "#1a2030",
+        "--text": "#eef0f6",
+        "--muted": "#9aa3b8",
+        "--line": "#2a3348",
+        "--accent": "#9fbcf0",
+        "--accent-ink": "#0e1a30",
+        "--accent2": "#ffb070",
+        "--soft": "#1f2c47",
+        "--ok": "#6fd6a0",
+        "--warn": "#f6c453",
+        "--bad": "#ff7a96",
+        "--radius": "16px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Kiwi Maru','Noto Sans TC',sans-serif",
+        "--m1": "#fff3e0",
+        "--m2": "#f5a964",
+        "--mi": "#2e2a35",
+        "--mb": "#f2939b"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

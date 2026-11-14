@@ -1,0 +1,118 @@
+/* 飽飽（系列 R）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+/* 這一套自己多用的顏色（不是合約 token；SYNOX 的 :root 只收 token 與 --th- 開頭的） */
+:root{--th-m3:#6f4fa8;--th-ia:#a688e0;--th-fy:#ffcf4a;--th-fg:#6fbf5a;--th-fr:#f0624d;--th-wood:#c98b4e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--th-m3:#7d5cc0;--th-ia:#8463cc;--th-fy:#ffcf4a;--th-fg:#6fbf5a;--th-fr:#f0624d;--th-wood:#d9a066}}
+:root[data-theme="dark"]{--th-m3:#7d5cc0;--th-ia:#8463cc;--th-fy:#ffcf4a;--th-fg:#6fbf5a;--th-fr:#f0624d;--th-wood:#d9a066}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-r-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running th-r-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running th-r-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-r-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running th-r-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running th-r-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-r-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-r-o-fade}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .masc .rlid{transform-box:fill-box}
+[data-slot][data-slot] .masc .rfood circle{transform-box:fill-box}
+[data-slot][data-slot] .masc .rlid{transform-origin:8% 100%}
+[data-slot][data-slot] .masc .rfood circle{transform-origin:50% 100%}
+[data-slot][data-slot] .st-think .rlid{animation:1.5s ease-in-out 0s infinite normal none running th-r-r-rattle}
+[data-slot][data-slot] .st-happy .rlid{transform:translateY(-15px) rotate(-9deg);animation:2.6s cubic-bezier(0.2, 1.4, 0.4, 1) 0s infinite normal none running th-r-r-up}
+[data-slot][data-slot] .st-happy .rfood circle{animation:2.6s cubic-bezier(0.2, 1.6, 0.4, 1) 0s infinite normal none running th-r-r-food}
+[data-slot][data-slot] .st-happy .rfood circle:nth-of-type(2){animation-delay:0.08s}
+[data-slot][data-slot] .st-happy .rfood circle:nth-of-type(3){animation-delay:0.16s}
+[data-slot][data-slot] .op-R .om{animation:0.4s cubic-bezier(0.2, 1.3, 0.4, 1) 0s 1 normal both running th-r-r-o-in, 0.32s ease 1.14s 1 normal both running th-r-r-o-shut}
+[data-slot][data-slot] .op-R .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .op-R .rlid{animation:1.42s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-r-r-o-lid}
+[data-slot][data-slot] .op-R .pc{opacity:0;animation:0.44s cubic-bezier(0.5, 0, 0.9, 0.6) 0s 1 normal both running th-r-r-o-drop}
+[data-slot][data-slot] .op-R .pc1{--x:-17px;animation-delay:0.3s}
+[data-slot][data-slot] .op-R .pc1 > .v > .bg{fill:var(--th-fy)}
+[data-slot][data-slot] .op-R .pc2{--x:0px;animation-delay:0.52s}
+[data-slot][data-slot] .op-R .pc2 > .v > .bg{fill:var(--th-fg)}
+[data-slot][data-slot] .op-R .pc3{--x:17px;animation-delay:0.74s}
+[data-slot][data-slot] .op-R .pc3 > .v > .bg{fill:var(--th-fr)}
+[data-slot][data-slot] .op-R .l{animation:th-r-o-pop .45s cubic-bezier(.2, 1.6, .4, 1) calc(1.22s + var(--i) * 65ms) both}
+[data-slot][data-slot] .op-R .ot{animation-delay:1.75s}
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .cr-v0{--i:0}
+[data-slot] .cr-v1{--i:1}
+[data-slot] .cr-v2{--i:2}
+[data-slot] .cr-v3{--i:3}
+[data-slot] .cr-v4{--i:4}
+@keyframes th-r-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes th-r-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes th-r-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes th-r-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes th-r-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes th-r-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes th-r-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes th-r-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes th-r-o-pop { 
+  0% { opacity: 0; transform: translateY(14px) scale(0.4) rotate(-14deg); }
+}
+@keyframes th-r-r-rattle { 
+  0%, 40%, 100% { transform: none; }
+  50% { transform: translateY(-3px) rotate(-2.5deg); }
+  60% { transform: none; }
+  70% { transform: translateY(-2px) rotate(-1.5deg); }
+  80% { transform: none; }
+}
+@keyframes th-r-r-up { 
+  0% { transform: none; }
+  16%, 100% { transform: translateY(-15px) rotate(-9deg); }
+}
+@keyframes th-r-r-food { 
+  0% { transform: scale(0.5); }
+  20%, 100% { transform: none; }
+}
+@keyframes th-r-r-o-in { 
+  0% { opacity: 0; transform: translateY(16px) scale(0.7); }
+}
+@keyframes th-r-r-o-shut { 
+  35% { transform: scale(1.07, 0.9); }
+  70% { transform: scale(0.98, 1.03); }
+}
+@keyframes th-r-r-o-lid { 
+  0% { transform: none; }
+  14%, 76% { transform: translateY(-26px) rotate(-13deg); }
+  86% { transform: translateY(1px); }
+  100% { transform: none; }
+}
+@keyframes th-r-r-o-drop { 
+  0% { opacity: 1; transform: translate(var(--x), -64px); }
+  85% { opacity: 1; transform: translate(var(--x), 30px); }
+  100% { opacity: 0; transform: translate(var(--x), 36px) scale(.7); }
+}

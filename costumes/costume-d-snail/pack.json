@@ -1,0 +1,67 @@
+{
+  "name": "costume-d-snail",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "小殼",
+  "summary": "把家背在身上的蝸牛：資料不出門。SYNOX 衣櫃 · 系列 D：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f1f4ee",
+        "--surface": "#ffffff",
+        "--text": "#1d2a22",
+        "--muted": "#5b6b5f",
+        "--line": "#dbe3d8",
+        "--accent": "#3a754b",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#b0742a",
+        "--soft": "#e1efe2",
+        "--ok": "#1d7f5f",
+        "--warn": "#8f6408",
+        "--bad": "#c23b2f",
+        "--radius": "22px",
+        "--font-ui": "'Quicksand','Noto Sans TC',sans-serif",
+        "--font-brand": "'Quicksand','Quicksand','Noto Sans TC',sans-serif",
+        "--m1": "#3d7a4f",
+        "--m2": "#dcb884",
+        "--mi": "#2a2a1c",
+        "--mb": "#e58a6a"
+      },
+      "dark": {
+        "--bg": "#101511",
+        "--surface": "#18201a",
+        "--text": "#e3ebe2",
+        "--muted": "#94a496",
+        "--line": "#28352b",
+        "--accent": "#8fd6a0",
+        "--accent-ink": "#0c2413",
+        "--accent2": "#e8b876",
+        "--soft": "#1c3323",
+        "--ok": "#6fdcb0",
+        "--warn": "#f2c14e",
+        "--bad": "#ff8177",
+        "--radius": "22px",
+        "--font-ui": "'Quicksand','Noto Sans TC',sans-serif",
+        "--font-brand": "'Quicksand','Quicksand','Noto Sans TC',sans-serif",
+        "--m1": "#5fae74",
+        "--m2": "#e8cfa6",
+        "--mi": "#2a2a1c",
+        "--mb": "#e58a6a"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

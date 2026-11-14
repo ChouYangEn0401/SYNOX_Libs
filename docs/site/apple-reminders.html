@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- SYNOX 工具庫：單一工具的說明頁。樣板＝這一頁（notes）；其他工具照抄版面，只換內容。改完跑 scripts/site_stamp.py 更新最下面的頁面版本。 -->
+<title>Apple 提醒事項 · SYNOX 工具</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* 跟 SYNOX 介紹頁同一套 token（青綠主色、藍灰中性色、三個狀態色），版面簡化成一欄。 */
+:root {
+  --bg: #f3f5f8; --surface: #ffffff; --sunken: #eef1f5; --line: #e2e7ee; --line-2: #cdd5df;
+  --ink: #131b26; --muted: #465264; --faint: #6a7687;
+  --accent: #0a7c70; --accent-soft: #d9f1ec; --accent-ink: #ffffff;
+  --ok: #1f7a3a; --ok-soft: #dcf3e3; --warn: #9a5b00; --warn-soft: #fbeccf; --bad: #b42318; --bad-soft: #fde3df;
+  --shadow: 0 1px 2px rgba(19,27,38,.05), 0 10px 28px -14px rgba(19,27,38,.22);
+  --glow: radial-gradient(60% 50% at 85% 0%, rgba(10,124,112,.12), transparent 70%);
+  --display: "LXGW WenKai TC", "Noto Serif TC", "PMingLiU", serif;
+  --body: "Noto Sans TC", "Microsoft JhengHei UI", "PingFang TC", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0f14; --surface: #121924; --sunken: #0d131b; --line: #1f2b3b; --line-2: #2d3b4f;
+    --ink: #dbe4ef; --muted: #aab6c6; --faint: #7f90a7;
+    --accent: #35e0c4; --accent-soft: #123b38; --accent-ink: #06201c;
+    --ok: #57d98a; --ok-soft: #10301e; --warn: #e6b04e; --warn-soft: #3a2a0b; --bad: #ff8a7a; --bad-soft: #43171a;
+    --shadow: 0 1px 2px rgba(0,0,0,.45), 0 14px 36px -16px rgba(0,0,0,.75);
+    --glow: radial-gradient(60% 50% at 85% 0%, rgba(53,224,196,.14), transparent 70%);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b0f14; --surface: #121924; --sunken: #0d131b; --line: #1f2b3b; --line-2: #2d3b4f;
+  --ink: #dbe4ef; --muted: #aab6c6; --faint: #7f90a7;
+  --accent: #35e0c4; --accent-soft: #123b38; --accent-ink: #06201c;
+  --ok: #57d98a; --ok-soft: #10301e; --warn: #e6b04e; --warn-soft: #3a2a0b; --bad: #ff8a7a; --bad-soft: #43171a;
+  --shadow: 0 1px 2px rgba(0,0,0,.45), 0 14px 36px -16px rgba(0,0,0,.75);
+  --glow: radial-gradient(60% 50% at 85% 0%, rgba(53,224,196,.14), transparent 70%);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg) var(--glow) no-repeat; color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.75;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 820px; margin-inline: auto; }
+h1, h2 { font-family: var(--display); font-weight: 700; line-height: 1.3; margin: 0; text-wrap: balance; }
+h2 { font-size: 24px; margin-bottom: 14px; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+code { font-family: var(--mono); font-size: .88em; background: var(--sunken); border: 1px solid var(--line); padding: 1px 6px; border-radius: 5px; word-break: break-word; }
+section { padding-block: 34px; }
+
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-block: 20px; font-size: 14.5px; }
+.top a { text-decoration: none; font-weight: 500; }
+.top .src { color: var(--muted); }
+
+.hero { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 20px; align-items: start; padding-block: 18px 30px; }
+@media (max-width: 520px) { .hero { grid-template-columns: 1fr; gap: 14px; } }
+.tile { width: 76px; height: 76px; border-radius: 22px; display: grid; place-items: center; font-size: 40px; line-height: 1; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.hero h1 { font-size: clamp(32px, 6vw, 44px); }
+.meta { font-family: var(--mono); font-size: 13px; color: var(--faint); margin-top: 4px; }
+.lede { font-size: 18px; color: var(--muted); margin-top: 12px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; border-radius: 999px; padding: 3px 12px; background: var(--sunken); border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.badge.stage { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+.badge.good { color: var(--ok); background: var(--ok-soft); border-color: transparent; }
+
+/* 指令：一列一個，右邊是它會做什麼（唯讀／會寫入／危險） */
+.cmds { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.cmds li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 14px; padding: 12px 16px; border-top: 1px solid var(--line); align-items: center; }
+.cmds li:first-child { border-top: 0; }
+.cmds code { background: none; border: 0; padding: 0; font-size: 14.5px; color: var(--ink); font-weight: 600; }
+.cmds span { grid-column: 1; color: var(--muted); font-size: 14.5px; }
+.cmds .fx { grid-column: 2; grid-row: 1 / span 2; }
+.fx { font-style: normal; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 1px 10px; white-space: nowrap; }
+.fx.read { color: var(--ok); background: var(--ok-soft); }
+.fx.write { color: var(--accent); background: var(--accent-soft); }
+.fx.danger { color: var(--bad); background: var(--bad-soft); }
+
+.say { display: grid; gap: 10px; }
+.say div { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.bubble { background: var(--accent-soft); border-radius: 14px 14px 5px 14px; padding: 7px 14px; font-size: 15px; }
+.arrow { color: var(--faint); font-size: 14px; }
+
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: grid; gap: 10px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.steps li::before { content: counter(s); font-family: var(--mono); font-weight: 600; font-size: 14px; color: var(--accent-ink); background: var(--accent); border-radius: 8px; height: 28px; display: grid; place-items: center; }
+.steps b { font-weight: 500; }
+.steps p { color: var(--muted); font-size: 14.5px; }
+
+.facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.facts li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 8px; font-size: 15px; color: var(--muted); }
+.facts li b { color: var(--ink); font-weight: 500; }
+
+.honest { list-style: none; margin: 0; padding: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.honest li { padding: 12px 16px; border-top: 1px solid var(--line); font-size: 15px; color: var(--muted); }
+.honest li:first-child { border-top: 0; }
+.honest b { color: var(--ink); font-weight: 500; }
+.wip, .sim { display: inline-block; font-style: normal; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 0 9px; line-height: 20px; margin-right: 6px; white-space: nowrap; }
+.wip { color: var(--warn); background: var(--warn-soft); }
+.sim { color: var(--muted); background: var(--sunken); border: 1px solid var(--line); }
+
+footer { border-top: 1px solid var(--line); margin-top: 30px; padding-block: 24px 16px; color: var(--faint); font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+footer a { color: var(--muted); }
+@media (max-width: 520px) {
+  .top a { display: inline-block; padding-block: 10px; }
+  footer a { display: inline-block; padding-block: 8px; }
+  .say div { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .arrow { padding-left: 6px; }
+  .cmds li { padding: 12px 14px; }
+  .lede { font-size: 17px; }
+}
+/* 給開發者對版本：線上版和本機版的「頁面版本」一樣＝同一份 */
+.stamp { font-family: var(--mono); font-size: 10px; color: var(--faint); opacity: .55; padding-bottom: 28px; word-break: break-all; }
+.stamp a { color: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <a href="https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL">← SYNOX 工具庫</a>
+  <a class="src" href="https://github.com/ChouYangEn0401/SYNOX_Libs/tree/main/packs/apple-reminders" target="_blank" rel="noopener">原始碼（GitHub）</a>
+</header>
+
+<div class="hero">
+  <div class="tile" aria-hidden="true">🍎</div>
+  <div>
+    <h1>Apple 提醒事項</h1>
+    <p class="meta">apple-reminders · v0.1.1 · 群組：接外面的服務</p>
+    <p class="lede">在 SYNOX 裡看、加、打勾 iPhone 提醒事項 App 裡的事。<b>先看這句：</b>iCloud 的提醒事項如果升級過（iOS 13 之後幾乎每個人都是），Apple 不開放給外面的程式，這個工具讀不到也加不進去；要用得接一個別家的 CalDAV 帳號。</p>
+    <div class="badges">
+      <span class="badge stage">🧪 alpha 早期版</span>
+      <span class="badge good">帳號加密存在這台電腦</span>
+      <span class="badge">會連網：只連你設定的伺服器</span>
+      <span class="badge" title="只有安裝 SYNOX、跟它配對的那個人能用；SYNOX 開成伺服器版時，其他人看不到這個工具。">👤 單人用：只有安裝的人能用</span>
+    </div>
+  </div>
+</div>
+
+<section>
+  <h2>指令</h2>
+  <ul class="cmds">
+    <li><code>/applerem 工作</code><span>列出還沒完成的（照到期排序，最多 30 項）；不寫清單＝全部</span><i class="fx read">唯讀</i></li>
+    <li><code>/applerem_lists</code><span>有哪些提醒事項清單</span><i class="fx read">唯讀</i></li>
+    <li><code>/applerem_add 繳電費 due=明天 15:00</code><span>加一個；有時間的會帶到時提醒，可加 <code>list=清單</code></span><i class="fx write">會寫入</i></li>
+    <li><code>/applerem_done 2</code><span>打勾（編號看上一次 /applerem）</span><i class="fx write">會寫入</i></li>
+    <li><code>/applerem_status</code><span>看帳號（遮住）、測試連線；AI 不能用</span><i class="fx read">唯讀</i></li>
+    <li><code>/applerem_logout</code><span>清掉這台電腦存的帳號；AI 不能用</span><i class="fx write">會寫入</i></li>
+  </ul>
+</section>
+
+<section>
+  <h2>要先準備</h2>
+  <ol class="steps">
+    <li><div><b>一個能用 CalDAV 的提醒事項帳號</b>
+      <p>建議：在 iPhone 的「設定 → 提醒事項 → 帳號 → 加入帳號 → 其他 → 加入 CalDAV 帳號」接一個別家的帳號（例如 Fastmail、mailbox.org、自架 Nextcloud），清單會出現在 iPhone 提醒事項 App。iCloud 只有從沒升級過的提醒事項能用，而且 Apple 隨時可能關掉。</p></div></li>
+    <li><div><b>準備密碼</b>
+      <p>iCloud 要用 App 專用密碼（appleid.apple.com → 登入與安全性 → App 專用密碼），不是 Apple ID 本身的密碼。</p></div></li>
+    <li><div><b>在這台電腦雙擊 <code>Connect-Apple.bat</code></b>
+      <p>工具裝好後，在 SYNOX 資料夾裡找到它（或 <code>python -m synox connect apple-reminders</code>），填伺服器網址（一定要 <code>https://</code>）、帳號、密碼。不能在聊天裡登入。</p></div></li>
+    <li><div><b>打 <code>/applerem_status</code></b>
+      <p>測試登入、列出找到的清單；iCloud 升級過的話它會說明為什麼找不到。</p></div></li>
+  </ol>
+</section>
+
+<section>
+  <h2>直接跟 AI 說</h2>
+  <div class="say">
+    <div><span class="bubble">我 iPhone 上還有哪些提醒？</span><span class="arrow">→ 列出還沒完成的</span></div>
+    <div><span class="bubble">提醒我明天下午三點繳電費</span><span class="arrow">→ 加一個，到期明天 15:00</span></div>
+    <div><span class="bubble">第 2 個做完了</span><span class="arrow">→ 打勾上一次列出的第 2 項</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>怎麼裝</h2>
+  <ol class="steps">
+    <li><div><b>拿到 <code>apple-reminders-0.1.1.synoxpack</code></b>
+      <p><a href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/download/v0.2.0/apple-reminders-0.1.1.synoxpack">直接下載</a>（GitHub 發佈頁 v0.2.0）；要一次拿全部工具就下載 <a href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/download/v0.2.0/tools-0.2.0.zip">tools-0.2.0.zip</a>，解開放進 SYNOX 資料夾的 <code>tools\</code>。也可以用工具庫的 <code>scripts\build.py apple-reminders</code> 自己打包。</p></div></li>
+    <li><div><b>點兩下，或拖進 SYNOX 網頁</b>
+      <p>也可以 <code>python -m synox tools install apple-reminders</code>。</p></div></li>
+    <li><div><b>看完檢查報告，按確認</b>
+      <p>裝好後打 <code>/help</code> 就多一頁「🍎 Apple 提醒事項」；接著照上面「要先準備」設定帳號。</p></div></li>
+  </ol>
+</section>
+
+<section>
+  <h2>資料與安全</h2>
+  <ul class="facts">
+    <li><span>🔒</span><span><b>存在哪</b>：帳號存在 <code>data/apple-reminders.auth.json.enc</code>，保管箱加密；提醒事項本身留在 CalDAV 伺服器上。</span></li>
+    <li><span>🌐</span><span><b>連不連網</b>：會連網，只連 https、只連你設定的那台主機（iCloud 允許 <code>*.icloud.com</code>），不跟隨重新導向，每次最多等 20 秒。</span></li>
+    <li><span>🛡️</span><span><b>伺服器回的東西</b>：回應上限 5 MB，含 DOCTYPE／ENTITY 的 XML 拒讀；你打的字跳脫後才寫進去。</span></li>
+    <li><span>⚠️</span><span><b>危險動作</b>：沒有。<code>/applerem_logout</code> 只清這台電腦存的帳號，記得也到 appleid.apple.com 撤銷那組 App 專用密碼。</span></li>
+    <li><span>👥</span><span><b>伺服器版</b>：只給擁有者用（<code>access: owner</code>），只在私訊裡。</span></li>
+  </ul>
+</section>
+
+<section>
+  <h2>現在的狀態</h2>
+  <ul class="honest">
+    <li><i class="sim">🧪 未實測</i><b>還沒對真的 CalDAV／iCloud 伺服器跑過</b>，測試全部用假的 HTTP 傳輸（所以標 alpha）。</li>
+    <li><b>Apple 的限制</b>：升級過的 iCloud 提醒事項用不了，這不是這個工具能修的；重複的提醒事項不能在這裡打勾，要在 iPhone 上做。</li>
+    <li><b>自動測試</b>：<code>tests/test_apple_reminders.py</code> 24 個，全部通過：安裝檢查、存帳號（密文）、密碼錯、升級過的 iCloud 說明、列出／加入／打勾（含跳脫、到時提醒、重複項目、版本衝突）、只連設定的主機、拒絕 http、XML 與過大回應、日期解析。<code>/applerem_lists</code> 沒有專門的測試。</li>
+  </ul>
+</section>
+
+<footer>
+  <span>SYNOX 工具庫 · apple-reminders</span>
+  <a href="https://claude.ai/artifact/M8zGBGy9kRtGTjNS24wBVL">所有工具</a>
+  <a href="https://github.com/ChouYangEn0401/SYNOX_Libs/blob/main/packs/apple-reminders/README.md" target="_blank" rel="noopener">README</a>
+  <a href="https://claude.ai/artifact/SNsSkbcVQm7BU22BBZN3gW#synox">SYNOX 是什麼</a>
+</footer>
+<p class="stamp" data-online="https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp">線上版 <a href="https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp">https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp</a> · 本機版 docs/site/apple-reminders.html · 頁面版本 <span data-stamp>5a68947fa7 · 2026-11-13</span></p>
+
+</div>
+</body>
+</html>
