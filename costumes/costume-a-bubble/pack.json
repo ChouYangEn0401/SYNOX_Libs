@@ -1,0 +1,64 @@
+{
+  "name": "costume-a-bubble",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "方方",
+  "description": "現在那顆會眨眼的方塊，長出一條對話尾巴。SYNOX 衣櫃 · 系列 A：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "theme": {
+    "tokens": {
+      "light": {
+        "--bg": "#f3f6f8",
+        "--surface": "#ffffff",
+        "--text": "#131b26",
+        "--muted": "#5d6b7e",
+        "--line": "#dfe6ee",
+        "--accent": "#0a7c70",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#2f7fd6",
+        "--soft": "#dff2ee",
+        "--ok": "#12823b",
+        "--warn": "#9a6400",
+        "--bad": "#c62f2f",
+        "--radius": "16px",
+        "--font-ui": "'Nunito','Noto Sans TC',sans-serif",
+        "--font-brand": "'Nunito','Nunito','Noto Sans TC',sans-serif",
+        "--m1": "#0d9484",
+        "--m2": "#0a7c70",
+        "--mi": "#ffffff",
+        "--mb": "#ff8fa3"
+      },
+      "dark": {
+        "--bg": "#0b0f14",
+        "--surface": "#121924",
+        "--text": "#dbe4ef",
+        "--muted": "#8a99ad",
+        "--line": "#223044",
+        "--accent": "#35e0c4",
+        "--accent-ink": "#04221d",
+        "--accent2": "#4aa8ff",
+        "--soft": "#12302d",
+        "--ok": "#46d17f",
+        "--warn": "#ffb454",
+        "--bad": "#ff6b78",
+        "--radius": "16px",
+        "--font-ui": "'Nunito','Noto Sans TC',sans-serif",
+        "--font-brand": "'Nunito','Nunito','Noto Sans TC',sans-serif",
+        "--m1": "#35e0c4",
+        "--m2": "#1fb8a0",
+        "--mi": "#04221d",
+        "--mb": "#ff7d95"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

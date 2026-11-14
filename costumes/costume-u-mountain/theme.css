@@ -1,0 +1,107 @@
+/* 靠山（系列 U）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+/* 這一套自己多用的顏色（不是共用 token） */
+[data-slot]{--snow:#ffffff;--sun:#ffa62e;--cloud:#ffffff;--cloudl:#cfc6dc;--storm:#6b6880}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) [data-slot]{--snow:#ffffff;--sun:#ffb347;--cloud:#e9e6f5;--cloudl:#e9e6f5;--storm:#a3a0bd}}
+:root[data-theme="dark"] [data-slot]{--snow:#ffffff;--sun:#ffb347;--cloud:#e9e6f5;--cloudl:#e9e6f5;--storm:#a3a0bd}
+@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running cu-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running cu-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running cu-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running cu-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running cu-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running cu-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running cu-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running cu-o-fade}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .st-happy .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .masc .ucloud{transform-box:fill-box;transform-origin:50% 50%}
+[data-slot][data-slot] .masc .usun{transform-box:fill-box;transform-origin:50% 50%}
+[data-slot][data-slot] .masc .urays{transform-box:fill-box;transform-origin:50% 50%}
+[data-slot][data-slot] .st-idle .ucloud{animation:6s ease-in-out 0s infinite alternate none running cu-u-drift}
+[data-slot][data-slot] .st-think .ucloud{animation:2.6s ease-in-out 0s infinite normal none running cu-u-puff}
+[data-slot][data-slot] .st-warn .ucloud{animation:2.4s linear 0s infinite normal none running cu-u-rumble}
+[data-slot][data-slot] .st-happy .urays{animation:12s linear 0s infinite normal none running cu-u-spin}
+[data-slot][data-slot] .st-happy .usun{animation:2.6s ease-in-out 0s infinite normal none running cu-u-glow}
+[data-slot][data-slot] .op-U .om{animation:0.8s cubic-bezier(0.2, 0.8, 0.3, 1) 0s 1 normal both running cu-u-o-rise}
+[data-slot][data-slot] .op-U .usun{animation:1.2s cubic-bezier(0.3, 0.7, 0.3, 1) 0.45s 1 normal both running cu-u-o-sun}
+[data-slot][data-slot] .op-U .st-idle .ucloud{animation:1.3s ease-out 0.5s 1 normal both running cu-u-o-cloud, 6s ease-in-out 1.8s infinite alternate none running cu-u-drift}
+[data-slot][data-slot] .op-U .l{animation:cu-u-o-let .7s ease calc(.95s + var(--i) * 80ms) both}
+[data-slot][data-slot] .op-U .ot{animation-delay:1.8s}
+@keyframes cu-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes cu-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes cu-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes cu-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes cu-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes cu-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes cu-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes cu-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes cu-u-drift { 
+  0% { transform: translateX(-7px); }
+  100% { transform: translateX(5px); }
+}
+@keyframes cu-u-puff { 
+  50% { transform: scale(1.07, 1.04); }
+}
+@keyframes cu-u-rumble { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes cu-u-spin { 
+  100% { transform: rotate(360deg); }
+}
+@keyframes cu-u-glow { 
+  50% { transform: scale(1.06); }
+}
+@keyframes cu-u-o-rise { 
+  0% { opacity: 0; transform: translateY(56px); }
+  30% { opacity: 1; }
+}
+@keyframes cu-u-o-sun { 
+  0% { transform: translate(10px, 30px); }
+}
+@keyframes cu-u-o-cloud { 
+  0% { opacity: 0; transform: translateX(30px); }
+  100% { transform: translateX(-7px); }
+}
+@keyframes cu-u-o-let { 
+  0% { opacity: 0; transform: translateY(12px); color: var(--sun); }
+  55% { opacity: 1; color: var(--accent); }
+  100% { transform: none; }
+}

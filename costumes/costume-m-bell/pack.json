@@ -1,0 +1,64 @@
+{
+  "name": "costume-m-bell",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "叮叮",
+  "description": "桌上的服務鈴小管家：按一下，「叮」，馬上到。SYNOX 衣櫃 · 系列 M：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "theme": {
+    "tokens": {
+      "light": {
+        "--bg": "#f1f4fb",
+        "--surface": "#ffffff",
+        "--text": "#111a33",
+        "--muted": "#58627a",
+        "--line": "#dbe2f0",
+        "--accent": "#1f4fd8",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#b97f00",
+        "--soft": "#e3ebff",
+        "--ok": "#12804a",
+        "--warn": "#8f6400",
+        "--bad": "#c62f3d",
+        "--radius": "14px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Josefin Sans','Noto Sans TC',sans-serif",
+        "--m1": "#2e5fe8",
+        "--m2": "#f2b430",
+        "--mi": "#ffffff",
+        "--mb": "#ff9fb4"
+      },
+      "dark": {
+        "--bg": "#0c1224",
+        "--surface": "#141c33",
+        "--text": "#e4eaf8",
+        "--muted": "#93a0bd",
+        "--line": "#26314f",
+        "--accent": "#8fb0ff",
+        "--accent-ink": "#0a1a44",
+        "--accent2": "#f5c04e",
+        "--soft": "#1b2a55",
+        "--ok": "#52d691",
+        "--warn": "#ffc857",
+        "--bad": "#ff7684",
+        "--radius": "14px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Josefin Sans','Noto Sans TC',sans-serif",
+        "--m1": "#5d88ff",
+        "--m2": "#f5c04e",
+        "--mi": "#ffffff",
+        "--mb": "#ff9fb4"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

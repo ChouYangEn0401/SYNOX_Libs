@@ -1,0 +1,64 @@
+{
+  "name": "costume-k-pulse",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "怦怦",
+  "description": "一條心跳線，凸起來的那一下就是它。SYNOX 衣櫃 · 系列 K：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "theme": {
+    "tokens": {
+      "light": {
+        "--bg": "#fbf2f6",
+        "--surface": "#ffffff",
+        "--text": "#2b1022",
+        "--muted": "#735a69",
+        "--line": "#f0dbe6",
+        "--accent": "#c2187a",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#5b2a86",
+        "--soft": "#fde0ee",
+        "--ok": "#1f7a4d",
+        "--warn": "#8f6200",
+        "--bad": "#b3261e",
+        "--radius": "22px",
+        "--font-ui": "'Comfortaa','Noto Sans TC',sans-serif",
+        "--font-brand": "'Comfortaa','Comfortaa','Noto Sans TC',sans-serif",
+        "--m1": "#d4237f",
+        "--m2": "#ffe1ef",
+        "--mi": "#4a0f33",
+        "--mb": "#ff7fb6"
+      },
+      "dark": {
+        "--bg": "#170b14",
+        "--surface": "#22111d",
+        "--text": "#f7e6ef",
+        "--muted": "#b595a8",
+        "--line": "#3a2032",
+        "--accent": "#ff78b9",
+        "--accent-ink": "#3d0522",
+        "--accent2": "#c9a2ff",
+        "--soft": "#40152f",
+        "--ok": "#62d69b",
+        "--warn": "#f5c04f",
+        "--bad": "#ff8a7a",
+        "--radius": "22px",
+        "--font-ui": "'Comfortaa','Noto Sans TC',sans-serif",
+        "--font-brand": "'Comfortaa','Comfortaa','Noto Sans TC',sans-serif",
+        "--m1": "#ff78b9",
+        "--m2": "#4a1736",
+        "--mi": "#ffe6f2",
+        "--mb": "#ff4f9e"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

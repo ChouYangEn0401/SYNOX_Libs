@@ -1,0 +1,84 @@
+/* 糰糰（系列 F）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .squish{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running cf-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running cf-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running cf-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running cf-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running cf-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running cf-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running cf-m-pop}
+[data-slot] .masc .squish{animation:2.8s ease-in-out 0s infinite normal none running cf-m-squish}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running cf-o-fade}
+[data-slot] .op-F .b{opacity:0}
+[data-slot] .op-F .b1{animation:0.55s ease-in 0s 1 normal both running cf-oF-b1}
+[data-slot] .op-F .b1 > .v > .bg{fill:var(--m1)}
+[data-slot] .op-F .b2{animation:0.55s ease-in 0s 1 normal both running cf-oF-b2}
+[data-slot] .op-F .b2 > .v > .bg{fill:var(--accent2)}
+[data-slot] .op-F .om{animation:0.9s cubic-bezier(0.3, 1.2, 0.5, 1) 0.5s 1 normal both running cf-oF-jelly}
+[data-slot] .op-F .l{animation:cf-o-pop .5s cubic-bezier(.2, 1.7, .4, 1) calc(1.05s + var(--i) * 70ms) both}
+[data-slot] .op-F .ot{animation-delay:1.6s}
+[data-slot] .wm{color:var(--text)}
+@keyframes cf-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes cf-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes cf-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes cf-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes cf-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes cf-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes cf-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes cf-m-squish { 
+  50% { transform: scale(1.035, 0.965); }
+}
+@keyframes cf-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes cf-o-pop { 
+  0% { opacity: 0; transform: translateY(14px) scale(0.4) rotate(-14deg); }
+}
+@keyframes cf-oF-b1 { 
+  0% { opacity: 1; transform: translate(-120px, -90px); }
+  85% { opacity: 1; transform: translate(-8px, 0px); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+@keyframes cf-oF-b2 { 
+  0% { opacity: 1; transform: translate(120px, -90px); }
+  85% { opacity: 1; transform: translate(8px, 0px); }
+  100% { opacity: 0; transform: scale(1.5); }
+}
+@keyframes cf-oF-jelly { 
+  0% { transform: scale(0.2); opacity: 0; }
+  35% { transform: scale(1.25, 0.8); opacity: 1; }
+  58% { transform: scale(0.9, 1.12); }
+  80% { transform: scale(1.05, 0.96); }
+}

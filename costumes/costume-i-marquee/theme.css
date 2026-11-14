@@ -1,0 +1,106 @@
+/* 小跑（系列 I）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+/* 這一套自己多用的顏色（不是共用 token） */
+[data-slot]{--panel:#1a0f24;--bulb:#ffe9a8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) [data-slot]{--panel:#0a0512;--bulb:#ffe9a8}}
+:root[data-theme="dark"] [data-slot]{--panel:#0a0512;--bulb:#ffe9a8}
+@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running ci-m-blink}
+[data-slot] .masc.sq .eye{animation-timing-function:steps(1)}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running ci-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running ci-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running ci-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running ci-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running ci-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running ci-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running ci-o-fade}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .masc .ileg{transform-box:fill-box}
+[data-slot][data-slot] .masc .iled .eye{transform-box:fill-box}
+[data-slot][data-slot] .masc .ileg{transform-origin:50% 0%}
+[data-slot][data-slot] .masc .iled{filter:drop-shadow(currentcolor 0px 0px 1.6px)}
+[data-slot][data-slot] .masc .ibulb{animation-duration:1.2s;animation-timing-function:steps(1);animation-iteration-count:infinite;animation-direction:normal;animation-fill-mode:none;animation-play-state:running;animation-name:ci-i-chase;animation-timeline:auto;animation-range:normal;animation-delay:calc(var(--i) * -300ms)}
+[data-slot][data-slot] .st-think .ibulb{animation-duration:0.48s;animation-delay:calc(var(--i) * -120ms)}
+[data-slot][data-slot] .st-happy .ibulb{animation:0.42s steps(1) 0s infinite normal none running ci-i-flash}
+[data-slot][data-slot] .st-warn .ibulb{animation:1.2s steps(1) 0s infinite normal none running ci-i-flash;fill:rgb(255, 143, 61)}
+[data-slot][data-slot] .st-think .ileg.il{animation:0.36s ease-in-out 0s infinite normal none running ci-i-run}
+[data-slot][data-slot] .st-think .ileg.ir{animation:0.36s ease-in-out -0.18s infinite normal none running ci-i-run}
+[data-slot][data-slot] .op-I .iboard > .v > .bg{fill:var(--panel)}
+[data-slot][data-slot] .op-I .iboard > .v > .sh{fill:var(--m1)}
+[data-slot][data-slot] .op-I .iboard .ibd{opacity:0.9;animation:0.5s steps(1) 0s 4 normal both running ci-i-o-bd}
+[data-slot][data-slot] .op-I .iboard .ibd > .v > .bd{stroke:var(--bulb)}
+[data-slot][data-slot] .op-I .ow{color:var(--mi);filter:drop-shadow(0 0 9px color-mix(in srgb, var(--mi) 65%, transparent));animation:1.1s steps(20) 0.3s 1 normal both running ci-i-o-scroll, 0.5s steps(1) 1.4s 1 normal none running ci-i-o-flick}
+[data-slot][data-slot] .op-I .om{animation:0.9s steps(9) 0s 1 normal both running ci-i-o-in}
+[data-slot][data-slot] .op-I .st-idle .mbody{animation:0.18s ease-in-out 0s 5 normal none running ci-i-o-bounce}
+[data-slot][data-slot] .op-I .ileg.il{animation:0.18s ease-in-out 0s 5 normal none running ci-i-run}
+[data-slot][data-slot] .op-I .ileg.ir{animation:0.18s ease-in-out -0.09s 5 normal none running ci-i-run}
+[data-slot][data-slot] .op-I .ot{animation-delay:1.75s}
+@keyframes ci-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes ci-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes ci-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes ci-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes ci-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes ci-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes ci-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes ci-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes ci-i-chase { 
+  0% { opacity: 1; }
+  25%, 100% { opacity: 0.28; }
+}
+@keyframes ci-i-flash { 
+  0% { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}
+@keyframes ci-i-run { 
+  0%, 100% { transform: rotate(20deg); }
+  50% { transform: rotate(-20deg) translateY(-3px); }
+}
+@keyframes ci-i-o-in { 
+  0% { transform: translateX(-210px); }
+}
+@keyframes ci-i-o-bounce { 
+  50% { transform: translateY(-5px); }
+}
+@keyframes ci-i-o-scroll { 
+  0% { transform: translateX(118%); }
+}
+@keyframes ci-i-o-flick { 
+  0%, 30%, 60% { opacity: 0.35; }
+  15%, 45%, 100% { opacity: 1; }
+}
+@keyframes ci-i-o-bd { 
+  0% { opacity: 0.9; }
+  50% { opacity: 0.3; }
+}

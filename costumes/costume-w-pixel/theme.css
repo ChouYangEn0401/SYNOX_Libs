@@ -1,0 +1,123 @@
+/* 嗶嗶（系列 W）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+/* 這一套自己多用的顏色（不是共用 token） */
+[data-slot]{--mh:#4c8a3e;--lcd:#c5d68a;--lcdink:#0f380f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) [data-slot]{--mh:#d9ec86;--lcd:#0e2110;--lcdink:#9bbc0f}}
+:root[data-theme="dark"] [data-slot]{--mh:#d9ec86;--lcd:#0e2110;--lcdink:#9bbc0f}
+@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running cw-m-blink}
+[data-slot] .masc.sq .eye{animation-timing-function:steps(1)}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running cw-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running cw-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running cw-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running cw-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running cw-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running cw-o-fade}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .masc .wfoot{transform-box:fill-box}
+[data-slot][data-slot] .masc .weyes{transform-box:fill-box}
+[data-slot][data-slot] .st-idle .mbody{animation:1.4s steps(1) 0s infinite normal none running cw-wp-bob}
+[data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .st-think .weyes{animation:2.4s steps(1) 0s infinite normal none running cw-wp-look}
+[data-slot][data-slot] .st-think .wfoot.fr{animation:0.5s steps(1) 0s infinite normal none running cw-wp-tap}
+[data-slot][data-slot] .st-happy .mbody{animation:0.8s steps(1) 0s infinite normal none running cw-wp-hop}
+[data-slot][data-slot] .st-warn .mbody{animation:2s steps(1) 0s infinite normal none running cw-wp-shake}
+[data-slot][data-slot] .masc .pop{animation:2.6s steps(1) 0s infinite normal none running cw-wp-pop}
+[data-slot][data-slot] .masc .wdots rect{animation:1.2s steps(1) 0s infinite normal none running cw-m-dot}
+[data-slot][data-slot] .masc .wdots rect:nth-of-type(2){animation-delay:0.2s}
+[data-slot][data-slot] .masc .wdots rect:nth-of-type(3){animation-delay:0.4s}
+[data-slot][data-slot] .op > .v > .bg{fill:var(--lcd)}
+[data-slot][data-slot] .op .ow{color:var(--lcdink)}
+[data-slot][data-slot] .op .ot{color:var(--lcdink)}
+[data-slot][data-slot] .op .wboot{color:var(--lcdink);opacity:0}
+[data-slot][data-slot] .op-W .wboot{animation:0.78s steps(1) 0s 1 normal both running cw-wp-o-boot}
+[data-slot][data-slot] .op-W .wboot .t-span{animation:1ms steps(1) 0s 1 normal both running cw-wp-o-line}
+[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-delay:0.2s}
+[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-delay:0.4s}
+[data-slot][data-slot] .op-W .ow{animation:0.64s steps(8) 0.8s 1 normal both running cw-wp-o-drop}
+[data-slot][data-slot] .op-W .om{animation:0.36s steps(4) 1.5s 1 normal both running cw-wp-o-rise}
+[data-slot][data-slot] .op-W .ot{animation:0.8s steps(1) 1.9s 1 normal both running cw-wp-o-blink}
+@keyframes cw-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes cw-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes cw-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes cw-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes cw-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes cw-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes cw-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes cw-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes cw-wp-bob { 
+  0%, 100% { transform: none; }
+  50% { transform: translateY(-4px); }
+}
+@keyframes cw-wp-hop { 
+  0%, 100% { transform: none; }
+  25%, 75% { transform: translateY(-8px); }
+  50% { transform: translateY(-16px); }
+}
+@keyframes cw-wp-shake { 
+  0%, 20%, 100% { transform: none; }
+  4%, 12% { transform: translateX(-4px); }
+  8%, 16% { transform: translateX(4px); }
+}
+@keyframes cw-wp-look { 
+  0%, 100% { transform: none; }
+  50% { transform: translateX(-24px); }
+}
+@keyframes cw-wp-pop { 
+  0% { opacity: 0; }
+  5% { opacity: 1; transform: translateY(-8px); }
+  10%, 100% { opacity: 1; transform: none; }
+}
+@keyframes cw-wp-tap { 
+  0%, 100% { transform: none; }
+  50% { transform: translateY(-8px); }
+}
+@keyframes cw-wp-o-boot { 
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes cw-wp-o-line { 
+  0% { visibility: hidden; }
+  100% { visibility: visible; }
+}
+@keyframes cw-wp-o-drop { 
+  0% { transform: translateY(-192px); }
+}
+@keyframes cw-wp-o-rise { 
+  0% { clip-path: inset(100% 0px 0px); }
+  100% { clip-path: inset(0px); }
+}
+@keyframes cw-wp-o-blink { 
+  0%, 40% { opacity: 0; }
+  20%, 60%, 100% { opacity: 1; }
+}

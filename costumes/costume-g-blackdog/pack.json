@@ -1,0 +1,64 @@
+{
+  "name": "costume-g-blackdog",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "小黑",
+  "description": "幫你顧厝的台灣土狗：平常一耳垂著，有狀況兩耳都豎起來。SYNOX 衣櫃 · 系列 G：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "theme": {
+    "tokens": {
+      "light": {
+        "--bg": "#f7f4e8",
+        "--surface": "#ffffff",
+        "--text": "#17150f",
+        "--muted": "#686250",
+        "--line": "#e7e0c9",
+        "--accent": "#17150f",
+        "--accent-ink": "#ffd23f",
+        "--accent2": "#c98a00",
+        "--soft": "#ffefb0",
+        "--ok": "#1f7a45",
+        "--warn": "#a34e00",
+        "--bad": "#c2322b",
+        "--radius": "12px",
+        "--font-ui": "'Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--font-brand": "'Rammetto One','Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--m1": "#17150f",
+        "--m2": "#f0a92e",
+        "--mi": "#fffaf0",
+        "--mb": "#ff7d95"
+      },
+      "dark": {
+        "--bg": "#13120e",
+        "--surface": "#1e1c16",
+        "--text": "#f3eedf",
+        "--muted": "#a59f8c",
+        "--line": "#37332a",
+        "--accent": "#ffd23f",
+        "--accent-ink": "#1a1503",
+        "--accent2": "#f3eedf",
+        "--soft": "#3b3211",
+        "--ok": "#5fd08d",
+        "--warn": "#ff9a4d",
+        "--bad": "#ff7a7a",
+        "--radius": "12px",
+        "--font-ui": "'Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--font-brand": "'Rammetto One','Chiron GoRound TC','Noto Sans TC',sans-serif",
+        "--m1": "#0e0d0a",
+        "--m2": "#f0a92e",
+        "--mi": "#fffaf0",
+        "--mb": "#ff7d95"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

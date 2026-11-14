@@ -1,0 +1,64 @@
+{
+  "name": "costume-p-lock",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "小鎖",
+  "description": "一把會笑的小鎖：平常鎖著，你說好才打開。SYNOX 衣櫃 · 系列 P：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "theme": {
+    "tokens": {
+      "light": {
+        "--bg": "#f5f5f7",
+        "--surface": "#ffffff",
+        "--text": "#1d1d1f",
+        "--muted": "#6e6e73",
+        "--line": "#e3e3e8",
+        "--accent": "#1d1d1f",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#0066cc",
+        "--soft": "#e8e8ed",
+        "--ok": "#1d7a3e",
+        "--warn": "#8a5a00",
+        "--bad": "#c4281c",
+        "--radius": "14px",
+        "--font-ui": "'Inter','Noto Sans TC',sans-serif",
+        "--font-brand": "'Inter','Inter','Noto Sans TC',sans-serif",
+        "--m1": "#1d1d1f",
+        "--m2": "#a1a1a6",
+        "--mi": "#ffffff",
+        "--mb": "#ff8fa3"
+      },
+      "dark": {
+        "--bg": "#0b0b0d",
+        "--surface": "#1c1c1e",
+        "--text": "#f5f5f7",
+        "--muted": "#98989d",
+        "--line": "#2e2e31",
+        "--accent": "#f5f5f7",
+        "--accent-ink": "#1d1d1f",
+        "--accent2": "#4da3ff",
+        "--soft": "#2c2c2e",
+        "--ok": "#30d158",
+        "--warn": "#ffb340",
+        "--bad": "#ff6961",
+        "--radius": "14px",
+        "--font-ui": "'Inter','Noto Sans TC',sans-serif",
+        "--font-brand": "'Inter','Inter','Noto Sans TC',sans-serif",
+        "--m1": "#f5f5f7",
+        "--m2": "#7c7c82",
+        "--mi": "#1d1d1f",
+        "--mb": "#ff8fa3"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

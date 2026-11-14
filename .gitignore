@@ -7,3 +7,5 @@ data/
 dist/
 # scripts/public_check.py 的私人字詞（擁有者的名字、暱稱…）：只在自己電腦上，不進 repo
 public_check.local.txt
+# scripts/build_costumes.py extract 下載的字型（只拿來把字標轉成路徑，不進 repo）
+.cache/

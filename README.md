@@ -25,6 +25,10 @@
   token／帳號加密存在保管箱、只給擁有者（`access: owner`）；都只對假傳輸測過，還沒對真的服務長時間用過。
 - 全部先標 **🧪 alpha**（維護者決定），意思與升級條件見下面「穩定度」。
 
+**SYNOX 衣櫃（外觀）**：26 套外觀（`costume-<字母>-<名字>`，例如 `costume-b-lantern` 提燈），換上之後整個聊天畫面的顏色、吉祥物、開場一起換；
+只有 SVG 和 CSS、不帶程式（kind=`theme`）。公開頁：[docs/site/wardrobe.html](docs/site/wardrobe.html)（每套都有預覽和「下載 .synoxpack」）。
+SYNOX 預設的吉祥物不變，不換就是原本的樣子。原始檔在 `costumes/`，由 `scripts/build_costumes.py` 產生（見下面「給開發者」）。
+
 **提醒（`/remind_add 08:00 吃藥`）不在這裡**：它是 SYNOX 的系統指令（「⏰ 提醒（系統）」），不用裝。
 2026-11-12 以前這裡有一個 `remind` 工具，已下架到 [legacy/](legacy/README.md)。`apple-reminders`（Apple 提醒事項）是另一個東西：接你 iCloud 的待辦。
 
@@ -75,7 +79,22 @@ set SYNOX_HOME=<SYNOX 資料夾>             建議明寫（見下面「找 SYNO
 <SYNOX>\.venv\Scripts\python.exe scripts\build.py --check    只檢查
 <SYNOX>\.venv\Scripts\python.exe scripts\sync_shared.py      改了 packs\_shared\zhdate.py 之後跑（--check 只檢查）
 <SYNOX>\.venv\Scripts\python.exe scripts\public_check.py     公開版檢查（--history 另外看 git 歷史與 commit 作者信箱）
+python scripts\build_costumes.py check                         衣櫃：26 套外觀的「不帶程式」檢查（只用標準函式庫）
+python scripts\build_costumes.py pack                          衣櫃：只打包外觀 → dist\costume-*.synoxpack（build.py 也會順便打）
+python scripts\build_costumes.py page                          衣櫃：重新產生 docs\site\wardrobe.html（之後跑 site_stamp.py wardrobe.html）
+python scripts\build_costumes.py extract --brand <品牌提案頁.html>   衣櫃：從品牌提案頁重新產生 costumes\（要 Playwright、fontTools、連網一次）
 ```
+
+**衣櫃（`costumes/`）**：每套一個資料夾 `costumes/costume-<字母>-<名字>/`：`pack.json`（kind=`theme`；`theme.tokens` 淺色／深色、
+`theme.slots` 7 個 SVG：吉祥物 idle／think／happy／warn、開場、字標、App 圖示；`theme.css`；`fonts` 空的）、`slots/*.svg`、`theme.css`，
+另外 `about.json` 給公開頁用（不進 pack）。**不要手改**：全部由 `scripts/build_costumes.py extract` 從品牌提案頁產生
+（在瀏覽器裡呼叫頁面畫吉祥物的函式；開場原本是 HTML＋CSS 動畫，量好位置轉成純 SVG；字標的字用字型輪廓轉成路徑，所以不用附字型）。
+規則（`build_costumes.py` 的 `pack_problems`，`tests/test_costumes.py` 每次都跑）：沒有 `<script`、`on…=`、`javascript:`、外部網址（SVG 的 `xmlns` 例外）、
+`@import`、`foreignObject`、`data:`；CSS 只有 custom properties 與 `[data-slot]` 底下的規則，keyframes 用 `c<字母>-` 開頭；每套 300 KB 以內。
+**字型**：不附（`fonts: []`）。`--font-ui`／`--font-brand` 寫的是字型名＋系統字後備，電腦上沒有就用系統字；字標和開場的字是路徑，不受影響。
+`scripts/build.py` 沒指定工具名時，會把 26 套一起打包、寫進同一份 `index.json`（`kind: "theme"`、`category: "衣櫃／外觀"`、
+`collection: "wardrobe"`，另有 `collections.wardrobe`），檔名 `costume-<字母>-<名字>-<版本>.synoxpack`，跟工具放在同一個發佈頁。
+SYNOX 那邊的 theme pack 實作如果跟這個格式不一樣：改 `build_costumes.py`、重新 extract，不要手改產生的檔。
 
 （主控台是 cp950：先 `set PYTHONIOENCODING=utf-8` 與 `set PYTHONUTF8=1`。）
 
@@ -125,6 +144,8 @@ set SYNOX_HOME=<SYNOX 資料夾>             建議明寫（見下面「找 SYNO
 | `packs/` | 每個工具一個資料夾；`_shared/` 是共用程式的正本（不是工具） |
 | `legacy/` | 下架的工具（不打包、不測試；每項寫原本做什麼、為什麼下架、怎麼救回） |
 | `scripts/build.py` | 打包＋寫 `index.json`（每個工具要寫 `requires.sdk`、`stage`） |
+| `costumes/` | SYNOX 衣櫃：26 套外觀（theme pack 的原始檔，`scripts/build_costumes.py` 產生） |
+| `scripts/build_costumes.py` | 衣櫃：產生、檢查、打包外觀，產生公開頁 `docs/site/wardrobe.html`（樣板 `scripts/wardrobe_template.html`） |
 | `scripts/public_check.py` | 公開版檢查（隱私、token、私人資料檔） |
 | `scripts/sync_shared.py` | `packs/_shared/` 的共用程式複製進用到的工具（calendar、todo、google-calendar、todoist） |
 | `scripts/_synox.py` | 找 SYNOX（`SYNOX_HOME` → 跑腳本的 Python 裝的那份 → 後備 `../SYNOX`） |

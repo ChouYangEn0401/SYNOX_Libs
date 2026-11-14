@@ -1,0 +1,64 @@
+{
+  "name": "costume-w-pixel",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "嗶嗶",
+  "description": "住在你電腦裡的像素小怪獸：有事「嗶」一聲，等你按確認。SYNOX 衣櫃 · 系列 W：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "theme": {
+    "tokens": {
+      "light": {
+        "--bg": "#eceae1",
+        "--surface": "#f9f8f2",
+        "--text": "#1b2a1b",
+        "--muted": "#5a6455",
+        "--line": "#d3d1c2",
+        "--accent": "#2c5e2c",
+        "--accent-ink": "#eaf3b8",
+        "--accent2": "#a3245f",
+        "--soft": "#dce7a8",
+        "--ok": "#1f7a45",
+        "--warn": "#8f5a00",
+        "--bad": "#b3261e",
+        "--radius": "2px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Press Start 2P','Noto Sans TC',sans-serif",
+        "--m1": "#306230",
+        "--m2": "#0f380f",
+        "--mi": "#e6f0b0",
+        "--mb": "#ff6fa3"
+      },
+      "dark": {
+        "--bg": "#0b160c",
+        "--surface": "#132316",
+        "--text": "#e3ecc0",
+        "--muted": "#9aa880",
+        "--line": "#27402a",
+        "--accent": "#9bbc0f",
+        "--accent-ink": "#0f2a0f",
+        "--accent2": "#ff7ab0",
+        "--soft": "#243b12",
+        "--ok": "#6fdc8c",
+        "--warn": "#ffc44d",
+        "--bad": "#ff8a7a",
+        "--radius": "2px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Press Start 2P','Noto Sans TC',sans-serif",
+        "--m1": "#9bbc0f",
+        "--m2": "#6c8c0c",
+        "--mi": "#0f380f",
+        "--mb": "#ff5c9a"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

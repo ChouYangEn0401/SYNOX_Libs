@@ -1,0 +1,118 @@
+/* 來福（系列 O）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+/* 這一套自己多用的顏色（不是共用 token） */
+[data-slot]{--m3:#fff1dc}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) [data-slot]{--m3:#fff1dc}}
+:root[data-theme="dark"] [data-slot]{--m3:#fff1dc}
+@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running co-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running co-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running co-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running co-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running co-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running co-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running co-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running co-o-fade}
+[data-slot] .op .hi{opacity:0}
+[data-slot] .op .hi > .v > .bg{fill:var(--surface)}
+[data-slot] .op .hi > .v > .bd{stroke:var(--line)}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .masc .o-tail{transform-box:view-box;animation:0.7s ease-in-out 0s infinite normal none running co-o-dog-wag}
+[data-slot][data-slot] .st-think .o-tail{animation-duration:2s}
+[data-slot][data-slot] .st-happy .o-tail{animation-duration:0.26s}
+[data-slot][data-slot] .st-warn .o-tail{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .masc .o-earl{transform-box:fill-box;transform-origin:88% 6%}
+[data-slot][data-slot] .masc .o-earr{transform-box:fill-box;transform-origin:12% 6%}
+[data-slot][data-slot] .st-idle .o-earl{animation:4.6s ease-in-out 0s infinite normal none running co-o-dog-ear}
+[data-slot][data-slot] .st-happy .o-earl{animation:0.52s ease-in-out 0s infinite normal none running co-o-dog-flap}
+[data-slot][data-slot] .st-happy .o-earr{animation:0.52s ease-in-out 0s infinite reverse none running co-o-dog-flap}
+[data-slot][data-slot] .masc .o-card{transform-box:fill-box;transform-origin:50% 0px;animation:2.4s ease-in-out 0s infinite normal none running co-o-dog-card}
+[data-slot][data-slot] .op-O .om{animation:1s linear 0.15s 1 normal both running co-o-dog-open-in}
+[data-slot][data-slot] .op-O .ball{animation:0.95s linear 0s 1 normal both running co-o-dog-open-ball}
+[data-slot][data-slot] .op-O .ball > .v > .bg{fill:var(--accent2)}
+[data-slot][data-slot] .op-O .hi{animation:1.05s ease 1.12s 1 normal both running co-o-hi}
+[data-slot][data-slot] .op-O .l{animation:co-o-pop .5s cubic-bezier(.2, 1.6, .4, 1) calc(1.2s + var(--i) * 65ms) both}
+[data-slot][data-slot] .op-O .ot{animation-delay:1.75s}
+@keyframes co-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes co-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes co-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes co-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes co-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes co-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes co-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes co-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes co-o-pop { 
+  0% { opacity: 0; transform: translateY(14px) scale(0.4) rotate(-14deg); }
+}
+@keyframes co-o-hi { 
+  0% { opacity: 0; transform: scale(0.3) rotate(-12deg); }
+  22% { opacity: 1; transform: scale(1.1); }
+  32%, 78% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-6px); }
+}
+@keyframes co-o-dog-wag { 
+  0%, 100% { transform: rotate(-9deg); }
+  50% { transform: rotate(13deg); }
+}
+@keyframes co-o-dog-ear { 
+  0%, 84%, 100% { transform: none; }
+  89% { transform: rotate(13deg); }
+  94% { transform: rotate(-4deg); }
+}
+@keyframes co-o-dog-flap { 
+  0%, 100% { transform: rotate(-7deg); }
+  50% { transform: rotate(9deg); }
+}
+@keyframes co-o-dog-card { 
+  0%, 100% { transform: rotate(-2.5deg); }
+  50% { transform: rotate(2.5deg); }
+}
+@keyframes co-o-dog-open-in { 
+  0% { transform: translate(-230px, 0px); animation-timing-function: ease-out; }
+  20% { transform: translate(-168px, -28px) rotate(-7deg); animation-timing-function: ease-in; }
+  40% { transform: translate(-108px, 0px) scale(1.06, 0.93); animation-timing-function: ease-out; }
+  60% { transform: translate(-52px, -24px) rotate(-6deg); animation-timing-function: ease-in; }
+  80% { transform: scale(1.09, 0.9); animation-timing-function: ease-out; }
+  100% { transform: none; }
+}
+@keyframes co-o-dog-open-ball { 
+  0% { transform: translate(-260px, -64px); animation-timing-function: ease-in; }
+  22% { transform: translate(-186px, 0px); animation-timing-function: ease-out; }
+  38% { transform: translate(-136px, -40px); animation-timing-function: ease-in; }
+  54% { transform: translate(-88px, 0px); animation-timing-function: ease-out; }
+  66% { transform: translate(-56px, -18px); animation-timing-function: ease-in; }
+  78% { transform: translate(-28px, 0px); animation-timing-function: ease-out; }
+  100% { transform: none; }
+}

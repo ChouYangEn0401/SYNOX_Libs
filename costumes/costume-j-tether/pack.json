@@ -1,0 +1,64 @@
+{
+  "name": "costume-j-tether",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "牽牽",
+  "description": "大點牽著小點：你說好，線才接上。SYNOX 衣櫃 · 系列 J：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "theme": {
+    "tokens": {
+      "light": {
+        "--bg": "#f2f4fb",
+        "--surface": "#ffffff",
+        "--text": "#141a33",
+        "--muted": "#5b6382",
+        "--line": "#dde2f1",
+        "--accent": "#2a4fe0",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#f2a900",
+        "--soft": "#e3e9ff",
+        "--ok": "#12804a",
+        "--warn": "#8f6200",
+        "--bad": "#c7303c",
+        "--radius": "18px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Unbounded','Noto Sans TC',sans-serif",
+        "--m1": "#3560f0",
+        "--m2": "#ffb92e",
+        "--mi": "#ffffff",
+        "--mb": "#ff9db0"
+      },
+      "dark": {
+        "--bg": "#0b0e1c",
+        "--surface": "#141931",
+        "--text": "#e3e8fb",
+        "--muted": "#8f98b8",
+        "--line": "#252c4d",
+        "--accent": "#8ea6ff",
+        "--accent-ink": "#0a1440",
+        "--accent2": "#ffd24a",
+        "--soft": "#1b2552",
+        "--ok": "#4fd58c",
+        "--warn": "#ffbe4d",
+        "--bad": "#ff7381",
+        "--radius": "18px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Unbounded','Noto Sans TC',sans-serif",
+        "--m1": "#5577ff",
+        "--m2": "#ffd24a",
+        "--mi": "#ffffff",
+        "--mb": "#ff9db0"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

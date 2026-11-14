@@ -1,0 +1,65 @@
+/* 游標（系列 E）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+@media (prefers-reduced-motion:reduce){[data-slot] *{animation:none!important;transition:none!important}}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running ce-m-blink}
+[data-slot] .masc.sq .eye{animation-timing-function:steps(1)}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running ce-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running ce-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running ce-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running ce-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running ce-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running ce-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running ce-o-fade}
+[data-slot] .op-E .pr{color:var(--accent)}
+[data-slot] .op-E .l{animation:ce-oE-key 1ms steps(1) calc(.35s + var(--i) * .17s) both}
+[data-slot] .op-E .eye{transform-box:fill-box;transform-origin:50% 50%;animation:0.3s ease 1.4s 1 normal both running ce-oE-eye}
+[data-slot] .op-E .mouth{transform-box:fill-box;transform-origin:50% 50%;animation:0.3s ease 1.4s 1 normal both running ce-oE-eye}
+[data-slot] .op-E .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot] .wm{color:var(--text)}
+@keyframes ce-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes ce-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes ce-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes ce-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes ce-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes ce-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes ce-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes ce-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes ce-oE-key { 
+  0% { max-width: 0px; opacity: 0; }
+  100% { max-width: 3em; opacity: 1; }
+}
+@keyframes ce-oE-eye { 
+  0% { transform: scaleY(0); }
+}

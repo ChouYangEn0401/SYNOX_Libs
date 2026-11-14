@@ -54,6 +54,26 @@ def _say(app, api, text):
     return api.last(OWNER_ID)
 
 
+def _tools(index):
+    """index.json 裡的工具（衣櫃的外觀 kind=theme 也在同一份清單，另外測：tests/test_costumes.py）。"""
+    return [e for e in index["packs"] if e.get("kind") != "theme"]
+
+
+def test_index_lists_wardrobe_costumes(built):
+    """衣櫃的 26 套外觀跟工具在同一份 index.json：kind=theme、category「衣櫃／外觀」，雜湊、大小對得上。"""
+    import build_costumes
+    out, index = built
+    themes = [e for e in index["packs"] if e.get("kind") == "theme"]
+    assert len(themes) == 26 == len(build_costumes.costume_folders())
+    assert index["collections"]["wardrobe"]["packs"] == [e["name"] for e in themes]
+    for e in themes:
+        assert e["category"] == "衣櫃／外觀" and e["collection"] == "wardrobe"
+        assert e["file"] == f"{e['name']}-{e['version']}.synoxpack"
+        with open(os.path.join(out, e["file"]), "rb") as f:
+            blob = f.read()
+        assert hashlib.sha256(blob).hexdigest() == e["sha256"] and len(blob) == e["size"]
+
+
 def test_every_tool_is_in_smoke_list():
     assert set(SMOKE) == set(PACK_NAMES)
 
@@ -62,10 +82,10 @@ def test_index_lists_every_tool_with_hash_and_sdk(built):
     out, index = built
     assert index["library"] == "SYNOX_Libs" and index["library_version"] == build_script.library_version()
     assert index["built_with"]["sdk"] == author.SDK_VERSION
-    assert {e["name"] for e in index["packs"]} == set(PACK_NAMES)
+    assert {e["name"] for e in _tools(index)} == set(PACK_NAMES)
     with open(os.path.join(out, "index.json"), encoding="utf-8") as f:
         assert json.load(f) == index
-    for e in index["packs"]:
+    for e in _tools(index):
         path = os.path.join(out, e["file"])
         assert e["file"] == f"{e['name']}-{e['version']}.synoxpack"
         with open(path, "rb") as f:
@@ -90,7 +110,7 @@ def test_empty_host_then_install_every_synoxpack(built, tmp_path):
     app, api, data = _empty_host(tmp_path, packs_dir)
     assert app.extras["synox_pack_report"].items == []                          # 一開始是空的
     assert "未知指令" in _say(app, api, "/money 120 午餐")
-    for e in index["packs"]:
+    for e in _tools(index):
         with open(os.path.join(out, e["file"]), "rb") as f:
             token, summary = admin.stage(f.read(), data)
         assert summary["scan"]["ok"], (e["name"], summary["scan"]["problems"])
