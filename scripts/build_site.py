@@ -46,7 +46,12 @@ ACCESS = {   # (標籤, 滑過去的說明) —— 跟 SYNOX 網頁「工具庫�
     "owner": ("👤 單人用", "只有安裝 SYNOX 的那個人能用；伺服器版的其他人看不到"),
     "member": ("👥 伺服器版也能用", "伺服器版裡每個人都能用，各自一份資料"),
 }
-SECTIONS = (("local", "存在這台電腦（不連網）"), ("online", "接外面的服務"))
+SECTIONS = (("local", "存在你電腦裡的"), ("online", "要連到別的網站的"))
+NET_WORD = {False: "不用上網", True: "要上網"}                     # 入口頁卡片「上網」那一格
+TESTED = {   # 入口頁卡片「測過嗎」那一格；工具自己寫了 status 就用它的
+    "test": "還在試做，隨時會改", "alpha": "能用，但還沒有人長期用過",
+    "beta": "有人實際用過一陣子", "stable": "長期實際用過",
+}
 NO_PAGE = "說明頁還沒寫"          # 沒有手寫說明頁（只有產生的簡單頁）
 NOT_ONLINE = "說明頁還沒上線"     # 有手寫頁，但 docs/artifacts.json 還沒有它的網址
 
@@ -187,22 +192,20 @@ def _pill(blocks, text, tone="", hint=""):
                                  "title_attr": f' title="{html.escape(hint, quote=True)}"' if hint else ""}, "pill")
 
 
-def card_data(t: dict, blocks: dict) -> dict:
-    pills = [_pill(blocks, STAGE_LABEL.get(t["stage"], t["stage"]), "stage")]
-    if t["status"]:
-        pills.append(_pill(blocks, t["status"]))
-    elif not t["network"]:
-        pills.append(_pill(blocks, "不連網", "ok"))
-    else:
-        pills.append(_pill(blocks, "要連網"))
+def card_data(t: dict, blocks: dict, root: str = ROOT) -> dict:
+    """卡片固定的順序：做什麼 → 例子 → 誰能用 → 上網 → 測過嗎 → 版本＋下載。"""
     label, hint = ACCESS[t["access"]]
-    pills.append(_pill(blocks, label, "", hint))
-    if page_note(t):
-        pills.append(_pill(blocks, page_note(t)))
+    stage = f"{STAGE_WORD.get(t['stage'], '')} {t['stage']}".strip()
+    note = page_note(t)
     return {"href": t["online_url"] or readme_url(t["name"]), "emoji": t["emoji"], "title": t["title"],
             "name": t["name"], "version": t["version"], "line": t["line"],
             "example": fill(blocks["example"], {"text": t["example"]}, "example") if t["example"] else "",
-            "pills": "".join(pills)}
+            "who": _pill(blocks, label, "", hint),
+            "net": _pill(blocks, NET_WORD[t["network"]], "" if t["network"] else "ok"),
+            "stage": _pill(blocks, stage, "stage"),
+            "tested": t["status"] or TESTED.get(t["stage"], ""),
+            "page_note": _pill(blocks, note) if note else "",
+            "pack_url": links.pack_url(t["name"], root=root)}
 
 
 def generated_note(template: str) -> str:
@@ -216,7 +219,7 @@ def index_data(all_tools: list, blocks: dict, root: str = ROOT) -> dict:
     for key, title in SECTIONS:
         group = [t for t in all_tools if ("online" if t["network"] else "local") == key]
         if group:
-            cards = "".join(fill(blocks["card"], card_data(t, blocks), "card") for t in group).rstrip("\n")
+            cards = "".join(fill(blocks["card"], card_data(t, blocks, root), "card") for t in group).rstrip("\n")
             sections.append(fill(blocks["section"], {"title": title, "cards": cards}, "section"))
     present = {t["stage"] for t in all_tools}
     data = {

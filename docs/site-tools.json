@@ -5,11 +5,11 @@
     "notes": {"line": "記一筆、找、刪", "example": "/note 買牛奶"},
     "todo": {"line": "重要度、專案、到期日、打勾完成", "example": "/todo !! 繳電費 明天"},
     "money": {"line": "支出、收入、轉帳、預算", "example": "/money 120 午餐"},
-    "calendar": {"line": "存在這台電腦的行程，可匯出 .ics", "example": "/cal 明天 14:00 看牙醫"},
+    "calendar": {"line": "存在這台電腦的行程，可以匯出給別的日曆用", "example": "/cal 明天 14:00 看牙醫"},
     "bullet": {"line": "快速記錄、今天、月誌、搬到今天", "example": "/bj • 買牛奶"},
-    "notion": {"line": "搜尋、讀頁面、加一列、改欄位", "example": "/notion 會議", "status": "只用模擬測過"},
-    "todoist": {"line": "看、加、完成、改期 Todoist 的待辦", "example": "/todoist !! 繳電費 明天", "status": "只用模擬測過"},
-    "google-calendar": {"line": "看今天／這週、加行程、刪行程", "example": "/gcal 明天 14:00 看牙醫", "status": "只用模擬測過"},
-    "apple-reminders": {"line": "CalDAV 提醒事項（升級過的 iCloud 讀不到）", "example": "/applerem_add 買牛奶", "status": "只用模擬測過"}
+    "notion": {"line": "搜尋、讀頁面、加一列、改欄位", "example": "/notion 會議", "status": "還沒真的連上去測過，只用假資料試過"},
+    "todoist": {"line": "看、加、完成、改期 Todoist 的待辦", "example": "/todoist !! 繳電費 明天", "status": "還沒真的連上去測過，只用假資料試過"},
+    "google-calendar": {"line": "看今天／這週、加行程、刪行程", "example": "/gcal 明天 14:00 看牙醫", "status": "還沒真的連上去測過，只用假資料試過"},
+    "apple-reminders": {"line": "看、加、完成提醒事項（新版 iCloud 的讀不到）", "example": "/applerem_add 買牛奶", "status": "還沒真的連上去測過，只用假資料試過"}
   }
 }
