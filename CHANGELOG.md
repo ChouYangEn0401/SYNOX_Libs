@@ -13,6 +13,7 @@
   `/gcal_status` 改成 `ai=False`（跟另外三個外部工具一樣，SKILL 改成請使用者自己打）。測試加一條 S6（log 裡沒有那些值）。
 
 ### Added
+- **`guitar` 0.1.0-alpha.1（新工具，`stage` alpha；**尚未實機驗證**，試過之後才發 0.1.0）**：把「吉他和弦全書」做成工具。`/chord`（查按法，一次可以好幾個）、`/chord_tp`（貼一份譜直接移調：`+2`、`-3`、`G→A`、`到 A`；和弦行與 `[C]` 夾在歌詞裡都認得，移調後和弦盡量留在原本那一欄；升降記號照新調寫；不貼譜＝用上次那份）、`/chord_capo`（夾幾格、用哪組手型最好彈）、`/chord_arp`（分散和弦 TAB）、`/chord_key`（一個調的和弦與常見進行）。網頁面板 `panel.html`（即時移調、capo 選擇、和弦圖、查和弦、分散和弦），資料走 `GET /api/packs/guitar/data`。只存最後一次貼的譜（保管箱、每人一份）；不連網、不碰檔案。`tests/test_guitar.py` 逐弦檢查每個按法的組成音；`catalog.json` 多一個建議群組「音樂」。
 - **`google-sheets` 0.1.0-alpha.1（新工具，`stage` alpha；**尚未實機驗證**，試過之後才發 0.1.0）**：Google 試算表**只加列**（[ADR-0005](docs/adr/0005-google-sheets-append-only.md)）。`/gsheet_new`、`/gsheet_list`、`/gsheet_use`、`/gsheet_read`、`/gsheet`（預覽）、`/gsheet_void`（加一列作廢標記）、`/gsheet_ok`（本人打確認碼才寫，AI 不行）；裝置碼登入、權限只有 `drive.file`、`values.append` 用 RAW＋INSERT_ROWS、每列有 id 不會重複寫。只對假的 Google 測過（`tests/test_gsheet.py`），還沒在真帳號上試。共用的 Google 登入程式放 `packs/_shared/googleauth.py`（`scripts/sync_shared.py` 也管它）；`catalog.json` 的「接外面的服務」多這一個。
 - **`money` 0.3.1 → 0.4.0-alpha.1**（**alpha，尚未實機驗證**：只在自動測試裡跑過，還沒在真的 SYNOX／Telegram 上試過；試過之後才發 0.4.0。記帳整個重做，[ADR-0004](docs/adr/0004-money-remake.md)；`stage` 仍是 alpha）：從一個本機使用多年的記帳程式通用化而來，
   去掉所有個人資料與寫死的設定。六個分頁（總覽、明細、規劃、設定、檢討、撲滿）、固定項目、每一格預算與滾存、信用卡與分期、負債、借貸、

@@ -26,6 +26,7 @@ CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-remin
 # pack 名稱 → 宣告的 capabilities（其他一律不准；每個都要明寫，沒有就寫 []——ADR-0006 C5）
 ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": ["filesystem:own"], "notes": [],
                 "diary": ["filesystem:own"],
+                "guitar": [],
                 **{name: ["network"] for name in CONNECT}}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0006 P1）
