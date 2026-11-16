@@ -1,4 +1,4 @@
-"""🎸 吉他和弦：查和弦、貼一份譜直接移調、Capo 建議、分散和弦 TAB、一個調裡有哪些和弦。
+"""🎸 吉他和弦：查和弦、貼一份譜直接移調、Capo 建議、分散和弦 TAB、一個調裡有哪些和弦、一格一小節的小節譜。
 
 指令（群組 chord）：
   /chord <和弦…>          查按法（Am7、D/F#、Bb，一次可以好幾個）
@@ -6,9 +6,11 @@
   /chord_capo [N] [譜或調] 夾 Capo 用哪一組手型最好彈；給 N＝直接把譜改成夾第 N 格的手型
   /chord_arp <和弦…> [型態] 分散和弦（指彈）的 TAB 譜
   /chord_key <調>          這個調裡的和弦與常見進行
+  /chord_chart [移法] <進行> 整理成一格一小節的小節譜（| C | G D/F# |、C G Am F、AI 看照片填的 JSON）
 
 樂理與按法的資料從「吉他和弦全書」（羊ㄣ出品）搬來；組成音都由程式逐弦算過（tests/test_guitar.py）。
-只記一樣東西：最後一次貼的譜（pack.store.of(user)，保管箱），讓「/chord_tp +1」不用再貼一次。不連網、不碰檔案。
+只記兩樣東西：最後一次貼的譜、最後一份小節譜（pack.store.of(user)，保管箱），讓「/chord_tp +1」不用再貼一次、
+面板的「小節譜」分頁看得到。不連網、不碰檔案。
 """
 
 import re
@@ -961,6 +963,548 @@ def describe_key(key):
     return "\n".join(lines)
 
 
+# ── 小節譜（一格一小節） ─────────────────────────────────────────────────────
+# 格式（README「小節譜的格式」）：{"title", "artist", "key", "capo", "time", "tempo", "bars_per_line",
+#   "sections": [{"name", "repeat", "bars": [["C"], ["G", "D/F#"], ["Am:3", "G:1"], ["%"], ["N.C."]], "lyrics": [...]}],
+#   "notes", "image": {"marks": [{"x": 0.12, "y": 0.30, "chord": "Am"}]}}
+# 一格（一小節）是一串字：和弦、和弦:拍數、%（同上一小節）、N.C.（不彈）、?（看不清楚）。
+
+MAX_BARS = 512
+MAX_SECTIONS = 40
+MAX_MARKS = 400
+NC_RE = re.compile(r"^(?:N\.?\s?C\.?|NC|n\.c\.)$")
+BEATS_RE = re.compile(r"^(.+?)[:：](\d{1,2})$")
+HOLDS = frozenset(("/", ".", "-", "·", "–", "—"))
+SAME = frozenset(("%", "％", "〃", "//."))
+TIME_RE = re.compile(r"^([1-9]\d?)/(2|4|8|16)$")
+BAR_MARK = re.compile(r"[|｜]")
+REPEAT_SIGN = re.compile(r"[|｜]\s*[:：]|[:：]\s*[|｜]")
+REPEAT_TAIL = re.compile(r"(?:^|\s+|(?<=[|｜]))[(（]?\s*(?:[x×X]\s*(\d{1,2})|(\d{1,2})\s*(?:[x×X]|次|遍))\s*[)）]?\s*$")
+REPEAT_ONLY = re.compile(r"^(?:[x×X]\s*\d{1,2}|\d{1,2}\s*(?:[x×X]|次|遍)|[x×X])$")
+LABEL_BOX = re.compile(r"^\s*[\[【]([^\[\]【】]{1,24})[\]】]\s*(.*)$")
+LABEL_COLON = re.compile(r"^\s*([^|｜:：\[\]【】]{1,16}?)\s*[:：](?!\d)\s*(.*)$")
+META = (
+    ("title", re.compile(r"^(?:標題|歌名|曲名|title)\s*[:：]\s*(.+)$", re.I)),
+    ("artist", re.compile(r"^(?:歌手|演唱|原唱|artist|by)\s*[:：]\s*(.+)$", re.I)),
+    ("key", re.compile(r"^(?:key|原調|調)\s*[:：=]?\s*(\S+?)\s*(?:調)?$", re.I)),
+    ("capo", re.compile(r"^(?:capo|夾)\s*[:：=]?\s*(\d{1,2})\s*(?:格)?$", re.I)),
+    ("time", re.compile(r"^(?:拍號\s*[:：]?\s*)?(\d{1,2}/\d{1,2})$")),
+    ("tempo", re.compile(r"^(?:(?:♩|bpm|tempo|速度)\s*[:：=]?\s*(\d{2,3})|(\d{2,3})\s*bpm)$", re.I)),
+    ("bars_per_line", re.compile(r"^(?:每行|bars)\s*[:：=]?\s*(\d)\s*(?:小節|格)?$", re.I)),
+)
+WIDE = re.compile(r"[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦]")
+JSON_TOKEN = re.compile(r'\s*(?:([{}\[\]:,])|"((?:[^"\\]|\\.)*)"|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|(true|false|null))',
+                        re.S)
+JSON_ESC = {'"': '"', "\\": "\\", "/": "/", "b": "\b", "f": "\f", "n": "\n", "r": "\r", "t": "\t"}
+
+
+def read_json(text):
+    """小小的 JSON 讀取器（本機工具只准用幾個標準庫，所以不 import json）。多的逗號放過、```json 圍欄拿掉；看不懂回 None。"""
+    s = re.sub(r"^\s*```[a-zA-Z]*\s*|\s*```\s*$", "", text or "").strip()
+    toks, pos = [], 0
+    while pos < len(s):
+        m = JSON_TOKEN.match(s, pos)
+        if not m:
+            return None
+        toks.append(m)
+        pos = m.end()
+    at = [0]
+
+    def unescape(raw):
+        out = re.sub(r"\\(u[0-9a-fA-F]{4}|.)",
+                     lambda e: chr(int(e.group(1)[1:], 16)) if e.group(1)[0] == "u" and len(e.group(1)) == 5
+                     else JSON_ESC.get(e.group(1), e.group(1)), raw)
+        return out.encode("utf-16", "surrogatepass").decode("utf-16", "replace")
+
+    def value():
+        if at[0] >= len(toks):
+            raise ValueError
+        m = toks[at[0]]
+        at[0] += 1
+        punct, string, number, word = m.groups()
+        if string is not None:
+            return unescape(string)
+        if number is not None:
+            return float(number) if re.search(r"[.eE]", number) else int(number)
+        if word is not None:
+            return {"true": True, "false": False, "null": None}[word]
+        if punct == "[":
+            return seq("]", lambda: value())
+        if punct == "{":
+            pairs = seq("}", pair)
+            return {k: v for k, v in pairs}
+        raise ValueError
+
+    def pair():
+        k = value()
+        if not isinstance(k, str) or at[0] >= len(toks) or toks[at[0]].group(1) != ":":
+            raise ValueError
+        at[0] += 1
+        return k, value()
+
+    def seq(close, item):
+        out = []
+        while True:
+            if at[0] >= len(toks):
+                raise ValueError
+            if toks[at[0]].group(1) == close:
+                at[0] += 1
+                return out
+            out.append(item())
+            if at[0] < len(toks) and toks[at[0]].group(1) == ",":
+                at[0] += 1
+            elif at[0] >= len(toks) or toks[at[0]].group(1) != close:
+                raise ValueError
+
+    try:
+        result = value()
+    except (ValueError, RecursionError):
+        return None
+    return result if at[0] == len(toks) else None
+
+
+def _width(text):
+    """等寬字型裡的寬度：中日韓的字算 2 格。"""
+    return sum(2 if WIDE.match(c) else 1 for c in text)
+
+
+def split_beats(tok):
+    """'Am:3' → ('Am', 3)；'Am' → ('Am', None)。"""
+    m = BEATS_RE.match(tok)
+    return (m.group(1), int(m.group(2))) if m else (tok, None)
+
+
+def cell_word(word):
+    """小節裡的一個字 → 標準寫法：和弦（照原本寫法，可帶 :拍數）、'%'、'N.C.'、'?'；'/'、'.' 是「多一拍」回 '+'；看不懂回 None。"""
+    t = (word or "").strip()
+    if t in SAME:
+        return "%"
+    if t in ("?", "？"):
+        return "?"
+    if t in HOLDS:
+        return "+"
+    name, beats = split_beats(t)
+    if NC_RE.match(name):
+        return "N.C." + (f":{beats}" if beats else "")
+    ch, _, _ = _token_chord(name)
+    if not ch:
+        return None
+    return own_name(ch) + (f":{beats}" if beats else "")
+
+
+def beats_of(time_sig):
+    m = TIME_RE.match(time_sig or "")
+    return int(m.group(1)) if m else 4
+
+
+def make_bar(words, bpb=4, unknown=None):
+    """一小節的字 → 一格（list）。'C . . G' → ['C:3', 'G:1']；平均分的拍子不寫數字（'G D/F#' → ['G', 'D/F#']）。"""
+    items = []                                                      # [名字, 寫明的拍數, 多出來的拍數]
+    for w in words:
+        c = cell_word(w)
+        if c is None:
+            if unknown is not None:
+                unknown.append(w)
+            items.append(["?", None, 0])
+        elif c == "+":
+            if items:
+                items[-1][2] += 1
+        else:
+            name, beats = split_beats(c)
+            items.append([name, beats, 0])
+    if any(it[2] for it in items):
+        for it in items:
+            it[1] = (it[1] or 1) + it[2]
+    out = [[name, beats] for name, beats, _ in items]
+    if out and all(b for _, b in out) and len({b for _, b in out}) == 1 and sum(b for _, b in out) == bpb:
+        out = [[name, None] for name, _ in out]                     # 平均分＝不用寫拍數
+    if len(out) == 1:
+        out[0][1] = None
+    return [name + (f":{beats}" if beats else "") for name, beats in out][:8]
+
+
+def _stream_bars(items, bpb):
+    """沒有小節線、但有 '/' 拍子記號的一行：照拍子排進一小節 bpb 拍（例 C / / / G / / / → | C | G |）。"""
+    bars, cur, used = [], [], 0
+    for name, beats in items:
+        while beats > 0:
+            take = min(beats, bpb - used)
+            cur.append([name, take])
+            used += take
+            beats -= take
+            if used == bpb:
+                bars.append(cur)
+                cur, used = [], 0
+    if cur:
+        bars.append(cur)
+    return [make_bar([f"{n}:{b}" for n, b in bar], bpb) for bar in bars]
+
+
+def _plain_line(line, offset, bpb):
+    """沒有小節線的一行：整行都是和弦＝一個和弦一小節（有 '/' 拍子記號或 'C:2' 拍數就照拍子排，沒寫的算一拍）。
+    回 (小節們, 每小節在這行的欄位)；不是和弦行（例如歌詞）回 (None, None)。"""
+    words, cols, holds = [], [], False
+    for m in re.finditer(r"\S+", line):
+        w = m.group(0)
+        c = cell_word(w)
+        if c is None:
+            if DECOR.match(w) or SECTION.match(w):
+                continue
+            return None, None
+        holds = holds or c == "+" or split_beats(c)[1] is not None     # 有拍子記號或寫了拍數：照拍子排
+        words.append(c)
+        cols.append(_width(line[:m.start()]) + offset)
+    if not words or all(w == "+" for w in words):
+        return None, None
+    if holds:
+        items = []
+        for w in words:
+            if w == "+":
+                if items:
+                    items[-1][1] += 1
+                continue
+            name, beats = split_beats(w)
+            items.append([name, beats or 1])
+        return _stream_bars(items, bpb), []
+    return [[w] for w in words], cols
+
+
+def _bar_line(line, bpb, unknown):
+    """有小節線的一行：| C | G D/F# | Am . . G | % |。中間空的格＝同上一小節。"""
+    segs = BAR_MARK.split(re.sub(r"[|｜]{2,}", "|", REPEAT_SIGN.sub("|", line)))
+    if segs and not segs[0].strip():
+        segs = segs[1:]
+    if segs and not segs[-1].strip():
+        segs = segs[:-1]
+    bars = []
+    for seg in segs:
+        words = [w for w in seg.split() if not re.fullmatch(r"[(（]?[x×X]?\d{0,2}[x×X]?[)）]?", w) or cell_word(w)]
+        bars.append(make_bar(words, bpb, unknown) if words else ["%"])
+    return [b for b in bars if b]
+
+
+def _inline_line(line):
+    """ChordPro：這是[G]一首[D]簡單的[Em]歌 → 每個和弦一小節，歌詞是它後面那段字。"""
+    parts = INLINE.split(line)
+    if len(parts) < 3:
+        return None, None
+    bars, lyrics, lead = [], [], parts[0].strip()
+    for i in range(1, len(parts), 2):
+        c = cell_word(parts[i])
+        if c is None or c == "+":
+            continue
+        bars.append([c])
+        lyrics.append(parts[i + 1].strip())
+    if not bars:
+        return None, None
+    if lead:
+        lyrics[0] = (lead + " " + lyrics[0]).strip()
+    return bars, lyrics
+
+
+def _lyric_slices(text, cols):
+    """歌詞照和弦的欄位切開（中文字算 2 格寬）。"""
+    out, pos, col = [""] * len(cols), 0, 0
+    for ch in text:
+        while pos + 1 < len(cols) and col >= cols[pos + 1] - 1:
+            pos += 1
+        out[pos] += ch
+        col += _width(ch)
+    return [x.strip() for x in out]
+
+
+def _meta(line, chart):
+    """「Key: G」「Capo 2」「4/4」「♩=90」「標題：…」這種資訊行（可以用兩個空白、｜、逗號分開寫在同一行）。"""
+    parts = [p.strip() for p in re.split(r"\s{2,}|[｜,，;；]", line.strip()) if p.strip()]
+    found = {}
+    for p in parts:
+        for field, rx in META:
+            m = rx.match(p)
+            if m:
+                found[field] = next(g for g in m.groups() if g)
+                break
+        else:
+            return False
+    if "key" in found and parse_key(found["key"]) is None:
+        return False
+    for field, v in found.items():
+        chart[field] = int(v) if field in ("capo", "tempo", "bars_per_line") else v.strip()
+    return bool(found)
+
+
+def _label(line):
+    """段落名稱：[主歌]、【副歌】×2、前奏：、Verse 1:、單獨一行的 Chorus、【×2】（沒有名字、整段重複）。
+    回 (名稱, 同一行剩下的, 整段重複幾次)；不是段落回 (None, line, 1)。"""
+    for rx in (LABEL_BOX, LABEL_COLON):
+        m = rx.match(line)
+        inner = m.group(1).strip() if m else ""
+        if not inner or cell_word(inner):
+            continue
+        if rx is LABEL_BOX and REPEAT_ONLY.match(inner):
+            n = int(re.sub(r"\D", "", inner))
+            return "", m.group(2), n if 2 <= n <= 16 else 1
+        if REPEAT_ONLY.match(inner):
+            continue
+        reps, body = _repeat(m.group(2))
+        return (inner, "", reps) if reps > 1 and not body.strip() else (inner, m.group(2), 1)
+    t = line.strip()
+    if SECTION.match(t) and not cell_word(t) and not DECOR.match(t):
+        return t.strip("[]()（）【】"), "", 1
+    return None, line, 1
+
+
+def _repeat(line):
+    """行尾的 (x2)、x3、2次，或 |: … :| → (次數, 拿掉之後的行)；沒有回 (1, line)。"""
+    m = REPEAT_TAIL.search(line)
+    if m and (m.group(1) or m.group(2)):
+        n = int(m.group(1) or m.group(2))
+        if 2 <= n <= 16:
+            return n, line[:m.start()]
+    if re.search(r"[:：]\s*[|｜]", line):
+        return 2, line
+    return 1, line
+
+
+def parse_progression(text):
+    """打的或貼的和弦進行 → 小節譜（dict，格式見 README）；回 (譜, 看不懂的字)。
+    認得：| C | G D/F# | Am | F |、C G Am F（一個和弦一小節）、C / / / G / / /（照拍子）、[主歌]／前奏：段落、
+    %、N.C.、(x2)、|: :|、Key／Capo／4/4／♩=90 資訊行、和弦在上歌詞在下（歌詞照欄位分到小節）、[C] 夾在歌詞裡。"""
+    chart = {"title": "", "artist": "", "key": "", "capo": 0, "time": "4/4", "tempo": None, "bars_per_line": 4,
+             "sections": [], "notes": ""}
+    unknown, sec, last, prev_n, closed = [], None, None, 0, False  # last：上一行和弦的 (段落, 第一個小節, 欄位)
+
+    def section(name):
+        s = {"name": name, "bars": [], "lyrics": []}
+        chart["sections"].append(s)
+        return s
+
+    def repeat(n, reps):
+        """最後 n 小節重複 reps 次：剛好是整段＝整段重複；不是就把這幾小節拆成自己一段（沒有名字）。"""
+        cur = chart["sections"][-1]
+        if len(cur["bars"]) > n:
+            moved_b, moved_l = cur["bars"][-n:], cur["lyrics"][-n:]
+            del cur["bars"][-n:], cur["lyrics"][-n:]
+            cur = section("")
+            cur["bars"], cur["lyrics"] = moved_b, moved_l
+        cur["repeat"] = reps
+        return cur
+
+    for raw in (text or "").splitlines():
+        line = raw.rstrip()
+        if not line.strip():
+            last = None
+            continue
+        if not chart["sections"] and _meta(line, chart):
+            continue
+        bpb = beats_of(chart["time"])
+        label, rest, hdr_reps = _label(line)
+        if label is not None:
+            sec, last, prev_n, closed = section(label), None, 0, False
+            if hdr_reps > 1:
+                sec["repeat"] = hdr_reps
+            if not rest.strip():
+                continue
+        offset = _width(line[:len(line) - len(rest)]) if label is not None else 0
+        reps, body = _repeat(rest)
+        if not body.strip():                                        # 單獨一行的 (x2)：上一行重複
+            if reps > 1 and prev_n:
+                sec, last, closed = repeat(prev_n, reps), None, True
+            continue
+        lyrics, cols = None, None
+        if BAR_MARK.search(body):
+            bars = _bar_line(body, bpb, unknown)
+        else:
+            bars, cols = _plain_line(body, offset, bpb)
+            if bars is None:
+                bars, lyrics = _inline_line(body)
+        if not bars:                                                # 歌詞行：照欄位分給上一行的和弦
+            if last:
+                s, start, c = last
+                for i, lyr in enumerate(_lyric_slices(body, c)):
+                    s["lyrics"][start + i] = lyr
+                if reps > 1:                                        # 歌詞行尾的 (x2)：上面那行和弦重複
+                    sec, closed = repeat(prev_n, reps), True
+            last = None
+            continue
+        if sec is None or closed:
+            sec, closed = section(""), False
+        start = len(sec["bars"])
+        sec["bars"] += bars
+        sec["lyrics"] += lyrics or [""] * len(bars)
+        last = (sec, start, cols) if cols and len(cols) == len(bars) else None
+        prev_n = len(bars)
+        if reps > 1:
+            sec, last, closed = repeat(len(bars), reps), None, True
+    return chart, unknown
+
+
+def _num(v, lo, hi, default):
+    try:
+        n = int(v)
+    except (TypeError, ValueError):
+        return default
+    return n if lo <= n <= hi else default
+
+
+def _text(v, limit):
+    return str(v).strip()[:limit] if isinstance(v, (str, int, float)) and not isinstance(v, bool) else ""
+
+
+def normalize_chart(obj):
+    """AI 填的（或解析出來的）小節譜 → 整理好、檢查過的；回 (譜, 問題)。看不懂的和弦換成 '?' 並列在問題裡。"""
+    problems, unknown = [], []
+    if not isinstance(obj, dict):
+        return None, ["不是小節譜（要是一個 {…}）"]
+    time_sig = obj.get("time") if TIME_RE.match(str(obj.get("time") or "")) else "4/4"
+    bpb = beats_of(time_sig)
+    chart = {"title": _text(obj.get("title"), 80), "artist": _text(obj.get("artist"), 80), "key": "",
+             "capo": _num(obj.get("capo"), 0, 11, 0), "time": time_sig, "tempo": _num(obj.get("tempo"), 20, 320, None),
+             "bars_per_line": _num(obj.get("bars_per_line"), 1, 8, 4), "sections": [], "notes": _text(obj.get("notes"), 500)}
+    key = _text(obj.get("key"), 12)
+    if key and parse_key(key):
+        chart["key"] = key_name(parse_key(key))
+    elif key:
+        problems.append(f"看不懂調「{key}」，改用程式猜的")
+    total = 0
+    for s in (obj.get("sections") or [])[:MAX_SECTIONS]:
+        if not isinstance(s, dict):
+            continue
+        bars = []
+        for b in (s.get("bars") or []):
+            if total >= MAX_BARS:
+                problems.append(f"太長了，只收前 {MAX_BARS} 小節")
+                break
+            words = b.split() if isinstance(b, str) else [w for x in b for w in str(x).split()] if isinstance(b, list) else []
+            bars.append(make_bar(words, bpb, unknown) if words else ["%"])
+            total += 1
+        if not bars:
+            continue
+        sec = {"name": _text(s.get("name"), 24), "bars": bars}
+        if _num(s.get("repeat"), 2, 16, None):
+            sec["repeat"] = int(s["repeat"])
+        lyrics = [_text(x, 80) for x in (s.get("lyrics") or [])][:len(bars)] if isinstance(s.get("lyrics"), list) else []
+        if any(lyrics):
+            sec["lyrics"] = lyrics + [""] * (len(bars) - len(lyrics))
+        chart["sections"].append(sec)
+    marks = []
+    image = obj.get("image") if isinstance(obj.get("image"), dict) else {}
+    for mk in (image.get("marks") or [])[:MAX_MARKS]:
+        if not isinstance(mk, dict):
+            continue
+        c = cell_word(_text(mk.get("chord"), 16))
+        try:
+            x, y = float(mk.get("x")), float(mk.get("y"))
+        except (TypeError, ValueError):
+            continue
+        if c and c != "+" and 0 <= x <= 1 and 0 <= y <= 1:
+            marks.append({"x": round(x, 4), "y": round(y, 4), "chord": split_beats(c)[0]})
+    if marks:
+        chart["image"] = {"marks": marks}
+    if unknown:
+        problems.append("看不懂的和弦先標成 ?：" + "、".join(dict.fromkeys(unknown)))
+    if not chart["key"]:
+        found = chart_chords(chart)
+        if found:
+            chart["key"] = key_name(detect_key(found))
+    return chart, problems
+
+
+def chart_input(text):
+    """/chord_chart 收到的字 → (譜, 問題)：{ 開頭當 JSON，其他當和弦進行或譜。"""
+    t = (text or "").strip()
+    if re.match(r"^(?:```[a-zA-Z]*\s*)?\{", t):
+        obj = read_json(t)
+        if obj is None:
+            return None, ["JSON 格式不對（括號、引號、逗號）"]
+        return normalize_chart(obj)
+    chart, unknown = parse_progression(t)
+    chart, problems = normalize_chart(chart)
+    if unknown:
+        problems = [p for p in problems if not p.startswith("看不懂的和弦")] + \
+            ["看不懂的字標成 ?：" + "、".join(dict.fromkeys(unknown))]
+    return chart, problems
+
+
+def chart_chords(chart):
+    """譜裡依序出現的每個和弦（parse_chord 的 dict）；%、N.C.、? 跳過。照片上的標記不算。"""
+    out = []
+    for s in chart.get("sections") or []:
+        for bar in s["bars"]:
+            for tok in bar:
+                ch = parse_chord(split_beats(tok)[0])
+                if ch:
+                    out.append(ch)
+    return out
+
+
+def chart_names(chart):
+    """譜裡用到的和弦，照譜上的寫法、不重複、照出現順序。"""
+    out = []
+    for s in chart.get("sections") or []:
+        for bar in s["bars"]:
+            for tok in bar:
+                name = split_beats(tok)[0]
+                if parse_chord(name) and name not in out:
+                    out.append(name)
+    return out
+
+
+def _tp_token(tok, n, key):
+    name, beats = split_beats(tok)
+    ch = parse_chord(name)
+    if not ch:
+        return tok
+    return chord_name(ch, n, key) + (f":{beats}" if beats else "")
+
+
+def transpose_chart(chart, n, key):
+    """整份小節譜（和照片標記）移 n 個半音、照 key 的調號寫；回新的一份，原本的不動。"""
+    out = dict(chart, key=key_name(key) if key else chart.get("key", ""))
+    out["sections"] = [dict(s, bars=[[_tp_token(t, n, key) for t in bar] for bar in s["bars"]])
+                       for s in chart.get("sections") or []]
+    if chart.get("image"):
+        out["image"] = {"marks": [dict(m, chord=_tp_token(m["chord"], n, key)) for m in chart["image"]["marks"]]}
+    return out
+
+
+def bar_text(bar):
+    """一格的字：平均分拍＝和弦之間空兩格；有寫拍數＝每多一拍一個「.」（Am . . G）。"""
+    if any(split_beats(t)[1] for t in bar):
+        parts = []
+        for t in bar:
+            name, beats = split_beats(t)
+            parts.append(name + " ." * ((beats or 1) - 1))
+        return " ".join(parts)
+    return "  ".join(bar)
+
+
+def chart_head(chart):
+    bits = [f"{chart['key']} 調" if chart.get("key") else "", chart.get("time") or "",
+            f"Capo {chart['capo']}" if chart.get("capo") else "", f"♩={chart['tempo']}" if chart.get("tempo") else ""]
+    name = " — ".join(x for x in (chart.get("title"), chart.get("artist")) if x)
+    return (name + "｜" if name else "") + "・".join(b for b in bits if b)
+
+
+def chart_text(chart, per_line=None):
+    """等寬字的小節格子：每段一個標題、每行 per_line 小節、每格一樣寬；有歌詞的行下面列一行 ♪。"""
+    per = per_line or chart.get("bars_per_line") or 4
+    cells = [bar_text(b) for s in chart["sections"] for b in s["bars"]]
+    w = max([6] + [len(c) for c in cells])
+    lines = []
+    for s in chart["sections"]:
+        rep = f"×{s['repeat']}" if s.get("repeat") else ""
+        if s.get("name") or rep:
+            lines.append(f"【{s['name']}】{rep}" if s.get("name") else f"【{rep}】")
+        lyr = s.get("lyrics") or []
+        for i in range(0, len(s["bars"]), per):
+            row = s["bars"][i:i + per]
+            lines.append("|" + "|".join(" " + bar_text(b).ljust(w) + " " for b in row) + "|")
+            words = [x for x in lyr[i:i + per] if x]
+            if words:
+                lines.append("  ♪ " + " / ".join(words))
+    return "\n".join(lines)
+
+
 # ── 工具 ─────────────────────────────────────────────────────────────────────
 
 MAX_SHEET = 12000
@@ -972,7 +1516,7 @@ USAGE_TP = ("用法：/chord_tp <移法> 再貼譜（譜放下一行）\n"
 
 
 def empty():
-    return {"last": "", "at": 0}
+    return {"last": "", "at": 0, "chart": None, "chart_at": 0}
 
 
 def chunks(text, size=CHUNK):
@@ -1002,6 +1546,13 @@ def library():
     quals = [{"id": q, "suffix": QUAL[q][0], "label": QUAL[q][1], "tones": list(QUAL[q][2])} for q in QUAL_ORDER]
     return {"lib": lib, "slash": slash, "qualities": quals, "suffix_map": {k: v for k, v in SUFFIX_EXACT.items()},
             "patterns": [{"name": n, "seq": s} for n, s in PATTERNS]}
+
+
+USAGE_CHART = ("用法：/chord_chart 換行貼和弦進行（或譜、或小節譜 JSON）\n"
+               "・| C | G D/F# | Am | F |（一格一小節；一格裡兩個和弦＝各兩拍，Am . . G＝Am 三拍、G 一拍）\n"
+               "・C G Am F（沒有小節線＝一個和弦一小節）\n"
+               "・[主歌]、前奏：寫段落；%＝同上一小節；N.C.＝不彈；(x2)＝這行重複\n"
+               "・第一行可以先寫移法：/chord_chart +2；不貼＝用上次的譜")
 
 
 def install(app, pack):
@@ -1150,10 +1701,71 @@ def install(app, pack):
             api.send_message(chat_id, f"🔎 這些和弦看起來是 {key_name(key)} 調。")
         send(api, chat_id, describe_key(key))
 
+    def saved(user):
+        return pack.store.of(user).load(empty()) or {}
+
+    def keep_chart(user, chart):
+        def put(d):
+            d["chart"], d["chart_at"] = chart, int(time.time())
+        pack.store.of(user).update(put, empty())
+
+    def chart_cmd(api, chat_id, user, values):
+        raw = (values.get("text") or "").strip("\n")
+        spec, body = split_spec(raw)
+        if spec is None:
+            body = raw
+        chart, problems = None, []
+        if not body.strip():
+            d = saved(user)
+            if d.get("chart") and d.get("chart_at", 0) >= d.get("at", 0):
+                chart = d["chart"]                                  # 上次的小節譜比上次貼的譜新
+            elif d.get("last"):
+                chart, problems = chart_input(d["last"])
+            else:
+                api.send_message(chat_id, "📄 還沒有譜。" + USAGE_CHART)
+                return
+        else:
+            chart, problems = chart_input(body)
+            if chart and not body.lstrip().startswith(("{", "```")):
+                remember(user, body)
+        if not chart or not chart["sections"]:
+            api.send_message(chat_id, "❓ " + ("；".join(problems) + "\n" if problems else "這裡面找不到和弦。\n") + USAGE_CHART)
+            return
+        chords = chart_chords(chart)
+        head = []
+        if spec is not None:
+            src = parse_key(chart["key"]) or detect_key(chords)
+            parsed = parse_shift(spec, src) if src else None
+            if parsed is None:
+                api.send_message(chat_id, f"❓ 看不懂移法「{spec}」。\n" + USAGE_CHART)
+                return
+            n, target = parsed
+            dst = target or ((src[0] + n) % 12, src[1])
+            chart = transpose_chart(chart, n, dst)
+            head.append(f"移調：{key_name(((dst[0] - n) % 12, dst[1]))} → {key_name(dst)}（{shift_label(n)}）")
+        keep_chart(user, chart)
+        nbars = sum(len(s["bars"]) for s in chart["sections"])
+        lines = [f"🎸 小節譜：{chart_head(chart)}（{nbars} 小節）"] + head
+        if chords:
+            lines.append("和弦：" + " ".join(chart_names(chart)))
+        if chart.get("capo") and chords:                        # 譜上的 capo：寫的和弦＝夾了之後按的手型
+            src = parse_key(chart["key"]) or detect_key(chords)
+            sound = ((src[0] + chart["capo"]) % 12, src[1])
+            lines.append(f"譜上夾 Capo {chart['capo']}：照上面的和弦按，聽起來是 {key_name(sound)} 調"
+                         "（面板可以換成不夾、或夾別格的手型）")
+        lines += ["", chart_text(chart), ""]
+        if chart.get("notes"):
+            lines.append("📝 " + chart["notes"])
+        lines += ["⚠️ " + p for p in problems]
+        lines.append("📋 完整的小節譜（和弦圖、移調、Capo、照片標記、列印）在網頁面板的「小節譜」分頁。")
+        send(api, chat_id, "\n".join(lines))
+
     def data_route(user):
-        """面板（panel.html）：按法資料＋這個人上次貼的譜。只回這個人自己的。"""
+        """面板（panel.html）：按法資料＋這個人上次貼的譜＋上次的小節譜。只回這個人自己的。"""
         out = library()
-        out["last"] = last_sheet(user)
+        d = saved(user)
+        out["last"] = d.get("last", "")
+        out["chart"] = d.get("chart")
         return out
 
     kit.command(g, "show", show, "查和弦的按法", default=True, positional=1,
@@ -1170,6 +1782,9 @@ def install(app, pack):
                 fields=[Field("text", "和弦，最後可以加型態", required=True)])
     kit.command(g, "key", key_, "一個調裡有哪些和弦", positional=1, usage="<調>（例：G、Am、Bb）",
                 fields=[Field("text", "調，或一串和弦讓我猜調", required=True)])
+    kit.command(g, "chart", chart_cmd, "整理成一格一小節的和弦譜", effect=WRITE, positional=1,
+                usage="[移法] 換行貼進行、譜或小節譜 JSON（例：| C | G D/F# | Am | F |；不貼＝用上次的譜）",
+                fields=[Field("text", "和弦進行、譜或小節譜 JSON，第一行可以先寫移法")])
     pack.web_route("data", data_route)
 
 

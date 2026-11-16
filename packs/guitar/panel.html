@@ -11,6 +11,7 @@
     :root { --bg: #1b1815; --card: #252119; --fg: #f1ebde; --muted: #b7ac96; --line: #3b3427; --strong: #5b5138;
             --accent: #e0925a; --accent-ink: #241408; --root: #7fb3a3; --warn: #e08080; --chip: #332c20; }
   }
+  /* >>> 共用 CSS（scripts/guitar_template.py 會把這段複製到 docs/guitar/chart_template.html） */
   * { box-sizing: border-box; }
   body { margin: 0; padding: 12px; background: var(--bg); color: var(--fg);
          font: 15px/1.5 system-ui, "PingFang TC", "Microsoft JhengHei", sans-serif; }
@@ -60,6 +61,44 @@
   .dg .pos { position: absolute; left: -2px; font-size: 10px; color: var(--muted); }
   .hidden { display: none; }
   label.ck { display: inline-flex; gap: 5px; align-items: center; font-size: 13px; cursor: pointer; }
+  /* 小節譜 */
+  .cmeta-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline; }
+  .ctitle { font-size: 19px; font-weight: 700; }
+  .cgrid-wrap { overflow-x: auto; margin-top: 6px; }
+  .csec { margin: 10px 0 4px; }
+  .csec-h { display: inline-block; font-size: 13px; font-weight: 700; color: var(--accent); border: 1px solid var(--accent);
+            border-radius: 6px; padding: 0 8px; margin-bottom: 4px; }
+  .crows { display: grid; grid-template-columns: repeat(var(--per, 4), minmax(min-content, 1fr));
+           border-left: 2px solid var(--fg); }
+  .cbar { border-right: 2px solid var(--fg); border-bottom: 1px solid var(--line); padding: 6px 6px 4px; min-height: 46px; min-width: 64px; }
+  .cchords { display: flex; gap: 4px; align-items: baseline; }
+  .cch { flex: 1 0 auto; font: 700 16px/1.3 ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+         white-space: nowrap; background: none; border: none; border-radius: 4px; padding: 0 2px; text-align: left; color: var(--fg); }
+  button.cch { cursor: pointer; }
+  button.cch:hover, button.cch:focus-visible { background: var(--chip); }
+  .cch.same, .cch.nc { color: var(--muted); font-weight: 400; }
+  .cch.nc { font-style: italic; font-size: 13px; }
+  .cch.unk { color: var(--warn); }
+  .clyric { font-size: 12px; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+  .grid.cused { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+  .chord.small .tip, .chord.small .lb { display: none; }
+  .chord.flash { animation: flash 1.2s ease-out; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 0 transparent; } }
+  .photo { position: relative; margin-top: 8px; }
+  .photo img { display: block; width: 100%; height: auto; border-radius: 8px; }
+  .cmark { position: absolute; transform: translate(-50%, -50%); background: var(--accent); color: var(--accent-ink);
+           font: 700 13px/1.2 ui-monospace, Menlo, Consolas, monospace; padding: 2px 6px; border-radius: 6px;
+           box-shadow: 0 1px 3px rgba(0, 0, 0, .35); white-space: nowrap; pointer-events: none; }
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    .noprint, .tabs, #status, h1 { display: none !important; }
+    .card { border: none; padding: 0; background: #fff; }
+    .crows, .cbar { border-color: #000; }
+    .cch, .csec-h { color: #000; border-color: #000; }
+    .cbar { break-inside: avoid; }
+    .chord { break-inside: avoid; background: #fff; }
+  }
+  /* <<< 共用 CSS */
 </style>
 </head>
 <body>
@@ -108,9 +147,47 @@
   <div class="card"><pre class="sheet" id="tab"></pre></div>
 </section>
 
+<section id="chart" class="hidden">
+<!-- >>> 共用 HTML（小節譜） -->
+  <div class="card noprint">
+    <div class="muted">貼或打一段和弦進行，馬上排成一格一小節：<code>| C | G D/F# | Am | F |</code>、<code>C G Am F</code>、
+      <code>[主歌]</code>／<code>前奏：</code>、<code>%</code>（同上一小節）、<code>N.C.</code>、<code>(x2)</code>、<code>Am . . G</code>（Am 三拍、G 一拍）；也可以貼小節譜 JSON。清空＝回到存的那份。</div>
+    <textarea id="cin" spellcheck="false" placeholder="[主歌]&#10;| C | G D/F# | Am | F |&#10;| Dm7 | G | C | % | (x2)&#10;[副歌]&#10;F G Em Am"></textarea>
+    <div class="row"><button id="cedit">把現在的譜放進來改（JSON）</button><span class="muted warn" id="cwarn"></span></div>
+  </div>
+  <div class="card noprint">
+    <div class="row" style="margin-top:0">
+      <button class="sq" id="cdown">−1</button><span class="big" id="cshift">原調</span><button class="sq" id="cup">＋1</button>
+      <span class="muted">Capo</span><select id="ccapo"></select>
+      <span class="muted">每行</span><select id="cper"></select>
+    </div>
+    <div class="row"><button id="ccopy">複製文字</button><button id="cprint">列印</button><span class="muted" id="ccopied"></span></div>
+  </div>
+  <div class="card">
+    <div class="cmeta-row"><span class="ctitle" id="ctitle"></span></div>
+    <div class="muted" id="cmeta"></div>
+    <div><strong id="ckey"></strong></div>
+    <div class="cgrid-wrap"><div id="cgrid"></div></div>
+    <div class="muted" id="cnotes"></div>
+    <h2>用到的和弦（點小節裡的和弦會跳到這裡）</h2>
+    <div class="grid cused" id="cused"></div>
+  </div>
+  <div class="card noprint hidden" id="cphoto">
+    <h2 style="margin-top:0">照片標記</h2>
+    <div class="muted">這份譜有和弦在照片上的位置。選那張照片，和弦（跟著上面的移調、Capo）會標在照片上。照片只在這個頁面裡顯示，不會上傳、也不會存起來。</div>
+    <div class="row"><input type="file" id="cfile" accept="image/*"></div>
+    <div class="photo hidden" id="cimgbox"><img id="cimg" alt="譜的照片"><div id="cmarks"></div></div>
+  </div>
+<!-- <<< 共用 HTML -->
+</section>
+
 <script>
 (function () {
   "use strict";
+  var D = null;                                   // 從自己的 API 拿的按法資料
+  var st = { tab: "tp", n: 0, src: null, srcAuto: true, look: "C_minor", easy: true };
+
+  // >>> 共用 JS（scripts/guitar_template.py 會把這段複製到 docs/guitar/chart_template.html）
   var SHARP = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
   var FLAT = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
   var NEUTRAL = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
@@ -125,8 +202,6 @@
   var DECOR = /^(?:[-–—\/%.*~>…_=]+|[x×X]\d+|\(?[x×X]?\d+[x×X]?\)?|N\.?C\.?|\d+\.|[(){}\[\]]+|\|+|:?\|\|?:?)$/;
   var SECTION = /^[\[(（【]?(?:intro|verse|pre-?chorus|chorus|bridge|outro|interlude|solo|ending|coda|riff|前奏|主歌|副歌|間奏|尾奏|橋段|導歌|過門|獨奏|結尾|[A-Z]\d?段?|[AB]'?|Capo.*|key.*|調.*)[\])）】]?\d*$/i;
   var WRAP = /^([(\[{（【]*)(.*?)([)\]}）】.,*!?;]*)$/;
-  var D = null;                                   // 從自己的 API 拿的按法資料
-  var st = { tab: "tp", n: 0, src: null, srcAuto: true, look: "C_minor", easy: true };
 
   function $(id) { return document.getElementById(id); }
   function el(tag, cls, text) {
@@ -281,35 +356,6 @@
     }
     return D.lib[SHARP[root] + "_" + quality] || [];
   }
-  function difficulty(ch, shift) {
-    var bass = ch.bass === null ? null : ch.bass + shift, vs = voicingsOf(ch.root + shift, ch.quality, bass);
-    if (!vs.length) { return 4; }
-    var kinds = vs.map(function (v) { return v.kind; });
-    if (kinds.indexOf("open") >= 0) { return 0; }
-    if (vs[0].kind === "slash" && vs[0].frets.indexOf(0) >= 0) { return 0.5; }
-    if (kinds.indexOf("easy") >= 0 || kinds.indexOf("slash") >= 0 || kinds.indexOf("approx") >= 0) { return 1.5; }
-    return 3;
-  }
-  function uniq(chords) {
-    var seen = {}, out = [];
-    chords.forEach(function (c) { var k = c.root + "|" + c.quality + "|" + c.bass; if (!seen[k]) { seen[k] = 1; out.push(c); } });
-    return out;
-  }
-  function capoOptions(chords, key) {
-    var u = uniq(chords), res = [];
-    for (var capo = 0; capo < 8; capo++) {
-      var shape = [mod(key[0] - capo), key[1]], cost = 0, hard = [], easy = [];
-      u.forEach(function (ch) {
-        var d = difficulty(ch, -capo);
-        cost += d;
-        if (d >= 3) { hard.push(chordName(ch, -capo, shape)); } else if (d >= 1.5) { easy.push(chordName(ch, -capo, shape)); }
-      });
-      res.push({ capo: capo, shape: shape, score: cost + capo * 0.25, hard: hard, easy: easy });
-    }
-    res.sort(function (a, b) { return a.score - b.score || a.capo - b.capo; });
-    return res.slice(0, 3);
-  }
-
   // ── 和弦圖（div，不用 SVG） ──
   function diagram(frets, fingers, root) {
     var box = el("div", "dg"), pressed = frets.filter(function (f) { return f; });
@@ -365,6 +411,494 @@
       for (var i = 1; i < vs.length; i++) { if (vs[i].kind === "easy") { return vs[i]; } }
     }
     return vs[0];
+  }
+
+  // ── 小節譜：解析（跟 pack.py 的 parse_progression／normalize_chart 同一套規則） ──
+  var NC_RE = /^(?:N\.?\s?C\.?|NC|n\.c\.)$/;
+  var BEATS_RE = /^(.+?)[:：](\d{1,2})$/;
+  var HOLDS = ["/", ".", "-", "·", "–", "—"], SAME = ["%", "％", "〃", "//."];
+  var TIME_RE = /^([1-9]\d?)\/(2|4|8|16)$/;
+  var REPEAT_SIGN = /[|｜]\s*[:：]|[:：]\s*[|｜]/g;
+  var REPEAT_TAIL = /(?:^|\s+|(?<=[|｜]))[(（]?\s*(?:[x×X]\s*(\d{1,2})|(\d{1,2})\s*(?:[x×X]|次|遍))\s*[)）]?\s*$/;
+  var REPEAT_ONLY = /^(?:[x×X]\s*\d{1,2}|\d{1,2}\s*(?:[x×X]|次|遍)|[x×X])$/;
+  var LABEL_BOX = /^\s*[\[【]([^\[\]【】]{1,24})[\]】]\s*(.*)$/;
+  var LABEL_COLON = /^\s*([^|｜:：\[\]【】]{1,16}?)\s*[:：](?!\d)\s*(.*)$/;
+  var META = [["title", /^(?:標題|歌名|曲名|title)\s*[:：]\s*(.+)$/i], ["artist", /^(?:歌手|演唱|原唱|artist|by)\s*[:：]\s*(.+)$/i],
+              ["key", /^(?:key|原調|調)\s*[:：=]?\s*(\S+?)\s*(?:調)?$/i], ["capo", /^(?:capo|夾)\s*[:：=]?\s*(\d{1,2})\s*(?:格)?$/i],
+              ["time", /^(?:拍號\s*[:：]?\s*)?(\d{1,2}\/\d{1,2})$/],
+              ["tempo", /^(?:(?:♩|bpm|tempo|速度)\s*[:：=]?\s*(\d{2,3})|(\d{2,3})\s*bpm)$/i],
+              ["bars_per_line", /^(?:每行|bars)\s*[:：=]?\s*(\d)\s*(?:小節|格)?$/i]];
+  var WIDE = /[ᄀ-ᅟ⺀-꓏가-힣豈-﫿︰-﹏＀-｠￠-￦]/;
+  var INLINE_SPLIT = /\[([^\[\]\s]{1,16})\]/;
+
+  function parseKey(text) {
+    var t = (text || "").trim().replace(/大調/g, "").replace(/調/g, "").trim(), minor = false;
+    var tails = ["小", "minor", "min", "m"];
+    for (var i = 0; i < tails.length; i++) {
+      var tail = tails[i];
+      if (t.length > tail.length && t.slice(-tail.length) === tail) { t = t.slice(0, -tail.length).trim(); minor = true; break; }
+    }
+    if (/major$/.test(t)) { t = t.slice(0, -5).trim(); }
+    var pc = notePc(t);
+    return pc === null ? null : [pc, minor];
+  }
+  function width(text) { var w = 0; for (var i = 0; i < text.length; i++) { w += WIDE.test(text[i]) ? 2 : 1; } return w; }
+  function uniqList(a) { return a.filter(function (x, i) { return a.indexOf(x) === i; }); }
+  function splitBeats(tok) { var m = BEATS_RE.exec(tok); return m ? [m[1], +m[2]] : [tok, null]; }
+  function beatsOf(t) { var m = TIME_RE.exec(t || ""); return m ? +m[1] : 4; }
+  function cellWord(word) {
+    var t = (word || "").trim();
+    if (SAME.indexOf(t) >= 0) { return "%"; }
+    if (t === "?" || t === "？") { return "?"; }
+    if (HOLDS.indexOf(t) >= 0) { return "+"; }
+    var sb = splitBeats(t), suf = sb[1] ? ":" + sb[1] : "";
+    if (NC_RE.test(sb[0])) { return "N.C." + suf; }
+    var tc = tokenChord(sb[0]);
+    return tc ? tc.ch.own + suf : null;
+  }
+  function makeBar(words, bpb, unknown) {
+    var items = [];
+    words.forEach(function (w) {
+      var c = cellWord(w);
+      if (c === null) { if (unknown) { unknown.push(w); } items.push(["?", null, 0]); }
+      else if (c === "+") { if (items.length) { items[items.length - 1][2] += 1; } }
+      else { var sb = splitBeats(c); items.push([sb[0], sb[1], 0]); }
+    });
+    if (items.some(function (it) { return it[2]; })) { items.forEach(function (it) { it[1] = (it[1] || 1) + it[2]; }); }
+    var out = items.map(function (it) { return [it[0], it[1]]; });
+    var bs = out.map(function (o) { return o[1]; });
+    if (out.length && bs.every(function (b) { return b; }) && uniqList(bs).length === 1 &&
+        bs.reduce(function (a, b) { return a + b; }, 0) === bpb) { out.forEach(function (o) { o[1] = null; }); }
+    if (out.length === 1) { out[0][1] = null; }
+    return out.map(function (o) { return o[0] + (o[1] ? ":" + o[1] : ""); }).slice(0, 8);
+  }
+  function streamBars(items, bpb) {
+    var bars = [], cur = [], used = 0;
+    items.forEach(function (it) {
+      var name = it[0], beats = it[1];
+      while (beats > 0) {
+        var take = Math.min(beats, bpb - used);
+        cur.push(name + ":" + take); used += take; beats -= take;
+        if (used === bpb) { bars.push(cur); cur = []; used = 0; }
+      }
+    });
+    if (cur.length) { bars.push(cur); }
+    return bars.map(function (b) { return makeBar(b, bpb); });
+  }
+  function plainLine(line, offset, bpb) {
+    var re = /\S+/g, m, words = [], cols = [], holds = false;
+    while ((m = re.exec(line)) !== null) {
+      var w = m[0], c = cellWord(w);
+      if (c === null) { if (DECOR.test(w) || SECTION.test(w)) { continue; } return [null, null]; }
+      holds = holds || c === "+" || splitBeats(c)[1] !== null;
+      words.push(c); cols.push(width(line.slice(0, m.index)) + offset);
+    }
+    if (!words.length || words.every(function (w) { return w === "+"; })) { return [null, null]; }
+    if (holds) {
+      var items = [];
+      words.forEach(function (w) {
+        if (w === "+") { if (items.length) { items[items.length - 1][1] += 1; } return; }
+        var sb = splitBeats(w); items.push([sb[0], sb[1] || 1]);
+      });
+      return [streamBars(items, bpb), []];
+    }
+    return [words.map(function (w) { return [w]; }), cols];
+  }
+  function barLine(line, bpb, unknown) {
+    var segs = line.replace(REPEAT_SIGN, "|").replace(/[|｜]{2,}/g, "|").split(/[|｜]/);
+    if (segs.length && !segs[0].trim()) { segs = segs.slice(1); }
+    if (segs.length && !segs[segs.length - 1].trim()) { segs = segs.slice(0, -1); }
+    return segs.map(function (seg) {
+      var words = seg.split(/\s+/).filter(function (w) { return w && (!/^[(（]?[x×X]?\d{0,2}[x×X]?[)）]?$/.test(w) || cellWord(w)); });
+      return words.length ? makeBar(words, bpb, unknown) : ["%"];
+    }).filter(function (b) { return b.length; });
+  }
+  function inlineLine(line) {
+    var parts = line.split(INLINE_SPLIT);
+    if (parts.length < 3) { return [null, null]; }
+    var bars = [], lyrics = [], lead = parts[0].trim();
+    for (var i = 1; i < parts.length; i += 2) {
+      var c = cellWord(parts[i]);
+      if (c === null || c === "+") { continue; }
+      bars.push([c]); lyrics.push((parts[i + 1] || "").trim());
+    }
+    if (!bars.length) { return [null, null]; }
+    if (lead) { lyrics[0] = (lead + " " + lyrics[0]).trim(); }
+    return [bars, lyrics];
+  }
+  function lyricSlices(text, cols) {
+    var out = cols.map(function () { return ""; }), pos = 0, col = 0;
+    for (var i = 0; i < text.length; i++) {
+      while (pos + 1 < cols.length && col >= cols[pos + 1] - 1) { pos += 1; }
+      out[pos] += text[i]; col += width(text[i]);
+    }
+    return out.map(function (x) { return x.trim(); });
+  }
+  function readMeta(line, chart) {
+    var parts = line.trim().split(/\s{2,}|[｜,，;；]/).map(function (p) { return p.trim(); }).filter(Boolean), found = {};
+    for (var i = 0; i < parts.length; i++) {
+      var hit = false;
+      for (var j = 0; j < META.length; j++) {
+        var m = META[j][1].exec(parts[i]);
+        if (m) { found[META[j][0]] = m[1] || m[2]; hit = true; break; }
+      }
+      if (!hit) { return false; }
+    }
+    if (found.key !== undefined && parseKey(found.key) === null) { return false; }
+    Object.keys(found).forEach(function (f) { chart[f] = ["capo", "tempo", "bars_per_line"].indexOf(f) >= 0 ? +found[f] : found[f].trim(); });
+    return Object.keys(found).length > 0;
+  }
+  function repeatOf(line) {
+    var m = REPEAT_TAIL.exec(line);
+    if (m && (m[1] || m[2])) { var n = +(m[1] || m[2]); if (n >= 2 && n <= 16) { return [n, line.slice(0, m.index)]; } }
+    if (/[:：]\s*[|｜]/.test(line)) { return [2, line]; }
+    return [1, line];
+  }
+  function labelOf(line) {
+    var rxs = [LABEL_BOX, LABEL_COLON];
+    for (var i = 0; i < 2; i++) {
+      var m = rxs[i].exec(line), inner = m ? m[1].trim() : "";
+      if (!inner || cellWord(inner)) { continue; }
+      if (i === 0 && REPEAT_ONLY.test(inner)) { var n = +inner.replace(/\D/g, ""); return ["", m[2], n >= 2 && n <= 16 ? n : 1]; }
+      if (REPEAT_ONLY.test(inner)) { continue; }
+      var r = repeatOf(m[2]);
+      return (r[0] > 1 && !r[1].trim()) ? [inner, "", r[0]] : [inner, m[2], 1];
+    }
+    var t = line.trim();
+    if (SECTION.test(t) && !cellWord(t) && !DECOR.test(t)) { return [t.replace(/^[\[(（【]+|[\])）】]+$/g, ""), "", 1]; }
+    return [null, line, 1];
+  }
+  function parseProgression(text) {
+    var chart = { title: "", artist: "", key: "", capo: 0, time: "4/4", tempo: null, bars_per_line: 4, sections: [], notes: "" };
+    var unknown = [], sec = null, last = null, prevN = 0, closed = false;
+    function section(name) { var s = { name: name, bars: [], lyrics: [] }; chart.sections.push(s); return s; }
+    function repeat(n, reps) {
+      var cur = chart.sections[chart.sections.length - 1];
+      if (cur.bars.length > n) {
+        var mb = cur.bars.splice(cur.bars.length - n, n), ml = cur.lyrics.splice(cur.lyrics.length - n, n);
+        cur = section(""); cur.bars = mb; cur.lyrics = ml;
+      }
+      cur.repeat = reps;
+      return cur;
+    }
+    (text || "").split(/\r?\n/).forEach(function (raw) {
+      var line = raw.replace(/\s+$/, "");
+      if (!line.trim()) { last = null; return; }
+      if (!chart.sections.length && readMeta(line, chart)) { return; }
+      var bpb = beatsOf(chart.time), lb = labelOf(line), rest = lb[1];
+      if (lb[0] !== null) {
+        sec = section(lb[0]); last = null; prevN = 0; closed = false;
+        if (lb[2] > 1) { sec.repeat = lb[2]; }
+        if (!rest.trim()) { return; }
+      }
+      var offset = lb[0] !== null ? width(line.slice(0, line.length - rest.length)) : 0;
+      var rp = repeatOf(rest), reps = rp[0], body = rp[1];
+      if (!body.trim()) { if (reps > 1 && prevN) { sec = repeat(prevN, reps); last = null; closed = true; } return; }
+      var bars, lyrics = null, cols = null;
+      if (/[|｜]/.test(body)) { bars = barLine(body, bpb, unknown); }
+      else {
+        var pl = plainLine(body, offset, bpb); bars = pl[0]; cols = pl[1];
+        if (bars === null) { var il = inlineLine(body); bars = il[0]; lyrics = il[1]; }
+      }
+      if (!bars || !bars.length) {
+        if (last) {
+          lyricSlices(body, last[2]).forEach(function (lyr, i) { last[0].lyrics[last[1] + i] = lyr; });
+          if (reps > 1) { sec = repeat(prevN, reps); closed = true; }
+        }
+        last = null;
+        return;
+      }
+      if (sec === null || closed) { sec = section(""); closed = false; }
+      var start = sec.bars.length;
+      sec.bars = sec.bars.concat(bars);
+      sec.lyrics = sec.lyrics.concat(lyrics || bars.map(function () { return ""; }));
+      last = (cols && cols.length === bars.length) ? [sec, start, cols] : null;
+      prevN = bars.length;
+      if (reps > 1) { sec = repeat(bars.length, reps); last = null; closed = true; }
+    });
+    return [chart, unknown];
+  }
+  function num(v, lo, hi, def) {
+    var n = typeof v === "number" ? Math.trunc(v) : (/^\s*-?\d+\s*$/.test(String(v)) ? parseInt(v, 10) : NaN);
+    return (isFinite(n) && n >= lo && n <= hi) ? n : def;
+  }
+  function txt(v, limit) { return (typeof v === "string" || typeof v === "number") ? String(v).trim().slice(0, limit) : ""; }
+  function normalizeChart(obj) {
+    var problems = [], unknown = [];
+    if (!obj || typeof obj !== "object" || Array.isArray(obj)) { return [null, ["不是小節譜（要是一個 {…}）"]]; }
+    var time = TIME_RE.test(String(obj.time || "")) ? obj.time : "4/4", bpb = beatsOf(time);
+    var chart = { title: txt(obj.title, 80), artist: txt(obj.artist, 80), key: "", capo: num(obj.capo, 0, 11, 0), time: time,
+                  tempo: num(obj.tempo, 20, 320, null), bars_per_line: num(obj.bars_per_line, 1, 8, 4), sections: [],
+                  notes: txt(obj.notes, 500) };
+    var key = txt(obj.key, 12);
+    if (key && parseKey(key)) { chart.key = keyName(parseKey(key)); } else if (key) { problems.push("看不懂調「" + key + "」，改用程式猜的"); }
+    var total = 0;
+    (Array.isArray(obj.sections) ? obj.sections : []).slice(0, 40).forEach(function (s) {
+      if (!s || typeof s !== "object") { return; }
+      var bars = [];
+      (Array.isArray(s.bars) ? s.bars : []).forEach(function (b) {
+        if (total >= 512) { return; }
+        var words = typeof b === "string" ? b.split(/\s+/).filter(Boolean) :
+          Array.isArray(b) ? [].concat.apply([], b.map(function (x) { return String(x).split(/\s+/).filter(Boolean); })) : [];
+        bars.push(words.length ? makeBar(words, bpb, unknown) : ["%"]);
+        total += 1;
+      });
+      if (!bars.length) { return; }
+      var out = { name: txt(s.name, 24), bars: bars };
+      if (num(s.repeat, 2, 16, null)) { out.repeat = num(s.repeat, 2, 16, null); }
+      var lyr = Array.isArray(s.lyrics) ? s.lyrics.slice(0, bars.length).map(function (x) { return txt(x, 80); }) : [];
+      if (lyr.some(Boolean)) { while (lyr.length < bars.length) { lyr.push(""); } out.lyrics = lyr; }
+      chart.sections.push(out);
+    });
+    if (total >= 512) { problems.push("太長了，只收前 512 小節"); }
+    var marks = [], image = (obj.image && typeof obj.image === "object") ? obj.image : {};
+    (Array.isArray(image.marks) ? image.marks : []).slice(0, 400).forEach(function (mk) {
+      if (!mk || typeof mk !== "object") { return; }
+      var c = cellWord(txt(mk.chord, 16)), x = parseFloat(mk.x), y = parseFloat(mk.y);
+      if (c && c !== "+" && x >= 0 && x <= 1 && y >= 0 && y <= 1) {
+        marks.push({ x: Math.round(x * 1e4) / 1e4, y: Math.round(y * 1e4) / 1e4, chord: splitBeats(c)[0] });
+      }
+    });
+    if (marks.length) { chart.image = { marks: marks }; }
+    if (unknown.length) { problems.push("看不懂的和弦先標成 ?：" + uniqList(unknown).join("、")); }
+    if (!chart.key) { var found = chartChords(chart); if (found.length) { chart.key = keyName(detectKey(found)); } }
+    return [chart, problems];
+  }
+  function chartInput(text) {
+    var t = (text || "").trim();
+    if (/^(?:```[a-zA-Z]*\s*)?\{/.test(t)) {
+      var obj;
+      try { obj = JSON.parse(t.replace(/^\s*```[a-zA-Z]*\s*|\s*```\s*$/g, "").replace(/,\s*([}\]])/g, "$1")); }
+      catch (e) { return [null, ["JSON 格式不對（括號、引號、逗號）"]]; }
+      return normalizeChart(obj);
+    }
+    var p = parseProgression(t), r = normalizeChart(p[0]);
+    if (p[1].length) {
+      r[1] = r[1].filter(function (x) { return x.indexOf("看不懂的和弦") !== 0; }).concat(["看不懂的字標成 ?：" + uniqList(p[1]).join("、")]);
+    }
+    return r;
+  }
+  function eachToken(chart, fn) {
+    (chart.sections || []).forEach(function (s) { s.bars.forEach(function (bar) { bar.forEach(fn); }); });
+  }
+  function chartChords(chart) {
+    var out = [];
+    eachToken(chart, function (tok) { var c = parseChord(splitBeats(tok)[0]); if (c) { out.push(c); } });
+    return out;
+  }
+  function chartNames(chart) {
+    var out = [];
+    eachToken(chart, function (tok) { var n = splitBeats(tok)[0]; if (parseChord(n) && out.indexOf(n) < 0) { out.push(n); } });
+    return out;
+  }
+  function tpToken(tok, n, key) {
+    var sb = splitBeats(tok), c = parseChord(sb[0]);
+    return c ? chordName(c, n, key) + (sb[1] ? ":" + sb[1] : "") : tok;
+  }
+  function transposeChart(chart, n, key) {
+    var out = JSON.parse(JSON.stringify(chart));
+    out.key = key ? keyName(key) : chart.key;
+    out.sections.forEach(function (s) { s.bars = s.bars.map(function (bar) { return bar.map(function (t) { return tpToken(t, n, key); }); }); });
+    if (out.image) { out.image.marks.forEach(function (m) { m.chord = tpToken(m.chord, n, key); }); }
+    return out;
+  }
+  function barText(bar) {
+    if (bar.some(function (t) { return splitBeats(t)[1]; })) {
+      return bar.map(function (t) { var sb = splitBeats(t); return sb[0] + " .".repeat((sb[1] || 1) - 1); }).join(" ");
+    }
+    return bar.join("  ");
+  }
+  function chartHead(chart) {
+    var bits = [chart.key ? chart.key + " 調" : "", chart.time || "", chart.capo ? "Capo " + chart.capo : "", chart.tempo ? "♩=" + chart.tempo : ""];
+    var name = [chart.title, chart.artist].filter(Boolean).join(" — ");
+    return (name ? name + "｜" : "") + bits.filter(Boolean).join("・");
+  }
+  function chartText(chart, per) {
+    per = per || chart.bars_per_line || 4;
+    var cells = [], lines = [];
+    eachBar(chart, function (b) { cells.push(barText(b)); });
+    var w = Math.max.apply(null, [6].concat(cells.map(function (c) { return c.length; })));
+    chart.sections.forEach(function (s) {
+      var rep = s.repeat ? "×" + s.repeat : "";
+      if (s.name || rep) { lines.push(s.name ? "【" + s.name + "】" + rep : "【" + rep + "】"); }
+      var lyr = s.lyrics || [];
+      for (var i = 0; i < s.bars.length; i += per) {
+        lines.push("|" + s.bars.slice(i, i + per).map(function (b) { var t = barText(b); return " " + t + " ".repeat(w - t.length) + " "; }).join("|") + "|");
+        var words = lyr.slice(i, i + per).filter(Boolean);
+        if (words.length) { lines.push("  ♪ " + words.join(" / ")); }
+      }
+    });
+    return lines.join("\n");
+  }
+  function eachBar(chart, fn) { (chart.sections || []).forEach(function (s) { s.bars.forEach(fn); }); }
+
+  // ── 小節譜：畫面 ──
+  var ct = { saved: null, chart: null, shift: 0, capo: null, per: null, photo: null };
+  function chartKey(chart) { return parseKey(chart.key) || detectKey(chartChords(chart)) || [0, false]; }
+  function chartView() {
+    // 譜上寫的和弦＝夾 chart.capo 時按的手型；聽起來＝寫的調＋capo。換 capo／移調：手型＝聽起來的調＋移調−新 capo
+    var c = ct.chart, wk = chartKey(c), capo = ct.capo === null ? c.capo : ct.capo;
+    var delta = mod(ct.shift + c.capo - capo), sound = [mod(wk[0] + c.capo + ct.shift), wk[1]], shape = [mod(sound[0] - capo), wk[1]];
+    var view = (delta === 0 && ct.shift === 0) ? JSON.parse(JSON.stringify(c)) : transposeChart(c, delta, shape);
+    view.key = keyName(shape);
+    view.capo = capo;
+    return { chart: view, sound: sound, shape: shape, capo: capo };
+  }
+  function diagramFor(name, small) {
+    var c = parseChord(name);
+    if (!c) { return null; }
+    var vs = voicingsOf(c.root, c.quality, c.bass);
+    if (!vs.length) { return null; }
+    var card = chordCard(name, pickVoicing(vs), c.root);
+    card.setAttribute("data-chord", name);
+    if (small) { card.classList.add("small"); }
+    return card;
+  }
+  function flashChord(name) {
+    var box = $("cused"), card = null;
+    for (var i = 0; i < box.children.length; i++) { if (box.children[i].getAttribute("data-chord") === name) { card = box.children[i]; } }
+    if (!card) { return; }
+    card.classList.remove("flash"); void card.offsetWidth; card.classList.add("flash");
+    if (card.scrollIntoView) { card.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+  }
+  function barCell(bar, lyric, bpb) {
+    var cell = el("div", "cbar");
+    var explicit = bar.reduce(function (a, t) { return a + (splitBeats(t)[1] || 0); }, 0), free = bar.filter(function (t) { return !splitBeats(t)[1]; }).length;
+    var rest = Math.max(free ? (bpb - explicit) / free : 0, 0.5), line = el("div", "cchords");
+    bar.forEach(function (t) {
+      var sb = splitBeats(t), name = sb[0], kind = name === "%" ? "same" : name === "N.C." ? "nc" : name === "?" ? "unk" : "ch";
+      var span = el(kind === "ch" ? "button" : "span", "cch " + kind, name);
+      span.style.flex = (sb[1] || rest) + " 0 auto";
+      if (kind === "same") { span.title = "同上一小節"; }
+      if (kind === "unk") { span.title = "看不清楚的和弦"; }
+      if (kind === "ch") { span.type = "button"; span.addEventListener("click", function () { flashChord(name); }); }
+      line.appendChild(span);
+    });
+    cell.appendChild(line);
+    if (lyric) { cell.appendChild(el("div", "clyric", lyric)); }
+    return cell;
+  }
+  function renderChart() {
+    var grid = $("cgrid"), used = $("cused");
+    clear(grid); clear(used);
+    if (!ct.chart || !ct.chart.sections.length) {
+      $("ctitle").textContent = ""; $("cmeta").textContent = ""; $("ckey").textContent = ""; $("cnotes").textContent = "";
+      grid.appendChild(el("div", "muted", "還沒有小節譜。在上面打一段進行（例：| C | G D/F# | Am | F |），或在聊天裡用 /chord_chart。"));
+      renderPhoto(null);
+      return;
+    }
+    var v = chartView(), c = v.chart, per = ct.per || c.bars_per_line || 4, bpb = beatsOf(c.time);
+    $("ctitle").textContent = c.title || "小節譜";
+    $("cmeta").textContent = [c.artist, "聽起來 " + keyName(v.sound) + " 調", c.time, c.tempo ? "♩=" + c.tempo : ""].filter(Boolean).join("・");
+    $("ckey").textContent = v.capo ? "夾 Capo " + v.capo + "，照 " + keyName(v.shape) + " 調手型彈" : "不夾 capo，照 " + keyName(v.shape) + " 調彈";
+    $("cshift").textContent = ct.shift === 0 ? "原調" : (ct.shift <= 6 ? "升 " + ct.shift : "降 " + (12 - ct.shift));
+    $("cnotes").textContent = c.notes || "";
+    c.sections.forEach(function (s) {
+      var sec = el("div", "csec");
+      if (s.name || s.repeat) { sec.appendChild(el("div", "csec-h", [s.name, s.repeat ? "×" + s.repeat : ""].filter(Boolean).join("　"))); }
+      var rows = el("div", "crows");
+      rows.style.setProperty("--per", per);
+      s.bars.forEach(function (bar, i) { rows.appendChild(barCell(bar, (s.lyrics || [])[i], bpb)); });
+      sec.appendChild(rows);
+      grid.appendChild(sec);
+    });
+    chartNames(c).forEach(function (n) {
+      var card = diagramFor(n, true);
+      used.appendChild(card || el("div", "chord", n + "：沒有收錄"));
+    });
+    renderPhoto(c);
+  }
+  function renderPhoto(c) {
+    var marks = c && c.image ? c.image.marks : [], box = $("cmarks");
+    $("cphoto").classList.toggle("hidden", !marks.length);
+    clear(box);
+    if (!marks.length || !ct.photo) { $("cimgbox").classList.toggle("hidden", !ct.photo); return; }
+    $("cimgbox").classList.remove("hidden");
+    marks.forEach(function (m) {
+      var tag = el("span", "cmark", m.chord);
+      tag.style.left = (m.x * 100) + "%"; tag.style.top = (m.y * 100) + "%";
+      box.appendChild(tag);
+    });
+  }
+  function setChart(chart, warn) {
+    ct.chart = chart; ct.shift = 0; ct.capo = null;
+    var capoSel = $("ccapo");
+    clear(capoSel);
+    for (var i = 0; i <= 9; i++) { var o = el("option", null, i ? "第 " + i + " 格" : "不夾"); o.value = String(i); capoSel.appendChild(o); }
+    capoSel.value = String(chart ? chart.capo : 0);
+    $("cper").value = String(chart ? chart.bars_per_line : 4);
+    ct.per = null;
+    $("cwarn").textContent = (warn || []).join("；");
+    renderChart();
+  }
+  function chartCopyText() {
+    var v = chartView(), c = v.chart;
+    var lines = ["🎸 " + chartHead(c)];
+    if (v.capo) { lines.push("（夾 Capo " + v.capo + "、照 " + keyName(v.shape) + " 調手型，聽起來 " + keyName(v.sound) + " 調）"); }
+    lines.push("", chartText(c, ct.per || c.bars_per_line));
+    if (c.notes) { lines.push("", "📝 " + c.notes); }
+    return lines.join("\n");
+  }
+  function mountChart(initial, warn) {
+    ct.saved = initial;
+    var per = $("cper");
+    for (var i = 2; i <= 8; i++) { var o = el("option", null, i + " 小節"); o.value = String(i); per.appendChild(o); }
+    $("cin").addEventListener("input", function () {
+      var t = $("cin").value;
+      if (!t.trim()) { setChart(ct.saved, []); return; }
+      var r = chartInput(t);
+      if (r[0] && r[0].sections.length) { setChart(r[0], r[1]); } else { $("cwarn").textContent = r[1].join("；") || "這裡面找不到和弦。"; }
+    });
+    $("cedit").addEventListener("click", function () { if (ct.chart) { $("cin").value = JSON.stringify(ct.chart, null, 1); } });
+    $("cup").addEventListener("click", function () { ct.shift = mod(ct.shift + 1); renderChart(); });
+    $("cdown").addEventListener("click", function () { ct.shift = mod(ct.shift - 1); renderChart(); });
+    $("ccapo").addEventListener("change", function () { ct.capo = +$("ccapo").value; renderChart(); });
+    per.addEventListener("change", function () { ct.per = +per.value; renderChart(); });
+    $("ccopy").addEventListener("click", function () {
+      if (!ct.chart) { return; }
+      var t = chartCopyText(), msg = $("ccopied");
+      if (navigator.clipboard) { navigator.clipboard.writeText(t).then(function () { msg.textContent = "已複製"; }, function () { msg.textContent = "複製不了，請手動選取"; }); }
+    });
+    $("cprint").addEventListener("click", function () { window.print(); });
+    $("cfile").addEventListener("change", function () {
+      var f = $("cfile").files && $("cfile").files[0];
+      if (!f) { return; }
+      var rd = new FileReader();                         // 只在這個頁面的記憶體裡：不上傳、不存
+      rd.onload = function () { ct.photo = rd.result; $("cimg").src = ct.photo; renderChart(); };
+      rd.readAsDataURL(f);
+    });
+    setChart(initial, warn);
+  }
+  // <<< 共用 JS
+
+  // ── 面板自己的：capo 建議 ──
+  function difficulty(ch, shift) {
+    var bass = ch.bass === null ? null : ch.bass + shift, vs = voicingsOf(ch.root + shift, ch.quality, bass);
+    if (!vs.length) { return 4; }
+    var kinds = vs.map(function (v) { return v.kind; });
+    if (kinds.indexOf("open") >= 0) { return 0; }
+    if (vs[0].kind === "slash" && vs[0].frets.indexOf(0) >= 0) { return 0.5; }
+    if (kinds.indexOf("easy") >= 0 || kinds.indexOf("slash") >= 0 || kinds.indexOf("approx") >= 0) { return 1.5; }
+    return 3;
+  }
+  function uniq(chords) {
+    var seen = {}, out = [];
+    chords.forEach(function (c) { var k = c.root + "|" + c.quality + "|" + c.bass; if (!seen[k]) { seen[k] = 1; out.push(c); } });
+    return out;
+  }
+  function capoOptions(chords, key) {
+    var u = uniq(chords), res = [];
+    for (var capo = 0; capo < 8; capo++) {
+      var shape = [mod(key[0] - capo), key[1]], cost = 0, hard = [], easy = [];
+      u.forEach(function (ch) {
+        var d = difficulty(ch, -capo);
+        cost += d;
+        if (d >= 3) { hard.push(chordName(ch, -capo, shape)); } else if (d >= 1.5) { easy.push(chordName(ch, -capo, shape)); }
+      });
+      res.push({ capo: capo, shape: shape, score: cost + capo * 0.25, hard: hard, easy: easy });
+    }
+    res.sort(function (a, b) { return a.score - b.score || a.capo - b.capo; });
+    return res.slice(0, 3);
   }
 
   // ── 分頁：移調 ──
@@ -501,7 +1035,7 @@
   }
 
   // ── 分頁切換 ──
-  var TABS = [["tp", "貼譜移調"], ["look", "查和弦"], ["arp", "分散和弦"]];
+  var TABS = [["tp", "貼譜移調"], ["chart", "小節譜"], ["look", "查和弦"], ["arp", "分散和弦"]];
   function showTab(id) {
     st.tab = id;
     var bar = $("tabs");
@@ -512,7 +1046,8 @@
       bar.appendChild(b);
       $(t[0]).classList.toggle("hidden", t[0] !== id);
     });
-    if (id === "tp") { renderTp(); } else if (id === "look") { buildPills(); renderLook(); } else { renderArp(); }
+    if (id === "tp") { renderTp(); } else if (id === "chart") { renderChart(); } else if (id === "look") { buildPills(); renderLook(); }
+    else { renderArp(); }
   }
 
   function start(data) {
@@ -537,7 +1072,9 @@
     $("q").addEventListener("input", renderLook);
     ["arpq", "patc"].forEach(function (id) { $(id).addEventListener("input", renderArp); });
     $("pat").addEventListener("change", renderArp);
-    showTab("tp");
+    var first = data.chart ? [data.chart, []] : (data.last ? chartInput(data.last) : [null, []]);
+    mountChart(first[0] && first[0].sections.length ? first[0] : null, []);
+    showTab(data.chart ? "chart" : "tp");
   }
 
   fetch("/api/packs/guitar/data", { credentials: "same-origin" })

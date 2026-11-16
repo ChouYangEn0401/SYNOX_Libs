@@ -1,8 +1,8 @@
 {
   "name": "guitar",
   "title": "🎸 吉他和弦",
-  "summary": "查和弦按法、貼一份譜直接移調、Capo 建議、分散和弦 TAB（不用上網）",
-  "version": "0.1.0-alpha.1",
+  "summary": "查和弦按法、貼一份譜直接移調、Capo 建議、分散和弦 TAB、一格一小節的小節譜（不用上網）",
+  "version": "0.2.0-alpha.1",
   "stage": "alpha",
   "kind": "python",
   "group": "chord",
@@ -17,17 +17,18 @@
   "storage": "vault",
   "web": { "panel": "panel.html", "api": ["GET /data"] },
   "help": {
-    "featured": ["show", "tp", "capo"],
+    "featured": ["show", "tp", "chart"],
     "commands": {
       "show": {"plain": "查一個或好幾個和弦怎麼按", "examples": [{"text": "Am7", "note": "按法、手指、組成音"}, "Bb F Gm Eb", "D/F#"], "alias_suggest": ["和弦"]},
       "tp": {"plain": "整份譜移調，第一行寫怎麼移，下一行開始貼譜", "examples": [{"text": "+2 C G Am F", "note": "升兩個半音"}, "G→A", {"text": "-1", "note": "沒貼譜就用上次那份"}], "alias_suggest": ["移調"]},
       "capo": {"plain": "夾第幾格、用哪一組手型最好彈", "examples": [{"text": "Bb", "note": "Bb 調怎麼夾"}, {"text": "3", "note": "把上次的譜改成夾第三格的手型"}]},
       "arp": {"plain": "分散和弦的指彈譜", "examples": ["Am F C G", {"text": "C 2", "note": "第二種型態"}]},
-      "key": {"plain": "一個調裡有哪些和弦、常見進行", "examples": ["G", "Am"]}
+      "key": {"plain": "一個調裡有哪些和弦、常見進行", "examples": ["G", "Am"]},
+      "chart": {"plain": "把和弦進行排成一格一小節的譜", "examples": [{"text": "C G Am F", "note": "一個和弦一小節"}, "| C | G D/F# | Am | F |", {"text": "+2", "note": "上次的譜升兩個半音再排"}], "alias_suggest": ["小節譜"]}
     }
   },
   "site": {
-    "line": "查和弦、貼譜直接移調、Capo 建議、分散和弦 TAB；網頁上有完整的和弦圖面板",
+    "line": "查和弦、貼譜直接移調、Capo 建議、分散和弦 TAB、一格一小節的小節譜；網頁上有完整的和弦圖面板",
     "example": "/chord_tp +2"
   }
 }

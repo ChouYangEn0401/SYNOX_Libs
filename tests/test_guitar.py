@@ -108,3 +108,83 @@ def test_server_mode_keeps_sheets_apart(make_bot):
     bot.say(100, "/chord_tp +1\nC G Am F")
     assert "C G Am F" in bot.route("guitar", "data", user=100)["last"]
     assert bot.route("guitar", "data", user=555)["last"] == ""
+
+
+# ── 小節譜 ──────────────────────────────────────────────────────────────────
+
+def test_progression_bar_lines_and_plain(g):
+    chart, unknown = g.parse_progression("| C | G D/F# | Am | F |")
+    assert chart["sections"][0]["bars"] == [["C"], ["G", "D/F#"], ["Am"], ["F"]] and unknown == []
+    chart, _ = g.parse_progression("C G Am F")                       # 沒有小節線＝一個和弦一小節
+    assert chart["sections"][0]["bars"] == [["C"], ["G"], ["Am"], ["F"]]
+    chart, _ = g.parse_progression("C / / / G / / / Am / G /")      # 照拍子排
+    assert chart["sections"][0]["bars"] == [["C"], ["G"], ["Am", "G"]]
+
+
+def test_progression_sections_specials_and_beats(g):
+    text = "Key: G  Capo 2  3/4\n[主歌]\n| G . . | D/F# . G | % | N.C. |\n前奏： Em:2 C:1\n【副歌】×2\n| C | G |\n| Am | F | (x3)"
+    chart, unknown = g.parse_progression(text)
+    assert (chart["key"], chart["capo"], chart["time"]) == ("G", 2, "3/4") and unknown == []
+    secs = chart["sections"]
+    assert secs[0]["name"] == "主歌" and secs[0]["bars"] == [["G"], ["D/F#:2", "G:1"], ["%"], ["N.C."]]
+    assert secs[1]["name"] == "前奏" and secs[1]["bars"] == [["Em:2", "C:1"]]      # 沒有小節線但寫了拍數：照拍子排
+    assert secs[2]["name"] == "副歌" and secs[2]["repeat"] == 2 and secs[2]["bars"] == [["C"], ["G"]]
+    assert secs[3]["repeat"] == 3 and secs[3]["bars"] == [["Am"], ["F"]]       # 只有這一行重複：拆成自己一段
+    _, unknown = g.parse_progression("| C | 我 | G |")
+    assert unknown == ["我"]
+
+
+def test_progression_from_a_lyric_sheet(g):
+    chart, _ = g.parse_progression(SHEET)
+    intro, again, chorus = chart["sections"]
+    assert intro["name"] == "前奏" and [b[0] for b in intro["bars"]] == ["G", "D/F#", "Em", "C", "G", "D/F#"]
+    assert intro["lyrics"][4] == "我想你 我想你"                      # 和弦下面那行歌詞分到小節
+    assert again["bars"] == [["Em"], ["C"]] and again["repeat"] == 2 and again["lyrics"][0] == "都是你的影子"   # 歌詞行尾的 (x2)
+    assert chorus["name"] == "Chorus" and [b[0] for b in chorus["bars"]][-3:] == ["G", "D", "Em"]
+    assert chorus["lyrics"][-1] == "歌"
+
+
+def test_chart_json_normalize_and_transpose(g):
+    text = """```json
+{"title": "練習", "key": "C", "time": "4/4", "bars_per_line": 5,
+ "sections": [{"name": "A", "repeat": 2, "bars": [["C"], ["G", "D/F#"], "Am . . G", ["%"], ["Xyz"]]},],
+ "image": {"marks": [{"x": 0.1, "y": 0.2, "chord": "Am"}, {"x": 3, "y": 0.2, "chord": "C"}]}}
+```"""
+    chart, problems = g.chart_input(text)
+    assert chart["sections"][0]["bars"] == [["C"], ["G", "D/F#"], ["Am:3", "G:1"], ["%"], ["?"]]
+    assert chart["bars_per_line"] == 5 and chart["image"]["marks"] == [{"x": 0.1, "y": 0.2, "chord": "Am"}]
+    assert any("Xyz" in p for p in problems)
+    up = g.transpose_chart(chart, 3, (3, False))                     # C → Eb：降記號調
+    assert up["key"] == "Eb" and up["sections"][0]["bars"][1] == ["Bb", "F/A"] and up["sections"][0]["bars"][2] == ["Cm:3", "Bb:1"]
+    assert up["image"]["marks"][0]["chord"] == "Cm" and chart["sections"][0]["bars"][0] == ["C"]   # 原本的不動
+    assert g.read_json('{"a": [1, 2.5, true, null, "\\u00e9"],}') == {"a": [1, 2.5, True, None, "é"]}
+    assert g.read_json('{"a": 1') is None and g.chart_input("{oops")[0] is None
+
+
+def test_chart_text_grid(g):
+    chart, _ = g.chart_input("[主歌]\n| C | G D/F# | Am . . G | % | F |")
+    text = g.chart_text(chart)
+    assert text.split("\n") == ["【主歌】", "| C        | G  D/F#  | Am . . G | %        |", "| F        |"]
+
+
+def test_chart_command_and_data(make_bot, owner):
+    bot = make_bot("guitar")
+    bot.say(owner, "/chord_chart [主歌]\n| C | G D/F# | Am | F |")
+    reply = bot.last(owner)
+    assert "【主歌】" in reply and "| C " in reply and "G  D/F#" in reply and "小節譜" in reply
+    bot.say(owner, "/chord_chart +2")                                  # 用上次的譜
+    reply = bot.last(owner)
+    assert "C → D" in reply and "A  E/G#" in reply
+    chart = bot.route("guitar", "data")["chart"]
+    assert chart["key"] == "D" and chart["sections"][0]["bars"][1] == ["A", "E/G#"]
+    bot.say(owner, "/chord_chart 到 Eb\n{\"sections\": [{\"bars\": [[\"C\"], [\"G\"]]}]}")
+    assert "| Eb" in bot.last(owner)
+    bot.say(owner, "/chord_chart hello")
+    assert "用法" in bot.last(owner)
+
+
+def test_server_mode_keeps_charts_apart(make_bot):
+    bot = make_bot("guitar", per_user=True)
+    bot.say(100, "/chord_chart C G Am F")
+    assert bot.route("guitar", "data", user=100)["chart"]["sections"][0]["bars"][0] == ["C"]
+    assert bot.route("guitar", "data", user=555)["chart"] is None
