@@ -1,0 +1,171 @@
+{
+  "id": "sermon-notes",
+  "name": "講道筆記",
+  "description": "聚會中邊聽邊記：經文、大綱、最記得的一句，聚會後勾回應、寫這週要做的一件事。",
+  "group": "與神同行",
+  "order": 17,
+  "when": "主日崇拜、特會、線上講道。",
+  "minutes": 10,
+  "moods": [
+    "專注"
+  ],
+  "tags": [
+    "講道",
+    "主日",
+    "教會",
+    "經文",
+    "每週"
+  ],
+  "structure": "three-part",
+  "reflection": "devotional",
+  "flow": [
+    "scripture",
+    "quote",
+    "reflection",
+    "plan",
+    "people"
+  ],
+  "default_theme": "notebook",
+  "default_layout": "manuscript",
+  "closing_label": "補充",
+  "closing_hint": "還想記下來的。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "info",
+      "title": "這一場",
+      "color": "#5a6472",
+      "icon": "▤",
+      "fields": [
+        {
+          "id": "meeting",
+          "label": "聚會",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "主日崇拜"
+            },
+            {
+              "id": "o2",
+              "label": "小組"
+            },
+            {
+              "id": "o3",
+              "label": "特會／營會"
+            },
+            {
+              "id": "o4",
+              "label": "線上講道"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "speaker",
+          "label": "講員",
+          "kind": "short_text",
+          "ai_hint": "照作者寫的稱呼；沒寫就留空。"
+        },
+        {
+          "id": "title",
+          "label": "題目",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "passage",
+          "label": "經文",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "經文出處照作者寫的抄；沒有就留空，不要自己補經文。"
+        }
+      ]
+    },
+    {
+      "id": "notes",
+      "title": "筆記",
+      "color": "#2456b8",
+      "icon": "✎",
+      "fields": [
+        {
+          "id": "outline",
+          "label": "大綱／重點",
+          "kind": "list",
+          "min_rows": 3,
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "quote",
+          "label": "最記得的一句話",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "ask",
+          "label": "想再查、想再問的",
+          "kind": "list",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        }
+      ]
+    },
+    {
+      "id": "respond",
+      "title": "我的回應",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "tome",
+          "label": "今天這篇信息對我說什麼",
+          "kind": "text",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        },
+        {
+          "id": "kind",
+          "label": "我要回應的是",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "要順服"
+            },
+            {
+              "id": "o2",
+              "label": "要悔改"
+            },
+            {
+              "id": "o3",
+              "label": "要相信"
+            },
+            {
+              "id": "o4",
+              "label": "要感謝"
+            },
+            {
+              "id": "o5",
+              "label": "要去行動"
+            },
+            {
+              "id": "o6",
+              "label": "還要再想想"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "act",
+          "label": "這週具體做的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "share",
+          "label": "想把這篇信息分享給誰",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

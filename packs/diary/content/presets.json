@@ -1,0 +1,21 @@
+{
+  "_doc": [
+    "Starter sets for /diary_setup_init <name> (pack.py, Diary.setup_init; originally `python -m backend.cli setup init`).",
+    "`templates` is a list of shipped question-set ids to install, or \"all\" = every shipped set except the ones",
+    "marked \"default_hidden\": true (shipped, but only brought in by hand). Sets not installed are marked as",
+    "already handled, so they do not appear later either; /diary_tpl_restore <id> brings one in.",
+    "Without setup init a new person gets the same as \"all\".",
+    "`settings` are written to the preferences (only keys not yet set by the person).",
+    "Nothing here ever deletes anything: running init again only adds what was never handled."
+  ],
+  "generic": {
+    "label": "一般：記事、感恩、三段回看，不談信仰",
+    "templates": ["jot", "three-lines", "gratitude", "day-review", "feelings", "hard-day", "worry-sort", "week-review"],
+    "settings": { "suggest_faith": "never", "template_id": "three-lines" }
+  },
+  "devotional": {
+    "label": "靈修：內建題組（讀經、省察、代禱、哀歌…也有不談信仰的；預設不出現的那幾個要自己拿）",
+    "templates": "all",
+    "settings": { "suggest_faith": "prefer" }
+  }
+}

@@ -6,8 +6,32 @@
 
 ### Fixed
 - **`money` 0.3.0 → 0.3.1**（SYNOX 獨立安全審查第 1 輪）：金額欄位改用 SYNOX 的 `kit.amount`（大於 0、最多兩位小數、不超過十億；預算與上限另外收 0＝拿掉）；`nan`、`inf` 這類不是一般數字的值一律擋下（以前會讓記一筆出錯、讓預算存成 NaN 之後每筆都壞）。
+- **`calendar` 0.1.2**（ADR-0006 T5、P1）：`/cal_ics` 的檔名改成每次不同（`export-<時間>-<亂數>.ics`），同一個人同時匯出兩次
+  不會互相蓋、互相刪；匯出前先清掉這個人資料夾裡留下的舊匯出檔（舊版的 `export.ics`、10 分鐘以前的）。
+- **`google-calendar` 0.1.1 → 0.1.2**（ADR-0006 C1、P5）：`/gcal_setup`、`/gcal_code`、`/gcal_token` 打的 client secret、授權碼、
+  refresh token 原本整串印在 `[ROUTE]` log（兩種模式都中）；`install` 改成對這三個叫 `kit.redact_in_logs`。
+  `/gcal_status` 改成 `ai=False`（跟另外三個外部工具一樣，SKILL 改成請使用者自己打）。測試加一條 S6（log 裡沒有那些值）。
 
 ### Added
+- **`google-sheets` 0.1.0-alpha.1（新工具，`stage` alpha；**尚未實機驗證**，試過之後才發 0.1.0）**：Google 試算表**只加列**（[ADR-0005](docs/adr/0005-google-sheets-append-only.md)）。`/gsheet_new`、`/gsheet_list`、`/gsheet_use`、`/gsheet_read`、`/gsheet`（預覽）、`/gsheet_void`（加一列作廢標記）、`/gsheet_ok`（本人打確認碼才寫，AI 不行）；裝置碼登入、權限只有 `drive.file`、`values.append` 用 RAW＋INSERT_ROWS、每列有 id 不會重複寫。只對假的 Google 測過（`tests/test_gsheet.py`），還沒在真帳號上試。共用的 Google 登入程式放 `packs/_shared/googleauth.py`（`scripts/sync_shared.py` 也管它）；`catalog.json` 的「接外面的服務」多這一個。
+- **`money` 0.3.1 → 0.4.0-alpha.1**（**alpha，尚未實機驗證**：只在自動測試裡跑過，還沒在真的 SYNOX／Telegram 上試過；試過之後才發 0.4.0。記帳整個重做，[ADR-0004](docs/adr/0004-money-remake.md)；`stage` 仍是 alpha）：從一個本機使用多年的記帳程式通用化而來，
+  去掉所有個人資料與寫死的設定。六個分頁（總覽、明細、規劃、設定、檢討、撲滿）、固定項目、每一格預算與滾存、信用卡與分期、負債、借貸、
+  餘額核對、水電帳單、收據附檔、每週與每月檢討（由 SYNOX 的 AI 讀 `report` 後照手冊寫、`review_save` 存回）、第一次使用的三步引導、CSV 匯出匯入。
+  撲滿（投資、倉、跟基準比）只在開了投資的帳本顯示；不含券商對帳單匯入；目前只支援整數幣別。
+  幣別、小數位數、時區、起算日、類別與帳戶都可自訂。工具改成多個檔（`python.package`，要有支援多檔工具的 SYNOX），
+  帳本是每人一個 SQLite 檔（**沒有加密**，README 照實寫；日後加密只動 `bridge/session.py`）。
+  舊指令照樣能打；從 0.3.x 升級時第一次打開會把舊資料轉進新帳本（一批寫入、可撤銷，原本那份另存不刪）。升級報告會出現「執行方式改了」紅字。
+- **`diary` 0.1.0-alpha.1（新工具，`stage` alpha；**尚未實機驗證**，試過之後才發 0.1.0）**：維護者自己的每日日記程式 1:1 搬成 SYNOX 工具：題組（原本 21 個＋新設計 20 個，
+  其中 12 個內建但預設不出現）、分類與挑題組的規則、寫入的合併規則（AI 整理一律標明、附原文）、歷史版本、垃圾桶、整本備份、
+  匯出匯入（格式名稱 `synox.diary.export`，其他跟原本的「匯出全部」一樣；原本程式匯出的舊檔照樣匯得進來）、四種版型的 HTML 與日記本卡片 SVG。資料在保管箱、伺服器版每人一份。
+  `tests/test_diary_parity.py` 拿原本程式錄下的輸出逐字比對（`scripts/dump_diary_parity.py` 產生 `tests/fixtures/diary_parity.json`）。
+  `tests/test_gates.py` 多一條 diary 的規矩（可以用的標準函式庫、只在三個地方開檔）；`catalog.json` 多一個建議群組「日記」。
+- **入口頁改成產生的**：`scripts/build_site.py`（`build.py` 全部打包時也跑；`--check`、`--list-republish [--since <git 版本>]`）從每個工具的
+  `pack.json`（＋選填的 `site` 區塊、`docs/site-tools.json`）產生 `docs/site/index.html`，加一個 `packs/<名字>/` 就多一張卡片、不用改 HTML；
+  沒有手寫說明頁的工具產生一頁簡單的（標「說明頁還沒寫」），手寫的 9 頁不動。樣板分開給設計改：`scripts/site_index_template.html`、
+  `scripts/site_tool_template.html`（版面沒變；衣櫃按鈕改連線上衣櫃頁）。線上頁網址登記在 `docs/artifacts.json`。
+  `index.json` 每個工具多 `line`（卡片上的一句話）。測試 `tests/test_build_site.py`（假的新工具會出現在入口頁與 index.json、連結對）。
+- 文件：`docs/README.md`（索引）、`docs/CONTRIBUTING-TOOLS.md`（新增工具從頭到尾）、`docs/ARTIFACTS.md`（線上頁）；`docs/RELEASING.md` 最上面加流程圖與檢查清單。
 - **`money` 0.2.0 → 0.3.0**（[ADR-0003](docs/adr/0003-tool-apps-and-money-app.md)；`stage` 仍是 alpha）：附完整的網頁畫面「記帳本」（SYNOX 的工具服務：
   總覽、帳目、類別、預算；畫面只走 SYNOX 的共用元件）；新指令 `/money_edit`（改一筆）；匯出 `entries_csv`（個人版、下載前提醒沒有加密；
   多人共用的 SYNOX 沒有匯出；加密匯出還沒做）。`pack.py` 拆成模組層的核心函式（指令與畫面同一份邏輯），舊指令的回覆一個字都沒變。
@@ -17,6 +41,44 @@
 - `scripts/build.py`：`index.json` 每筆多 `"app": true/false`（目錄頁標「有完整畫面」）。
 - 測試：`tests/test_money_app.py`（同一件事兩條路結果一樣、欄位訊息一樣、讀、匯出、伺服器版隔離）、`tests/test_apps_common.py`
   （每個有畫面的官方工具：畫面程式不自己連線、入口先載 SYNOX 的共用元件、說明不印畫面的網址）。
+- **SYNOX 衣櫃**（`wardrobe`）：品牌提案的 26 個系列（A–Z）做成 26 套外觀 `costume-<字母>-<名字>` 1.0.0（kind=`theme`）：
+  淺色／深色 token、吉祥物 4 種狀態、開場動畫、字標、App 圖示，只有 SVG＋CSS、不帶程式、不附字型。
+  `scripts/build_costumes.py`（extract／check／pack／page）、`tests/test_costumes.py`（不帶程式的規則、7 個 slot、token、大小、雜湊）、
+  公開頁 `docs/site/wardrobe.html`（從 `docs/site/index.html` 與 README 連過去）。
+  `scripts/build.py` 沒指定工具名時一起打包、列進 `index.json`（`kind: "theme"`、`category: "衣櫃／外觀"`、`collections.wardrobe`）。
+- **下載連結永遠是最新版**（[docs/RELEASING.md](docs/RELEASING.md)）：`scripts/links.py` 是網址的唯一來源（版本只看 `pack.json`／`VERSION`；
+  `LINK_MODE` = `tag`（現在，v0.2.0 是 pre-release）或 `latest`（標成 Latest 之後））。`scripts/build.py` 全部打包時 dist/ 多了
+  不帶版本的別名 `<name>.synoxpack`、`tools-<VERSION>.zip`／`tools.zip`、`SHA256SUMS`，打完自動改寫 README 與 `docs/site/*.html` 的連結。
+  衣櫃頁改連發佈頁（不再連 repo 分支裡的 `docs/site/packs/`，那份拿掉了）。`tests/test_links.py` 擋過期連結。
+- [ADR-0006](docs/adr/0006-personal-and-server-mode.md)（2026-11-13，提議中）：個人版與伺服器（多人）版——九個工具的審查結果、
+  工具的「多人契約」、`pack.json`／`install`／面板的入口標準、接外面服務的工具在伺服器版維持只給擁有者的政策、測試要求與實作待辦。
+  只有文件，沒有改任何工具（待辦裡最優先的是 google-calendar 的密鑰會進 `[ROUTE]` log）。README 加上指向它的說明。
+
+### Changed
+- **多人契約也套到 `money` 0.4.0 與 `diary`**（ADR-0006 合進來時補的）：M3、M4 改成看工具裡每個 `.py`（money 是多檔工具），個別准的模組層級呼叫列在 `tests/test_gates.py` 的 `M4_EXTRA_CALLS`，每條寫理由、用不到了測試會擋；`diary` 的四個字元表改成 `frozenset`、設定的預設值改由 `pref_defaults()` 每次回新的（原本 `dict(PREF_DEFAULTS)` 會讓大家共用同一個 `palette` list）；`money` 拿掉 `if hasattr(pack, "web_route")`；`tests/test_access.py` 每打一個指令先清掉陌生人當天的配額（money、diary 的指令超過 30 個），只准本人打的指令（`ai=False`）算看得到；`tests/test_isolation.py` 的 money 照 0.4.0 的帳本位置檢查（沒有加密，不檢查密文）。
+- **宣告補齊**（ADR-0006 T1，C4、C5；不改行為，SYNOX 讀到的值跟原本的預設值一樣）：`calendar`、`todo`、`bullet` 0.1.1 → **0.1.2**
+  明寫 `"surfaces": ["dm"]`、`"data": "user"`；`notes` 0.1.1 → **0.1.2** 明寫 `"capabilities": []`（`money` 0.4.0 本來就寫了 `["filesystem:own"]`）。
+- **`todoist` 0.1.1 → 0.1.2**（ADR-0006 T1、C3）：`auth.fields` 改成物件（`{name, ask, secret}`，跟 notion 一樣），
+  `python -m synox connect todoist` 從此能用（存在 `key="auth"`）；程式先認 connect 存的、再認 `/todoist_token` 存的（舊的 token 照樣能用），
+  `/todoist_token` 存新的時清掉 connect 那份（最後設的算數），`/todoist_logout` 兩份都清。
+- `scripts/build.py`：`access`、`surfaces`、`data`、`storage`、`capabilities` 沒明寫就不打包（ADR-0006 入口標準）；
+  `tests/test_gates.py` 加 `test_declares_scope`，`ALLOWED_CAPS` 不再把「沒寫」當期待值。
+- 測試（ADR-0006 T2；不改工具）：`tests/test_isolation.py` 改用真的 SYNOX，本機五個工具（多了 notes、money）跑伺服器版
+  兩個成員＋擁有者（S1 讀的指令、S2 落地檔、S3 面板）與個人版（S5）；新的 `tests/test_access.py` 九個工具的權限（S4：
+  個人版陌生人、伺服器版訪客、成員對 `access: owner`、`policy.decide(via=AI)`）；notion、apple-reminders、google-calendar
+  各加一條 token 每人一份（S7）；calendar 加匯出檔不留東西（S8）。`tests/conftest.py` 的假 pack 伺服器版 `path()`／`path_of(None)`
+  跟真的一樣丟 `PackPathError`（P7）。
+- `tests/test_gates.py` 加多人契約的靜態檢查（ADR-0006 T3；不改工具）：M3 `chat_id` 不准當 `store.of`／`path_of`／`secret` 的參數或 dict 的鍵；
+  M4 模組層級不准有空容器、會被改的表、共用物件、`global`、拿常數表淺拷貝（`X = None` 的測試掛勾暫列 todoist `HTTP`、
+  google-calendar `transport`，T5 拿掉）；M5 `panel.html` 不准 `innerHTML`、`localStorage`、外部網址，`fetch` 只打自己宣告的
+  `/api/packs/<名字>/<route>`。每個檢查都有一條「故意寫錯一定抓得到」的測試。
+- 小修（ADR-0006 T5；不改資料格式。這一輪還沒發佈，T1／T4 已經升過版的工具不再另外升）：
+  `todoist`、`google-calendar` 模組層級的 `HTTP`／`transport` 改成 `def new_session()`（跟 notion、apple-reminders 一樣；
+  測試改成換函式，P6），`tests/test_gates.py` 的暫時白名單拿掉；`calendar`、`todo`、`bullet`、`money` 拿掉
+  `if hasattr(pack, "web_route")`（`requires.synox >=0.2` 一定有，C9）。
+- 文件（ADR-0006 T6）：本機五個工具的 README 寫明伺服器版每人一份、伺服器的管理者解得開、改模式不會自己搬舊資料；
+  外部四個的 README 寫明伺服器版只有擁有者用得到（ADR-0006 第 4 節）。ADR-0006 的 T1～T6 標成已完成。
+  `notion`、`apple-reminders` 只改了 README（會打包進 .synoxpack），版本 0.1.1 → **0.1.2**。
 
 ## [0.2.0] - 2026-11-13
 

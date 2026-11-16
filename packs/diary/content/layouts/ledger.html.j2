@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ doc.date_display }}　{{ doc.title or doc.template_name }}</title>
+<style>
+{% include "_tokens.css.j2" %}
+
+body{padding:clamp(1rem,3vw,2.5rem) 1rem clamp(3rem,7vw,5rem);font-size:16.5px;}
+.stage{max-width:62rem;margin:0 auto;}
+.sheet{background:var(--paper);border:1px solid var(--paper-edge);
+       padding:clamp(1.4rem,4vw,3rem);box-shadow:0 18px 40px -28px rgba(0,0,0,.4);}
+
+/* ---- masthead band ---- */
+.band{display:flex;align-items:flex-end;justify-content:space-between;
+      gap:1.5rem;flex-wrap:wrap;padding-bottom:.9rem;}
+.band .left{min-width:0;}
+.eyebrow{font-size:.68rem;letter-spacing:.3em;color:var(--ink-muted);
+         text-transform:uppercase;margin-bottom:.35rem;}
+.date{font-family:var(--display);font-size:clamp(1.9rem,6vw,2.75rem);
+      line-height:1;margin:0;font-weight:600;font-variant-numeric:tabular-nums;}
+.title{font-family:var(--display);font-size:1.15rem;font-weight:500;
+       margin:.55rem 0 0;color:var(--ink);}
+.stats{text-align:right;font-size:.75rem;color:var(--ink-muted);
+       display:flex;flex-direction:column;gap:.15rem;}
+.stats b{font-family:var(--display);font-size:1.6rem;color:var(--ink);
+         font-weight:600;line-height:1;font-variant-numeric:tabular-nums;}
+.double-rule{border-top:2px solid var(--ink);border-bottom:1px solid var(--hairline);
+             height:3px;margin-bottom:1.8rem;}
+
+/* ---- two columns ---- */
+.cols{display:grid;grid-template-columns:1fr;gap:2rem;}
+@media (min-width:900px){
+  .cols{grid-template-columns:15rem minmax(0,1fr);gap:2.75rem;}
+  .index{position:sticky;top:1.5rem;align-self:start;}
+}
+
+/* left: the ticked answers, as a compact register */
+.index h3{font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;
+          color:var(--ink-muted);margin:0 0 .5rem;font-family:var(--body);
+          font-weight:600;}
+.idx-group{margin-bottom:1.3rem;padding-left:.65rem;border-left:2px solid var(--sec);}
+.idx-row{display:flex;justify-content:space-between;gap:.6rem;align-items:baseline;
+         padding:.22rem 0;border-bottom:1px dotted var(--hairline);font-size:.82rem;}
+.idx-row:last-child{border-bottom:none;}
+.idx-row .q{color:var(--ink-muted);min-width:0;overflow-wrap:anywhere;}
+.idx-row .a{color:var(--sec);font-weight:600;white-space:nowrap;flex:none;}
+.idx-row .a.none{color:var(--ink-muted);font-weight:400;opacity:.6;}
+
+/* right: the prose */
+.body section{margin-bottom:2.4rem;}
+.sec-title{font-family:var(--display);font-size:1.02rem;font-weight:600;margin:0 0 1rem;
+           display:flex;align-items:center;gap:.55rem;}
+.sec-title::before{content:"";width:.55rem;height:.55rem;background:var(--sec);
+                   border-radius:2px;flex:none;}
+.field{margin-bottom:1.25rem;}
+.f-label{font-size:.74rem;letter-spacing:.1em;color:var(--ink-muted);
+         display:block;margin-bottom:.3rem;}
+.f-body{max-width:36rem;overflow-wrap:anywhere;}
+.f-body p{margin:0 0 .4em;}
+ol.lines{margin:0;padding:0;list-style:none;counter-reset:l;max-width:36rem;}
+ol.lines li{counter-increment:l;display:flex;gap:.7rem;margin-bottom:.4rem;
+            overflow-wrap:anywhere;}
+ol.lines li::before{content:counter(l,decimal-leading-zero);flex:none;
+  font-size:.7rem;color:var(--sec);font-weight:600;padding-top:.35em;
+  font-variant-numeric:tabular-nums;letter-spacing:.05em;}
+
+.closing{margin-top:1rem;padding:1.5rem 1.6rem;background:
+  color-mix(in srgb,var(--accent) 6%,transparent);border-radius:4px;
+  border-left:3px solid var(--accent);overflow-wrap:anywhere;}
+.closing .f-label{color:var(--accent);}
+.closing p{font-family:var(--display);font-size:1.02rem;margin:0 0 .45em;}
+
+footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--hairline);
+       display:flex;justify-content:space-between;font-size:.7rem;
+       color:var(--ink-muted);letter-spacing:.1em;flex-wrap:wrap;gap:.5rem;}
+@media print{.sheet{box-shadow:none;border:none;}.index{position:static;}footer{display:none;}}
+</style>
+</head>
+<body>
+<div class="stage{% if not gift_cover %} open{% endif %}" id="stage">
+{% include "_cover.html.j2" %}
+  <article class="journal"><div class="sheet">
+    <div class="band">
+      <div class="left">
+        <div class="eyebrow">{{ doc.template_name }}　·　週{{ doc.weekday }}</div>
+        <h1 class="date">{{ doc.date_display }}</h1>
+        {% if doc.title %}<p class="title">{{ doc.title }}</p>{% endif %}
+      </div>
+      <div class="stats"><b>{{ doc.word_count }}</b><span>字</span></div>
+    </div>
+    <div class="double-rule"></div>
+
+    <div class="cols">
+      <aside class="index">
+        {% set ns = namespace(any=false) %}
+        {% for s in doc.sections %}
+          {% set ticked = s.fields | selectattr('chips') | list %}
+          {% if ticked %}
+            {% set ns.any = true %}
+            <div class="idx-group" style="--sec:{{ s.color }}">
+              <h3>{{ s.title }}</h3>
+              {% for f in ticked %}
+                {% set picked = f.chips | selectattr('selected') | map(attribute='label') | join('、') %}
+                <div class="idx-row">
+                  <span class="q">{{ f.label }}</span>
+                  <span class="a{% if not picked %} none{% endif %}">{{ picked or "—" }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endfor %}
+        {% if not ns.any %}
+          <h3>今日</h3>
+          <div class="idx-group" style="--sec:{{ doc.palette[0] if doc.palette else '#888' }}">
+            <div class="idx-row"><span class="q">篇幅</span><span class="a">{{ doc.word_count }} 字</span></div>
+            <div class="idx-row"><span class="q">星期</span><span class="a">週{{ doc.weekday }}</span></div>
+          </div>
+        {% endif %}
+      </aside>
+
+      <div class="body">
+        {% for s in doc.sections %}
+          {% set prose = s.fields | rejectattr('chips') | list %}
+          {% if prose %}
+          <section style="--sec:{{ s.color }}">
+            <h2 class="sec-title">{{ s.title }}</h2>
+            {% for f in prose %}
+            <div class="field">
+              <span class="f-label">{{ f.label }}</span>
+              {% if f.numbered %}
+                <ol class="lines">{% for line in f.lines %}<li><span>{{ line | runs }}</span></li>{% endfor %}</ol>
+              {% else %}
+                <div class="f-body">{% for line in f.lines %}<p>{{ line | runs }}</p>{% endfor %}</div>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </section>
+          {% endif %}
+        {% endfor %}
+
+        {% if doc.has_closing %}
+        <div class="closing">
+          <span class="f-label">{{ doc.closing_label }}</span>
+          {% for line in doc.closing_lines %}<p>{{ line | runs }}</p>{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer><span>{{ doc.template_name }}</span><span>{{ doc.date_display }}</span></footer>
+  </div></article>
+</div>
+{% include "_cover.js.j2" %}
+</body>
+</html>

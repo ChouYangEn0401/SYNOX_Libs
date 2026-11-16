@@ -1,0 +1,67 @@
+{
+  "name": "costume-h-teapot",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "小壺",
+  "summary": "一把青花小茶壺：茶泡好了，坐下來慢慢說。SYNOX 衣櫃 · 系列 H：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f2f5fb",
+        "--surface": "#ffffff",
+        "--text": "#14213f",
+        "--muted": "#56627e",
+        "--line": "#d9e1f0",
+        "--accent": "#1f44b5",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#a15f12",
+        "--soft": "#e1e9fc",
+        "--ok": "#1c7a4c",
+        "--warn": "#8f6408",
+        "--bad": "#c2362f",
+        "--radius": "18px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Zen Antique Soft','Noto Sans TC',sans-serif",
+        "--m1": "#ffffff",
+        "--m2": "#1f44b5",
+        "--mi": "#1f44b5",
+        "--mb": "#f08d8d"
+      },
+      "dark": {
+        "--bg": "#0a1130",
+        "--surface": "#121b42",
+        "--text": "#e9eefc",
+        "--muted": "#9aa7cc",
+        "--line": "#26325f",
+        "--accent": "#8fb0ff",
+        "--accent-ink": "#0a1640",
+        "--accent2": "#f0c27a",
+        "--soft": "#1b2a63",
+        "--ok": "#5fd08d",
+        "--warn": "#f2c14e",
+        "--bad": "#ff8a8a",
+        "--radius": "18px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Zen Antique Soft','Noto Sans TC',sans-serif",
+        "--m1": "#f6f8ff",
+        "--m2": "#8fb0ff",
+        "--mi": "#1f44b5",
+        "--mb": "#f08d8d"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

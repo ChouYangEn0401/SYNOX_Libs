@@ -1,0 +1,100 @@
+{
+  "id": "day-review",
+  "name": "三段回看 · 事情・感受・學到",
+  "description": "先寫發生什麼，再寫自己怎麼了，最後留一句學到的。不談信仰的三段式。",
+  "group": "成為什麼樣的人",
+  "order": 19,
+  "when": "想把一天分三段看清楚：發生了什麼、我怎麼了、我帶走什麼。不談信仰也完全成立。",
+  "minutes": 8,
+  "moods": ["平靜", "想整理", "有點亂"],
+  "tags": ["反思", "三段式", "每天", "不談信仰也可以"],
+  "structure": "three-part",
+  "reflection": "reflection",
+  "flow": ["events", "feelings", "reflection", "plan"],
+  "default_theme": "letterpress",
+  "default_layout": "letter",
+  "closing_label": "寫給自己的話",
+  "closing_hint": "有就寫，沒有就算了。",
+  "closing_placeholder": "今天的我…",
+  "sections": [
+    {
+      "id": "events",
+      "title": "發生了什麼",
+      "color": "#2456b8",
+      "icon": "①",
+      "fields": [
+        {
+          "id": "happened",
+          "label": "今天發生的事",
+          "kind": "text",
+          "placeholder": "今天…",
+          "color": "#2456b8",
+          "ai_hint": "今天發生的事，照作者的話整理成一兩段，保留細節，不加作者沒說的情節。"
+        },
+        {
+          "id": "biggest",
+          "label": "其中最佔住我心思的一件",
+          "kind": "short_text",
+          "placeholder": "那件…",
+          "ai_hint": "作者花最多字、或自己說最在意的那一件，一句話；分不出來就留空。"
+        }
+      ]
+    },
+    {
+      "id": "feelings",
+      "title": "我怎麼了",
+      "color": "#6b4c9a",
+      "icon": "②",
+      "fields": [
+        {
+          "id": "feel",
+          "label": "最接近的幾個字（可複選）",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "calm", "label": "平靜" },
+            { "id": "glad", "label": "開心" },
+            { "id": "grateful", "label": "感激" },
+            { "id": "proud", "label": "有成就感" },
+            { "id": "tired", "label": "疲累" },
+            { "id": "anxious", "label": "焦慮" },
+            { "id": "sad", "label": "難過" },
+            { "id": "angry", "label": "生氣" },
+            { "id": "wronged", "label": "委屈" },
+            { "id": "confused", "label": "困惑" },
+            { "id": "numb", "label": "說不上來" }
+          ],
+          "ai_hint": "只照作者自己說出來的感受勾；沒說就不勾，不要替作者判斷。"
+        },
+        {
+          "id": "why_feel",
+          "label": "這個感覺從哪裡來",
+          "kind": "text",
+          "color": "#6b4c9a",
+          "ai_hint": "作者自己說到的原因；沒說就留空。"
+        }
+      ]
+    },
+    {
+      "id": "takeaway",
+      "title": "我帶走什麼",
+      "color": "#1f7a4d",
+      "icon": "③",
+      "fields": [
+        {
+          "id": "learned",
+          "label": "今天學到、或看見自己的一件事",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "ai_hint": "作者自己說到的體會；作者沒說就留空，不要替作者下結論。"
+        },
+        {
+          "id": "tomorrow",
+          "label": "明天想試的一件小事",
+          "kind": "short_text",
+          "placeholder": "明天…",
+          "ai_hint": "作者說要做的事，一句話；沒有就留空。"
+        }
+      ]
+    }
+  ]
+}

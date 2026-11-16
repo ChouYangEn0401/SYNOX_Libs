@@ -14,6 +14,10 @@ FORBIDDEN_JS = ("fetch(", "XMLHttpRequest", "sendBeacon", "WebSocket", "setInter
                 "sessionStorage", "localStorage", "serviceWorker", "location.href", "location.assign", "location.replace",
                 "window.open", "127.0.0.")
 APP_KEYS = {"entry", "root", "title", "kit", "reads", "actions", "exports", "remote"}
+# 記帳 0.4.0 的畫面從原本的記帳畫面原樣搬來：每個分頁還是叫 api("/api/…")，由 app/js/api.js（轉接器）
+# 照 app/js/routes.js 的對照表換成 SynoxApp.read／act／download。這裡的 "/api/…" 只是對照表的鍵、不是網址；
+# 自己連線（fetch(、XMLHttpRequest…）照樣擋（packs/money/CONTRACT.md「畫面」）。
+ALLOWED_JS = {"money": ("/api/",)}
 
 
 def app_tools():
@@ -41,7 +45,7 @@ def test_page_rules(name, folder, raw, app):
         for f in files:
             if f.endswith(".js"):
                 text = open(os.path.join(here, f), encoding="utf-8").read()
-                bad = [w for w in FORBIDDEN_JS if w in text]
+                bad = [w for w in FORBIDDEN_JS if w in text and w not in ALLOWED_JS.get(name, ())]
                 assert not bad, f"{name}/{f}: {bad}"
     entry = open(os.path.join(folder, app["entry"]), encoding="utf-8").read()
     scripts = re.findall(r"<script\b[^>]*>", entry)

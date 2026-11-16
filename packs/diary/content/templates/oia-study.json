@@ -1,0 +1,177 @@
+{
+  "id": "oia-study",
+  "name": "讀經筆記（觀察・解釋・應用）",
+  "description": "歸納式查經的三步：先看清楚寫了什麼，再問原本的意思，最後才問跟我有什麼關係。",
+  "group": "與神同行",
+  "order": 9,
+  "default_hidden": true,
+  "when": "預備查經、帶小組前，或想把一段經文真正讀懂的時候。",
+  "minutes": 20,
+  "moods": [
+    "專注",
+    "平靜"
+  ],
+  "tags": [
+    "讀經",
+    "查經",
+    "OIA",
+    "經文"
+  ],
+  "structure": "three-part",
+  "reflection": "devotional",
+  "flow": [
+    "scripture",
+    "reflection",
+    "plan"
+  ],
+  "default_theme": "notebook",
+  "default_layout": "manuscript",
+  "closing_label": "補充",
+  "closing_hint": "還想記下來的。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "o",
+      "title": "觀察：寫了什麼",
+      "color": "#2456b8",
+      "icon": "①",
+      "fields": [
+        {
+          "id": "passage",
+          "label": "經文範圍",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "經文出處照作者寫的抄；沒有就留空，不要自己補經文。"
+        },
+        {
+          "id": "genre",
+          "label": "這是哪一種文體",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "敘事"
+            },
+            {
+              "id": "o2",
+              "label": "詩歌"
+            },
+            {
+              "id": "o3",
+              "label": "智慧書"
+            },
+            {
+              "id": "o4",
+              "label": "律法"
+            },
+            {
+              "id": "o5",
+              "label": "先知書"
+            },
+            {
+              "id": "o6",
+              "label": "福音書"
+            },
+            {
+              "id": "o7",
+              "label": "書信"
+            },
+            {
+              "id": "o8",
+              "label": "啟示文學"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "facts",
+          "label": "看到的事實（誰、何時、何地、做了什麼）",
+          "kind": "list",
+          "min_rows": 3,
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "keys",
+          "label": "重複或關鍵的字詞",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "i",
+      "title": "解釋：原本的意思",
+      "color": "#1f7a4d",
+      "icon": "②",
+      "fields": [
+        {
+          "id": "then",
+          "label": "當時的讀者聽到這段，會明白什麼",
+          "kind": "text",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        },
+        {
+          "id": "unclear",
+          "label": "我還不懂、想再查的地方",
+          "kind": "list",
+          "hint": "留著問人或查工具書；不懂是正常的。",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "main",
+          "label": "這段的主旨，一句話",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "title": "應用：那我呢",
+      "color": "#b5623c",
+      "icon": "③",
+      "fields": [
+        {
+          "id": "speck",
+          "label": "這段裡有沒有",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "要認的罪"
+            },
+            {
+              "id": "o2",
+              "label": "要抓住的應許"
+            },
+            {
+              "id": "o3",
+              "label": "要效法的榜樣"
+            },
+            {
+              "id": "o4",
+              "label": "要遵行的命令"
+            },
+            {
+              "id": "o5",
+              "label": "對神新的認識"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "act",
+          "label": "這週具體要做的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "tell",
+          "label": "這個發現想講給誰聽",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

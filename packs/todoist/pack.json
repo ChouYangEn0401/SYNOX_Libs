@@ -2,7 +2,7 @@
   "name": "todoist",
   "title": "✅ Todoist",
   "summary": "看 Todoist 的待辦（今天、逾期、專案、標籤）、加待辦、打勾完成、改期",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "stage": "alpha",
   "kind": "python",
   "group": "todoist",
@@ -13,7 +13,7 @@
   "python": { "module": "pack" },
   "publisher": "SYNOX_Libs",
   "capabilities": ["network"],
-  "auth": { "type": "token", "fields": ["token"], "where": "Todoist 設定 → 整合 → 開發者 → API token" },
+  "auth": { "type": "token", "fields": [{ "name": "token", "ask": "Todoist API token", "secret": true }], "where": "Todoist 設定 → 整合 → 開發者 → API token" },
   "requires": { "pip": ["requests"], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
   "skill": "SKILL.md",
   "storage": "vault"

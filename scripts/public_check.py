@@ -6,7 +6,9 @@
 找什麼（概念跟 SYNOX 的 scripts/prepublish_check.py 一樣，規則是工具庫自己的）：
   1. 本機絕對路徑（C:\\Users\\<名字>、/Users/<名字>、/home/<名字>；<你>、x、me 這種佔位不算）
   2. 使用者名稱：這台電腦的帳號名、git 的 user.name／user.email（執行時才讀，不寫進 repo），
-     再加 public_check.local.txt（git 忽略，一行一個：真名、暱稱、Telegram 帳號…）；太短或太常見的字（user、admin…）跳過
+     再加 public_check.local.txt（git 忽略，一行一個：真名、暱稱、Telegram 帳號…）；太短或太常見的字（user、admin…）跳過。
+     例外只有一種：名字剛好是 GitHub 網址裡的帳號那一段（github.com/<名字>/、<名字>.github.io、
+     raw.githubusercontent.com/<名字>/）——那是 repo 的公開網址，本來就看得到；同一行別的地方再出現照樣算
   3. email（example.com／.org／.net、.invalid 這類保留網域、me@／noreply@ 這種佔位不算）
   4. token／金鑰：Telegram、OpenAI／Anthropic、Google、Slack、GitHub、AWS、私鑰檔頭、Notion、Discord，
      以及 token／secret／password／api_key = "很長的一串"（值看起來是假的才放行：fake、test、example、123、重複字…）
@@ -136,6 +138,23 @@ def private_words(repo: str) -> List[str]:
     return out
 
 
+def _github_account_spans(word: str) -> "re.Pattern[str]":
+    """GitHub 網址裡「帳號」那一段剛好是 word：github.com/<word>/、raw.githubusercontent.com/<word>/、<word>.github.io。
+    帳號後面一定要是 / 或網址結束（github.com/<word>x/ 不算），前面不能接別的網域字（notgithub.com/ 不算）。"""
+    w = re.escape(word)
+    end = r"(?=/|$|[\s\"'`<>)\]#?])"
+    return re.compile(r"(?<![\w.-])(?:www\.)?github\.com/" + w + end
+                      + r"|(?<![\w.-])raw\.githubusercontent\.com/" + w + end
+                      + r"|(?<![\w.-])" + w + r"\.github\.io(?![\w-])", re.I)
+
+
+def _mentions(line: str, word: str, low_word: str) -> bool:
+    """這一行有沒有提到 word（大小寫不分）；GitHub 網址的帳號那一段不算（見最上面第 2 點）。"""
+    if low_word not in line.lower():
+        return False
+    return low_word in _github_account_spans(word).sub(" ", line).lower()
+
+
 def scan_text(text: str, words: Iterable[str] = ()) -> List[Tuple[int, str]]:
     """一個檔的內容 → [(行號, 種類)]。只回位置與種類，不回比對到的字。"""
     out: List[Tuple[int, str]] = []
@@ -153,8 +172,7 @@ def scan_text(text: str, words: Iterable[str] = ()) -> List[Tuple[int, str]]:
             out.append((no, "本機絕對路徑（含使用者名稱）"))
         if any(not email_allowed(m.group(0)) for m in EMAIL.finditer(line)):
             out.append((no, "email"))
-        low = line.lower()
-        if any(lw in low for _w, lw in lowered):
+        if any(_mentions(line, w, lw) for w, lw in lowered):
             out.append((no, "使用者名稱（這台的帳號／git 名字／public_check.local.txt）"))
         if REAL_TG_ID.search(line):
             out.append((no, "疑似真實 id（Telegram 長度的數字）"))

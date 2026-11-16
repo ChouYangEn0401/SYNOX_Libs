@@ -1,0 +1,147 @@
+{
+  "id": "evening-review",
+  "name": "晚間回顧（三分鐘）",
+  "description": "睡前勾一勾：今天幾分、照顧自己了沒、最好的一刻、想放下的一件事。",
+  "group": "簡單記一下",
+  "order": 42,
+  "when": "每天睡前；不談信仰也能用。",
+  "minutes": 3,
+  "moods": [
+    "疲累",
+    "平靜"
+  ],
+  "tags": [
+    "每天",
+    "勾選為主",
+    "不談信仰也可以"
+  ],
+  "structure": "n-part",
+  "reflection": "reflection",
+  "flow": [
+    "checkin",
+    "events",
+    "reflection",
+    "plan"
+  ],
+  "default_theme": "dawn",
+  "default_layout": "postcard",
+  "closing_label": "寫給自己的話",
+  "closing_hint": "還想留給自己的一段話。",
+  "closing_placeholder": "今天…",
+  "sections": [
+    {
+      "id": "day",
+      "title": "今天",
+      "color": "#2456b8",
+      "icon": "☾",
+      "fields": [
+        {
+          "id": "score",
+          "label": "今天整體幾分（1 很糟 – 5 很好）",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "r1",
+              "label": "1"
+            },
+            {
+              "id": "r2",
+              "label": "2"
+            },
+            {
+              "id": "r3",
+              "label": "3"
+            },
+            {
+              "id": "r4",
+              "label": "4"
+            },
+            {
+              "id": "r5",
+              "label": "5"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "energy",
+          "label": "現在的電量",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "還很好"
+            },
+            {
+              "id": "o2",
+              "label": "普通"
+            },
+            {
+              "id": "o3",
+              "label": "快沒電了"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "care",
+          "label": "今天有做到的",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "好好吃飯"
+            },
+            {
+              "id": "o2",
+              "label": "動一動身體"
+            },
+            {
+              "id": "o3",
+              "label": "跟重要的人說到話"
+            },
+            {
+              "id": "o4",
+              "label": "離開螢幕一段時間"
+            },
+            {
+              "id": "o5",
+              "label": "做完最重要的事"
+            },
+            {
+              "id": "o6",
+              "label": "準時收工"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "best",
+          "label": "今天最好的一刻",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "close",
+      "title": "收起來",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "letgo",
+          "label": "今天想放下、不帶進明天的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "first",
+          "label": "明天起床後第一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

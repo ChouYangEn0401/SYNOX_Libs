@@ -1,0 +1,67 @@
+{
+  "name": "costume-t-magpie",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "啾啾",
+  "summary": "一隻台灣藍鵲：黑頭、黃眼睛、紅嘴巴，有事就飛來跟你啾一聲。SYNOX 衣櫃 · 系列 T：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f1f7fc",
+        "--surface": "#ffffff",
+        "--text": "#111a26",
+        "--muted": "#52627a",
+        "--line": "#d5e3f0",
+        "--accent": "#0b6fb8",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#c7361f",
+        "--soft": "#dcedfb",
+        "--ok": "#1c7a4c",
+        "--warn": "#8f6408",
+        "--bad": "#b3261a",
+        "--radius": "14px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Grandstander','Noto Sans TC',sans-serif",
+        "--m1": "#2b93e0",
+        "--m2": "#151a26",
+        "--mi": "#151a26",
+        "--mb": "#e8452f"
+      },
+      "dark": {
+        "--bg": "#0b1420",
+        "--surface": "#13202f",
+        "--text": "#e8f1fa",
+        "--muted": "#93a7bd",
+        "--line": "#243649",
+        "--accent": "#5fb8f5",
+        "--accent-ink": "#04233b",
+        "--accent2": "#ff8a70",
+        "--soft": "#12344f",
+        "--ok": "#5fd08d",
+        "--warn": "#f2c14e",
+        "--bad": "#ff8a8a",
+        "--radius": "14px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Grandstander','Noto Sans TC',sans-serif",
+        "--m1": "#3aa0ea",
+        "--m2": "#2a3650",
+        "--mi": "#0b1420",
+        "--mb": "#ff5a40"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

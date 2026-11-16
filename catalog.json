@@ -10,6 +10,11 @@
       "summary": "記支出、收入、轉帳，看這個月，設預算與單項上限",
       "packs": ["money"]
     },
+    "diary": {
+      "title": "日記",
+      "summary": "每日日記：隨手記一則，或挑一個題組（靈修、心情、反思、工作）寫一篇，做成一頁 HTML 或一張卡片",
+      "packs": ["diary"]
+    },
     "planner": {
       "title": "規劃：行程與筆記",
       "summary": "行事曆、待辦、子彈筆記",
@@ -17,8 +22,8 @@
     },
     "connect": {
       "title": "接外面的服務",
-      "summary": "Notion、Todoist、Google 日曆、Apple 提醒事項（CalDAV）。要連網、要你自己的帳號或 token",
-      "packs": ["notion", "todoist", "google-calendar", "apple-reminders"]
+      "summary": "Notion、Todoist、Google 日曆、Google 試算表（只加列）、Apple 提醒事項（CalDAV）。要連網、要你自己的帳號或 token",
+      "packs": ["notion", "todoist", "google-calendar", "google-sheets", "apple-reminders"]
     }
   }
 }

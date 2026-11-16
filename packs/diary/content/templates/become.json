@@ -1,0 +1,133 @@
+{
+  "id": "become",
+  "name": "我想成為什麼樣的人",
+  "description": "先寫下想長成的樣子，再看今天哪一刻像、哪一刻不像。每天一點點。",
+  "group": "成為什麼樣的人",
+  "order": 20,
+  "when": "想看看今天的自己，離想成為的那個人近了還是遠了。",
+  "minutes": 10,
+  "moods": ["平靜", "想成長", "想調整"],
+  "tags": ["品格", "成長", "反思"],
+  "structure": "three-part",
+  "reflection": "reflection",
+  "flow": ["identity", "events", "reflection", "plan"],
+  "default_theme": "linen",
+  "default_layout": "letter",
+  "closing_label": "寫給未來的自己",
+  "closing_hint": "寫給一年後讀到這一頁的你。",
+  "closing_placeholder": "等你讀到這一段的時候，希望你已經…",
+  "sections": [
+    {
+      "id": "picture",
+      "title": "那個人的樣子",
+      "color": "#b5623c",
+      "icon": "✦",
+      "fields": [
+        {
+          "id": "admire",
+          "label": "我心裡有沒有一個這樣的人？",
+          "kind": "short_text",
+          "placeholder": "他叫什麼名字",
+          "hint": "身邊的人、書裡的人、聖經裡的人都可以",
+          "ai_hint": "作者心裡那個榜樣（人或描述）；沒提到就留空。"
+        },
+        {
+          "id": "quality",
+          "label": "我最想長成的樣子（挑兩三個就好）",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "honest", "label": "誠實" },
+            { "id": "gentle", "label": "溫柔" },
+            { "id": "brave", "label": "勇敢" },
+            { "id": "patient", "label": "有耐心" },
+            { "id": "faithful", "label": "守信" },
+            { "id": "generous", "label": "慷慨" },
+            { "id": "humble", "label": "謙卑" },
+            { "id": "focused", "label": "專注" },
+            { "id": "discipline", "label": "自律" },
+            { "id": "humour", "label": "幽默" },
+            { "id": "reliable", "label": "可靠" },
+            { "id": "listener", "label": "會聽人說話" },
+            { "id": "unhurried", "label": "不慌不忙" },
+            { "id": "admit", "label": "敢認錯" },
+            { "id": "curious", "label": "對人好奇" },
+            { "id": "hopeful", "label": "有盼望" }
+          ],
+          "ai_hint": "從選項挑作者說想長成的樣子（兩三個）。"
+        },
+        {
+          "id": "sentence",
+          "label": "一句話說清楚",
+          "kind": "fill",
+          "pattern": "我想成為一個 {} 的人，因為 {} 。",
+          "hint": "這一句可以每天照抄，不用每天想新的",
+          "ai_hint": "兩格：想成為怎樣的人、為什麼。"
+        }
+      ]
+    },
+    {
+      "id": "today",
+      "title": "今天呢",
+      "color": "#2456b8",
+      "icon": "☀",
+      "fields": [
+        {
+          "id": "like",
+          "label": "今天哪一刻，我像那個人？",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "hint": "再小都算，一句話、一個忍住",
+          "ai_hint": "今天像那個人的一刻。"
+        },
+        {
+          "id": "unlike",
+          "label": "今天哪一刻，我離他最遠？",
+          "kind": "text",
+          "color": "#2456b8",
+          "hint": "看清楚就好，不用罵自己",
+          "ai_hint": "今天離那個人最遠的一刻；照實寫，不加評語。"
+        },
+        {
+          "id": "cost",
+          "label": "當時如果要做對的選擇，我要付出什麼？",
+          "kind": "short_text",
+          "hint": "多半是面子、時間，或一句不好說的話",
+          "ai_hint": "當時要做對的選擇得付出什麼。"
+        }
+      ]
+    },
+    {
+      "id": "step",
+      "title": "往前一步",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "practice",
+          "label": "明天可以練習的一件具體小事",
+          "kind": "short_text",
+          "color": "#1f7a4d",
+          "hint": "具體到明天一看就知道要做什麼",
+          "ai_hint": "明天可以練習的一件具體小事。"
+        },
+        {
+          "id": "who",
+          "label": "誰會因為我變成這樣，日子好過一點？",
+          "kind": "short_text",
+          "ai_hint": "誰會因此好過一點。"
+        },
+        {
+          "id": "howlong",
+          "label": "這件事我打算練多久？",
+          "kind": "choice",
+          "options": [
+            { "id": "tomorrow", "label": "明天" },
+            { "id": "week", "label": "這一週" },
+            { "id": "month", "label": "這個月" }
+          ],
+          "ai_hint": "作者說了打算練多久才選。"
+        }
+      ]
+    }
+  ]
+}

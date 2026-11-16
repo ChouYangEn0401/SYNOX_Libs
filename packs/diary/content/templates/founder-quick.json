@@ -1,0 +1,166 @@
+{
+  "id": "founder-quick",
+  "name": "創業打卡（兩分鐘）",
+  "description": "全部用勾的：最重要的事做了沒、有沒有跟客戶說到話、時間花在哪、體力還剩多少。",
+  "group": "工作與創業",
+  "order": 33,
+  "when": "很忙的日子，不想讓創業日記斷掉。",
+  "minutes": 2,
+  "moods": [
+    "忙碌",
+    "疲累"
+  ],
+  "tags": [
+    "工作",
+    "創業",
+    "勾選為主"
+  ],
+  "structure": "n-part",
+  "reflection": "reflection",
+  "flow": [
+    "checkin",
+    "work",
+    "plan"
+  ],
+  "default_theme": "notebook",
+  "default_layout": "ledger",
+  "closing_label": "今天想記下的一句話",
+  "closing_hint": "還想留下的。",
+  "closing_placeholder": "今天…",
+  "sections": [
+    {
+      "id": "today",
+      "title": "今天",
+      "color": "#2f7d86",
+      "icon": "✓",
+      "fields": [
+        {
+          "id": "main",
+          "label": "今天最重要的那件事",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "做完了"
+            },
+            {
+              "id": "o2",
+              "label": "做了一半"
+            },
+            {
+              "id": "o3",
+              "label": "沒碰"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "users",
+          "label": "今天有跟使用者／客戶說到話嗎",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "yes",
+              "label": "有"
+            },
+            {
+              "id": "no",
+              "label": "沒有"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "time",
+          "label": "時間主要花在",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "產品"
+            },
+            {
+              "id": "o2",
+              "label": "客戶"
+            },
+            {
+              "id": "o3",
+              "label": "銷售"
+            },
+            {
+              "id": "o4",
+              "label": "募資"
+            },
+            {
+              "id": "o5",
+              "label": "招募"
+            },
+            {
+              "id": "o6",
+              "label": "行政雜事"
+            },
+            {
+              "id": "o7",
+              "label": "救火"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "energy",
+          "label": "體力與心力",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "還很好"
+            },
+            {
+              "id": "o2",
+              "label": "普通"
+            },
+            {
+              "id": "o3",
+              "label": "快沒電了"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "stuck",
+          "label": "現在有卡住的事嗎",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "沒有"
+            },
+            {
+              "id": "o2",
+              "label": "有，我知道找誰"
+            },
+            {
+              "id": "o3",
+              "label": "有，還不知道怎麼辦"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        }
+      ]
+    },
+    {
+      "id": "tomorrow",
+      "title": "明天",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "one",
+          "label": "明天最重要的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

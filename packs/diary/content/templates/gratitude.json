@@ -1,0 +1,78 @@
+{
+  "id": "gratitude",
+  "name": "感恩清單",
+  "description": "三件小事，加上一個人。寫久了會發現，好的東西一直都在。",
+  "group": "簡單記一下",
+  "order": 41,
+  "when": "想把注意力放回好的事情上：三件小事，加上一個人。",
+  "minutes": 3,
+  "moods": ["平靜", "低落時也適合"],
+  "tags": ["感恩", "簡短", "不談信仰也可以"],
+  "structure": "n-part",
+  "reflection": "reflection",
+  "flow": ["gratitude", "people", "reflection"],
+  "default_theme": "dawn",
+  "default_layout": "letter",
+  "closing_label": "還想說的話",
+  "closing_hint": "有就寫，沒有就算了。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "list",
+      "title": "今天的感恩",
+      "color": "#1f7a4d",
+      "icon": "♡",
+      "fields": [
+        {
+          "id": "three",
+          "label": "三件",
+          "kind": "list",
+          "placeholder": "謝謝…",
+          "min_rows": 3,
+          "color": "#1f7a4d",
+          "hint": "越小越好，越具體越好",
+          "ai_hint": "三件感謝的小事，一件一行，越具體越好；不到三件就照實寫。"
+        },
+        {
+          "id": "person",
+          "label": "今天有誰讓我的一天好過一點？",
+          "kind": "short_text",
+          "ai_hint": "今天讓作者好過一點的人。"
+        },
+        {
+          "id": "told",
+          "label": "有跟他說嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "說了" },
+            { "id": "not_yet", "label": "還沒" },
+            { "id": "cannot", "label": "不方便說" }
+          ],
+          "ai_hint": "作者說了有沒有跟對方說才選。"
+        }
+      ]
+    },
+    {
+      "id": "deeper",
+      "title": "再想一層",
+      "color": "#b5623c",
+      "icon": "✦",
+      "fields": [
+        {
+          "id": "taken",
+          "label": "有什麼是我早就習慣、其實不是理所當然的？",
+          "kind": "short_text",
+          "color": "#b5623c",
+          "ai_hint": "作者意識到不是理所當然的事；沒提到就留空。"
+        },
+        {
+          "id": "hard_good",
+          "label": "今天有沒有一件難的事，其實對我有好處？",
+          "kind": "text",
+          "hint": "想不到就跳過，不用勉強",
+          "ai_hint": "一件難、但其實對作者有好處的事；想不到就留空。"
+        }
+      ]
+    }
+  ]
+}

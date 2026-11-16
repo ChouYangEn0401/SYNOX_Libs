@@ -54,6 +54,35 @@ def test_private_words_are_found_but_not_printed(tmp_path):
     assert kinds("nothing here", ["RealPerson42"]) == []
 
 
+NAME = "Rea" + "lPerson42"
+
+
+@pytest.mark.parametrize("line", [
+    "下載：https://github.com/" + NAME + "/SYNOX_Libs/releases/tag/v0.2.0",
+    "git clone https://github.com/" + NAME + "/SYNOX_Libs.git",
+    "<a href=\"https://github.com/" + NAME + "\">GitHub</a>",
+    "https://" + NAME.lower() + ".github.io/page",
+    "https://raw.githubusercontent.com/" + NAME + "/SYNOX_Libs/main/README.md",
+    "兩個網址 https://github.com/" + NAME + "/a 與 https://www.github.com/" + NAME + "/b",
+])
+def test_private_name_in_the_github_account_part_of_a_url_passes(line):
+    """repo 的公開網址：名字在 GitHub 帳號那一段，放行。"""
+    assert kinds(line, [NAME]) == []
+
+
+@pytest.mark.parametrize("line", [
+    "written by " + NAME,                                                  # 一般的字
+    "https://github.com/" + NAME + "/SYNOX_Libs  作者：" + NAME,            # 網址放行，但同一行別處又出現
+    "https://github.com/someone/" + NAME,                                 # repo 名字那一段，不是帳號
+    "https://github.com/" + NAME + "x/repo",                              # 帳號不是剛好這個名字
+    "https://notgithub.com/" + NAME + "/repo",                            # 不是 GitHub
+    "https://example.com/" + NAME + "/x",
+    "mail " + NAME + "@users.noreply.github.com",                          # 網域對，但不是網址的帳號位置
+])
+def test_private_name_elsewhere_is_still_found(line):
+    assert any("使用者名稱" in k for k in kinds(line, [NAME])), kinds(line, [NAME])
+
+
 def test_sensitive_files():
     assert pc.sensitive_name("data/money.json")
     assert pc.sensitive_name("packs/x/config.json")

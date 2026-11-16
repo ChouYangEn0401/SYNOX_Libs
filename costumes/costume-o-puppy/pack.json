@@ -1,0 +1,67 @@
+{
+  "name": "costume-o-puppy",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "來福",
+  "summary": "會等你說「好」的小黃狗：坐下、等一下、好！。SYNOX 衣櫃 · 系列 O：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f8f2e9",
+        "--surface": "#fffdf9",
+        "--text": "#2e1e12",
+        "--muted": "#766556",
+        "--line": "#eadfd0",
+        "--accent": "#85461a",
+        "--accent-ink": "#fff6e8",
+        "--accent2": "#d63c22",
+        "--soft": "#f7e3c8",
+        "--ok": "#2c7a4b",
+        "--warn": "#8a6100",
+        "--bad": "#b3123f",
+        "--radius": "20px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Caprasimo','Noto Sans TC',sans-serif",
+        "--m1": "#e3a55c",
+        "--m2": "#b6713a",
+        "--mi": "#3a2212",
+        "--mb": "#ff8296"
+      },
+      "dark": {
+        "--bg": "#19130e",
+        "--surface": "#241b14",
+        "--text": "#f7ecdd",
+        "--muted": "#b5a390",
+        "--line": "#3a2c20",
+        "--accent": "#f3c58e",
+        "--accent-ink": "#3a2108",
+        "--accent2": "#ff8066",
+        "--soft": "#3d2a17",
+        "--ok": "#6fd6a0",
+        "--warn": "#f6c453",
+        "--bad": "#ff7096",
+        "--radius": "20px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Caprasimo','Noto Sans TC',sans-serif",
+        "--m1": "#e8ad68",
+        "--m2": "#bb783f",
+        "--mi": "#3a2212",
+        "--mb": "#ff8fa0"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

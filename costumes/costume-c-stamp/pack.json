@@ -1,0 +1,67 @@
+{
+  "name": "costume-c-stamp",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "小印",
+  "summary": "一顆會笑的印章：你點頭，我才蓋章。SYNOX 衣櫃 · 系列 C：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f6f4f0",
+        "--surface": "#ffffff",
+        "--text": "#1c1917",
+        "--muted": "#6a635b",
+        "--line": "#e2ddd5",
+        "--accent": "#c8321f",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#1c1917",
+        "--soft": "#fbe6e1",
+        "--ok": "#1f7a4a",
+        "--warn": "#8f6408",
+        "--bad": "#8e1637",
+        "--radius": "5px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Noto Serif TC','Noto Sans TC',sans-serif",
+        "--m1": "#c8321f",
+        "--m2": "#2a2522",
+        "--mi": "#fff7f0",
+        "--mb": "#ff9a8a"
+      },
+      "dark": {
+        "--bg": "#141211",
+        "--surface": "#1e1b19",
+        "--text": "#efe9e1",
+        "--muted": "#a59c91",
+        "--line": "#35302b",
+        "--accent": "#ff6a52",
+        "--accent-ink": "#2b0803",
+        "--accent2": "#efe9e1",
+        "--soft": "#3a1a14",
+        "--ok": "#5ecb8f",
+        "--warn": "#f0b94a",
+        "--bad": "#ff8fa8",
+        "--radius": "5px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Noto Serif TC','Noto Sans TC',sans-serif",
+        "--m1": "#e2452f",
+        "--m2": "#b3a99c",
+        "--mi": "#fff7f0",
+        "--mb": "#ff9a8a"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

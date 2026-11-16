@@ -1,0 +1,7 @@
+{
+  "name": "信箋 Letter",
+  "description": "單欄、寬邊界、襯線標題。像一封寫好的信，最耐看，長短文都合用。",
+  "tags": ["單欄", "耐看", "可印"],
+  "default_theme": "letterpress",
+  "card_paper": "ruled"
+}

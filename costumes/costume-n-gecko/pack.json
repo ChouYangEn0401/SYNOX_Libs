@@ -1,0 +1,67 @@
+{
+  "name": "costume-n-gecko",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "小守",
+  "summary": "住在你家牆上的小守宮：夜裡安靜巡邏，專吃 bug。SYNOX 衣櫃 · 系列 N：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f3f4ee",
+        "--surface": "#ffffff",
+        "--text": "#171c10",
+        "--muted": "#5c6452",
+        "--line": "#dfe2d5",
+        "--accent": "#3d5c00",
+        "--accent-ink": "#e9ff8f",
+        "--accent2": "#171c10",
+        "--soft": "#e7f5b4",
+        "--ok": "#0f7a5a",
+        "--warn": "#8a6100",
+        "--bad": "#c2362f",
+        "--radius": "12px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Syne','Noto Sans TC',sans-serif",
+        "--m1": "#1d2414",
+        "--m2": "#4a5c2c",
+        "--mi": "#cdf345",
+        "--mb": "#ff8a70"
+      },
+      "dark": {
+        "--bg": "#0d100a",
+        "--surface": "#161b10",
+        "--text": "#eef3df",
+        "--muted": "#9aa58a",
+        "--line": "#2a3320",
+        "--accent": "#c9f24a",
+        "--accent-ink": "#1a2400",
+        "--accent2": "#eef3df",
+        "--soft": "#26330f",
+        "--ok": "#5fdc9a",
+        "--warn": "#ffc857",
+        "--bad": "#ff7a6b",
+        "--radius": "12px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Syne','Noto Sans TC',sans-serif",
+        "--m1": "#c9f24a",
+        "--m2": "#9cc22c",
+        "--mi": "#141a08",
+        "--mb": "#ff8a70"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

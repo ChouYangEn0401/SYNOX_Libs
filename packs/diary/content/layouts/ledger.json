@@ -1,0 +1,7 @@
+{
+  "name": "對帳 Ledger",
+  "description": "左邊一欄把勾選的答案整理成清單，右邊放文字。勾選題多的範本用這個最清楚。",
+  "tags": ["雙欄", "勾選題多", "一目了然"],
+  "default_theme": "linen",
+  "card_paper": "grid"
+}

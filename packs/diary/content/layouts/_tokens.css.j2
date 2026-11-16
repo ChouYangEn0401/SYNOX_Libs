@@ -1,0 +1,91 @@
+/* Shared foundation for the shipped page designs.
+   Colour tokens, reset, the flip-open gift cover, and the dark-mode lift for
+   the writer's pen colours. A design that wants none of this can simply not
+   include the file — layouts are standalone Jinja templates. */
+:root{
+  --backdrop:{{ t.backdrop }};
+  --paper:{{ t.paper }};
+  --paper-edge:{{ t.paper_edge }};
+  --ink:{{ t.ink }};
+  --ink-muted:{{ t.ink_muted }};
+  --hairline:{{ t.hairline }};
+  --accent:{{ t.accent }};
+  --rule:{{ t.rule }};
+  --display:{{ t.display_font }};
+  --body:{{ t.body_font }};
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --backdrop:{{ t.dark_backdrop }};--paper:{{ t.dark_paper }};
+    --paper-edge:{{ t.dark_hairline }};--ink:{{ t.dark_ink }};
+    --ink-muted:{{ t.dark_ink_muted }};--hairline:{{ t.dark_hairline }};
+    --rule:{{ t.dark_hairline }};
+  }
+}
+:root[data-theme="light"]{
+  --backdrop:{{ t.backdrop }};--paper:{{ t.paper }};--paper-edge:{{ t.paper_edge }};
+  --ink:{{ t.ink }};--ink-muted:{{ t.ink_muted }};--hairline:{{ t.hairline }};
+  --rule:{{ t.rule }};
+}
+:root[data-theme="dark"]{
+  --backdrop:{{ t.dark_backdrop }};--paper:{{ t.dark_paper }};
+  --paper-edge:{{ t.dark_hairline }};--ink:{{ t.dark_ink }};
+  --ink-muted:{{ t.dark_ink_muted }};--hairline:{{ t.dark_hairline }};
+  --rule:{{ t.dark_hairline }};
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;background:var(--backdrop);color:var(--ink);
+  font-family:var(--body);line-height:1.85;overflow-x:hidden;
+}
+img{max-width:100%;}
+
+/* The writer's pen colours are picked against pale paper; on a dark
+   background they read as muddy. Lift them without losing which pen was
+   which. `!important` is needed to beat the inline `color`. */
+@media (prefers-color-scheme: dark){
+  [style*="--ink"]{color:color-mix(in srgb, var(--ink) 55%, #ffffff)!important;}
+}
+:root[data-theme="dark"] [style*="--ink"]{
+  color:color-mix(in srgb, var(--ink) 55%, #ffffff)!important;
+}
+:root[data-theme="light"] [style*="--ink"]{color:var(--ink)!important;}
+
+/* ---- flip-open gift cover ---- */
+.stage{perspective:2200px;}
+.cover{
+  position:relative;background:var(--accent);color:#fff;border-radius:14px;
+  padding:clamp(2rem,6vw,3.5rem);text-align:center;cursor:pointer;
+  transform-origin:left center;transform-style:preserve-3d;
+  transition:transform .95s cubic-bezier(.2,.8,.2,1),opacity .5s .35s;
+  box-shadow:0 22px 50px -22px rgba(0,0,0,.45);margin-bottom:1.5rem;
+}
+.cover::after{
+  content:"";position:absolute;inset:12px;border:1px solid rgba(255,255,255,.35);
+  border-radius:9px;pointer-events:none;
+}
+.cover h1{font-family:var(--display);font-size:clamp(1.4rem,4vw,2rem);
+          margin:.2em 0 .35em;font-weight:600;}
+.cover p{margin:0 auto;max-width:26rem;opacity:.92;font-size:.95rem;}
+.cover .seal{display:inline-flex;align-items:center;justify-content:center;
+             width:52px;height:52px;border-radius:50%;
+             border:1px solid rgba(255,255,255,.55);font-size:1.2rem;margin-bottom:.6rem;}
+.cover .hint{margin-top:1.6rem;font-size:.78rem;letter-spacing:.22em;opacity:.8;}
+.stage.open .cover{transform:rotateY(-155deg);opacity:0;pointer-events:none;
+                   height:0;padding:0;margin:0;overflow:hidden;}
+.stage .journal{transition:opacity .5s .45s, transform .6s .45s;}
+{% if gift_cover %}
+.stage:not(.open) .journal{opacity:0;transform:translateY(14px);
+                           pointer-events:none;height:0;overflow:hidden;}
+{% endif %}
+
+@media print{
+  body{background:#fff;}
+  .cover{display:none!important;}
+  .stage .journal{opacity:1!important;transform:none!important;height:auto!important;}
+}
+@media (prefers-reduced-motion: reduce){
+  .cover,.stage .journal{transition:none!important;}
+}

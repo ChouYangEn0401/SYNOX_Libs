@@ -1,0 +1,153 @@
+{
+  "id": "intercession",
+  "name": "代禱名單 · 記下來，也記蒙應允的",
+  "description": "今天為誰禱告、求什麼、哪些已經蒙應允、哪些還在等。",
+  "group": "與神同行",
+  "order": 12,
+  "when": "每天或每週固定為人代禱；想記得答應過別人的代禱，也想回頭數算神的回應。",
+  "minutes": 5,
+  "moods": [
+    "平靜",
+    "掛心別人"
+  ],
+  "tags": [
+    "代禱",
+    "禱告",
+    "勾選為主",
+    "每週"
+  ],
+  "structure": "three-part",
+  "reflection": "prayer",
+  "flow": [
+    "prayer",
+    "people",
+    "gratitude",
+    "trust"
+  ],
+  "default_theme": "letterpress",
+  "default_layout": "ledger",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "who",
+      "title": "今天為誰",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "circle",
+          "label": "今天為這些人禱告",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "家人"
+            },
+            {
+              "id": "o2",
+              "label": "小組"
+            },
+            {
+              "id": "o3",
+              "label": "教會與牧者"
+            },
+            {
+              "id": "o4",
+              "label": "還沒信主的朋友"
+            },
+            {
+              "id": "o5",
+              "label": "生病的人"
+            },
+            {
+              "id": "o6",
+              "label": "同事／同學"
+            },
+            {
+              "id": "o7",
+              "label": "國家與社會"
+            },
+            {
+              "id": "o8",
+              "label": "宣教士"
+            },
+            {
+              "id": "o9",
+              "label": "我自己"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "items",
+          "label": "代禱事項",
+          "kind": "list",
+          "placeholder": "為（稱呼）求主…",
+          "min_rows": 3,
+          "color": "#c8322c",
+          "hint": "別人的事只寫稱呼或代號。",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        }
+      ]
+    },
+    {
+      "id": "answered",
+      "title": "神的回應",
+      "color": "#1f7a4d",
+      "icon": "🌱",
+      "fields": [
+        {
+          "id": "yes",
+          "label": "已經蒙應允的",
+          "kind": "list",
+          "placeholder": "感謝神…",
+          "color": "#1f7a4d",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "waiting",
+          "label": "還在等候的",
+          "kind": "list",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "heart",
+          "label": "等候裡我的心",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "平安"
+            },
+            {
+              "id": "o2",
+              "label": "有點急"
+            },
+            {
+              "id": "o3",
+              "label": "快放棄了"
+            }
+          ],
+          "hint": "照實勾。「快放棄了」也可以帶到主面前。",
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "title": "讓他知道",
+      "color": "#2456b8",
+      "icon": "✉",
+      "fields": [
+        {
+          "id": "msg",
+          "label": "今天要跟誰說一聲「我有為你禱告」",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

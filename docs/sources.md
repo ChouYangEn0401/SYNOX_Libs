@@ -18,6 +18,10 @@
 | `packs/apple-reminders/` | SYNOX `connectors/apple-reminders-caldav/` | 同上 | 同上；資料夾名改成跟 pack 名字一樣（`apple-reminders`，pack 名字沒變，保管箱的資料照用） |
 | `tests/test_notion.py`、`test_todoist.py`、`test_gcal.py`、`test_apple_reminders.py` | SYNOX `tests/` | 同上 | 測試本體沒改；資料夾位置改成 `packs/<name>`、檔內 `make_bot` 指向 `conftest.host_bot`；假帳號 `me@icloud.com` → `me@example.com` |
 
+| `packs/diary/`（2026-11-15） | 維護者自己的每日日記程式（不公開）`backend/`、`content/`、`skills/diary-templates/SKILL.md`、`synox-pack/` | commit `6ee9881` | `content/templates/` 的 21 個題組、`content/layouts/`、`suggest.json` 逐字複製；`presets.json` 只改說明文字與 devotional 的標籤（加 `default_hidden`）。Python 後端（richtext、themes、document、textlayout、card_svg、taxonomy、storage、backup、preferences、cli 的寫入規則、image_prompt 沒有 key 的那一套）照搬進 `pack.py`，pydantic／Jinja2／SQLite 換成標準函式庫與保管箱。沒搬：網頁編輯器、FastAPI、AI 設計版型／AI 取名、桌機與手機的打包 |
+| `packs/diary/content/templates/` 的 20 個新題組 | 2026-11-15 另一個 agent 設計的範本稿（不在 repo 裡） | — | 只取題組本身；4 個原本放在新分類「教會生活」的改放「與神同行」；12 個加 `"default_hidden": true` |
+| `scripts/dump_diary_parity.py`、`tests/fixtures/diary_parity.json` | 新寫的；fixture 是用原專案的程式跑假日記錄下來的 | 原專案 `6ee9881` | — |
+
 之後全部 9 個工具的 `pack.json` 都加了 `"stage": "alpha"`（README「穩定度」）。
 
 | 這裡 | 參考了什麼 | 怎麼用 |

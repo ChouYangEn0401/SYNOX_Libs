@@ -1,0 +1,7 @@
+{
+  "name": "明信片 Postcard",
+  "description": "郵戳日期加雙欄密排，短短的一天也很有份量。適合截圖傳給人。",
+  "tags": ["緊湊", "適合截圖", "雙欄"],
+  "default_theme": "dawn",
+  "card_paper": "plain"
+}

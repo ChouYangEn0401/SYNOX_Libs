@@ -1,0 +1,198 @@
+{
+  "id": "repent-respond",
+  "name": "悔改與回應",
+  "description": "把一件得罪神或得罪人的事說清楚：認罪、領受赦免、決定怎麼補救。",
+  "group": "與神同行",
+  "order": 14,
+  "default_hidden": true,
+  "when": "心裡有一件過不去的事，知道該面對了。",
+  "minutes": 10,
+  "moods": [
+    "內疚",
+    "羞愧",
+    "想自省"
+  ],
+  "tags": [
+    "認罪",
+    "悔改",
+    "禱告"
+  ],
+  "structure": "three-part",
+  "reflection": "prayer",
+  "flow": [
+    "events",
+    "confession",
+    "prayer",
+    "people",
+    "plan",
+    "trust"
+  ],
+  "default_theme": "linen",
+  "default_layout": "letter",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "what",
+      "title": "發生了什麼",
+      "color": "#5a6472",
+      "icon": "▤",
+      "fields": [
+        {
+          "id": "fact",
+          "label": "照實說",
+          "kind": "text",
+          "hint": "只寫事實，先不解釋、不辯護。",
+          "ai_hint": "只寫作者自己承認的事；不要替作者判斷對錯。"
+        },
+        {
+          "id": "kind",
+          "label": "這件事屬於",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "說出口的話"
+            },
+            {
+              "id": "o2",
+              "label": "心裡的念頭"
+            },
+            {
+              "id": "o3",
+              "label": "態度"
+            },
+            {
+              "id": "o4",
+              "label": "做了不該做的"
+            },
+            {
+              "id": "o5",
+              "label": "該做卻沒做"
+            },
+            {
+              "id": "o6",
+              "label": "關係"
+            },
+            {
+              "id": "o7",
+              "label": "金錢"
+            },
+            {
+              "id": "o8",
+              "label": "時間"
+            },
+            {
+              "id": "o9",
+              "label": "眼目"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "want",
+          "label": "在這件事底下，我真正想要的是什麼",
+          "kind": "short_text",
+          "hint": "例：被肯定、掌控感、逃避。看見它，才知道要把什麼交出來。",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "confess",
+      "title": "認罪",
+      "color": "#c8322c",
+      "icon": "✝",
+      "fields": [
+        {
+          "id": "line",
+          "label": "向主承認",
+          "kind": "fill",
+          "pattern": "主啊，我得罪了祢，我 {}。求祢赦免我。",
+          "ai_hint": "一格：作者自己承認的事。"
+        },
+        {
+          "id": "forgiven",
+          "label": "我領受主的赦免了嗎？",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "領受了"
+            },
+            {
+              "id": "o2",
+              "label": "半信半疑"
+            },
+            {
+              "id": "o3",
+              "label": "還放不下"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "verse",
+          "label": "扶住我的一句經文",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "經文出處照作者寫的抄；沒有就留空，不要自己補經文。"
+        }
+      ]
+    },
+    {
+      "id": "respond",
+      "title": "回應",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "hurt",
+          "label": "有沒有誰因此受傷",
+          "kind": "short_text",
+          "hint": "只寫稱呼或代號。",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "repair",
+          "label": "需要做的補救",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "道歉"
+            },
+            {
+              "id": "o2",
+              "label": "歸還或賠償"
+            },
+            {
+              "id": "o3",
+              "label": "把實話說出來"
+            },
+            {
+              "id": "o4",
+              "label": "刪掉、遠離那個試探"
+            },
+            {
+              "id": "o5",
+              "label": "找一個人陪我守望"
+            },
+            {
+              "id": "o6",
+              "label": "現在不需要做什麼"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "step",
+          "label": "今天就做的一步",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "id": "soap-full",
+  "name": "SOAP 靈修（完整版）",
+  "description": "抄經、逐項觀察、寫出應用與禱告，並回頭看昨天的應用有沒有做。",
+  "group": "與神同行",
+  "order": 8,
+  "default_hidden": true,
+  "when": "時間充裕、想把一段經文讀仔細的日子（週末或晨更）。",
+  "minutes": 15,
+  "moods": [
+    "平靜",
+    "想自省"
+  ],
+  "tags": [
+    "靈修",
+    "經文",
+    "SOAP"
+  ],
+  "structure": "n-part",
+  "reflection": "prayer",
+  "flow": [
+    "review",
+    "scripture",
+    "reflection",
+    "plan",
+    "prayer"
+  ],
+  "default_theme": "notebook",
+  "default_layout": "manuscript",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "back",
+      "title": "先回頭看",
+      "color": "#5a6472",
+      "icon": "⟲",
+      "fields": [
+        {
+          "id": "yesterday",
+          "label": "昨天寫的應用，做了嗎？",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "做了"
+            },
+            {
+              "id": "o2",
+              "label": "做了一部分"
+            },
+            {
+              "id": "o3",
+              "label": "沒做"
+            },
+            {
+              "id": "o4",
+              "label": "昨天沒寫"
+            }
+          ],
+          "hint": "看清楚就好，不用罵自己。",
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        }
+      ]
+    },
+    {
+      "id": "s",
+      "title": "S 經文",
+      "color": "#1f7a4d",
+      "icon": "📖",
+      "fields": [
+        {
+          "id": "passage",
+          "label": "今天的經文",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "經文出處照作者寫的抄；沒有就留空，不要自己補經文。"
+        },
+        {
+          "id": "copy",
+          "label": "把最重要的一兩節抄下來",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "ai_hint": "照作者抄的經文寫；沒有就留空，不要自己補經文。"
+        }
+      ]
+    },
+    {
+      "id": "o",
+      "title": "O 觀察",
+      "color": "#2456b8",
+      "icon": "🔍",
+      "fields": [
+        {
+          "id": "notice",
+          "label": "我注意到的（人、事、重複的字、轉折）",
+          "kind": "list",
+          "min_rows": 3,
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "god",
+          "label": "關於神，這段說了什麼",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "people",
+          "label": "關於人，這段說了什麼",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "title": "A 應用",
+      "color": "#b5623c",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "tome",
+          "label": "這段話今天對我說什麼",
+          "kind": "text",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        },
+        {
+          "id": "act",
+          "label": "具體要做的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "by",
+          "label": "什麼時候做",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "今天"
+            },
+            {
+              "id": "o2",
+              "label": "這一週"
+            },
+            {
+              "id": "o3",
+              "label": "要長期操練"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        }
+      ]
+    },
+    {
+      "id": "p",
+      "title": "P 禱告",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "pray",
+          "label": "把上面的回應化成禱告",
+          "kind": "text",
+          "placeholder": "主啊…",
+          "color": "#c8322c",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        }
+      ]
+    }
+  ]
+}
