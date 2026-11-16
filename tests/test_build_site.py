@@ -56,14 +56,18 @@ def test_every_tool_has_a_card_linking_its_online_page():
 
 
 def test_hand_written_tool_pages_are_left_alone():
-    """產生器只產生入口頁，和還沒有手寫說明頁的工具的簡單頁；有手寫頁的工具（登記了線上網址的）它不碰。"""
-    urls = build_site.online_urls()
+    """產生器只產生入口頁，和還沒有手寫說明頁的工具的簡單頁；手寫頁它不碰。
+    產生的頁發佈後也會登記網址（made_by＝產生），所以「有沒有網址」不等於「是不是手寫」，要看 docs/artifacts.json 的 made_by。"""
+    made_by = {p["local"]: p.get("made_by", "") for p in build_site.registry()}
     generated = set()
     for name in PACK_NAMES:
         local = f"docs/site/{name}.html"
-        if local in urls:
-            assert build_site.is_hand_written(os.path.join(ROOT, local)), name
+        hand_written = build_site.is_hand_written(os.path.join(ROOT, local))
+        if local in made_by:
+            assert hand_written == (made_by[local] == "手寫"), name
         else:
+            assert not hand_written, name   # 沒登記的一定是產生的（還沒發佈）
+        if not hand_written:
             generated.add(local)
     assert set(build_site.outputs()) == {build_site.INDEX_PAGE} | generated
 
