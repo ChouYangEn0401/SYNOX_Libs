@@ -12,6 +12,7 @@
     {"title": "Notion", "url": "https://claude.ai/artifact/B36np3VigMinvyFuyz74dJ", "local": "docs/site/notion.html", "tool": "notion", "made_by": "手寫"},
     {"title": "Todoist", "url": "https://claude.ai/artifact/D3zgGcZ9h1LRrDLu2QD5Mw", "local": "docs/site/todoist.html", "tool": "todoist", "made_by": "手寫"},
     {"title": "Google 日曆", "url": "https://claude.ai/artifact/NyhRhPrRL1n9NMMbMEv3mx", "local": "docs/site/google-calendar.html", "tool": "google-calendar", "made_by": "手寫"},
-    {"title": "Apple 提醒事項", "url": "https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp", "local": "docs/site/apple-reminders.html", "tool": "apple-reminders", "made_by": "手寫"}
+    {"title": "Apple 提醒事項", "url": "https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp", "local": "docs/site/apple-reminders.html", "tool": "apple-reminders", "made_by": "手寫"},
+    {"title": "Google 試算表（只加列）", "url": "https://claude.ai/artifact/H74Xn3PdwzCsseG9dEkq1r", "local": "docs/site/google-sheets.html", "tool": "google-sheets", "made_by": "scripts/build_site.py（產生）"}
   ]
 }
