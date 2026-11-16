@@ -1,0 +1,169 @@
+{
+  "id": "goal-check",
+  "name": "目標檢視",
+  "description": "一個目標：這週做了什麼、被什麼擋住、它還是不是我要的、下一步最小的一步。",
+  "group": "成為什麼樣的人",
+  "order": 26,
+  "default_hidden": true,
+  "when": "每週或每兩週一次，看一個正在進行的目標。",
+  "minutes": 10,
+  "moods": [
+    "想自省",
+    "拖延中"
+  ],
+  "tags": [
+    "每週",
+    "目標",
+    "不談信仰也可以"
+  ],
+  "structure": "three-part",
+  "reflection": "reflection",
+  "flow": [
+    "review",
+    "reflection",
+    "plan"
+  ],
+  "default_theme": "letterpress",
+  "default_layout": "ledger",
+  "closing_label": "寫給自己的話",
+  "closing_hint": "還想留給自己的一段話。",
+  "closing_placeholder": "今天…",
+  "sections": [
+    {
+      "id": "goal",
+      "title": "這個目標",
+      "color": "#b5623c",
+      "icon": "◎",
+      "fields": [
+        {
+          "id": "name",
+          "label": "我在看的目標",
+          "kind": "short_text",
+          "placeholder": "例：三個月內養成晨間運動",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "progress",
+          "label": "目前進度（1 剛開始 – 5 快完成）",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "r1",
+              "label": "1"
+            },
+            {
+              "id": "r2",
+              "label": "2"
+            },
+            {
+              "id": "r3",
+              "label": "3"
+            },
+            {
+              "id": "r4",
+              "label": "4"
+            },
+            {
+              "id": "r5",
+              "label": "5"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "done",
+          "label": "這段時間實際做了的",
+          "kind": "list",
+          "min_rows": 2,
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        }
+      ]
+    },
+    {
+      "id": "block",
+      "title": "卡在哪",
+      "color": "#5a6472",
+      "icon": "⚠",
+      "fields": [
+        {
+          "id": "why",
+          "label": "沒進展的話，是因為",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "目標太大"
+            },
+            {
+              "id": "o2",
+              "label": "沒排進行事曆"
+            },
+            {
+              "id": "o3",
+              "label": "被別的事插隊"
+            },
+            {
+              "id": "o4",
+              "label": "累了"
+            },
+            {
+              "id": "o5",
+              "label": "怕做不好"
+            },
+            {
+              "id": "o6",
+              "label": "其實不想做"
+            },
+            {
+              "id": "o7",
+              "label": "有進展，沒卡住"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "still",
+          "label": "這個目標現在還是我要的嗎",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "是"
+            },
+            {
+              "id": "o2",
+              "label": "要調整"
+            },
+            {
+              "id": "o3",
+              "label": "其實不是了"
+            }
+          ],
+          "hint": "放掉一個不再適合的目標，不算失敗。",
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "title": "下一步",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "step",
+          "label": "下一步最小的一步",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "when",
+          "label": "什麼時候做",
+          "kind": "short_text",
+          "placeholder": "例：週三早上",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

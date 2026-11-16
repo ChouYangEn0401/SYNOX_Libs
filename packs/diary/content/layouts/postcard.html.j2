@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ doc.date_display }}　{{ doc.title or doc.template_name }}</title>
+<style>
+{% include "_tokens.css.j2" %}
+
+body{padding:clamp(.8rem,3vw,2rem) 1rem clamp(2rem,5vw,3.5rem);font-size:15.5px;
+     line-height:1.75;}
+.stage{max-width:54rem;margin:0 auto;}
+.card{
+  background:var(--paper);border-radius:18px;overflow:hidden;
+  border:1px solid var(--paper-edge);
+  box-shadow:0 26px 54px -32px rgba(0,0,0,.5);
+}
+
+/* ---- stamp-like header ---- */
+.head{
+  display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap;
+  padding:clamp(1.1rem,3.5vw,1.8rem) clamp(1.2rem,4vw,2.2rem);
+  background:color-mix(in srgb,var(--accent) 10%,var(--paper));
+  border-bottom:1px dashed var(--paper-edge);
+}
+.stamp{
+  flex:none;width:5.2rem;height:5.6rem;border-radius:4px;background:var(--accent);
+  color:#fff;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:.1rem;text-align:center;
+  box-shadow:0 0 0 4px var(--paper),0 0 0 5px color-mix(in srgb,var(--accent) 40%,transparent);
+}
+.stamp .d{font-family:var(--display);font-size:2rem;line-height:1;font-weight:700;
+          font-variant-numeric:tabular-nums;}
+.stamp .m{font-size:.66rem;letter-spacing:.18em;opacity:.9;}
+.stamp .w{font-size:.66rem;letter-spacing:.1em;opacity:.85;margin-top:.15rem;}
+.head .who{min-width:0;flex:1;}
+.head .yr{font-size:.68rem;letter-spacing:.3em;color:var(--ink-muted);}
+.head h1{font-family:var(--display);font-size:clamp(1.15rem,3.5vw,1.6rem);
+         margin:.2rem 0 .3rem;font-weight:600;overflow-wrap:anywhere;}
+.head .tags{display:flex;flex-wrap:wrap;gap:.3rem;}
+.head .tags span{font-size:.72rem;padding:.05rem .5rem;border-radius:999px;
+                 background:color-mix(in srgb,var(--ink) 8%,transparent);
+                 color:var(--ink-muted);}
+
+/* ---- dense masonry body ---- */
+.body{padding:clamp(1.1rem,4vw,2.2rem);column-gap:1.6rem;}
+@media (min-width:760px){.body{columns:2;}}
+section{break-inside:avoid;margin:0 0 1.4rem;}
+.sec-title{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;
+           color:var(--sec);font-weight:700;margin:0 0 .5rem;
+           display:flex;align-items:center;gap:.4rem;}
+.sec-title::after{content:"";flex:1;height:1px;
+                  background:color-mix(in srgb,var(--sec) 35%,transparent);}
+.field{margin-bottom:.75rem;break-inside:avoid;}
+.f-label{font-size:.71rem;color:var(--ink-muted);display:block;}
+.f-body{overflow-wrap:anywhere;}
+.f-body p{margin:0 0 .3em;}
+.chips{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.15rem;}
+.chip{font-size:.76rem;padding:.02rem .5rem;border-radius:4px;
+      background:color-mix(in srgb,var(--ink) 6%,transparent);color:var(--ink-muted);}
+.chip.on{background:var(--sec);color:#fff;font-weight:600;}
+ul.lines{list-style:none;margin:.1rem 0 0;padding:0;}
+ul.lines li{position:relative;padding-left:.95rem;margin-bottom:.25rem;
+            overflow-wrap:anywhere;}
+ul.lines li::before{content:"";position:absolute;left:0;top:.72em;width:.32rem;
+                    height:.32rem;border-radius:50%;background:var(--sec);}
+
+.closing{
+  break-inside:avoid;margin-top:.5rem;padding:1rem 1.1rem;border-radius:10px;
+  background:color-mix(in srgb,var(--accent) 7%,transparent);overflow-wrap:anywhere;
+}
+.closing .f-label{color:var(--accent);letter-spacing:.14em;}
+.closing p{margin:.15rem 0 .35em;font-family:var(--display);}
+
+footer{
+  padding:.8rem clamp(1.2rem,4vw,2.2rem);border-top:1px dashed var(--paper-edge);
+  display:flex;justify-content:space-between;font-size:.68rem;
+  color:var(--ink-muted);letter-spacing:.14em;flex-wrap:wrap;gap:.4rem;
+}
+@media print{.card{box-shadow:none;}.body{columns:2;}}
+</style>
+</head>
+<body>
+<div class="stage{% if not gift_cover %} open{% endif %}" id="stage">
+{% include "_cover.html.j2" %}
+  <article class="journal"><div class="card">
+    <div class="head">
+      <div class="stamp">
+        <span class="d">{{ "%02d"|format(doc.entry_date.day) }}</span>
+        <span class="m">{{ "%02d"|format(doc.entry_date.month) }} 月</span>
+        <span class="w">週{{ doc.weekday }}</span>
+      </div>
+      <div class="who">
+        <div class="yr">{{ doc.entry_date.year }}　{{ doc.template_name }}</div>
+        <h1>{{ doc.title or "今天" }}</h1>
+        <div class="tags">
+          <span>{{ doc.word_count }} 字</span>
+          {% for s in doc.sections %}<span>{{ s.title }}</span>{% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="body">
+      {% for s in doc.sections %}
+      <section style="--sec:{{ s.color }}">
+        <h2 class="sec-title">{{ s.title }}</h2>
+        {% for f in s.fields %}
+        <div class="field">
+          <span class="f-label">{{ f.label }}</span>
+          {% if f.chips %}
+            <div class="chips">
+              {%- for c in f.chips %}<span class="chip{% if c.selected %} on{% endif %}">{{ c.label }}</span>{% endfor -%}
+            </div>
+          {% elif f.numbered %}
+            <ul class="lines">{% for line in f.lines %}<li>{{ line | runs }}</li>{% endfor %}</ul>
+          {% else %}
+            <div class="f-body">{% for line in f.lines %}<p>{{ line | runs }}</p>{% endfor %}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </section>
+      {% endfor %}
+
+      {% if doc.has_closing %}
+      <div class="closing">
+        <span class="f-label">{{ doc.closing_label }}</span>
+        {% for line in doc.closing_lines %}<p>{{ line | runs }}</p>{% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <footer><span>{{ doc.template_name }}</span><span>{{ doc.date_display }}</span></footer>
+  </div></article>
+</div>
+{% include "_cover.js.j2" %}
+</body>
+</html>

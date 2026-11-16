@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ doc.date_display }}　{{ doc.title or doc.template_name }}</title>
+<style>
+{% include "_tokens.css.j2" %}
+
+body{padding:clamp(1rem,4vw,3.5rem) 1rem clamp(3rem,8vw,6rem);font-size:17px;
+     background:radial-gradient(120% 80% at 50% -10%,
+       color-mix(in srgb,var(--accent) 8%,transparent),transparent 60%),var(--backdrop);}
+.stage{max-width:46rem;margin:0 auto;}
+.paper{
+  background:var(--paper);border:1px solid var(--paper-edge);border-radius:14px;
+  padding:clamp(1.5rem,5vw,3.25rem);position:relative;
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 24px 48px -30px rgba(0,0,0,.35);
+}
+.paper::before{
+  content:"";position:absolute;inset:0;border-radius:14px;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,
+    color-mix(in srgb,var(--ink) 2.5%,transparent) 3px 4px);
+  opacity:.35;mix-blend-mode:multiply;
+}
+@media (prefers-color-scheme: dark){.paper::before{mix-blend-mode:screen;opacity:.12;}}
+
+.kicker{font-size:.7rem;letter-spacing:.28em;color:var(--ink-muted);
+        display:flex;gap:.75rem;align-items:center;text-transform:uppercase;}
+.kicker::after{content:"";flex:1;height:1px;background:var(--hairline);}
+.date{font-family:var(--display);font-size:clamp(2rem,7vw,3rem);line-height:1.1;
+      margin:.55rem 0 0;font-variant-numeric:tabular-nums;font-weight:600;letter-spacing:.02em;}
+.title{font-family:var(--display);font-size:clamp(1.05rem,3.2vw,1.35rem);
+       margin:.5rem 0 0;font-weight:500;}
+.meta{display:flex;flex-wrap:wrap;gap:.5rem 1.1rem;align-items:center;
+      margin-top:1rem;font-size:.78rem;color:var(--ink-muted);}
+.dots{display:inline-flex;gap:5px;}
+.dots i{width:9px;height:9px;border-radius:50%;display:block;}
+.rule{height:1px;background:var(--hairline);margin-top:1.75rem;}
+
+section{margin-top:2.5rem;}
+.sec-head{display:flex;align-items:center;gap:.7rem;margin-bottom:1.1rem;}
+.sec-icon{width:1.9rem;height:1.9rem;border-radius:8px;display:grid;
+          place-items:center;font-size:.9rem;color:#fff;flex:none;}
+.sec-title{font-family:var(--display);font-size:1.08rem;font-weight:600;margin:0;}
+.sec-body{border-left:2px solid var(--sec);padding-left:clamp(.9rem,3vw,1.35rem);}
+
+.field{margin-bottom:1.35rem;}
+.field:last-child{margin-bottom:0;}
+.f-label{font-size:.76rem;letter-spacing:.12em;color:var(--ink-muted);
+         margin:0 0 .4rem;display:block;}
+.f-body{max-width:34rem;overflow-wrap:anywhere;}
+.f-body p{margin:0 0 .45em;}
+.f-body p:last-child{margin-bottom:0;}
+
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;}
+.chip{font-size:.85rem;padding:.16rem .8rem;border-radius:999px;
+      border:1px solid var(--hairline);color:var(--ink-muted);white-space:nowrap;}
+.chip.on{background:var(--sec);border-color:var(--sec);color:#fff;font-weight:500;}
+
+ol.lines{list-style:none;counter-reset:l;margin:0;padding:0;max-width:34rem;}
+ol.lines li{counter-increment:l;position:relative;padding-left:2rem;
+            margin-bottom:.5rem;overflow-wrap:anywhere;}
+ol.lines li::before{
+  content:counter(l);position:absolute;left:0;top:.15em;font-size:.72rem;
+  line-height:1.35rem;width:1.35rem;height:1.35rem;text-align:center;border-radius:50%;
+  background:color-mix(in srgb,var(--sec) 14%,transparent);
+  color:var(--sec);font-variant-numeric:tabular-nums;font-weight:600;}
+ol.lines li:last-child{margin-bottom:0;}
+
+.closing{margin-top:2.75rem;padding:1.4rem 0 .2rem 1.4rem;
+         border-left:3px solid var(--accent);overflow-wrap:anywhere;}
+.closing .f-label{color:var(--accent);}
+.closing p{font-family:var(--display);font-style:italic;font-size:1.02rem;
+           margin:0 0 .5em;max-width:34rem;}
+
+footer{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--hairline);
+       font-size:.72rem;color:var(--ink-muted);display:flex;
+       justify-content:space-between;flex-wrap:wrap;gap:.5rem;}
+@media print{.paper{box-shadow:none;border:none;}footer{display:none;}}
+</style>
+</head>
+<body>
+<div class="stage{% if not gift_cover %} open{% endif %}" id="stage">
+{% include "_cover.html.j2" %}
+  <article class="journal"><div class="paper">
+    <header>
+      <div class="kicker">{{ doc.template_name }}</div>
+      <h1 class="date">{{ doc.date_display }}</h1>
+      {% if doc.title %}<p class="title">{{ doc.title }}</p>{% endif %}
+      <div class="meta">
+        <span>週{{ doc.weekday }}</span><span>{{ doc.word_count }} 字</span>
+        {% if doc.palette %}<span class="dots">
+          {%- for c in doc.palette[:6] %}<i style="background:{{ c }}"></i>{% endfor -%}
+        </span>{% endif %}
+      </div>
+      <div class="rule"></div>
+    </header>
+
+    {% for s in doc.sections %}
+    <section style="--sec:{{ s.color }}">
+      <div class="sec-head">
+        {% if s.icon %}<span class="sec-icon" style="background:{{ s.color }}">{{ s.icon }}</span>{% endif %}
+        <h2 class="sec-title">{{ s.title }}</h2>
+      </div>
+      <div class="sec-body">
+        {% for f in s.fields %}
+        <div class="field">
+          <span class="f-label">{{ f.label }}</span>
+          {% if f.chips %}
+            <div class="chips">
+              {%- for c in f.chips %}<span class="chip{% if c.selected %} on{% endif %}">{{ c.label }}</span>{% endfor -%}
+            </div>
+          {% elif f.numbered %}
+            <ol class="lines">{% for line in f.lines %}<li>{{ line | runs }}</li>{% endfor %}</ol>
+          {% else %}
+            <div class="f-body">{% for line in f.lines %}<p>{{ line | runs }}</p>{% endfor %}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+
+    {% if doc.has_closing %}
+    <div class="closing">
+      <span class="f-label">{{ doc.closing_label }}</span>
+      {% for line in doc.closing_lines %}<p>{{ line | runs }}</p>{% endfor %}
+    </div>
+    {% endif %}
+
+    <footer><span>{{ doc.template_name }}</span><span>{{ doc.date_display }}</span></footer>
+  </div></article>
+</div>
+{% include "_cover.js.j2" %}
+</body>
+</html>

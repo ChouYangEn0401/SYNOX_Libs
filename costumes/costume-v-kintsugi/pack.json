@@ -1,0 +1,67 @@
+{
+  "name": "costume-v-kintsugi",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "維維",
+  "summary": "金縫拼成的變形管家：手平常收成兩片平板貼在身側；你點頭，面板才翻開變成手。SYNOX 衣櫃 · 系列 V：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f5f0e4",
+        "--surface": "#fffdf8",
+        "--text": "#141c38",
+        "--muted": "#5b607a",
+        "--line": "#e2d9c4",
+        "--accent": "#1b2a5c",
+        "--accent-ink": "#f6e4b4",
+        "--accent2": "#86621a",
+        "--soft": "#ebe2cb",
+        "--ok": "#1c7448",
+        "--warn": "#b0480f",
+        "--bad": "#b3261e",
+        "--radius": "10px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Cinzel','Noto Sans TC',sans-serif",
+        "--m1": "#1d2850",
+        "--m2": "#c9a45c",
+        "--mi": "#f3dca2",
+        "--mb": "#e58f86"
+      },
+      "dark": {
+        "--bg": "#0a0d1a",
+        "--surface": "#141931",
+        "--text": "#f3eddd",
+        "--muted": "#a4a8c0",
+        "--line": "#2a3152",
+        "--accent": "#e2c583",
+        "--accent-ink": "#17132b",
+        "--accent2": "#a9b8f0",
+        "--soft": "#252b4d",
+        "--ok": "#5fd08d",
+        "--warn": "#ffa45c",
+        "--bad": "#ff8078",
+        "--radius": "10px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Cinzel','Noto Sans TC',sans-serif",
+        "--m1": "#2b3a76",
+        "--m2": "#e2c583",
+        "--mi": "#f8e6b6",
+        "--mb": "#f09a90"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

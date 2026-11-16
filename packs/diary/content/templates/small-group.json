@@ -1,0 +1,169 @@
+{
+  "id": "small-group",
+  "name": "小組分享",
+  "description": "小組前先想好近況，小組中記下經文發現與彼此的代禱，小組後留一個行動。",
+  "group": "與神同行",
+  "order": 18,
+  "when": "每週小組聚會前後。",
+  "minutes": 10,
+  "moods": [
+    "平靜",
+    "想被了解"
+  ],
+  "tags": [
+    "小組",
+    "教會",
+    "代禱",
+    "每週"
+  ],
+  "structure": "n-part",
+  "reflection": "prayer",
+  "flow": [
+    "checkin",
+    "events",
+    "scripture",
+    "reflection",
+    "prayer",
+    "people",
+    "plan"
+  ],
+  "default_theme": "notebook",
+  "default_layout": "ledger",
+  "closing_label": "補充",
+  "closing_hint": "還想記下來的。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "me",
+      "title": "我這一週",
+      "color": "#2456b8",
+      "icon": "☀",
+      "fields": [
+        {
+          "id": "state",
+          "label": "這週整體",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "不錯"
+            },
+            {
+              "id": "o2",
+              "label": "普通"
+            },
+            {
+              "id": "o3",
+              "label": "很辛苦"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "good",
+          "label": "一件開心的事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "hard",
+          "label": "一件難的事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "open",
+          "label": "今天我願意分享到多深",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "都可以說"
+            },
+            {
+              "id": "o2",
+              "label": "說一部分"
+            },
+            {
+              "id": "o3",
+              "label": "今天想多聽"
+            }
+          ],
+          "hint": "沒有標準答案，想多聽也很好。",
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        }
+      ]
+    },
+    {
+      "id": "word",
+      "title": "經文與討論",
+      "color": "#1f7a4d",
+      "icon": "📖",
+      "fields": [
+        {
+          "id": "passage",
+          "label": "今天的經文",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "經文出處照作者寫的抄；沒有就留空，不要自己補經文。"
+        },
+        {
+          "id": "mine",
+          "label": "我的發現",
+          "kind": "text",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        },
+        {
+          "id": "theirs",
+          "label": "別人說的一句話，讓我想到",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "pray",
+      "title": "彼此代禱",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "my",
+          "label": "我請大家代禱的",
+          "kind": "list",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "group",
+          "label": "組員的代禱事項",
+          "kind": "list",
+          "placeholder": "（稱呼）：…",
+          "min_rows": 3,
+          "color": "#c8322c",
+          "hint": "只寫稱呼或代號；小組裡聽到的不外傳。",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "title": "這一週",
+      "color": "#b5623c",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "act",
+          "label": "這週要做的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "care",
+          "label": "這週要主動關心誰",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "id": "peaks-valleys",
+  "name": "高峰與低谷 · 得意時謙卑，難處中敬畏",
+  "description": "今天最開心和最難受的各一件事。在高處學著不把功勞都算在自己頭上，在低處學著把不能決定的交出去。",
+  "group": "成為什麼樣的人",
+  "order": 21,
+  "when": "一天裡有特別開心和特別難受的事：在高處學謙卑、在低處學敬畏。",
+  "minutes": 20,
+  "moods": ["起伏很大", "得意", "失落"],
+  "tags": ["品格", "謙卑", "信靠", "信仰", "深度反思"],
+  "structure": "n-part",
+  "reflection": "devotional",
+  "flow": ["events", "feelings", "reflection", "trust", "plan"],
+  "default_theme": "dawn",
+  "default_layout": "ledger",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "high1",
+      "title": "高峰 ①",
+      "color": "#b5623c",
+      "icon": "▲",
+      "fields": [
+        {
+          "id": "h1_what",
+          "label": "今天最值得開心的一件事",
+          "kind": "text",
+          "placeholder": "今天…",
+          "ai_hint": "今天最開心的一件事。"
+        },
+        {
+          "id": "h1_react",
+          "label": "我的第一個反應是",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "thankful", "label": "感謝" },
+            { "id": "relief", "label": "鬆一口氣" },
+            { "id": "tell", "label": "想讓人知道" },
+            { "id": "deserved", "label": "覺得本來就該這樣" },
+            { "id": "disbelief", "label": "不敢相信" },
+            { "id": "fragile", "label": "怕它撐不久" }
+          ],
+          "hint": "先誠實看一眼自己的第一個念頭",
+          "ai_hint": "從選項挑作者的第一個反應。"
+        },
+        {
+          "id": "h1_grace",
+          "label": "這件事裡，有多少不是我自己掙來的？",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "hint": "別人的幫忙、時機、身體健康、神的保守——一樣一樣數",
+          "ai_hint": "這件事裡不是作者自己掙來的部分（別人、時機、身體、神的保守）。"
+        },
+        {
+          "id": "h1_pride",
+          "label": "如果三個月後我因為這件事變得驕傲，會是從哪裡開始？",
+          "kind": "short_text",
+          "hint": "先看見，走到那裡的時候才認得出來",
+          "ai_hint": "作者察覺到可能變驕傲的起點；作者沒說就留空。"
+        },
+        {
+          "id": "h1_give",
+          "label": "這件事讓我可以怎麼幫到別人？",
+          "kind": "short_text",
+          "color": "#1f7a4d",
+          "hint": "得著的人接下來能給出什麼",
+          "ai_hint": "這件事能怎麼幫到別人。"
+        }
+      ]
+    },
+    {
+      "id": "low1",
+      "title": "低谷 ①",
+      "color": "#2456b8",
+      "icon": "▼",
+      "fields": [
+        {
+          "id": "l1_what",
+          "label": "今天最讓我難受的一件事",
+          "kind": "text",
+          "placeholder": "今天…",
+          "ai_hint": "今天最難受的一件事。"
+        },
+        {
+          "id": "l1_react",
+          "label": "我的第一個反應是",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "flee", "label": "想逃" },
+            { "id": "angry", "label": "生氣" },
+            { "id": "blame_self", "label": "自責" },
+            { "id": "talk", "label": "想找人講" },
+            { "id": "mask", "label": "裝沒事" },
+            { "id": "blame", "label": "怪別人" },
+            { "id": "pray", "label": "先禱告" },
+            { "id": "freeze", "label": "整個人當機" }
+          ],
+          "ai_hint": "從選項挑作者的第一個反應。"
+        },
+        {
+          "id": "l1_edge",
+          "label": "這件事裡，哪些是我能決定的？哪些不是？",
+          "kind": "text",
+          "hint": "認出自己的界線，是敬畏的開始",
+          "ai_hint": "作者能決定的、不能決定的各是什麼。"
+        },
+        {
+          "id": "l1_trust",
+          "label": "在這件事上，信靠神具體要做什麼？",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "hint": "不是假裝沒事，是把不能決定的那一半交出去",
+          "ai_hint": "作者說信靠神具體要做什麼；作者沒說就留空，不要替作者寫屬靈答案。"
+        },
+        {
+          "id": "l1_spare",
+          "label": "我可以怎麼讓身邊的人不必再踩一次同樣的坑？",
+          "kind": "short_text",
+          "hint": "痛過的人，是最好的護欄",
+          "ai_hint": "怎麼讓身邊的人不必踩同樣的坑。"
+        }
+      ]
+    },
+    {
+      "id": "high2",
+      "title": "高峰 ②",
+      "color": "#b5623c",
+      "icon": "▲",
+      "fields": [
+        {
+          "id": "h2_what",
+          "label": "還有一件開心的事",
+          "kind": "text",
+          "hint": "今天沒有第二件也沒關係，空著就好，輸出時不會出現",
+          "ai_hint": "第二件開心的事；日記裡只有一件就整段留空。"
+        },
+        {
+          "id": "h2_react",
+          "label": "我的第一個反應是",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "thankful", "label": "感謝" },
+            { "id": "relief", "label": "鬆一口氣" },
+            { "id": "tell", "label": "想讓人知道" },
+            { "id": "deserved", "label": "覺得本來就該這樣" },
+            { "id": "disbelief", "label": "不敢相信" },
+            { "id": "fragile", "label": "怕它撐不久" }
+          ],
+          "ai_hint": "從選項挑作者的第一個反應。"
+        },
+        {
+          "id": "h2_grace",
+          "label": "這件事裡，有多少不是我自己掙來的？",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "ai_hint": "這件事裡不是作者自己掙來的部分。"
+        },
+        {
+          "id": "h2_pride",
+          "label": "這件事最可能讓我在哪裡看不起別人？",
+          "kind": "short_text",
+          "ai_hint": "作者察覺到可能看不起別人的地方；作者沒說就留空。"
+        },
+        {
+          "id": "h2_give",
+          "label": "這件事讓我可以怎麼幫到別人？",
+          "kind": "short_text",
+          "color": "#1f7a4d",
+          "ai_hint": "這件事能怎麼幫到別人。"
+        }
+      ]
+    },
+    {
+      "id": "low2",
+      "title": "低谷 ②",
+      "color": "#2456b8",
+      "icon": "▼",
+      "fields": [
+        {
+          "id": "l2_what",
+          "label": "還有一件難受的事",
+          "kind": "text",
+          "hint": "一樣，沒有就空著",
+          "ai_hint": "第二件難受的事；日記裡只有一件就整段留空。"
+        },
+        {
+          "id": "l2_react",
+          "label": "我的第一個反應是",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "flee", "label": "想逃" },
+            { "id": "angry", "label": "生氣" },
+            { "id": "blame_self", "label": "自責" },
+            { "id": "talk", "label": "想找人講" },
+            { "id": "mask", "label": "裝沒事" },
+            { "id": "blame", "label": "怪別人" },
+            { "id": "pray", "label": "先禱告" },
+            { "id": "freeze", "label": "整個人當機" }
+          ],
+          "ai_hint": "從選項挑作者的第一個反應。"
+        },
+        {
+          "id": "l2_edge",
+          "label": "這件事裡，哪些是我能決定的？哪些不是？",
+          "kind": "text",
+          "ai_hint": "作者能決定的、不能決定的各是什麼。"
+        },
+        {
+          "id": "l2_trust",
+          "label": "在這件事上，信靠神具體要做什麼？",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "ai_hint": "作者說信靠神具體要做什麼；作者沒說就留空。"
+        },
+        {
+          "id": "l2_spare",
+          "label": "我可以怎麼讓身邊的人不必再踩一次同樣的坑？",
+          "kind": "short_text",
+          "ai_hint": "怎麼讓身邊的人不必踩同樣的坑。"
+        }
+      ]
+    },
+    {
+      "id": "both",
+      "title": "合起來看",
+      "color": "#22252a",
+      "icon": "✦",
+      "fields": [
+        {
+          "id": "same_lesson",
+          "label": "今天的高和低放在一起，它們在教我同一件什麼事？",
+          "kind": "text",
+          "hint": "高處和低處常常在講同一句話",
+          "ai_hint": "高和低放在一起在教作者的同一件事；作者沒說就留空。"
+        },
+        {
+          "id": "shape",
+          "label": "今天這一天，讓我更像還是更不像我想成為的那個人？",
+          "kind": "scale",
+          "options": [
+            { "id": "closer", "label": "更像" },
+            { "id": "same", "label": "差不多" },
+            { "id": "further", "label": "更不像" }
+          ],
+          "ai_hint": "只在作者自己說了才選；沒提到就不選，不要替作者打分數。"
+        },
+        {
+          "id": "one_line",
+          "label": "明天想記得的一句話",
+          "kind": "short_text",
+          "color": "#b5623c",
+          "ai_hint": "明天想記得的一句話。"
+        }
+      ]
+    }
+  ]
+}

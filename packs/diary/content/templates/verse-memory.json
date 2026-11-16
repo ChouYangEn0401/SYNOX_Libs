@@ -1,0 +1,104 @@
+{
+  "id": "verse-memory",
+  "name": "背經卡",
+  "description": "一節經文：默寫、勾熟不熟、今天用在哪裡。",
+  "group": "與神同行",
+  "order": 16,
+  "default_hidden": true,
+  "when": "正在背經的那幾週，每天三分鐘。",
+  "minutes": 3,
+  "moods": [
+    "平靜"
+  ],
+  "tags": [
+    "背經",
+    "經文",
+    "勾選為主"
+  ],
+  "structure": "one-part",
+  "reflection": "devotional",
+  "flow": [
+    "scripture",
+    "review",
+    "reflection"
+  ],
+  "default_theme": "letterpress",
+  "default_layout": "postcard",
+  "closing_label": "補充",
+  "closing_hint": "還想記下來的。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "card",
+      "title": "這一節",
+      "color": "#1f7a4d",
+      "icon": "📖",
+      "fields": [
+        {
+          "id": "ref",
+          "label": "經文出處",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "經文出處照作者寫的抄；沒有就留空，不要自己補經文。"
+        },
+        {
+          "id": "write",
+          "label": "不看，默寫一次",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "ai_hint": "照作者默寫的抄，錯字也不要替作者改；沒有就留空，不要自己補經文。"
+        },
+        {
+          "id": "level",
+          "label": "現在的熟悉度",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "背得出來"
+            },
+            {
+              "id": "o2",
+              "label": "看一眼才行"
+            },
+            {
+              "id": "o3",
+              "label": "還不熟"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "review",
+          "label": "今天也複習了",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "昨天那節"
+            },
+            {
+              "id": "o2",
+              "label": "上週的"
+            },
+            {
+              "id": "o3",
+              "label": "上個月的"
+            },
+            {
+              "id": "o4",
+              "label": "今天沒複習"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "use",
+          "label": "這節話今天用在哪裡",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

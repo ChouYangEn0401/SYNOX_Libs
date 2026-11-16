@@ -1,0 +1,162 @@
+{
+  "id": "customer-note",
+  "name": "客戶訪談筆記",
+  "description": "跟一位使用者或客戶談完馬上記：他現在怎麼解決、原話、最痛的點、我有沒有誘導他。",
+  "group": "工作與創業",
+  "order": 35,
+  "default_hidden": true,
+  "when": "每一次訪談、銷售電話或客訴之後。",
+  "minutes": 8,
+  "moods": [
+    "專注"
+  ],
+  "tags": [
+    "工作",
+    "創業",
+    "客戶"
+  ],
+  "structure": "three-part",
+  "reflection": "reflection",
+  "flow": [
+    "work",
+    "people",
+    "quote",
+    "reflection",
+    "plan"
+  ],
+  "default_theme": "notebook",
+  "default_layout": "ledger",
+  "closing_label": "補充",
+  "closing_hint": "還想記下來的。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "who",
+      "title": "這個人",
+      "color": "#5a6472",
+      "icon": "▤",
+      "fields": [
+        {
+          "id": "alias",
+          "label": "對象",
+          "kind": "short_text",
+          "placeholder": "例：客戶 A（代號）",
+          "hint": "只寫代號，不寫真名與聯絡方式。",
+          "ai_hint": "只寫代號或角色；不要寫出真實姓名與聯絡方式。"
+        },
+        {
+          "id": "type",
+          "label": "他是",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "現有客戶"
+            },
+            {
+              "id": "o2",
+              "label": "潛在客戶"
+            },
+            {
+              "id": "o3",
+              "label": "流失的客戶"
+            },
+            {
+              "id": "o4",
+              "label": "不是目標客群"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        }
+      ]
+    },
+    {
+      "id": "heard",
+      "title": "聽到的",
+      "color": "#2f7d86",
+      "icon": "✎",
+      "fields": [
+        {
+          "id": "now",
+          "label": "他現在怎麼解決這個問題",
+          "kind": "text",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        },
+        {
+          "id": "quotes",
+          "label": "他的原話",
+          "kind": "list",
+          "min_rows": 2,
+          "hint": "照他說的寫，不要翻成我想聽的。",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "pain",
+          "label": "他最痛的一點",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "pay",
+          "label": "他願意為此付錢或花時間嗎",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "明顯願意"
+            },
+            {
+              "id": "o2",
+              "label": "說不準"
+            },
+            {
+              "id": "o3",
+              "label": "不願意"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "surprise",
+          "label": "讓我意外的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "me",
+      "title": "我自己",
+      "color": "#6b4c9a",
+      "icon": "◍",
+      "fields": [
+        {
+          "id": "lead",
+          "label": "我有沒有誘導他說出我想聽的",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "沒有"
+            },
+            {
+              "id": "o2",
+              "label": "有一點"
+            },
+            {
+              "id": "o3",
+              "label": "有"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "follow",
+          "label": "答應他的後續",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

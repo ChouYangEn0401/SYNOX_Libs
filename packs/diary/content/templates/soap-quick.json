@@ -1,0 +1,167 @@
+{
+  "id": "soap-quick",
+  "name": "SOAP 靈修（簡短版）",
+  "description": "經文、觀察、應用、禱告四步，觀察和應用用勾的，五分鐘寫完。",
+  "group": "與神同行",
+  "order": 7,
+  "when": "每天早上的固定靈修；讀完一段經文想留下一點東西，但時間不多。",
+  "minutes": 5,
+  "moods": [
+    "平靜",
+    "忙碌"
+  ],
+  "tags": [
+    "靈修",
+    "經文",
+    "SOAP",
+    "勾選為主"
+  ],
+  "structure": "n-part",
+  "reflection": "prayer",
+  "flow": [
+    "scripture",
+    "reflection",
+    "plan",
+    "prayer"
+  ],
+  "default_theme": "letterpress",
+  "default_layout": "letter",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "s",
+      "title": "S 經文",
+      "color": "#1f7a4d",
+      "icon": "📖",
+      "fields": [
+        {
+          "id": "passage",
+          "label": "今天的經文",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "經文出處照作者寫的抄；沒有就留空，不要自己補經文。"
+        },
+        {
+          "id": "line",
+          "label": "最觸動我的一句",
+          "kind": "short_text",
+          "ai_hint": "照作者抄的那一句寫；沒有就留空，不要自己補經文。"
+        }
+      ]
+    },
+    {
+      "id": "o",
+      "title": "O 觀察",
+      "color": "#2456b8",
+      "icon": "🔍",
+      "fields": [
+        {
+          "id": "about",
+          "label": "這段經文主要在講",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "神是怎樣的神"
+            },
+            {
+              "id": "o2",
+              "label": "一個應許"
+            },
+            {
+              "id": "o3",
+              "label": "一個命令"
+            },
+            {
+              "id": "o4",
+              "label": "一個警告"
+            },
+            {
+              "id": "o5",
+              "label": "一個榜樣"
+            },
+            {
+              "id": "o6",
+              "label": "一個禱告"
+            },
+            {
+              "id": "o7",
+              "label": "安慰與盼望"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "one",
+          "label": "用一句話說這段在講什麼",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "title": "A 應用",
+      "color": "#b5623c",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "respond",
+          "label": "我要回應的是",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "要順服的事"
+            },
+            {
+              "id": "o2",
+              "label": "要停下來的事"
+            },
+            {
+              "id": "o3",
+              "label": "要相信的應許"
+            },
+            {
+              "id": "o4",
+              "label": "要感謝的事"
+            },
+            {
+              "id": "o5",
+              "label": "要去和好的人"
+            },
+            {
+              "id": "o6",
+              "label": "要分享給人"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "act",
+          "label": "今天具體做的一件事",
+          "kind": "short_text",
+          "hint": "越小越好，今天做得到的。",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "p",
+      "title": "P 禱告",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "pray",
+          "label": "一句禱告",
+          "kind": "fill",
+          "pattern": "主啊，謝謝祢 {}，求祢幫助我 {}。",
+          "ai_hint": "兩格：謝謝主什麼、求主幫助什麼。"
+        }
+      ]
+    }
+  ]
+}

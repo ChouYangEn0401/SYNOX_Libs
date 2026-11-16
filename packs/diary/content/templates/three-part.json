@@ -1,0 +1,99 @@
+{
+  "id": "three-part",
+  "name": "三段式（反省・靈修・代禱）",
+  "description": "一段一個顏色：反省藍、靈修綠、代禱紅。手寫本常見的分法。",
+  "group": "與神同行",
+  "order": 1,
+  "when": "想照手寫本常見的分法，把反省、靈修、代禱分開寫的日子。",
+  "minutes": 10,
+  "moods": ["平靜", "想整理"],
+  "tags": ["靈修", "經文", "感恩", "代禱", "書寫為主"],
+  "structure": "three-part",
+  "reflection": "prayer",
+  "flow": ["events", "reflection", "scripture", "prayer", "gratitude"],
+  "default_theme": "notebook",
+  "default_layout": "manuscript",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "reflect",
+      "title": "每日反省",
+      "color": "#2456b8",
+      "icon": "①",
+      "fields": [
+        {
+          "id": "highlight",
+          "label": "今天發生了什麼",
+          "kind": "text",
+          "placeholder": "今天…",
+          "color": "#2456b8",
+          "ai_hint": "今天發生的事，照作者的話整理成一兩段，保留細節。"
+        },
+        {
+          "id": "learned",
+          "label": "我學到 / 我看見自己",
+          "kind": "text",
+          "placeholder": "我發現我…",
+          "color": "#2456b8",
+          "ai_hint": "作者自己說到的體會、看見自己的地方；作者沒說就留空，不要替作者下結論。"
+        }
+      ]
+    },
+    {
+      "id": "devotion",
+      "title": "靈修",
+      "color": "#1f7a4d",
+      "icon": "②",
+      "fields": [
+        {
+          "id": "passage",
+          "label": "經文進度",
+          "kind": "short_text",
+          "placeholder": "例：約伯記 33-34 章",
+          "ai_hint": "作者讀的經文出處或進度（例：腓 4、詩篇 23 篇）；沒讀經就留空。"
+        },
+        {
+          "id": "observe",
+          "label": "觀察：這段在說什麼",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "ai_hint": "作者對那段經文的觀察；沒有就留空。"
+        },
+        {
+          "id": "apply",
+          "label": "應用：那我要怎麼做",
+          "kind": "text",
+          "color": "#c8322c",
+          "ai_hint": "作者說要怎麼做；沒有就留空，不要替作者想應用。"
+        }
+      ]
+    },
+    {
+      "id": "pray",
+      "title": "代禱",
+      "color": "#c8322c",
+      "icon": "③",
+      "fields": [
+        {
+          "id": "prayer",
+          "label": "代禱事項",
+          "kind": "list",
+          "placeholder": "求主…",
+          "min_rows": 4,
+          "color": "#c8322c",
+          "ai_hint": "作者提到要禱告、擔心或想交託的人與事，一件一行（可寫成「求主…」）；沒有就留空。"
+        },
+        {
+          "id": "gratitude",
+          "label": "感恩事項",
+          "kind": "list",
+          "placeholder": "感謝神…",
+          "color": "#1f7a4d",
+          "ai_hint": "作者明白感謝的事，一件一行、用作者的話；沒有就留空，不要硬湊。"
+        }
+      ]
+    }
+  ]
+}

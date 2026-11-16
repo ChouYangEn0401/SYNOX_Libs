@@ -1,0 +1,63 @@
+{
+  "id": "three-lines",
+  "name": "三行日記",
+  "description": "一件事、一個感覺、一件謝謝。一分鐘寫完，最不容易斷掉的那一種。",
+  "group": "簡單記一下",
+  "order": 40,
+  "when": "只有一分鐘：一件事、一個感覺、一件謝謝。最不容易斷掉的那一種。",
+  "minutes": 1,
+  "moods": ["任何心情", "很忙", "很累"],
+  "tags": ["簡短", "每天", "感恩", "不談信仰也可以"],
+  "structure": "one-part",
+  "reflection": "none",
+  "flow": ["events", "feelings", "gratitude"],
+  "default_theme": "letterpress",
+  "default_layout": "postcard",
+  "closing_label": "還想說的話",
+  "closing_hint": "有就寫，沒有就算了。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "three",
+      "title": "今天三行",
+      "color": "#22252a",
+      "icon": "✎",
+      "fields": [
+        {
+          "id": "fact",
+          "label": "今天發生的一件事",
+          "kind": "short_text",
+          "placeholder": "今天…",
+          "ai_hint": "今天的一件事，一句話。"
+        },
+        {
+          "id": "feel",
+          "label": "我的感覺",
+          "kind": "short_text",
+          "placeholder": "我覺得…",
+          "color": "#6b4c9a",
+          "ai_hint": "作者的感覺，一句話。"
+        },
+        {
+          "id": "thanks",
+          "label": "謝謝的一件事",
+          "kind": "short_text",
+          "placeholder": "謝謝…",
+          "color": "#1f7a4d",
+          "ai_hint": "一件謝謝的事；沒提到就留空。"
+        },
+        {
+          "id": "overall",
+          "label": "今天整體",
+          "kind": "scale",
+          "options": [
+            { "id": "good", "label": "好" },
+            { "id": "ok", "label": "普通" },
+            { "id": "bad", "label": "不好" }
+          ],
+          "ai_hint": "只在作者自己說了才選；沒提到就不選，不要替作者打分數。"
+        }
+      ]
+    }
+  ]
+}

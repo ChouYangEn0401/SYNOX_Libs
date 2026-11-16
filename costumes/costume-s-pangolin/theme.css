@@ -1,0 +1,91 @@
+/* 捲捲（系列 S）· SYNOX 衣櫃 · 由 scripts/build_costumes.py 從品牌提案頁產生，不要手改 */
+/* 這一套自己多用的顏色（不是合約 token；SYNOX 的 :root 只收 token 與 --th- 開頭的） */
+:root{--th-mc:#fff3e0}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--th-mc:#fff3e0}}
+:root[data-theme="dark"]{--th-mc:#fff3e0}
+[data-slot] .masc .mbody{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .pop{transform-box:fill-box;transform-origin:50% 100%}
+[data-slot] .masc .eye{transform-origin:50% 50%;animation:4.2s ease 0s infinite normal none running th-s-m-blink}
+[data-slot] .st-idle .mbody{animation:3.2s ease-in-out 0s infinite normal none running th-s-m-bob}
+[data-slot] .st-think .mbody{animation:2.6s ease-in-out 0s infinite normal none running th-s-m-tilt}
+[data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .st-happy .mbody{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-s-m-hop}
+[data-slot] .st-warn .mbody{animation:2.4s linear 0s infinite normal none running th-s-m-shake}
+[data-slot] .st-warn .eye{animation:auto ease 0s 1 normal none running none}
+[data-slot] .masc .tdots circle{animation:1.5s ease-in-out 0s infinite normal none running th-s-m-dot}
+[data-slot] .masc .tdots circle:nth-of-type(2){animation-delay:0.2s}
+[data-slot] .masc .tdots circle:nth-of-type(3){animation-delay:0.4s}
+[data-slot] .masc .pop{transform-origin:50% 50%;animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-s-m-pop}
+[data-slot] .op .ow{color:var(--text)}
+[data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-s-o-fade}
+[data-slot] .wm{color:var(--text)}
+[data-slot][data-slot] .masc .ptail{transform-box:fill-box;transform-origin:0% 100%;animation:2.8s ease-in-out 0s infinite normal none running th-s-s-wag}
+[data-slot][data-slot] .st-happy .ptail{animation-duration:0.5s}
+[data-slot][data-slot] .st-think .ptail{animation-duration:4.4s}
+[data-slot][data-slot] .st-warn .mbody{transform-origin:50% 100%;animation:2.8s ease-in-out 0s infinite normal none running th-s-s-rock}
+[data-slot][data-slot] .st-warn .eye{animation:4.2s ease 0s infinite normal none running th-s-m-blink}
+[data-slot][data-slot] .op-S .pb{opacity:0;animation:1.05s cubic-bezier(0.3, 0.6, 0.3, 1) 0s 1 normal both running th-s-s-o-roll}
+[data-slot][data-slot] .op-S .pb .mbody{animation:auto ease 0s 1 normal none running none}
+[data-slot][data-slot] .op-S .om:not(.pb){animation:0.5s cubic-bezier(0.2, 1.5, 0.4, 1) 0.95s 1 normal both running th-s-s-o-open}
+[data-slot][data-slot] .op-S .l{animation:th-s-o-pop .45s cubic-bezier(.2, 1.5, .4, 1) calc(1.2s + var(--i) * 65ms) both}
+[data-slot][data-slot] .op-S .ot{animation-delay:1.75s}
+/* 開場、字標裡每個元素自己的變數（原本寫在 style="…"） */
+[data-slot] .cs-v0{--i:0}
+[data-slot] .cs-v1{--i:1}
+[data-slot] .cs-v2{--i:2}
+[data-slot] .cs-v3{--i:3}
+[data-slot] .cs-v4{--i:4}
+@keyframes th-s-m-blink { 
+  0%, 93%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.1); }
+}
+@keyframes th-s-m-bob { 
+  50% { transform: translateY(-3px); }
+}
+@keyframes th-s-m-tilt { 
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes th-s-m-hop { 
+  0%, 100% { transform: none; }
+  12% { transform: scale(1.06, 0.92); }
+  40% { transform: translateY(-9px) scale(0.97, 1.04); }
+  70% { transform: scale(1.03, 0.96); }
+}
+@keyframes th-s-m-shake { 
+  0%, 16%, 100% { transform: none; }
+  3%, 9% { transform: translateX(-2.5px); }
+  6%, 12% { transform: translateX(2.5px); }
+}
+@keyframes th-s-m-dot { 
+  0%, 100% { opacity: 0.25; }
+  40% { opacity: 1; }
+}
+@keyframes th-s-m-pop { 
+  0% { transform: scale(0); }
+  12%, 100% { transform: scale(1); }
+}
+@keyframes th-s-o-fade { 
+  0% { opacity: 0; transform: translateY(6px); }
+}
+@keyframes th-s-o-pop { 
+  0% { opacity: 0; transform: translateY(14px) scale(0.4) rotate(-14deg); }
+}
+@keyframes th-s-s-wag { 
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(8deg); }
+}
+@keyframes th-s-s-rock { 
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes th-s-s-o-roll { 
+  0% { opacity: 1; transform: translateX(-200px) rotate(-620deg); }
+  76% { opacity: 1; transform: translateX(7px) rotate(9deg); }
+  90% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+@keyframes th-s-s-o-open { 
+  0% { opacity: 0; transform: scale(0.55); }
+}

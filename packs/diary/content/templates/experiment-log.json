@@ -1,0 +1,189 @@
+{
+  "id": "experiment-log",
+  "name": "假設驗證紀錄",
+  "description": "一次只驗一個假設：事前寫下怎樣算成立，事後回來對答案。",
+  "group": "工作與創業",
+  "order": 34,
+  "default_hidden": true,
+  "when": "要開始一個實驗（新功能、定價、通路、廣告）之前，以及結果出來之後。",
+  "minutes": 10,
+  "moods": [
+    "冷靜",
+    "不確定"
+  ],
+  "tags": [
+    "工作",
+    "創業",
+    "決策"
+  ],
+  "structure": "three-part",
+  "reflection": "reflection",
+  "flow": [
+    "work",
+    "decision",
+    "review",
+    "plan"
+  ],
+  "default_theme": "letterpress",
+  "default_layout": "ledger",
+  "closing_label": "補充",
+  "closing_hint": "還想記下來的。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "bet",
+      "title": "假設",
+      "color": "#b5623c",
+      "icon": "◎",
+      "fields": [
+        {
+          "id": "line",
+          "label": "一句話寫清楚",
+          "kind": "fill",
+          "pattern": "我相信 {} 會因為 {} 而 {}。",
+          "ai_hint": "三格：哪一群人、因為什麼、會做出什麼行為。"
+        },
+        {
+          "id": "kind",
+          "label": "這是關於",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "客群"
+            },
+            {
+              "id": "o2",
+              "label": "問題"
+            },
+            {
+              "id": "o3",
+              "label": "解法"
+            },
+            {
+              "id": "o4",
+              "label": "價格"
+            },
+            {
+              "id": "o5",
+              "label": "通路"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "sure",
+          "label": "我的把握",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "很有把握"
+            },
+            {
+              "id": "o2",
+              "label": "五五波"
+            },
+            {
+              "id": "o3",
+              "label": "其實是賭的"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        }
+      ]
+    },
+    {
+      "id": "test",
+      "title": "怎麼驗",
+      "color": "#2456b8",
+      "icon": "⌥",
+      "fields": [
+        {
+          "id": "how",
+          "label": "最便宜的驗證方法",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "pass",
+          "label": "看到什麼數字或行為，才算成立",
+          "kind": "short_text",
+          "hint": "先寫好，結果出來才不會自己騙自己。",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "due",
+          "label": "什麼時候看結果",
+          "kind": "short_text",
+          "placeholder": "例：兩週後的週五",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "later",
+      "title": "事後回來寫",
+      "color": "#1f7a4d",
+      "icon": "⟲",
+      "fields": [
+        {
+          "id": "result",
+          "label": "實際發生了什麼",
+          "kind": "text",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        },
+        {
+          "id": "verdict",
+          "label": "結論",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "成立"
+            },
+            {
+              "id": "o2",
+              "label": "不成立"
+            },
+            {
+              "id": "o3",
+              "label": "看不出來"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "next",
+          "label": "下一步",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "加碼"
+            },
+            {
+              "id": "o2",
+              "label": "轉向"
+            },
+            {
+              "id": "o3",
+              "label": "再測一次"
+            },
+            {
+              "id": "o4",
+              "label": "放掉"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "learn",
+          "label": "這次學到的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

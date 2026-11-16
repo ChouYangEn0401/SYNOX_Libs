@@ -1,0 +1,102 @@
+{
+  "id": "scripture-fill",
+  "name": "填空式靈修",
+  "description": "句子已經寫好，只要把空格填起來。最不需要想「該從哪寫起」。",
+  "group": "與神同行",
+  "order": 3,
+  "when": "讀了經文卻不知道從哪裡寫起：句子寫好了，只要把空格填起來。",
+  "minutes": 5,
+  "moods": ["卡住", "疲累", "平靜"],
+  "tags": ["靈修", "經文", "填空"],
+  "structure": "three-part",
+  "reflection": "prayer",
+  "flow": ["scripture", "reflection", "events", "feelings", "prayer"],
+  "default_theme": "letterpress",
+  "default_layout": "letter",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "read",
+      "title": "讀經",
+      "color": "#1f7a4d",
+      "icon": "📖",
+      "fields": [
+        {
+          "id": "passage_line",
+          "label": "經文",
+          "kind": "fill",
+          "pattern": "今天讀了 {} ，最觸動我的一句是「{}」。",
+          "ai_hint": "兩格：經文出處、最觸動作者的那一句（照作者寫的抄）。作者沒讀經就整題留空，不要自己補經文。"
+        },
+        {
+          "id": "about_god",
+          "label": "關於神",
+          "kind": "fill",
+          "pattern": "這段經文讓我看見神是 {} 的神。",
+          "ai_hint": "一格：作者說這段經文讓作者看見神是怎樣的神（例：信實）；沒說就留空。"
+        },
+        {
+          "id": "about_me",
+          "label": "關於我",
+          "kind": "fill",
+          "pattern": "也讓我看見自己 {} ，所以我想 {}。",
+          "ai_hint": "兩格：看見自己什麼、所以想怎麼做；作者沒說就留空。"
+        }
+      ]
+    },
+    {
+      "id": "today",
+      "title": "今天",
+      "color": "#2456b8",
+      "icon": "☀",
+      "fields": [
+        {
+          "id": "today_line",
+          "label": "一天的樣子",
+          "kind": "fill",
+          "pattern": "今天最像我的一刻是 {}，最不像我的一刻是 {}。",
+          "ai_hint": "兩格：今天最像自己的一刻、最不像自己的一刻，用作者的話。"
+        },
+        {
+          "id": "mood",
+          "label": "今天的心情",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "peace", "label": "平安" },
+            { "id": "joy", "label": "喜樂" },
+            { "id": "tired", "label": "疲累" },
+            { "id": "anxious", "label": "焦慮" },
+            { "id": "thankful", "label": "感恩" },
+            { "id": "numb", "label": "麻木" },
+            { "id": "hopeful", "label": "有盼望" }
+          ],
+          "ai_hint": "從選項挑作者自己說出的心情；沒有對得上的就不選。"
+        }
+      ]
+    },
+    {
+      "id": "pray",
+      "title": "禱告",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "prayer_line",
+          "label": "今天的禱告",
+          "kind": "fill",
+          "pattern": "主啊，求祢 {}，也謝謝祢 {}。",
+          "ai_hint": "兩格：求主什麼、謝謝主什麼。"
+        },
+        {
+          "id": "prayer",
+          "label": "其他代禱",
+          "kind": "list",
+          "color": "#c8322c",
+          "ai_hint": "作者提到要禱告、擔心或想交託的人與事，一件一行（可寫成「求主…」）；沒有就留空。"
+        }
+      ]
+    }
+  ]
+}

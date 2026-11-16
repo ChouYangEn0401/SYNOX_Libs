@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-Hant" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ doc.date_display }}　{{ doc.title or doc.template_name }}</title>
+<style>
+{% include "_tokens.css.j2" %}
+
+body{padding:clamp(1rem,4vw,3rem) 1rem clamp(3rem,8vw,5rem);font-size:18px;
+     line-height:2.1;}
+.stage{max-width:44rem;margin:0 auto;}
+.pad{
+  position:relative;background:var(--paper);border:1px solid var(--paper-edge);
+  padding:clamp(1.6rem,5vw,3.5rem);
+  background-image:
+    linear-gradient(var(--rule) 1px,transparent 1px),
+    linear-gradient(90deg,var(--rule) 1px,transparent 1px);
+  background-size:2.1rem 2.1rem;
+  background-position:calc(clamp(1.6rem,5vw,3.5rem) - 1px) calc(clamp(1.6rem,5vw,3.5rem) - 1px);
+  box-shadow:0 20px 44px -30px rgba(0,0,0,.45);
+}
+/* the grid should sit behind the text, and fade at the edges */
+.pad::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,var(--paper) 0,transparent 3rem,
+             transparent calc(100% - 3rem),var(--paper) 100%);
+}
+.pad > *{position:relative;z-index:1;}
+
+header{margin-bottom:2.1rem;}
+.date{font-family:var(--display);font-size:clamp(2.1rem,8vw,3.2rem);
+      margin:0;line-height:2.1rem;font-weight:600;letter-spacing:.06em;
+      font-variant-numeric:tabular-nums;}
+.sub{margin:.9rem 0 0;font-size:.82rem;color:var(--ink-muted);letter-spacing:.18em;}
+.title{font-family:var(--display);font-size:1.3rem;margin:1.05rem 0 0;font-weight:500;}
+.seal-line{margin-top:1.05rem;height:2px;background:var(--ink);width:3.5rem;}
+
+section{margin-bottom:2.1rem;}
+.sec-title{font-family:var(--display);font-size:1.1rem;font-weight:600;
+           margin:0 0 1.05rem;padding-left:1.4rem;position:relative;line-height:2.1rem;}
+.sec-title::before{content:"";position:absolute;left:0;top:.72rem;width:.62rem;
+                   height:.62rem;background:var(--sec);}
+.field{margin-bottom:1.05rem;}
+.f-label{display:block;font-size:.76rem;color:var(--ink-muted);
+         letter-spacing:.14em;line-height:2.1rem;}
+.f-body{overflow-wrap:anywhere;}
+.f-body p{margin:0;}
+
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;line-height:2.1rem;}
+.chip{font-size:.86rem;padding:0 .55rem;border-bottom:2px solid transparent;
+      color:var(--ink-muted);}
+.chip.on{color:var(--sec);font-weight:600;border-bottom-color:var(--sec);}
+
+ol.lines{list-style:none;margin:0;padding:0;counter-reset:l;}
+ol.lines li{counter-increment:l;position:relative;padding-left:2.1rem;
+            overflow-wrap:anywhere;}
+ol.lines li::before{content:counter(l)"、";position:absolute;left:0;
+  color:var(--sec);font-weight:600;font-size:.9rem;}
+
+.closing{margin-top:2.1rem;padding-top:1.05rem;border-top:1px solid var(--ink);
+         overflow-wrap:anywhere;}
+.closing .f-label{color:var(--accent);}
+.closing p{margin:0;font-family:var(--display);}
+.closing p:first-of-type::first-letter{
+  font-size:2.1rem;line-height:1;float:left;margin:.15rem .3rem 0 0;color:var(--accent);}
+
+footer{margin-top:2.1rem;font-size:.72rem;color:var(--ink-muted);
+       letter-spacing:.2em;text-align:right;}
+@media print{.pad{box-shadow:none;}footer{display:none;}}
+</style>
+</head>
+<body>
+<div class="stage{% if not gift_cover %} open{% endif %}" id="stage">
+{% include "_cover.html.j2" %}
+  <article class="journal"><div class="pad">
+    <header>
+      <h1 class="date">{{ doc.date_display }}</h1>
+      <p class="sub">週{{ doc.weekday }}　{{ doc.template_name }}　{{ doc.word_count }} 字</p>
+      {% if doc.title %}<p class="title">{{ doc.title }}</p>{% endif %}
+      <div class="seal-line"></div>
+    </header>
+
+    {% for s in doc.sections %}
+    <section style="--sec:{{ s.color }}">
+      <h2 class="sec-title">{{ s.title }}</h2>
+      {% for f in s.fields %}
+      <div class="field">
+        <span class="f-label">{{ f.label }}</span>
+        {% if f.chips %}
+          <div class="chips">
+            {%- for c in f.chips %}<span class="chip{% if c.selected %} on{% endif %}">{{ c.label }}</span>{% endfor -%}
+          </div>
+        {% elif f.numbered %}
+          <ol class="lines">{% for line in f.lines %}<li>{{ line | runs }}</li>{% endfor %}</ol>
+        {% else %}
+          <div class="f-body">{% for line in f.lines %}<p>{{ line | runs }}</p>{% endfor %}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </section>
+    {% endfor %}
+
+    {% if doc.has_closing %}
+    <div class="closing">
+      <span class="f-label">{{ doc.closing_label }}</span>
+      {% for line in doc.closing_lines %}<p>{{ line | runs }}</p>{% endfor %}
+    </div>
+    {% endif %}
+
+    <footer>{{ doc.date_display }}</footer>
+  </div></article>
+</div>
+{% include "_cover.js.j2" %}
+</body>
+</html>

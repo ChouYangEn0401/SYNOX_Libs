@@ -1,0 +1,174 @@
+{
+  "id": "week-review",
+  "name": "週回顧",
+  "description": "週末花十五分鐘：做完了什麼、時間花在哪、下週只做三件事。",
+  "group": "工作與創業",
+  "order": 32,
+  "when": "週末花十五分鐘回顧這一週，排好下週只做的三件事。",
+  "minutes": 15,
+  "moods": ["回顧", "平靜", "疲累"],
+  "tags": ["工作", "回顧", "每週", "計畫"],
+  "structure": "n-part",
+  "reflection": "reflection",
+  "flow": ["review", "work", "people", "plan"],
+  "default_theme": "notebook",
+  "default_layout": "ledger",
+  "closing_label": "這一週想留下的一句話",
+  "closing_hint": "一年後翻回來，這一句要看得懂。",
+  "closing_placeholder": "這一週…",
+  "sections": [
+    {
+      "id": "done",
+      "title": "這一週做完的",
+      "color": "#2f7d86",
+      "icon": "✓",
+      "fields": [
+        {
+          "id": "wins",
+          "label": "完成的事",
+          "kind": "list",
+          "min_rows": 4,
+          "color": "#2f7d86",
+          "ai_hint": "這一週完成的事，一件一行。"
+        },
+        {
+          "id": "vs_plan",
+          "label": "跟週一的計畫比起來",
+          "kind": "scale",
+          "options": [
+            { "id": "most", "label": "差不多做到" },
+            { "id": "half", "label": "做了一半" },
+            { "id": "off", "label": "幾乎沒照計畫" }
+          ],
+          "ai_hint": "只在作者自己說了才選；沒提到就不選，不要替作者打分數。"
+        }
+      ]
+    },
+    {
+      "id": "not_done",
+      "title": "沒做到的",
+      "color": "#c8322c",
+      "icon": "○",
+      "fields": [
+        {
+          "id": "undone",
+          "label": "原本要做、沒做的",
+          "kind": "list",
+          "min_rows": 3,
+          "color": "#c8322c",
+          "ai_hint": "原本要做、沒做的，一件一行。"
+        },
+        {
+          "id": "why",
+          "label": "主要原因",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "bigger", "label": "事情比想的大" },
+            { "id": "interrupt", "label": "被別的事插隊" },
+            { "id": "delay", "label": "拖延" },
+            { "id": "waiting", "label": "在等別人" },
+            { "id": "health", "label": "身體不舒服" },
+            { "id": "overbook", "label": "一開始就排太滿" },
+            { "id": "unimportant", "label": "其實不重要" }
+          ],
+          "ai_hint": "從選項挑作者說的主要原因。"
+        },
+        {
+          "id": "drop",
+          "label": "其中哪一件，其實可以直接刪掉？",
+          "kind": "short_text",
+          "hint": "刪掉也是一種完成",
+          "ai_hint": "其中可以直接刪掉的那一件。"
+        }
+      ]
+    },
+    {
+      "id": "time",
+      "title": "時間花在哪",
+      "color": "#5a6472",
+      "icon": "◷",
+      "fields": [
+        {
+          "id": "most",
+          "label": "花最多時間的一件事",
+          "kind": "short_text",
+          "ai_hint": "花最多時間的一件事。"
+        },
+        {
+          "id": "worth",
+          "label": "值得嗎",
+          "kind": "scale",
+          "options": [
+            { "id": "yes", "label": "值得" },
+            { "id": "meh", "label": "還好" },
+            { "id": "no", "label": "不值得" }
+          ],
+          "ai_hint": "只在作者自己說了才選；沒提到就不選，不要替作者打分數。"
+        },
+        {
+          "id": "thief",
+          "label": "這週最大的時間小偷",
+          "kind": "short_text",
+          "color": "#5a6472",
+          "ai_hint": "這週最大的時間小偷。"
+        }
+      ]
+    },
+    {
+      "id": "people_self",
+      "title": "人與自己",
+      "color": "#6b4c9a",
+      "icon": "♢",
+      "fields": [
+        {
+          "id": "good_to",
+          "label": "這週我對誰好過？",
+          "kind": "short_text",
+          "color": "#1f7a4d",
+          "ai_hint": "這週作者對誰好過。"
+        },
+        {
+          "id": "owe_time",
+          "label": "這週我虧欠了誰的時間？",
+          "kind": "short_text",
+          "color": "#c8322c",
+          "ai_hint": "這週虧欠了誰的時間；沒提到就留空。"
+        },
+        {
+          "id": "rest",
+          "label": "這週有休息到嗎",
+          "kind": "scale",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "barely", "label": "勉強" },
+            { "id": "no", "label": "完全沒有" }
+          ],
+          "ai_hint": "只在作者自己說了才選；沒提到就不選，不要替作者打分數。"
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "title": "下一週",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "three",
+          "label": "下週只做三件事的話",
+          "kind": "list",
+          "min_rows": 3,
+          "color": "#1f7a4d",
+          "ai_hint": "下週只做的三件事，一件一行。"
+        },
+        {
+          "id": "first",
+          "label": "星期一早上第一件做的事",
+          "kind": "short_text",
+          "hint": "先寫好，星期一就不用想",
+          "ai_hint": "星期一早上第一件做的事。"
+        }
+      ]
+    }
+  ]
+}

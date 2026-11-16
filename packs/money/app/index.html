@@ -5,17 +5,37 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>記帳本</title>
 <link rel="stylesheet" href="/_synox/kit.css">
-<link rel="stylesheet" href="money.css">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/book.css">
+<link rel="stylesheet" href="css/piggy.css">
+<link rel="stylesheet" href="css/review.css">
+<link rel="stylesheet" href="css/plan.css">
+<link rel="stylesheet" href="css/setup.css">
 </head>
 <body>
-<main id="money">
-  <div class="money-top">
-    <nav class="tabs" id="tabs" aria-label="記帳本的分頁"></nav>
-    <button class="btn primary" id="add-one" type="button">＋ 記一筆</button>
+<header class="top">
+  <div class="top-row">
+    <span class="brand">記帳本</span>
+    <div class="month">
+      <button type="button" id="prevP" aria-label="上一期">‹</button>
+      <span id="pName">…</span>
+      <button type="button" id="nextP" aria-label="下一期">›</button>
+    </div>
   </div>
-  <section id="pane"></section>
-</main>
+  <nav class="tabs" id="tabs" aria-label="分頁"></nav>
+</header>
+<main id="view" class="page" aria-live="polite"><p class="muted">載入中…</p></main>
+<div class="toast" id="toast" hidden></div>
+<div class="modal-wrap" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h2 id="modalTitle"></h2>
+    <div id="modalBody" class="modal-body"></div>
+    <div id="modalFoot" class="modal-foot"></div>
+  </div>
+</div>
+<noscript><p class="page">這個畫面需要開啟 JavaScript。</p></noscript>
 <script src="/_synox/kit.js"></script>
-<script src="money.js"></script>
+<script type="module" src="js/main.js"></script>
 </body>
 </html>

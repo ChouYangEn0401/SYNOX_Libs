@@ -1,0 +1,67 @@
+{
+  "name": "costume-i-marquee",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "小跑",
+  "summary": "夜市招牌上的跑馬燈長了腳：幫你跑腿，有事就跑字幕。SYNOX 衣櫃 · 系列 I：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f6f3f9",
+        "--surface": "#ffffff",
+        "--text": "#1d1226",
+        "--muted": "#675a73",
+        "--line": "#e4dcec",
+        "--accent": "#c2126e",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#0b7397",
+        "--soft": "#fbe0ee",
+        "--ok": "#1c7a4c",
+        "--warn": "#8f6408",
+        "--bad": "#b3321a",
+        "--radius": "9px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Doto','Noto Sans TC',sans-serif",
+        "--m1": "#e3207f",
+        "--m2": "#1d1226",
+        "--mi": "#ffe45c",
+        "--mb": "#35e0ff"
+      },
+      "dark": {
+        "--bg": "#130a1f",
+        "--surface": "#1e1230",
+        "--text": "#f5eafa",
+        "--muted": "#ae9cc0",
+        "--line": "#39274f",
+        "--accent": "#ff6bb0",
+        "--accent-ink": "#3b0420",
+        "--accent2": "#4dd9f5",
+        "--soft": "#45153b",
+        "--ok": "#5fe0a0",
+        "--warn": "#ffc44d",
+        "--bad": "#ff8a6b",
+        "--radius": "9px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Doto','Noto Sans TC',sans-serif",
+        "--m1": "#ff4f9e",
+        "--m2": "#f5eafa",
+        "--mi": "#ffe45c",
+        "--mb": "#35e0ff"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

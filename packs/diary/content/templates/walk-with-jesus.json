@@ -1,0 +1,205 @@
+{
+  "id": "walk-with-jesus",
+  "name": "同行日記（完整版）",
+  "description": "逐項自省的長版本，多半是勾選題，最後留一段給神的話。",
+  "group": "與神同行",
+  "order": 2,
+  "when": "時間比較充裕、想把一整天在主面前逐項自省的日子。",
+  "minutes": 10,
+  "moods": ["平靜", "想自省"],
+  "tags": ["靈修", "勾選為主", "自省", "感恩", "代禱"],
+  "structure": "n-part",
+  "reflection": "prayer",
+  "flow": ["checkin", "scripture", "confession", "gratitude", "prayer"],
+  "default_theme": "linen",
+  "default_layout": "ledger",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "day",
+      "title": "這一天",
+      "color": "#2456b8",
+      "icon": "☀",
+      "fields": [
+        {
+          "id": "wake",
+          "label": "起床的時候想起主了嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到起床時想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "meal",
+          "label": "吃飯的時候想起主了嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到吃飯時想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "work",
+          "label": "開始工作／課業的時候想起主了嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到開始工作或課業時想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "commute",
+          "label": "在車上、通勤的時候想起主了嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到通勤、在車上時想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "home",
+          "label": "在家裡有想起主嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到在家裡想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "meet",
+          "label": "與人見面交流時想起主嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到與人見面時想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        }
+      ]
+    },
+    {
+      "id": "word",
+      "title": "靈修",
+      "color": "#1f7a4d",
+      "icon": "📖",
+      "fields": [
+        {
+          "id": "passage",
+          "label": "今天默想的經文",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "今天默想的經文出處（照作者寫的）；沒有就留空。"
+        },
+        {
+          "id": "meditation",
+          "label": "這段話對我說了什麼？",
+          "kind": "text",
+          "placeholder": "主耶穌，這段經文讓我看見…",
+          "color": "#1f7a4d",
+          "ai_hint": "作者對那段話的領受；沒有就留空，不要自己講道。"
+        },
+        {
+          "id": "ask",
+          "label": "有沒有問過主：「主啊，我當怎麼做？」",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到為某件事想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "obey",
+          "label": "有沒有順服主所吩咐的？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "作者說照著主的話去做了 → yes；說沒做到 → no；沒提到就不選。"
+        }
+      ]
+    },
+    {
+      "id": "review",
+      "title": "自省",
+      "color": "#22252a",
+      "icon": "🔍",
+      "fields": [
+        {
+          "id": "pleasing",
+          "label": "有沒有做過主喜悅的事？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "作者說做了討主喜悅的事 → yes；沒提到就不選。"
+        },
+        {
+          "id": "displeasing",
+          "label": "有沒有做過主不喜悅的事？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "只照作者自己承認的選；不要替作者判斷對錯。"
+        },
+        {
+          "id": "looking",
+          "label": "一天仰望主的時間如何衡量？",
+          "kind": "scale",
+          "options": [
+            { "id": "good", "label": "滿意" },
+            { "id": "ok", "label": "還可以" },
+            { "id": "low", "label": "缺乏" }
+          ],
+          "ai_hint": "作者自己評價了今天親近主的時間才選；不要替作者打分數。"
+        }
+      ]
+    },
+    {
+      "id": "thanks",
+      "title": "感恩事項",
+      "color": "#1f7a4d",
+      "icon": "🌱",
+      "fields": [
+        {
+          "id": "gratitude",
+          "label": "三件以上向神感恩的事",
+          "kind": "list",
+          "placeholder": "感謝神…",
+          "min_rows": 3,
+          "color": "#1f7a4d",
+          "ai_hint": "感恩的事一件一行；只有一兩件就照實寫，不要湊滿三件。"
+        }
+      ]
+    },
+    {
+      "id": "pray",
+      "title": "代禱事項",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "prayer",
+          "label": "今天最重要、最緊急的代禱",
+          "kind": "list",
+          "placeholder": "求主帶領…",
+          "min_rows": 3,
+          "color": "#c8322c",
+          "ai_hint": "作者提到要禱告、擔心或想交託的人與事，一件一行（可寫成「求主…」）；沒有就留空。"
+        }
+      ]
+    }
+  ]
+}

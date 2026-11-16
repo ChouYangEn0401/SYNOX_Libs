@@ -1,0 +1,236 @@
+{
+  "id": "serving-review",
+  "name": "服事回顧",
+  "description": "服事完看一下自己的心：喜樂還是枯乾、為誰做、需要什麼。",
+  "group": "與神同行",
+  "order": 18,
+  "default_hidden": true,
+  "when": "主日或活動服事之後；覺得服事變成差事的時候。",
+  "minutes": 8,
+  "moods": [
+    "疲累",
+    "想自省"
+  ],
+  "tags": [
+    "服事",
+    "教會",
+    "勾選為主"
+  ],
+  "structure": "three-part",
+  "reflection": "devotional",
+  "flow": [
+    "work",
+    "feelings",
+    "reflection",
+    "gratitude",
+    "people",
+    "plan"
+  ],
+  "default_theme": "linen",
+  "default_layout": "ledger",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "what",
+      "title": "這次的服事",
+      "color": "#2f7d86",
+      "icon": "▶",
+      "fields": [
+        {
+          "id": "role",
+          "label": "我做的是",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "敬拜"
+            },
+            {
+              "id": "o2",
+              "label": "招待"
+            },
+            {
+              "id": "o3",
+              "label": "兒童／青少年"
+            },
+            {
+              "id": "o4",
+              "label": "帶小組"
+            },
+            {
+              "id": "o5",
+              "label": "影音／場地"
+            },
+            {
+              "id": "o6",
+              "label": "關懷探訪"
+            },
+            {
+              "id": "o7",
+              "label": "行政"
+            },
+            {
+              "id": "o8",
+              "label": "教導"
+            },
+            {
+              "id": "o9",
+              "label": "其他"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "saw",
+          "label": "這次看見神做了什麼",
+          "kind": "text",
+          "hint": "再小都算；想不到就跳過。",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        }
+      ]
+    },
+    {
+      "id": "heart",
+      "title": "我的心",
+      "color": "#6b4c9a",
+      "icon": "◍",
+      "fields": [
+        {
+          "id": "joy",
+          "label": "服事時的心",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "喜樂"
+            },
+            {
+              "id": "o2",
+              "label": "普通"
+            },
+            {
+              "id": "o3",
+              "label": "枯乾"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "forwhom",
+          "label": "老實說，這次比較像",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "為主做的"
+            },
+            {
+              "id": "o2",
+              "label": "做給人看的"
+            },
+            {
+              "id": "o3",
+              "label": "只是習慣了"
+            },
+            {
+              "id": "o4",
+              "label": "說不清"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "tired",
+          "label": "累的話，是因為",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "事情太多"
+            },
+            {
+              "id": "o2",
+              "label": "人手不夠"
+            },
+            {
+              "id": "o3",
+              "label": "沒被看見"
+            },
+            {
+              "id": "o4",
+              "label": "同工之間有摩擦"
+            },
+            {
+              "id": "o5",
+              "label": "自己靈裡很乾"
+            },
+            {
+              "id": "o6",
+              "label": "身體撐不住"
+            },
+            {
+              "id": "o7",
+              "label": "不累"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "title": "接下來",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "need",
+          "label": "我現在需要",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "休息一陣子"
+            },
+            {
+              "id": "o2",
+              "label": "裝備與學習"
+            },
+            {
+              "id": "o3",
+              "label": "多一個同工"
+            },
+            {
+              "id": "o4",
+              "label": "一句肯定"
+            },
+            {
+              "id": "o5",
+              "label": "有人為我禱告"
+            },
+            {
+              "id": "o6",
+              "label": "換個崗位"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "thank",
+          "label": "想謝謝的同工",
+          "kind": "short_text",
+          "hint": "只寫稱呼或代號。",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        },
+        {
+          "id": "change",
+          "label": "下次想調整的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    }
+  ]
+}

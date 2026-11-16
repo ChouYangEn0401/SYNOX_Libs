@@ -1,0 +1,136 @@
+{
+  "id": "month-review",
+  "name": "月回顧 · 這個月我變成了誰",
+  "description": "一個月寫一次。不是檢討進度，是看自己有沒有往想成為的那個人靠近。",
+  "group": "成為什麼樣的人",
+  "order": 25,
+  "when": "月底或月初，一個月寫一次：看自己有沒有往想成為的人靠近。",
+  "minutes": 20,
+  "moods": ["回顧", "平靜"],
+  "tags": ["回顧", "每月", "品格", "成長"],
+  "structure": "n-part",
+  "reflection": "reflection",
+  "flow": ["review", "reflection", "people", "plan"],
+  "default_theme": "linen",
+  "default_layout": "ledger",
+  "closing_label": "寫給下個月的自己",
+  "closing_hint": "下個月的第一天，你會回來讀這一段。",
+  "closing_placeholder": "下個月的我，記得…",
+  "sections": [
+    {
+      "id": "look_back",
+      "title": "這個月",
+      "color": "#5a6472",
+      "icon": "▤",
+      "fields": [
+        {
+          "id": "moments",
+          "label": "記得起來的三個畫面",
+          "kind": "list",
+          "min_rows": 3,
+          "hint": "不用重要，是「記得起來」就好",
+          "ai_hint": "這個月記得起來的畫面，一件一行。"
+        },
+        {
+          "id": "hardest",
+          "label": "最難的一件事",
+          "kind": "short_text",
+          "ai_hint": "最難的一件事。"
+        },
+        {
+          "id": "best",
+          "label": "最好的一件事",
+          "kind": "short_text",
+          "color": "#1f7a4d",
+          "ai_hint": "最好的一件事。"
+        }
+      ]
+    },
+    {
+      "id": "change",
+      "title": "我變了什麼",
+      "color": "#b5623c",
+      "icon": "✦",
+      "fields": [
+        {
+          "id": "now_can",
+          "label": "這個月之後我做得到、上個月做不到的事",
+          "kind": "text",
+          "color": "#1f7a4d",
+          "ai_hint": "這個月之後做得到、上個月做不到的事。"
+        },
+        {
+          "id": "let_go",
+          "label": "有什麼是我終於放下了的？",
+          "kind": "text",
+          "ai_hint": "終於放下的事；沒提到就留空。"
+        },
+        {
+          "id": "still",
+          "label": "有什麼是我還在原地打轉的？",
+          "kind": "text",
+          "color": "#5a6472",
+          "hint": "寫下來就好，這個月不用解決它",
+          "ai_hint": "還在原地打轉的事；照實寫，不用替作者解決。"
+        },
+        {
+          "id": "direction",
+          "label": "整體來說，我有往想成為的那個人靠近嗎？",
+          "kind": "scale",
+          "options": [
+            { "id": "closer", "label": "有" },
+            { "id": "same", "label": "差不多" },
+            { "id": "back", "label": "退了一點" }
+          ],
+          "ai_hint": "只在作者自己說了才選；沒提到就不選，不要替作者打分數。"
+        }
+      ]
+    },
+    {
+      "id": "people",
+      "title": "人",
+      "color": "#2456b8",
+      "icon": "♢",
+      "fields": [
+        {
+          "id": "thanks_to",
+          "label": "這個月要謝謝的人",
+          "kind": "list",
+          "min_rows": 3,
+          "color": "#1f7a4d",
+          "ai_hint": "這個月要謝謝的人，一位一行（用作者的稱呼）。"
+        },
+        {
+          "id": "owe",
+          "label": "有沒有誰，我還欠一句話？",
+          "kind": "short_text",
+          "color": "#c8322c",
+          "hint": "一句對不起、一句謝謝，或一句我很想你",
+          "ai_hint": "還欠誰一句話；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "title": "下個月",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "one",
+          "label": "下個月只做好一件事的話，是哪一件？",
+          "kind": "short_text",
+          "color": "#1f7a4d",
+          "ai_hint": "下個月只做好一件事的話是哪一件。"
+        },
+        {
+          "id": "stop",
+          "label": "下個月想停掉的一件事",
+          "kind": "short_text",
+          "color": "#c8322c",
+          "ai_hint": "下個月想停掉的一件事。"
+        }
+      ]
+    }
+  ]
+}

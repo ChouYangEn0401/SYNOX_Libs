@@ -1,0 +1,634 @@
+{
+ "_說明": [
+  "引擎測試用的假帳本起始資料（全部是假的、通用的名字）：結構像一本用了一陣子的帳本——",
+  "六個核心用途都開著、每期從 5 號開始、有三餐／吃好喝好／交通／購物等大類、一張範例信用卡。",
+  "conftest 會把它寫成帳本資料夾的 categories.json（seed.config 的第二順位），所以每條測試的新帳本都長這樣；",
+  "要測內建通用版的，db.connect(seed=\"generic\") 或先刪掉那個檔。"
+ ],
+ "name": "test",
+ "buckets": [
+  {
+   "id": "giving",
+   "name": "捐贈",
+   "is_living": false
+  },
+  {
+   "id": "fixed",
+   "name": "固定支出",
+   "is_living": false
+  },
+  {
+   "id": "saving",
+   "name": "存錢儲蓄",
+   "is_living": false
+  },
+  {
+   "id": "living",
+   "name": "生活支出",
+   "is_living": true
+  },
+  {
+   "id": "invest",
+   "name": "資產投資",
+   "is_living": false
+  },
+  {
+   "id": "debt",
+   "name": "負債償還",
+   "is_living": false
+  }
+ ],
+ "groups": [
+  {
+   "name": "三餐",
+   "bucket": "living",
+   "icon": "🍱",
+   "categories": [
+    {
+     "name": "早餐",
+     "system_key": "meal.breakfast",
+     "kind": "expense",
+     "keywords": "早餐,蛋餅,豆漿,飯糰,吐司,早午餐",
+     "meal_slot": "breakfast",
+     "transfer_purpose": null,
+     "icon": "🥪"
+    },
+    {
+     "name": "午餐",
+     "system_key": "meal.lunch",
+     "kind": "expense",
+     "keywords": "午餐,便當,自助餐",
+     "meal_slot": "lunch",
+     "transfer_purpose": null,
+     "icon": "🍱"
+    },
+    {
+     "name": "晚餐",
+     "system_key": "meal.dinner",
+     "kind": "expense",
+     "keywords": "晚餐",
+     "meal_slot": "dinner",
+     "transfer_purpose": null,
+     "icon": "🍲"
+    }
+   ]
+  },
+  {
+   "name": "吃好喝好",
+   "bucket": "living",
+   "icon": "🧋",
+   "categories": [
+    {
+     "name": "點心宵夜",
+     "system_key": "snack",
+     "kind": "expense",
+     "keywords": "點心,宵夜,零食,甜點,鹹酥雞,餅乾,洋芋片,巧克力,糖果,堅果,零嘴",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🍩"
+    },
+    {
+     "name": "飲料",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "飲料,咖啡,手搖,奶茶",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🧋"
+    },
+    {
+     "name": "吃好",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "聚餐,大餐",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🍣"
+    }
+   ]
+  },
+  {
+   "name": "交通",
+   "bucket": "living",
+   "icon": "🚌",
+   "categories": [
+    {
+     "name": "大眾運輸",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "捷運,公車,火車,高鐵",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🚇"
+    },
+    {
+     "name": "計程車",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "計程車,小黃",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🚕"
+    },
+    {
+     "name": "停車加油",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "停車,加油,洗車",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "⛽"
+    }
+   ]
+  },
+  {
+   "name": "購物",
+   "bucket": "living",
+   "icon": "🛍️",
+   "categories": [
+    {
+     "name": "購物",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "購物,衣服,鞋,耳機,滑鼠,鍵盤,螢幕,充電,手機殼,文具,背包",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🛍️"
+    },
+    {
+     "name": "日用品",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "日用品,衛生紙,洗衣,牛奶,麥片,雞蛋",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🧴"
+    },
+    {
+     "name": "大額採買",
+     "system_key": "big_purchase",
+     "kind": "expense",
+     "keywords": "家電,3c,電腦,手機,家具",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🛒"
+    },
+    {
+     "name": "寵物",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "寵物,飼料,貓砂",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🐾"
+    }
+   ]
+  },
+  {
+   "name": "學習",
+   "bucket": "living",
+   "icon": "📚",
+   "categories": [
+    {
+     "name": "進修",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "課程,學費,補習,進修",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🎓"
+    },
+    {
+     "name": "書籍",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "書,電子書",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "📖"
+    }
+   ]
+  },
+  {
+   "name": "醫療",
+   "bucket": "living",
+   "icon": "🏥",
+   "categories": [
+    {
+     "name": "看病",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "掛號,診所,醫院,看病,牙醫",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🩺"
+    },
+    {
+     "name": "藥品保健",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "藥局,藥,保健,維他命",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "💊"
+    }
+   ]
+  },
+  {
+   "name": "雜項",
+   "bucket": "living",
+   "icon": "🧾",
+   "categories": [
+    {
+     "name": "雜支",
+     "system_key": "misc",
+     "kind": "expense",
+     "keywords": "雜支",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🧾"
+    },
+    {
+     "name": "禮物",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "禮物,紅包,伴手禮,土產,紀念品,名產",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🎁"
+    }
+   ]
+  },
+  {
+   "name": "住",
+   "bucket": "fixed",
+   "icon": "🏠",
+   "categories": [
+    {
+     "name": "房租",
+     "system_key": "bill.rent",
+     "kind": "expense",
+     "keywords": "房租,租金",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🏠"
+    },
+    {
+     "name": "電費",
+     "system_key": "bill.electricity",
+     "kind": "expense",
+     "keywords": "電費",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "💡"
+    },
+    {
+     "name": "水費",
+     "system_key": "bill.water",
+     "kind": "expense",
+     "keywords": "水費,自來水",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🚰"
+    },
+    {
+     "name": "瓦斯",
+     "system_key": "bill.gas",
+     "kind": "expense",
+     "keywords": "瓦斯,天然氣",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🔥"
+    },
+    {
+     "name": "管理費",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "管理費",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🏢"
+    }
+   ]
+  },
+  {
+   "name": "通訊訂閱",
+   "bucket": "fixed",
+   "icon": "📱",
+   "categories": [
+    {
+     "name": "手機網路",
+     "system_key": "bill.phone",
+     "kind": "expense",
+     "keywords": "電信,手機費,網路費",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "📱"
+    },
+    {
+     "name": "訂閱",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "訂閱,月費",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🔁"
+    }
+   ]
+  },
+  {
+   "name": "稅與保險",
+   "bucket": "fixed",
+   "icon": "🛡️",
+   "categories": [
+    {
+     "name": "勞保",
+     "system_key": "payroll.labor_insurance",
+     "kind": "expense",
+     "keywords": "勞保",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🛡️"
+    },
+    {
+     "name": "健保",
+     "system_key": "payroll.health_insurance",
+     "kind": "expense",
+     "keywords": "健保",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🏥"
+    },
+    {
+     "name": "所得稅",
+     "system_key": "payroll.income_tax",
+     "kind": "expense",
+     "keywords": "所得稅,綜所稅",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🧾"
+    },
+    {
+     "name": "勞退自提",
+     "system_key": "payroll.pension",
+     "kind": "transfer",
+     "keywords": "勞退,自提",
+     "meal_slot": null,
+     "transfer_purpose": "pension",
+     "icon": "🏦"
+    },
+    {
+     "name": "保險",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "保險,保費",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "☂️"
+    }
+   ]
+  },
+  {
+   "name": "捐贈",
+   "bucket": "giving",
+   "icon": "🎗️",
+   "categories": [
+    {
+     "name": "定期捐款",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "定期捐款",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🎗️"
+    },
+    {
+     "name": "公益捐款",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "捐款,捐贈,公益",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🤲"
+    }
+   ]
+  },
+  {
+   "name": "收入",
+   "bucket": null,
+   "icon": "💰",
+   "categories": [
+    {
+     "name": "薪資",
+     "system_key": "salary",
+     "kind": "income",
+     "keywords": "薪水,薪資,月薪",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "💼"
+    },
+    {
+     "name": "兼職",
+     "system_key": null,
+     "kind": "income",
+     "keywords": "兼職,打工,外快",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "🧑‍💻"
+    },
+    {
+     "name": "投資收益",
+     "system_key": null,
+     "kind": "income",
+     "keywords": "股利,利息收入",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "📈"
+    },
+    {
+     "name": "退款回饋",
+     "system_key": null,
+     "kind": "income",
+     "keywords": "退款,回饋,退費",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "↩️"
+    },
+    {
+     "name": "其他收入",
+     "system_key": "income.other",
+     "kind": "income",
+     "keywords": "",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "💰"
+    }
+   ]
+  },
+  {
+   "name": "轉帳",
+   "bucket": null,
+   "icon": "🔁",
+   "categories": [
+    {
+     "name": "繳卡費",
+     "system_key": "card_payment",
+     "kind": "transfer",
+     "keywords": "繳卡費,信用卡費",
+     "meal_slot": null,
+     "transfer_purpose": "card_payment",
+     "icon": "💳"
+    },
+    {
+     "name": "帳戶互轉",
+     "system_key": "transfer",
+     "kind": "transfer",
+     "keywords": "轉帳,互轉",
+     "meal_slot": null,
+     "transfer_purpose": "other",
+     "icon": "🔁"
+    },
+    {
+     "name": "借出",
+     "system_key": "lend",
+     "kind": "transfer",
+     "keywords": "借出,代墊",
+     "meal_slot": null,
+     "transfer_purpose": "lend",
+     "icon": "🤝"
+    },
+    {
+     "name": "收回借款",
+     "system_key": "collect",
+     "kind": "transfer",
+     "keywords": "還錢,收回",
+     "meal_slot": null,
+     "transfer_purpose": "collect",
+     "icon": "🤝"
+    }
+   ]
+  },
+  {
+   "name": "存錢",
+   "bucket": "saving",
+   "icon": "🪙",
+   "categories": [
+    {
+     "name": "緊急預備金",
+     "system_key": null,
+     "kind": "transfer",
+     "keywords": "存錢,定存,預備金",
+     "meal_slot": null,
+     "transfer_purpose": "saving",
+     "icon": "🪙"
+    }
+   ]
+  },
+  {
+   "name": "投資",
+   "bucket": "invest",
+   "icon": "📈",
+   "categories": [
+    {
+     "name": "股票",
+     "system_key": null,
+     "kind": "transfer",
+     "keywords": "股票,etf,證券",
+     "meal_slot": null,
+     "transfer_purpose": "investing",
+     "icon": "📈"
+    },
+    {
+     "name": "基金",
+     "system_key": null,
+     "kind": "transfer",
+     "keywords": "基金,定期定額",
+     "meal_slot": null,
+     "transfer_purpose": "investing",
+     "icon": "📊"
+    }
+   ]
+  },
+  {
+   "name": "負債",
+   "bucket": "debt",
+   "icon": "💳",
+   "categories": [
+    {
+     "name": "卡分期",
+     "system_key": null,
+     "kind": "expense",
+     "keywords": "分期",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "💳"
+    },
+    {
+     "name": "自借款還款",
+     "system_key": "debt.self_loan",
+     "kind": "transfer",
+     "keywords": "還借款",
+     "meal_slot": null,
+     "transfer_purpose": "debt",
+     "icon": "🔁"
+    },
+    {
+     "name": "信貸還款",
+     "system_key": "debt.credit_loan",
+     "kind": "transfer",
+     "keywords": "信貸",
+     "meal_slot": null,
+     "transfer_purpose": "debt",
+     "icon": "🏦"
+    },
+    {
+     "name": "利息",
+     "system_key": "fee.interest",
+     "kind": "expense",
+     "keywords": "利息",
+     "meal_slot": null,
+     "transfer_purpose": null,
+     "icon": "📉"
+    }
+   ]
+  }
+ ],
+ "accounts": [
+  {
+   "name": "現金",
+   "kind": "cash",
+   "purpose": "隨身",
+   "aliases": "現金,cash,錢包",
+   "liquid": true
+  },
+  {
+   "name": "生活帳戶",
+   "kind": "bank",
+   "purpose": "薪水入帳、付卡費",
+   "aliases": "生活,薪轉",
+   "liquid": true
+  },
+  {
+   "name": "存錢帳戶",
+   "kind": "bank",
+   "purpose": "存起來的錢",
+   "aliases": "存錢",
+   "liquid": true
+  },
+  {
+   "name": "範例 Demo",
+   "kind": "credit_card",
+   "purpose": "日常刷卡",
+   "aliases": "demo,範例卡",
+   "liquid": true
+  }
+ ],
+ "settings": {
+  "period_start_day": 5,
+  "default_account": "現金",
+  "review.include_notes": true,
+  "currency.code": "TWD",
+  "currency.symbol": "NT$",
+  "currency.decimals": 0
+ }
+}

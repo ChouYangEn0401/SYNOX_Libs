@@ -20,7 +20,7 @@
 </style>
 </head>
 <body>
-<div class="muted" id="month">這個月</div>
+<div class="muted" id="month">這一期</div>
 <div class="total" id="total">…</div>
 <div class="bar"><div class="fill" id="fill"></div></div>
 <div class="muted" id="budget"></div>
@@ -28,31 +28,33 @@
 <ul id="cats"></ul>
 <script>
 (function () {
-  function fmt(n) { return Number(n).toLocaleString("zh-TW", { maximumFractionDigits: 2 }); }
+  var unit = "元";
+  function fmt(n) { return Number(n).toLocaleString("zh-TW", { maximumFractionDigits: 3 }) + " " + unit; }
   fetch("/api/packs/money/summary", { credentials: "same-origin" })
     .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
     .then(function (d) {
-      document.getElementById("month").textContent = d.month + " 共花了";
-      document.getElementById("total").textContent = fmt(d.total) + " 元";
+      unit = d.unit || "元";
+      document.getElementById("month").textContent = d.month + " 這一期共花了";
+      document.getElementById("total").textContent = fmt(d.total);
       var fill = document.getElementById("fill");
       var note = document.getElementById("budget");
       if (d.budget) {
-        var pct = Math.min(100, Math.round(d.total / d.budget * 100));
+        var pct = Math.min(100, Math.round(d.spent / d.budget * 100));
         fill.style.width = pct + "%";
-        if (d.total > d.budget) { fill.classList.add("over"); }
-        note.textContent = "預算 " + fmt(d.budget) + " 元，" +
-          (d.left >= 0 ? "還剩 " + fmt(d.left) + " 元" : "超過 " + fmt(-d.left) + " 元");
+        if (d.spent > d.budget) { fill.classList.add("over"); }
+        note.textContent = "生活費預算 " + fmt(d.budget) + "，花了 " + fmt(d.spent) + "，" +
+          (d.left >= 0 ? "還剩 " + fmt(d.left) : "超過 " + fmt(-d.left));
       } else {
         note.textContent = "還沒設預算（/money_budget 金額）";
       }
       var flow = [];
-      if (d.income) { flow.push("收入 " + fmt(d.income) + " 元"); }
-      if (d.transfer) { flow.push("轉帳 " + fmt(d.transfer) + " 元（不算花費）"); }
+      if (d.income) { flow.push("收入 " + fmt(d.income)); }
+      if (d.transfer) { flow.push("轉帳 " + fmt(d.transfer) + "（不算花費）"); }
       document.getElementById("flow").textContent = flow.join("・");
       var ul = document.getElementById("cats");
       d.by_category.forEach(function (c) {
         var li = document.createElement("li");
-        li.textContent = c.category + "：" + fmt(c.amount) + " 元";
+        li.textContent = c.category + "：" + fmt(c.amount);
         ul.appendChild(li);
       });
     })

@@ -1,0 +1,116 @@
+{
+  "id": "thanks-to-god",
+  "name": "數算恩典",
+  "description": "先勾今天恩典出現在哪裡，再寫三件，最後一句感謝的禱告。",
+  "group": "與神同行",
+  "order": 13,
+  "default_hidden": true,
+  "when": "一天結束前三分鐘；或心裡只剩抱怨、想換個眼光的時候。",
+  "minutes": 3,
+  "moods": [
+    "感恩",
+    "疲累",
+    "愛抱怨的一天"
+  ],
+  "tags": [
+    "感恩",
+    "勾選為主",
+    "禱告"
+  ],
+  "structure": "n-part",
+  "reflection": "prayer",
+  "flow": [
+    "gratitude",
+    "prayer"
+  ],
+  "default_theme": "dawn",
+  "default_layout": "postcard",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "where",
+      "title": "今天的恩典在哪裡",
+      "color": "#1f7a4d",
+      "icon": "🌱",
+      "fields": [
+        {
+          "id": "areas",
+          "label": "勾一勾",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "供應"
+            },
+            {
+              "id": "o2",
+              "label": "保守平安"
+            },
+            {
+              "id": "o3",
+              "label": "人的幫助"
+            },
+            {
+              "id": "o4",
+              "label": "神的話"
+            },
+            {
+              "id": "o5",
+              "label": "禱告蒙應允"
+            },
+            {
+              "id": "o6",
+              "label": "身體"
+            },
+            {
+              "id": "o7",
+              "label": "工作／課業"
+            },
+            {
+              "id": "o8",
+              "label": "家人"
+            },
+            {
+              "id": "o9",
+              "label": "難處裡的平安"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "three",
+          "label": "向神感恩的三件事",
+          "kind": "list",
+          "placeholder": "感謝神…",
+          "min_rows": 3,
+          "color": "#1f7a4d",
+          "hint": "再小都算。",
+          "ai_hint": "一件一行，用作者的話；沒有就留空，不要湊數。"
+        },
+        {
+          "id": "usual",
+          "label": "早就習慣、其實是恩典的一件事",
+          "kind": "short_text",
+          "ai_hint": "用作者自己的話，一句以內；沒提到就留空。"
+        }
+      ]
+    },
+    {
+      "id": "pray",
+      "title": "說出來",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "line",
+          "label": "一句感謝",
+          "kind": "fill",
+          "pattern": "主啊，謝謝祢 {}。",
+          "ai_hint": "一格：謝謝主什麼。"
+        }
+      ]
+    }
+  ]
+}

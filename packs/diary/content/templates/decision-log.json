@@ -1,0 +1,211 @@
+{
+  "id": "decision-log",
+  "name": "決策紀錄",
+  "description": "要做重要決定的那天寫。記下當時知道什麼、預期什麼，過一陣子回來對照。",
+  "group": "工作與創業",
+  "order": 31,
+  "when": "要做重要決定的那天：記下當時知道什麼、預期什麼，過一陣子回來對照。",
+  "minutes": 15,
+  "moods": ["猶豫", "有壓力", "冷靜"],
+  "tags": ["工作", "決策", "回頭對照", "不談信仰也可以"],
+  "structure": "n-part",
+  "reflection": "reflection",
+  "flow": ["decision", "reflection", "review"],
+  "default_theme": "letterpress",
+  "default_layout": "ledger",
+  "closing_label": "補充",
+  "closing_hint": "其他想留給以後的自己看的。",
+  "closing_placeholder": "當時的情況還有…",
+  "sections": [
+    {
+      "id": "what",
+      "title": "這個決定",
+      "color": "#22252a",
+      "icon": "◈",
+      "fields": [
+        {
+          "id": "decision",
+          "label": "我決定了什麼",
+          "kind": "short_text",
+          "ai_hint": "作者決定了什麼，一句話。"
+        },
+        {
+          "id": "affects",
+          "label": "這個決定會影響到誰？他們知道嗎？",
+          "kind": "text",
+          "hint": "被影響最深的人，常常是最晚知道的那個",
+          "ai_hint": "會影響到誰、他們知不知道。"
+        },
+        {
+          "id": "type",
+          "label": "這是哪一種決定？",
+          "kind": "choice",
+          "options": [
+            { "id": "reversible", "label": "可以反悔的" },
+            { "id": "one_way", "label": "很難反悔的" }
+          ],
+          "hint": "可以反悔的就快點決定，別開會了",
+          "ai_hint": "作者說了能不能反悔才選。"
+        },
+        {
+          "id": "deadline",
+          "label": "什麼時候一定要決定",
+          "kind": "short_text",
+          "ai_hint": "什麼時候一定要決定。"
+        }
+      ]
+    },
+    {
+      "id": "know",
+      "title": "當時我知道什麼",
+      "color": "#5a6472",
+      "icon": "▤",
+      "fields": [
+        {
+          "id": "facts",
+          "label": "手上的事實",
+          "kind": "list",
+          "min_rows": 3,
+          "ai_hint": "手上的事實，一件一行。"
+        },
+        {
+          "id": "unknown",
+          "label": "還不知道、但影響很大的事",
+          "kind": "list",
+          "color": "#c8322c",
+          "ai_hint": "還不知道、但影響很大的事，一件一行。"
+        },
+        {
+          "id": "state",
+          "label": "做這個決定時我的狀態",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "calm", "label": "冷靜" },
+            { "id": "excited", "label": "興奮" },
+            { "id": "anxious", "label": "焦慮" },
+            { "id": "forced", "label": "被逼的" },
+            { "id": "spite", "label": "賭氣" },
+            { "id": "tired", "label": "疲累" },
+            { "id": "sure", "label": "有把握" },
+            { "id": "pretending", "label": "在裝有把握" }
+          ],
+          "hint": "狀態會影響判斷，先記下來才看得出來",
+          "ai_hint": "從選項挑作者做決定時的狀態；「在裝有把握」只照作者承認的選。"
+        }
+      ]
+    },
+    {
+      "id": "options",
+      "title": "選項",
+      "color": "#2456b8",
+      "icon": "⌥",
+      "fields": [
+        {
+          "id": "considered",
+          "label": "認真考慮過的做法",
+          "kind": "list",
+          "min_rows": 3,
+          "color": "#2456b8",
+          "ai_hint": "認真考慮過的做法，一個一行。"
+        },
+        {
+          "id": "why",
+          "label": "為什麼選這個，不選其他的",
+          "kind": "text",
+          "ai_hint": "為什麼選這個、不選其他的。"
+        },
+        {
+          "id": "cost",
+          "label": "選了它，我放棄了什麼",
+          "kind": "short_text",
+          "color": "#5a6472",
+          "ai_hint": "選了它放棄了什麼。"
+        },
+        {
+          "id": "sunlight",
+          "label": "這個決定裡，有沒有哪一部分是我不希望被人知道的？",
+          "kind": "short_text",
+          "color": "#c8322c",
+          "hint": "如果有，那裡通常就是要再想一次的地方",
+          "ai_hint": "不希望被人知道的部分；作者沒提就留空。"
+        }
+      ]
+    },
+    {
+      "id": "expect",
+      "title": "我預期會怎樣",
+      "color": "#b5623c",
+      "icon": "◎",
+      "fields": [
+        {
+          "id": "expected",
+          "label": "如果對了，三個月後會看到什麼",
+          "kind": "text",
+          "color": "#b5623c",
+          "hint": "寫得越具體，之後越好對照",
+          "ai_hint": "如果對了，三個月後會看到什麼（越具體越好）。"
+        },
+        {
+          "id": "wrong_sign",
+          "label": "什麼跡象出現，就代表我錯了",
+          "kind": "short_text",
+          "color": "#c8322c",
+          "hint": "先講好，事後才不會硬拗",
+          "ai_hint": "什麼跡象出現就代表錯了。"
+        },
+        {
+          "id": "confidence",
+          "label": "我的把握",
+          "kind": "scale",
+          "options": [
+            { "id": "high", "label": "很有把握" },
+            { "id": "mid", "label": "五五波" },
+            { "id": "low", "label": "其實是賭的" }
+          ],
+          "ai_hint": "只在作者自己說了才選；沒提到就不選，不要替作者打分數。"
+        },
+        {
+          "id": "review_when",
+          "label": "什麼時候回來看這一篇",
+          "kind": "short_text",
+          "placeholder": "例：三個月後",
+          "ai_hint": "什麼時候回來看這一篇。"
+        }
+      ]
+    },
+    {
+      "id": "later",
+      "title": "事後回來寫",
+      "color": "#1f7a4d",
+      "icon": "⟲",
+      "fields": [
+        {
+          "id": "outcome",
+          "label": "後來怎麼了",
+          "kind": "text",
+          "hint": "回來的時候再填",
+          "ai_hint": "事後回來才寫：當天整理時一律留空。"
+        },
+        {
+          "id": "judgement",
+          "label": "決定本身是好的嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "good", "label": "是" },
+            { "id": "bad", "label": "不是" },
+            { "id": "unclear", "label": "說不準" }
+          ],
+          "hint": "跟結果分開看——好決定也可能碰上壞運氣",
+          "ai_hint": "事後回來才寫：當天整理時一律不選。"
+        },
+        {
+          "id": "lesson",
+          "label": "下次我要改的一件事",
+          "kind": "short_text",
+          "color": "#1f7a4d",
+          "ai_hint": "事後回來才寫：當天整理時一律留空。"
+        }
+      ]
+    }
+  ]
+}

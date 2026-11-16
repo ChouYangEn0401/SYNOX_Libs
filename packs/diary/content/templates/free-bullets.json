@@ -1,0 +1,70 @@
+{
+  "id": "free-bullets",
+  "name": "星號隨筆",
+  "description": "不分題目，想到什麼寫什麼，最後補上感恩與代禱。",
+  "group": "與神同行",
+  "order": 4,
+  "when": "不想被題目綁住，想到什麼就記什麼，最後補上感恩與代禱。",
+  "minutes": 3,
+  "moods": ["隨意", "零碎"],
+  "tags": ["靈修", "條列", "自由書寫", "感恩", "代禱"],
+  "structure": "three-part",
+  "reflection": "prayer",
+  "flow": ["events", "gratitude", "prayer"],
+  "default_theme": "linen",
+  "default_layout": "postcard",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "notes",
+      "title": "今天的片段",
+      "color": "#22252a",
+      "icon": "✳",
+      "fields": [
+        {
+          "id": "bullets",
+          "label": "一則一則記下來",
+          "kind": "list",
+          "placeholder": "＊ 今天…",
+          "min_rows": 3,
+          "color": "#22252a",
+          "ai_hint": "作者記下的片段，一則一行，照原文、不改寫。"
+        }
+      ]
+    },
+    {
+      "id": "thanks",
+      "title": "感恩事項",
+      "color": "#1f7a4d",
+      "icon": "🌱",
+      "fields": [
+        {
+          "id": "gratitude",
+          "label": "感恩",
+          "kind": "list",
+          "min_rows": 3,
+          "color": "#1f7a4d",
+          "ai_hint": "作者明白感謝的事，一件一行、用作者的話；沒有就留空，不要硬湊。"
+        }
+      ]
+    },
+    {
+      "id": "pray",
+      "title": "代禱事項",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "prayer",
+          "label": "代禱",
+          "kind": "list",
+          "min_rows": 3,
+          "color": "#c8322c",
+          "ai_hint": "作者提到要禱告、擔心或想交託的人與事，一件一行（可寫成「求主…」）；沒有就留空。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+/* setup 分頁自己的樣式（共用的放 ../style.css）：帳本設定、選配功能兩張卡。 */
+.setting-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 16px; }
+.feature-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0;
+  border-bottom: 1px solid var(--line, #e5e5e5); }
+.feature-row:last-child { border-bottom: 0; }
+.feature-row .what { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.feature-row .btn { min-height: 44px; }

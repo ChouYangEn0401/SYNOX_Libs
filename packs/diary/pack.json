@@ -1,0 +1,20 @@
+{
+  "name": "diary",
+  "title": "📔 日記",
+  "summary": "每日日記：隨手記一則，或挑一個題組（靈修、心情、反思、工作…）寫一篇，做成一頁 HTML 或一張日記本內頁的卡片（加密存在這台電腦）",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "diary",
+  "category": "生活",
+  "access": "member",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 40,
+  "python": { "module": "pack" },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
+  "capabilities": ["filesystem:own"],
+  "callers": { "export_all": ["human"], "import": ["human"], "import_replace": ["human"] },
+  "skill": "SKILL.md",
+  "storage": "vault"
+}

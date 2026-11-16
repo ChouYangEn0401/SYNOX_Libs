@@ -1,0 +1,127 @@
+{
+  "_doc": [
+    "The rule behind `python -m backend.cli templates suggest --text=...` (backend/taxonomy.py). No model is involved:",
+    "a signal fires when one of its `words` appears in the text; a question set then earns `weight` points per matched",
+    "word (capped at 3) if its `flow` has one of the signal's steps, its `moods` or `tags` overlap, or it is named in",
+    "`templates` (x1.5). Writing shorter than `length.short` characters favours sets of <= 3 minutes; longer than",
+    "`length.long` favours sets with room to write. Faith-oriented sets (reflection = devotional/prayer) lose",
+    "`faith_penalty` points when the `faith` signal did not fire (setting suggest_faith=auto).",
+    "Copy this file to data/suggest.json to tune it for yourself; the copy wins."
+  ],
+  "length": { "short": 40, "long": 300 },
+  "faith_penalty": 4,
+  "signals": {
+    "faith": {
+      "label": "提到信仰",
+      "words": ["主", "神", "上帝", "耶穌", "經文", "讀經", "聖經", "詩篇", "禱告", "祈禱", "代禱", "靈修", "教會", "阿們", "恩典", "讚美"],
+      "flow": ["scripture", "prayer", "checkin", "confession", "trust"],
+      "weight": 3
+    },
+    "scripture": {
+      "label": "提到經文",
+      "words": ["經文", "讀經", "聖經", "詩篇", "福音", "書信", "章", "節"],
+      "flow": ["scripture"],
+      "weight": 2
+    },
+    "prayer": {
+      "label": "在禱告",
+      "words": ["禱告", "祈禱", "代禱", "求主", "主啊", "神啊", "交託"],
+      "flow": ["prayer"],
+      "weight": 3
+    },
+    "lament": {
+      "label": "向神哀哭",
+      "words": ["為什麼", "主啊", "神啊", "離棄", "不公平", "無力", "撐不下去", "哭"],
+      "templates": ["lament"],
+      "weight": 2
+    },
+    "gratitude": {
+      "label": "在感謝",
+      "words": ["感謝", "謝謝", "感恩", "感激", "幸好", "還好有"],
+      "flow": ["gratitude"],
+      "weight": 2
+    },
+    "worry": {
+      "label": "在擔心",
+      "words": ["擔心", "焦慮", "緊張", "害怕", "停不下來", "怕", "睡不著", "萬一"],
+      "flow": ["worries"],
+      "moods": ["焦慮", "害怕", "停不下來"],
+      "weight": 3
+    },
+    "hard": {
+      "label": "很難過",
+      "words": ["難過", "痛", "崩潰", "受傷", "委屈", "生氣", "很糟", "撐不住", "累死", "難熬", "好累", "想哭"],
+      "flow": ["feelings"],
+      "moods": ["難過", "痛苦", "委屈", "生氣", "疲累"],
+      "weight": 2
+    },
+    "feelings_unclear": {
+      "label": "說不出是什麼心情",
+      "words": ["說不出", "說不上來", "不知道怎麼了", "心情", "情緒", "麻木", "煩", "怪怪的"],
+      "flow": ["feelings"],
+      "moods": ["說不上來", "麻木", "煩躁", "混亂"],
+      "weight": 2
+    },
+    "work": {
+      "label": "在講工作",
+      "words": ["工作", "客戶", "專案", "老闆", "同事", "開會", "產品", "使用者", "創業", "公司", "上班", "deadline", "bug", "程式", "業績"],
+      "flow": ["work"],
+      "weight": 3
+    },
+    "decision": {
+      "label": "在做決定",
+      "words": ["決定", "選擇", "要不要", "猶豫", "抉擇", "選了", "該不該"],
+      "flow": ["decision"],
+      "weight": 3
+    },
+    "review_week": {
+      "label": "回顧一週",
+      "words": ["這一週", "這週", "本週", "一週", "週末", "下週", "這禮拜", "下禮拜"],
+      "flow": ["review"],
+      "tags": ["每週"],
+      "weight": 3
+    },
+    "review_month": {
+      "label": "回顧一個月",
+      "words": ["這個月", "月底", "月初", "下個月", "一個月", "這一個月"],
+      "tags": ["每月"],
+      "weight": 4
+    },
+    "learn": {
+      "label": "有學到東西",
+      "words": ["學到", "發現", "原來", "體會", "領悟", "反思", "想通", "明白", "看見自己"],
+      "flow": ["reflection"],
+      "weight": 2
+    },
+    "identity": {
+      "label": "在想要成為怎樣的人",
+      "words": ["想成為", "成為什麼樣", "我想變成", "品格", "像那樣的人", "想成為的人"],
+      "flow": ["identity"],
+      "weight": 4
+    },
+    "highs_lows": {
+      "label": "一天裡有高有低",
+      "words": ["最開心", "最難受", "又開心又", "起伏", "一邊開心一邊", "高興又"],
+      "templates": ["peaks-valleys"],
+      "weight": 2
+    },
+    "quote": {
+      "label": "引了別人的話",
+      "words": ["說過", "有人說", "那句話", "名言", "一句話"],
+      "flow": ["quote"],
+      "weight": 2
+    },
+    "people": {
+      "label": "提到身邊的人",
+      "words": ["朋友", "家人", "媽", "爸", "太太", "老公", "孩子", "同學", "室友", "女兒", "兒子"],
+      "flow": ["people"],
+      "weight": 1
+    },
+    "plan": {
+      "label": "在想下一步",
+      "words": ["明天", "下一步", "接下來", "打算", "之後要"],
+      "flow": ["plan"],
+      "weight": 1
+    }
+  }
+}

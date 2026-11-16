@@ -1,0 +1,6 @@
+/* plan 分頁自己的樣式（共用的放 ../style.css）＋第一次使用的引導（onboard.js，畫在總覽）。 */
+.onboard h2 { margin: 4px 0 8px; }
+.onboard .field { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; }
+.onboard .pick-group { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.onboard .pick { display: flex; align-items: flex-start; gap: 8px; min-height: 44px; }
+.onboard .actions .btn { min-height: 44px; }

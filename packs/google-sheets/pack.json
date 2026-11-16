@@ -1,0 +1,27 @@
+{
+  "name": "google-sheets",
+  "title": "📊 Google 試算表（只加列）",
+  "summary": "建試算表、看、往後加列（先預覽、你自己確認才寫；不改、不刪格子）",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "gsheet",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 36,
+  "python": { "module": "pack" },
+  "capabilities": ["network"],
+  "publisher": "SYNOX_Libs",
+  "auth": {
+    "type": "oauth",
+    "fields": ["client_id", "client_secret"],
+    "oauth": {
+      "flow": "device authorization grant (RFC 8628): show a code, the user approves on any browser, then /gsheet_login polls once",
+      "scopes": ["https://www.googleapis.com/auth/drive.file"]
+    }
+  },
+  "requires": { "pip": ["requests"], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3" },
+  "skill": "SKILL.md",
+  "storage": "vault"
+}

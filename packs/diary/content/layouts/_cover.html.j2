@@ -1,0 +1,8 @@
+{% if gift_cover %}
+  <div class="cover" id="cover" role="button" tabindex="0" aria-label="打開日記">
+    <span class="seal">✉</span>
+    <h1>{{ gift_message or "有人把今天的日記留給你" }}</h1>
+    <p>{{ doc.date_display }}　週{{ doc.weekday }}</p>
+    <div class="hint">點一下打開</div>
+  </div>
+{% endif %}

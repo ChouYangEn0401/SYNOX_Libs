@@ -1,8 +1,8 @@
 {
   "name": "money",
   "title": "💰 記帳",
-  "summary": "記支出、收入、轉帳，自己的類別與選配範本，預算與單項上限；附完整的記帳畫面（加密存在這台電腦）",
-  "version": "0.3.1",
+  "summary": "記支出、收入、轉帳；每期收入怎麼分、各格預算、信用卡與分期、週月檢討；附完整的記帳畫面（帳本存在你自己的資料夾，沒有加密）",
+  "version": "0.4.0-alpha.1",
   "stage": "alpha",
   "kind": "python",
   "group": "money",
@@ -10,10 +10,30 @@
   "surfaces": ["dm"],
   "data": "user",
   "order": 20,
-  "python": { "module": "pack" },
+  "capabilities": ["filesystem:own"],
+  "python": { "module": "pack", "package": true },
   "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3" },
   "skill": "SKILL.md",
   "storage": "vault",
+  "callers": {
+    "plan": ["human", "remote"], "plan_names": ["human", "remote"], "bucket": ["human", "remote"],
+    "bucket_skip": ["human", "remote"], "bucket_setaside": ["human", "remote"], "bucket_fold": ["human", "remote"],
+    "move": ["human", "remote"], "fixed": ["human", "remote"], "group": ["human", "remote"],
+    "account": ["human", "remote"], "setting": ["human", "remote"], "feature_on": ["human", "remote"],
+    "init": ["human", "remote"], "pbook": ["human", "remote"], "pbook_close": ["human", "remote"],
+    "piggy_hide": ["human", "remote"], "piggy_set": ["human", "remote"],
+    "book_new": ["human"]
+  },
+  "agent": {
+    "index": "記一筆支出收入或轉帳、看這期還能花多少、查最近的帳、寫週月檢討",
+    "triggers": ["記帳", "花了", "收入", "轉帳", "預算", "還能花", "這個月", "收據", "檢討"],
+    "load": "on_trigger",
+    "skill": { "file": "SKILL.md",
+               "topics": { "record": "skills/record.md", "categories": "skills/categories.md",
+                           "transfer": "skills/transfer.md", "iou": "skills/iou.md", "debt": "skills/debt.md",
+                           "budget": "skills/budget.md", "review": "skills/review.md", "ingest": "skills/ingest.md" } },
+    "provides": ["money.record", "money.report", "money.review"]
+  },
   "web": {
     "panel": "panel.html",
     "api": ["GET /summary"],
@@ -22,11 +42,23 @@
       "root": "app",
       "title": "記帳本",
       "kit": 1,
-      "reads": ["month", "entries", "categories"],
-      "actions": { "add": "WRITE", "in": "WRITE", "transfer": "WRITE", "edit": "WRITE", "undo": "WRITE",
-                   "rm": "DANGER", "budget": "WRITE", "cap": "WRITE", "cat_add": "WRITE", "cat_rm": "WRITE",
-                   "template": "WRITE" },
-      "exports": ["entries_csv"],
+      "reads": ["meta", "ref", "guess", "items", "passbook", "txn", "inbox", "batches",
+                "home", "year", "allowance", "conflicts", "moves",
+                "setup", "features", "book_info",
+                "reviews", "review",
+                "piggy", "piggy_trades", "piggy_positions", "piggy_book", "piggy_compare", "books", "quotes",
+                "quotes_needed", "reconcile"],
+      "actions": {
+        "add": "WRITE", "in": "WRITE", "transfer": "WRITE", "iou": "WRITE", "edit": "WRITE", "rm": "DANGER",
+        "undo": "WRITE", "revert": "DANGER", "note": "WRITE", "reclassify": "WRITE", "dedup": "WRITE",
+        "bucket_skip": "WRITE", "bucket_setaside": "WRITE", "bucket_fold": "WRITE", "move": "WRITE",
+        "fixed_post": "WRITE", "envelope_do": "WRITE", "plan": "WRITE", "plan_names": "WRITE", "bucket": "WRITE",
+        "fixed": "WRITE", "group": "WRITE", "cat_add": "WRITE", "account": "WRITE", "setting": "WRITE",
+        "feature_on": "WRITE", "init": "WRITE", "book_new": "DANGER", "review_apply": "WRITE",
+        "review_reply": "WRITE", "review_save": "WRITE", "trade_add": "WRITE", "trade_rm": "WRITE", "pbook": "WRITE",
+        "pbook_close": "WRITE", "piggy_hide": "WRITE", "piggy_set": "WRITE", "count": "WRITE", "price_push": "WRITE"
+      },
+      "exports": ["book", "entries_csv"],
       "remote": true
     }
   }

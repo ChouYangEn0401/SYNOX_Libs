@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<!--#
+  SYNOX 工具庫入口頁的樣板（給設計的人改這一份；docs/site/index.html 是產生出來的，不要手改）。
+  產生：python scripts/build_site.py（scripts/build.py 全部打包時也會跑）；檢查：python scripts/build_site.py --check。
+  資料從 packs/*/pack.json（＋site 區塊）、docs/site-tools.json、docs/artifacts.json、catalog.json、VERSION 來；
+  版面、文案、CSS 都可以改，只要留著 {{…}} 佔位與 BEGIN／END 片段。說明：docs/CONTRIBUTING-TOOLS.md、docs/ARTIFACTS.md。
+-->
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+{{{generated_note}}}
+<title>SYNOX 工具庫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai+TC:wght@400;700&family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* 跟 SYNOX 介紹頁同一套 token（青綠主色、藍灰中性色、三個狀態色），版面簡化成一欄。 */
+:root {
+  --bg: #f3f5f8; --surface: #ffffff; --sunken: #eef1f5; --line: #e2e7ee; --line-2: #cdd5df;
+  --ink: #131b26; --muted: #465264; --faint: #6a7687;
+  --accent: #0a7c70; --accent-soft: #d9f1ec; --accent-ink: #ffffff;
+  --ok: #1f7a3a; --ok-soft: #dcf3e3; --warn: #9a5b00; --warn-soft: #fbeccf; --bad: #b42318; --bad-soft: #fde3df;
+  --shadow: 0 1px 2px rgba(19,27,38,.05), 0 10px 28px -14px rgba(19,27,38,.22);
+  --glow: radial-gradient(60% 50% at 85% 0%, rgba(10,124,112,.12), transparent 70%);
+  --display: "LXGW WenKai TC", "Noto Serif TC", "PMingLiU", serif;
+  --body: "Noto Sans TC", "Microsoft JhengHei UI", "PingFang TC", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "Cascadia Code", Consolas, ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0f14; --surface: #121924; --sunken: #0d131b; --line: #1f2b3b; --line-2: #2d3b4f;
+    --ink: #dbe4ef; --muted: #aab6c6; --faint: #7f90a7;
+    --accent: #35e0c4; --accent-soft: #123b38; --accent-ink: #06201c;
+    --ok: #57d98a; --ok-soft: #10301e; --warn: #e6b04e; --warn-soft: #3a2a0b; --bad: #ff8a7a; --bad-soft: #43171a;
+    --shadow: 0 1px 2px rgba(0,0,0,.45), 0 14px 36px -16px rgba(0,0,0,.75);
+    --glow: radial-gradient(60% 50% at 85% 0%, rgba(53,224,196,.14), transparent 70%);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b0f14; --surface: #121924; --sunken: #0d131b; --line: #1f2b3b; --line-2: #2d3b4f;
+  --ink: #dbe4ef; --muted: #aab6c6; --faint: #7f90a7;
+  --accent: #35e0c4; --accent-soft: #123b38; --accent-ink: #06201c;
+  --ok: #57d98a; --ok-soft: #10301e; --warn: #e6b04e; --warn-soft: #3a2a0b; --bad: #ff8a7a; --bad-soft: #43171a;
+  --shadow: 0 1px 2px rgba(0,0,0,.45), 0 14px 36px -16px rgba(0,0,0,.75);
+  --glow: radial-gradient(60% 50% at 85% 0%, rgba(53,224,196,.14), transparent 70%);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg) var(--glow) no-repeat; color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 880px; margin-inline: auto; }
+h1, h2 { font-family: var(--display); font-weight: 700; line-height: 1.3; margin: 0; text-wrap: balance; }
+h2 { font-size: 22px; margin-bottom: 4px; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+code { font-family: var(--mono); font-size: .88em; background: var(--sunken); border: 1px solid var(--line); padding: 1px 6px; border-radius: 5px; word-break: break-word; }
+section { padding-block: 22px; }
+
+/* 最上面：一句話＋三步 */
+.hero { padding-block: 28px 6px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .18em; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+.slogan { font-size: clamp(30px, 7.4vw, 50px); line-height: 1.25; }
+.slogan em { font-style: normal; color: var(--accent); }
+.steps { list-style: none; margin: 20px 0 0; padding: 0; counter-reset: s; display: grid; gap: 8px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+.steps li::before { content: counter(s); font-family: var(--mono); font-weight: 600; font-size: 14px; color: var(--accent-ink); background: var(--accent); border-radius: 8px; height: 28px; display: grid; place-items: center; }
+.steps b { display: block; font-weight: 700; }
+.steps p { color: var(--muted); font-size: 14.5px; }
+@media (min-width: 760px) { .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* 工具卡片：做什麼 → 例子 → 誰能用 → 上網 → 測過嗎 → 版本＋下載 */
+.group-h { font-family: var(--body); font-size: 15px; font-weight: 700; color: var(--muted); margin: 20px 0 10px; }
+.tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 700px) { .tools { grid-template-columns: 1fr; } }
+.tool { display: flex; flex-direction: column; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; min-width: 0; box-shadow: var(--shadow); }
+.t-head { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 12px; align-items: center; }
+.t-ico { width: 44px; height: 44px; border-radius: 13px; background: var(--sunken); display: grid; place-items: center; font-size: 24px; line-height: 1; }
+.t-title { display: block; font-size: 18px; font-weight: 700; line-height: 1.35; }
+.t-line { display: block; color: var(--muted); font-size: 14.5px; line-height: 1.5; }
+.t-try { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: 13px; color: var(--faint); }
+.t-ex { font-size: 13.5px; color: var(--ink); padding: 3px 9px; }
+.t-facts { margin: 0; display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 10px; }
+.t-facts div { display: grid; grid-template-columns: 4.2em minmax(0, 1fr); gap: 8px; align-items: baseline; }
+.t-facts dt { font-size: 13px; color: var(--faint); white-space: nowrap; }
+.t-facts dd { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+.pill { display: inline-block; font-style: normal; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 0 9px; line-height: 20px; background: var(--sunken); color: var(--muted); border: 1px solid var(--line); white-space: nowrap; }
+.pill.stage { color: var(--warn); background: var(--warn-soft); border-color: transparent; }
+.pill.ok { color: var(--ok); background: var(--ok-soft); border-color: transparent; }
+.t-foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding-top: 2px; }
+.t-name { font-family: var(--mono); font-size: 12px; color: var(--faint); margin-right: auto; }
+.t-more { font-size: 14px; font-weight: 500; text-decoration: none; padding-block: 10px; }
+.t-more:hover { text-decoration: underline; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; font-weight: 600; font-size: 15px; padding: 8px 18px; border-radius: 11px; border: 1px solid var(--line-2); color: var(--ink); background: var(--surface); min-height: 44px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* 一次全部下載、衣櫃：一列一件事 */
+.extra { display: grid; gap: 10px; }
+@media (min-width: 760px) { .extra { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.strip { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+.strip div { flex: 1 1 220px; min-width: 0; }
+.strip b { display: block; }
+.strip p { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
+
+/* 標籤的意思：收起來，要看再打開 */
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px 16px; }
+summary { cursor: pointer; font-weight: 600; padding-block: 10px; min-height: 44px; display: flex; align-items: center; gap: 8px; }
+summary::before { content: "＋"; color: var(--accent); }
+details[open] summary::before { content: "－"; }
+summary::-webkit-details-marker { display: none; }
+.key { list-style: none; margin: 0; padding: 0 0 8px; }
+.key li { padding-block: 9px; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--muted); }
+.key b { color: var(--ink); font-weight: 600; }
+.key .now b { color: var(--warn); }
+
+footer { border-top: 1px solid var(--line); margin-top: 18px; padding-block: 20px 14px; color: var(--faint); font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: center; }
+footer a { color: var(--muted); display: inline-block; padding-block: 8px; }
+/* 給開發者對版本：線上版和本機版的「頁面版本」一樣＝同一份 */
+.stamp { font-family: var(--mono); font-size: 10px; color: var(--faint); opacity: .55; padding-bottom: 28px; word-break: break-all; }
+.stamp a { color: inherit; }
+</style>
+</head>
+<body>
+<!--#
+  ═══ 樣板片段（scripts/build_site.py 會先把 BEGIN／END 之間的片段拿出來，不會出現在產生的頁面）═══
+  每個工具一張卡片（card），固定順序：做什麼 → 例子 → 誰能用 → 上網 → 測過嗎 → 版本＋下載；同一組的卡片放進一個 section；小標籤是 pill。
+  {{名字}}＝會跳脫的字，{{{名字}}}＝產生器組好的 HTML。可以用的名字見 scripts/build_site.py 的 index_data()／card_data()。
+-->
+<!-- BEGIN:section -->
+  <h3 class="group-h">{{title}}</h3>
+  <div class="tools">
+{{{cards}}}
+  </div>
+<!-- END:section -->
+<!-- BEGIN:card -->
+    <article class="tool">
+      <div class="t-head">
+        <span class="t-ico" aria-hidden="true">{{emoji}}</span>
+        <div><b class="t-title">{{title}}</b>
+          <span class="t-line">{{line}}</span></div>
+      </div>
+      {{{example}}}
+      <dl class="t-facts">
+        <div><dt>誰能用</dt><dd>{{{who}}}</dd></div>
+        <div><dt>上網</dt><dd>{{{net}}}</dd></div>
+        <div><dt>測過嗎</dt><dd>{{{stage}}} {{tested}}</dd></div>
+      </dl>
+      <div class="t-foot">
+        <span class="t-name">{{name}} · v{{version}}</span>
+        {{{page_note}}}
+        <a class="t-more" href="{{href}}">看說明 →</a>
+        <a class="btn primary" href="{{pack_url}}" aria-label="下載 {{title}}">下載</a>
+      </div>
+    </article>
+<!-- END:card -->
+<!-- BEGIN:example --><p class="t-try">打這句試試 <code class="t-ex">{{text}}</code></p><!-- END:example -->
+<!-- BEGIN:pill --><i class="pill{{tone}}"{{{title_attr}}}>{{text}}</i><!-- END:pill -->
+<!-- BEGIN:all_here -->（現在全部工具都是這一級）<!-- END:all_here -->
+<div class="wrap">
+
+<div class="hero">
+  <p class="eyebrow">SYNOX 工具庫</p>
+  <h1 class="slogan">挑一個工具，按下載，<em>丟進 SYNOX 就好。</em></h1>
+  <ol class="steps">
+    <li><div><b>下載</b>
+      <p>在下面挑一個，按「下載」。</p></div></li>
+    <li><div><b>丟進 SYNOX</b>
+      <p>到 SYNOX 的「設定 → 功能與安裝」上傳。或在那裡按「看有哪些工具」直接裝，不用下載。</p></div></li>
+    <li><div><b>打一句試試</b>
+      <p>照卡片上的例子打一句。</p></div></li>
+  </ol>
+</div>
+
+<section id="tools">
+  <h2>所有工具（{{tool_count}} 個）</h2>
+{{{sections}}}
+</section>
+
+<section id="more" class="extra">
+  <div class="strip" id="all">
+    <div><b>一次全部下載</b>
+      <p><code>{{tools_zip}}</code>，解開後一樣一個一個上傳。</p></div>
+    <a class="btn" href="{{tools_url}}">全部下載</a>
+  </div>
+  <div class="strip" id="wardrobe">
+    <div><b>想換外觀？</b>
+      <p>衣櫃裡有 {{costume_count}} 套，顏色和吉祥物一起換。</p></div>
+    <a class="btn" href="{{wardrobe_url}}">逛衣櫃</a>
+  </div>
+</section>
+
+<section id="key">
+  <details>
+    <summary>卡片上的字是什麼意思</summary>
+    <ul class="key">
+      <li><b>👤 單人用</b>：只有裝 SYNOX 的那個人能用。SYNOX 開成伺服器版（一台給家人或社團一起用）時，其他人看不到。</li>
+      <li><b>👥 伺服器版也能用</b>：伺服器版裡每個人都能用，各自一份資料，互相看不到。只有你自己用的話，兩種沒有差別。</li>
+      <li><b>不用上網／要上網</b>：不用上網的，資料只存在你的電腦。要上網的，會連到那個網站（{{online_names}}），要先有那邊的帳號。</li>
+      <li{{{now_test}}}><b>🔧 test 測試中</b>：還在試做，隨時會改。{{{all_here_test}}}</li>
+      <li{{{now_alpha}}}><b>🧪 alpha 早期版</b>：能用，但還沒有人長期用過，用法之後可能會改。{{{all_here_alpha}}}</li>
+      <li{{{now_beta}}}><b>🚧 beta 公測版</b>：功能齊了，有人實際用過一陣子。{{{all_here_beta}}}</li>
+      <li{{{now_stable}}}><b>⭐ stable 穩定版</b>：長期實際用過。{{{all_here_stable}}}</li>
+      <li><b>只用假資料試過</b>：要上網的 {{online_count}} 個，還沒真的連到那個網站測過，只用假的資料試過。真的連上去可能會遇到問題。</li>
+      <li><b>Apple 提醒事項</b>：新版 iCloud 的提醒事項 Apple 不讓別的程式讀，要改用別家的帳號。</li>
+    </ul>
+  </details>
+</section>
+
+<footer>
+  <span>SYNOX 工具庫 {{tag}}</span>
+  <a href="https://github.com/ChouYangEn0401/SYNOX_Libs" target="_blank" rel="noopener">GitHub</a>
+  <a href="{{release_url}}" target="_blank" rel="noopener">發佈頁 {{tag}}</a>
+  <a href="https://github.com/ChouYangEn0401/SYNOX/blob/main/docs/tools.md" target="_blank" rel="noopener">自己寫一個工具</a>
+  <a href="https://claude.ai/artifact/SNsSkbcVQm7BU22BBZN3gW#synox">SYNOX 介紹頁</a>
+</footer>
+<p class="stamp" data-online="{{online_url}}">線上版 <a href="{{online_url}}">{{online_url}}</a> · 本機版 docs/site/index.html · 頁面版本 <span data-stamp></span></p>
+
+</div>
+</body>
+</html>

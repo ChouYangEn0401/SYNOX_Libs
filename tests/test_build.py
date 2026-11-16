@@ -21,10 +21,11 @@ from synox.sdk import author
 
 # 每個工具裝好之後試一個指令：(指令, 回覆裡要有的字)
 SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "記下了"),
-         "calendar": ("/cal 明天 14:00 看牙醫", "加好了"), "todo": ("/todo 買牛奶", "加好了"), "bullet": ("/bj • 買牛奶", "記到今天"),
+         "calendar": ("/cal 明天 14:00 看牙醫", "加好了"), "diary": ("/diary 今天很好", "記進「一則一則記下來」"), "todo": ("/todo 買牛奶", "加好了"), "bullet": ("/bj • 買牛奶", "記到今天"),
          # 接外面服務的：還沒連接時回「要先設定」，不連網
          "notion": ("/notion 會議", "還沒設定 Notion"), "todoist": ("/todoist_list", "還沒接上 Todoist"),
-         "google-calendar": ("/gcal_today", "還沒連上 Google 日曆"), "apple-reminders": ("/applerem_status", "還沒設定帳號")}
+         "google-calendar": ("/gcal_today", "還沒連上 Google 日曆"), "google-sheets": ("/gsheet_list", "還沒連上 Google 試算表"),
+         "apple-reminders": ("/applerem_status", "還沒設定帳號")}
 
 
 @pytest.fixture(scope="module")
@@ -54,6 +55,26 @@ def _say(app, api, text):
     return api.last(OWNER_ID)
 
 
+def _tools(index):
+    """index.json 裡的工具（衣櫃的外觀 kind=theme 也在同一份清單，另外測：tests/test_costumes.py）。"""
+    return [e for e in index["packs"] if e.get("kind") != "theme"]
+
+
+def test_index_lists_wardrobe_costumes(built):
+    """衣櫃的 26 套外觀跟工具在同一份 index.json：kind=theme、category「衣櫃／外觀」，雜湊、大小對得上。"""
+    import build_costumes
+    out, index = built
+    themes = [e for e in index["packs"] if e.get("kind") == "theme"]
+    assert len(themes) == 26 == len(build_costumes.costume_folders())
+    assert index["collections"]["wardrobe"]["packs"] == [e["name"] for e in themes]
+    for e in themes:
+        assert e["category"] == "衣櫃／外觀" and e["collection"] == "wardrobe"
+        assert e["file"] == f"{e['name']}-{e['version']}.synoxpack"
+        with open(os.path.join(out, e["file"]), "rb") as f:
+            blob = f.read()
+        assert hashlib.sha256(blob).hexdigest() == e["sha256"] and len(blob) == e["size"]
+
+
 def test_every_tool_is_in_smoke_list():
     assert set(SMOKE) == set(PACK_NAMES)
 
@@ -62,10 +83,10 @@ def test_index_lists_every_tool_with_hash_and_sdk(built):
     out, index = built
     assert index["library"] == "SYNOX_Libs" and index["library_version"] == build_script.library_version()
     assert index["built_with"]["sdk"] == author.SDK_VERSION
-    assert {e["name"] for e in index["packs"]} == set(PACK_NAMES)
+    assert {e["name"] for e in _tools(index)} == set(PACK_NAMES)
     with open(os.path.join(out, "index.json"), encoding="utf-8") as f:
         assert json.load(f) == index
-    for e in index["packs"]:
+    for e in _tools(index):
         path = os.path.join(out, e["file"])
         assert e["file"] == f"{e['name']}-{e['version']}.synoxpack"
         with open(path, "rb") as f:
@@ -81,6 +102,31 @@ def test_index_lists_every_tool_with_hash_and_sdk(built):
         assert set(bundle["packs"]) <= set(PACK_NAMES), key
 
 
+def test_money_synoxpack_is_the_whole_multi_file_tool(built):
+    """記帳 0.4.0 是多檔工具：安裝檔裡要有 engine/（含 schema.sql、seeds/）、bridge/、app/、skills/，
+    沒有 __pycache__、.pyc、資料庫；大小與檔數在 SYNOX 的上限內（5 MB／300 個檔）。"""
+    out, index = built
+    entry = next(e for e in _tools(index) if e["name"] == "money")
+    with open(os.path.join(PACKS, "money", "pack.json"), encoding="utf-8") as f:
+        version = json.load(f)["version"]
+    assert entry["version"] == version and entry["file"] == f"money-{version}.synoxpack"
+    path = os.path.join(out, entry["file"])
+    with zipfile.ZipFile(path) as z:
+        names = set(z.namelist())
+    for must in ("pack.json", "pack.py", "SKILL.md", "README.md", "CONTRACT.md", "panel.html",
+                 "engine/__init__.py", "engine/db.py", "engine/schema.sql", "engine/seeds/generic.json",
+                 "engine/services/transactions.py", "bridge/__init__.py", "bridge/session.py", "bridge/table.py",
+                 "bridge/ledger.py", "bridge/piggy.py", "app/index.html", "app/style.css", "app/js/api.js",
+                 "app/js/dom.js", "app/js/views/home.js", "app/js/views/piggy.js", "skills/record.md"):
+        assert must in names, must
+    folder = os.path.join(PACKS, "money")
+    on_disk = {os.path.relpath(os.path.join(b, f), folder).replace(os.sep, "/")
+               for b, d, fs in os.walk(folder) if "__pycache__" not in b for f in fs}
+    assert on_disk <= names, sorted(on_disk - names)                             # 工具資料夾裡的每個檔都帶到了
+    assert not any("__pycache__" in n or n.endswith((".pyc", ".db", ".sqlite")) for n in names)
+    assert len(names) <= 300 and os.path.getsize(path) <= 5 * 1024 * 1024
+
+
 def test_empty_host_then_install_every_synoxpack(built, tmp_path):
     """空的 SYNOX：沒有任何工具；把 dist/ 裡的每個 .synoxpack 走安裝流程裝進去，重開後每個都能用。"""
     from synox.packs import admin
@@ -90,7 +136,7 @@ def test_empty_host_then_install_every_synoxpack(built, tmp_path):
     app, api, data = _empty_host(tmp_path, packs_dir)
     assert app.extras["synox_pack_report"].items == []                          # 一開始是空的
     assert "未知指令" in _say(app, api, "/money 120 午餐")
-    for e in index["packs"]:
+    for e in _tools(index):
         with open(os.path.join(out, e["file"]), "rb") as f:
             token, summary = admin.stage(f.read(), data)
         assert summary["scan"]["ok"], (e["name"], summary["scan"]["problems"])
@@ -151,6 +197,19 @@ def test_build_refuses_tool_without_valid_stage(tmp_path, stage):
     path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
     result = build_script.build(out_dir=str(tmp_path / "out"), root=str(root))
     assert result["index"] is None and any("stage" in p for p in result["problems"]), result["problems"]
+
+
+@pytest.mark.parametrize("key", ["access", "surfaces", "data", "storage", "capabilities"])
+def test_build_refuses_tool_without_explicit_scope(tmp_path, key):
+    """ADR-0006 入口標準：access、surfaces、data、storage、capabilities 都要明寫（SYNOX 有預設值也一樣），沒寫就不打包。"""
+    root = _copy_library(tmp_path)
+    path = root / "packs" / "notes" / "pack.json"
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    del raw[key]
+    path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+    result = build_script.build(out_dir=str(tmp_path / "out"), root=str(root))
+    assert result["index"] is None and any(f"沒寫 {key}" in p for p in result["problems"]), result["problems"]
+    assert not os.path.exists(tmp_path / "out")
 
 
 def test_build_refuses_sdk_range_this_synox_does_not_meet(tmp_path):

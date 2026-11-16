@@ -1,0 +1,7 @@
+{
+  "name": "稿紙 Manuscript",
+  "description": "整頁鋪方格稿紙，段落之間留大量空白，字大好讀。像把手寫本掃描下來。",
+  "tags": ["稿紙", "字大", "手寫感"],
+  "default_theme": "notebook",
+  "card_paper": "grid"
+}

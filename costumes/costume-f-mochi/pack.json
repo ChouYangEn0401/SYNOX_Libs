@@ -1,0 +1,67 @@
+{
+  "name": "costume-f-mochi",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "糰糰",
+  "summary": "一顆軟軟的麻糬糰子，被戳會彈回來。SYNOX 衣櫃 · 系列 F：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#fbf3f0",
+        "--surface": "#ffffff",
+        "--text": "#3a2230",
+        "--muted": "#7a606c",
+        "--line": "#f0dcd8",
+        "--accent": "#c9412d",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#6b4ea8",
+        "--soft": "#fde3dc",
+        "--ok": "#2c8055",
+        "--warn": "#96600a",
+        "--bad": "#b3123f",
+        "--radius": "24px",
+        "--font-ui": "'Baloo 2','Noto Sans TC',sans-serif",
+        "--font-brand": "'Baloo 2','Baloo 2','Noto Sans TC',sans-serif",
+        "--m1": "#ffb09c",
+        "--m2": "#cf4530",
+        "--mi": "#3a2230",
+        "--mb": "#ff5d73"
+      },
+      "dark": {
+        "--bg": "#1c1218",
+        "--surface": "#281a22",
+        "--text": "#f8e9ec",
+        "--muted": "#b89ba7",
+        "--line": "#3d2933",
+        "--accent": "#ff9580",
+        "--accent-ink": "#3d0f06",
+        "--accent2": "#c3a6ff",
+        "--soft": "#45211c",
+        "--ok": "#6fd6a0",
+        "--warn": "#f6c453",
+        "--bad": "#ff7096",
+        "--radius": "24px",
+        "--font-ui": "'Baloo 2','Noto Sans TC',sans-serif",
+        "--font-brand": "'Baloo 2','Baloo 2','Noto Sans TC',sans-serif",
+        "--m1": "#ffb09c",
+        "--m2": "#ff9580",
+        "--mi": "#3a2230",
+        "--mb": "#ff5d73"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

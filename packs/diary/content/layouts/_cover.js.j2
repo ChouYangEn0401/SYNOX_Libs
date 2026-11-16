@@ -1,0 +1,13 @@
+{% if gift_cover %}
+<script>
+(function(){
+  var stage=document.getElementById('stage'),cover=document.getElementById('cover');
+  if(!stage||!cover)return;
+  function open(){stage.classList.add('open');}
+  cover.addEventListener('click',open);
+  cover.addEventListener('keydown',function(e){
+    if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}
+  });
+})();
+</script>
+{% endif %}

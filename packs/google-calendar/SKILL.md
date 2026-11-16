@@ -10,7 +10,7 @@ description: 使用者提到「Google 日曆」、要看今天／這幾天的 Go
 - 「幫我在 Google 日曆加：明天下午兩點看牙醫」→ `gcal__add`。
 - 「把 Google 日曆上看牙醫那個刪掉」→ 先 `gcal__list`（或 `gcal__today`、`gcal__week`）看編號，再 `gcal__rm`（`n` 是 `[3]` 裡的數字）。
   編號是**最近一次列出來的那一份**；隔了很久或不確定，就先再列一次。刪除會先送確認卡給使用者按。
-- 「Google 日曆連上了沒」→ `gcal__status`。
+- 「Google 日曆連上了沒」→ 你沒有這個工具；請使用者自己打 `/gcal_status`（連接相關的指令都只給人打）。
 
 ## 怎麼填 `gcal__add`（跟本機行事曆 `cal__add` 一樣）
 - 最穩的填法：**算好日期**放 `date`（YYYY-MM-DD）、時間放 `time`（`14:00` 或 `14:00-15:30`；整天的不要填 `time`），

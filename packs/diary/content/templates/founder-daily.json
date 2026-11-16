@@ -1,0 +1,198 @@
+{
+  "id": "founder-daily",
+  "name": "創業日記 · 每天",
+  "description": "今天推進了什麼、我在賭什麼、卡在哪裡。順便看一眼自己的體力和心情。",
+  "group": "工作與創業",
+  "order": 30,
+  "when": "在做自己的事業或專案的日子：今天推進了什麼、在驗證什麼、卡在哪裡。",
+  "minutes": 10,
+  "moods": ["忙碌", "焦慮", "有衝勁"],
+  "tags": ["工作", "創業", "專案", "不談信仰也可以"],
+  "structure": "n-part",
+  "reflection": "reflection",
+  "flow": ["work", "reflection", "plan"],
+  "default_theme": "notebook",
+  "default_layout": "ledger",
+  "closing_label": "今天想記下的一句話",
+  "closing_hint": "以後回頭看，會想知道今天的你在想什麼。",
+  "closing_placeholder": "今天…",
+  "sections": [
+    {
+      "id": "moved",
+      "title": "今天推進了什麼",
+      "color": "#2f7d86",
+      "icon": "▶",
+      "fields": [
+        {
+          "id": "shipped",
+          "label": "真的完成、交出去的",
+          "kind": "list",
+          "min_rows": 3,
+          "color": "#2f7d86",
+          "hint": "不是「做了」，是「完成了」",
+          "ai_hint": "真的完成、交出去的，一件一行；「做了」但沒完成的不算。"
+        },
+        {
+          "id": "talked",
+          "label": "今天跟幾個使用者／客戶說到話？",
+          "kind": "short_text",
+          "ai_hint": "跟幾個使用者／客戶說到話（數字或一句話）。"
+        },
+        {
+          "id": "heard",
+          "label": "從他們身上聽到最刺耳的一句話",
+          "kind": "text",
+          "color": "#c8322c",
+          "hint": "刺耳的通常最有用",
+          "ai_hint": "從他們身上聽到最刺耳的一句話。"
+        }
+      ]
+    },
+    {
+      "id": "bet",
+      "title": "我在賭什麼",
+      "color": "#b5623c",
+      "icon": "◎",
+      "fields": [
+        {
+          "id": "assumption",
+          "label": "這禮拜我在驗證的假設",
+          "kind": "short_text",
+          "hint": "「我相信 ___ 會願意為 ___ 付錢」",
+          "ai_hint": "這禮拜在驗證的假設。"
+        },
+        {
+          "id": "evidence",
+          "label": "今天的證據往哪邊倒？",
+          "kind": "scale",
+          "options": [
+            { "id": "for", "label": "支持" },
+            { "id": "unclear", "label": "不確定" },
+            { "id": "against", "label": "反對" }
+          ],
+          "ai_hint": "作者說了證據往哪邊倒才選。"
+        },
+        {
+          "id": "next_test",
+          "label": "下一個最便宜的驗證方法",
+          "kind": "short_text",
+          "hint": "最小、最快、最省錢的那個",
+          "ai_hint": "下一個最便宜的驗證方法。"
+        }
+      ]
+    },
+    {
+      "id": "stuck",
+      "title": "卡住的地方",
+      "color": "#c8322c",
+      "icon": "⚠",
+      "fields": [
+        {
+          "id": "blocker",
+          "label": "現在最大的瓶頸",
+          "kind": "text",
+          "color": "#c8322c",
+          "ai_hint": "現在最大的瓶頸。"
+        },
+        {
+          "id": "why_stuck",
+          "label": "卡住是因為",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "howto", "label": "不知道怎麼做" },
+            { "id": "time", "label": "沒時間" },
+            { "id": "money", "label": "沒錢" },
+            { "id": "waiting", "label": "在等別人" },
+            { "id": "afraid", "label": "怕做錯" },
+            { "id": "unwilling", "label": "其實不想做" },
+            { "id": "unimportant", "label": "其實沒那麼重要" }
+          ],
+          "hint": "後面三個最誠實，也最有用",
+          "ai_hint": "從選項挑作者說的原因；後面幾個誠實的選項只照作者承認的選。"
+        },
+        {
+          "id": "ask",
+          "label": "誰可以幫我？我今天有沒有開口？",
+          "kind": "short_text",
+          "ai_hint": "誰可以幫作者、今天有沒有開口。"
+        }
+      ]
+    },
+    {
+      "id": "me",
+      "title": "我這個人",
+      "color": "#6b4c9a",
+      "icon": "◍",
+      "fields": [
+        {
+          "id": "energy",
+          "label": "今天的體力與心力",
+          "kind": "scale",
+          "options": [
+            { "id": "good", "label": "還很好" },
+            { "id": "ok", "label": "普通" },
+            { "id": "empty", "label": "快沒電了" }
+          ],
+          "ai_hint": "只在作者自己說了才選；沒提到就不選，不要替作者打分數。"
+        },
+        {
+          "id": "state",
+          "label": "今天做決定的時候，我是冷靜的還是慌的？",
+          "kind": "short_text",
+          "color": "#6b4c9a",
+          "ai_hint": "做決定時是冷靜還是慌。"
+        },
+        {
+          "id": "shortcut",
+          "label": "今天有沒有為了推進，走了一條自己也覺得不太對的捷徑？",
+          "kind": "short_text",
+          "color": "#c8322c",
+          "hint": "寫下來，它就不會慢慢變成習慣",
+          "ai_hint": "作者承認走過、自己也覺得不太對的捷徑；沒提到就留空。"
+        },
+        {
+          "id": "treated",
+          "label": "今天誰因為我而過得辛苦？",
+          "kind": "short_text",
+          "hint": "同事、家人、客戶都算。趕進度的時候最容易忘記這一題",
+          "ai_hint": "今天誰因為作者過得辛苦；沒提到就留空。"
+        },
+        {
+          "id": "boundary",
+          "label": "今天有沒有好好吃飯、睡覺、跟家人說到話？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "part", "label": "部分" },
+            { "id": "no", "label": "完全沒有" }
+          ],
+          "hint": "公司會活很久，你也要",
+          "ai_hint": "作者提到吃飯、睡覺、家人才選。"
+        }
+      ]
+    },
+    {
+      "id": "tomorrow",
+      "title": "明天",
+      "color": "#1f7a4d",
+      "icon": "→",
+      "fields": [
+        {
+          "id": "one_thing",
+          "label": "明天最重要的一件事",
+          "kind": "short_text",
+          "color": "#1f7a4d",
+          "hint": "只准寫一件",
+          "ai_hint": "明天最重要的一件事，只寫一件。"
+        },
+        {
+          "id": "not_doing",
+          "label": "明天決定不做的事",
+          "kind": "short_text",
+          "color": "#5a6472",
+          "ai_hint": "明天決定不做的事。"
+        }
+      ]
+    }
+  ]
+}

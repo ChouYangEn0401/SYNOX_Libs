@@ -1,0 +1,61 @@
+{
+  "id": "jot",
+  "name": "隨手記 · 一則一則",
+  "description": "想到就記，一則一則寫下來；想的話，再請經文陪你看一看。從 Telegram 記的日記都在這裡。",
+  "group": "簡單記一下",
+  "order": 39,
+  "when": "不想選題目，想到什麼就一則一則記下來的時候（Telegram 上的 /diary 就是存在這一組）。",
+  "minutes": 2,
+  "moods": ["任何心情", "零碎", "忙碌"],
+  "tags": ["自由書寫", "條列", "經文可選", "Telegram"],
+  "structure": "one-part",
+  "reflection": "none",
+  "flow": ["events"],
+  "default_theme": "letterpress",
+  "default_layout": "letter",
+  "closing_label": "還想說的話",
+  "closing_hint": "有就寫，沒有就算了。",
+  "closing_placeholder": "另外…",
+  "sections": [
+    {
+      "id": "notes",
+      "title": "今天記下的",
+      "color": "#22252a",
+      "icon": "✎",
+      "fields": [
+        {
+          "id": "notes",
+          "label": "一則一則記下來",
+          "kind": "list",
+          "placeholder": "想到什麼就寫…",
+          "min_rows": 3,
+          "ai_hint": "作者傳進來的原文，一則一行：照原文、不改寫、不刪減、不合併。"
+        }
+      ]
+    },
+    {
+      "id": "word",
+      "title": "從聖經來的回應",
+      "color": "#1f7a4d",
+      "icon": "📖",
+      "fields": [
+        {
+          "id": "reflection",
+          "label": "從經文來的回應（AI 整理）",
+          "kind": "text",
+          "color": "#2f7d86",
+          "hint": "這一段是 AI 讀了上面那幾則之後寫的，不是你寫的；可以改，也可以刪。",
+          "ai_hint": "只有作者選了「從聖經尋找答案」才有：從信仰角度的回應，溫和、不說教、不替作者下結論。這不是作者自己的話，不要搬進別的題目當成作者寫的。"
+        },
+        {
+          "id": "verses",
+          "label": "經文（和合本）",
+          "kind": "list",
+          "color": "#1f7a4d",
+          "hint": "出處由 AI 挑，原文由程式從和合本照抄。",
+          "ai_hint": "一行一處：粗體的出處、和合本原文、一句為什麼。原文一律由程式查，不要自己寫經文。"
+        }
+      ]
+    }
+  ]
+}

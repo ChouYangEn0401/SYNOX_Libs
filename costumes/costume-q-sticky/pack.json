@@ -1,0 +1,67 @@
+{
+  "name": "costume-q-sticky",
+  "kind": "theme",
+  "version": "1.0.0",
+  "title": "貼貼",
+  "summary": "一張會笑的便利貼：要做什麼先寫給你看，你打勾才動手。SYNOX 衣櫃 · 系列 Q：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
+  "publisher": "SYNOX 衣櫃",
+  "stage": "alpha",
+  "theme": {
+    "contract": 1,
+    "tokens": {
+      "light": {
+        "--bg": "#f4f6f4",
+        "--surface": "#ffffff",
+        "--text": "#1f2a30",
+        "--muted": "#5a686e",
+        "--line": "#dde4e2",
+        "--accent": "#0b7285",
+        "--accent-ink": "#ffffff",
+        "--accent2": "#9a6408",
+        "--soft": "#d8f0f3",
+        "--ok": "#1c7a4c",
+        "--warn": "#8f6408",
+        "--bad": "#c2362f",
+        "--radius": "10px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Shantell Sans','Noto Sans TC',sans-serif",
+        "--m1": "#ffe37a",
+        "--m2": "#eec341",
+        "--mi": "#26323a",
+        "--mb": "#ff8f8f"
+      },
+      "dark": {
+        "--bg": "#0e1517",
+        "--surface": "#162023",
+        "--text": "#e6efef",
+        "--muted": "#93a4a8",
+        "--line": "#263438",
+        "--accent": "#5fd4e4",
+        "--accent-ink": "#05282e",
+        "--accent2": "#f2c94c",
+        "--soft": "#12343a",
+        "--ok": "#5fd08d",
+        "--warn": "#f2c14e",
+        "--bad": "#ff8a8a",
+        "--radius": "10px",
+        "--font-ui": "'Noto Sans TC',sans-serif",
+        "--font-brand": "'Shantell Sans','Noto Sans TC',sans-serif",
+        "--m1": "#ffe37a",
+        "--m2": "#e0b73a",
+        "--mi": "#26323a",
+        "--mb": "#ff8f8f"
+      }
+    },
+    "slots": {
+      "mascot.idle": "slots/idle.svg",
+      "mascot.think": "slots/think.svg",
+      "mascot.happy": "slots/happy.svg",
+      "mascot.warn": "slots/warn.svg",
+      "opening": "slots/opening.svg",
+      "wordmark": "slots/wordmark.svg",
+      "appicon": "slots/appicon.svg"
+    },
+    "css": "theme.css",
+    "fonts": []
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "id": "quick-checkin",
+  "name": "快速打卡",
+  "description": "全部用勾的，兩分鐘寫完。適合很忙、但不想斷掉紀錄的日子。",
+  "group": "與神同行",
+  "order": 0,
+  "when": "很忙、只有兩分鐘，但不想讓靈修紀錄斷掉的日子。",
+  "minutes": 2,
+  "moods": ["忙碌", "疲累", "平穩"],
+  "tags": ["靈修", "勾選為主", "感恩", "代禱", "快速"],
+  "structure": "three-part",
+  "reflection": "prayer",
+  "flow": ["checkin", "gratitude", "prayer"],
+  "default_theme": "letterpress",
+  "default_layout": "ledger",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "checks",
+      "title": "今天與主同行",
+      "color": "#2456b8",
+      "icon": "✓",
+      "fields": [
+        {
+          "id": "wake",
+          "label": "起床的時候想起主嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到起床時想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "work",
+          "label": "工作／上課的時候想過主嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到工作或上課時想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "ask",
+          "label": "有沒有問過主：「主啊，我當怎麼做？」",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到為某件事想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "people",
+          "label": "與人相處時想起主嗎？",
+          "kind": "choice",
+          "options": [
+            { "id": "yes", "label": "有" },
+            { "id": "no", "label": "沒有" }
+          ],
+          "ai_hint": "日記裡提到與人相處時想起主、禱告或求問 → yes；作者明說沒有 → no；沒提到就不選。"
+        },
+        {
+          "id": "looking",
+          "label": "今天仰望主的時間",
+          "kind": "scale",
+          "options": [
+            { "id": "good", "label": "滿意" },
+            { "id": "ok", "label": "還可以" },
+            { "id": "low", "label": "缺乏" }
+          ],
+          "ai_hint": "作者自己評價了今天親近主的時間才選；不要替作者打分數。"
+        }
+      ]
+    },
+    {
+      "id": "thanks",
+      "title": "感恩",
+      "color": "#1f7a4d",
+      "icon": "🌱",
+      "fields": [
+        {
+          "id": "gratitude",
+          "label": "兩件向神感恩的事",
+          "kind": "list",
+          "placeholder": "今天讓我想說謝謝的一件小事…",
+          "color": "#1f7a4d",
+          "ai_hint": "作者明白感謝的事，一件一行、用作者的話；沒有就留空，不要硬湊。"
+        }
+      ]
+    },
+    {
+      "id": "pray",
+      "title": "代禱",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "prayer",
+          "label": "最緊急的代禱事項",
+          "kind": "list",
+          "placeholder": "求主…",
+          "min_rows": 3,
+          "color": "#c8322c",
+          "ai_hint": "作者提到要禱告、擔心或想交託的人與事，一件一行（可寫成「求主…」）；沒有就留空。"
+        }
+      ]
+    }
+  ]
+}

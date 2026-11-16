@@ -1,0 +1,218 @@
+{
+  "id": "mood-quick",
+  "name": "情緒覺察（一分鐘）",
+  "description": "幾分、幾個字、身體哪裡有感覺、現在需要什麼。全部用勾的。",
+  "group": "心情與難處",
+  "order": 13,
+  "default_hidden": true,
+  "when": "一天當中任何時候，覺得怪怪的就勾一下。",
+  "minutes": 1,
+  "moods": [
+    "說不上來",
+    "煩躁",
+    "疲累"
+  ],
+  "tags": [
+    "情緒",
+    "勾選為主",
+    "不談信仰也可以"
+  ],
+  "structure": "one-part",
+  "reflection": "reflection",
+  "flow": [
+    "feelings",
+    "reflection",
+    "plan"
+  ],
+  "default_theme": "dawn",
+  "default_layout": "postcard",
+  "closing_label": "寫給自己的話",
+  "closing_hint": "還想留給自己的一段話。",
+  "closing_placeholder": "今天…",
+  "sections": [
+    {
+      "id": "now",
+      "title": "此刻",
+      "color": "#6b4c9a",
+      "icon": "◍",
+      "fields": [
+        {
+          "id": "score",
+          "label": "現在的心情（1 很低 – 5 很好）",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "r1",
+              "label": "1"
+            },
+            {
+              "id": "r2",
+              "label": "2"
+            },
+            {
+              "id": "r3",
+              "label": "3"
+            },
+            {
+              "id": "r4",
+              "label": "4"
+            },
+            {
+              "id": "r5",
+              "label": "5"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        },
+        {
+          "id": "words",
+          "label": "最接近的幾個字",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "平靜"
+            },
+            {
+              "id": "o2",
+              "label": "開心"
+            },
+            {
+              "id": "o3",
+              "label": "感激"
+            },
+            {
+              "id": "o4",
+              "label": "疲累"
+            },
+            {
+              "id": "o5",
+              "label": "煩躁"
+            },
+            {
+              "id": "o6",
+              "label": "焦慮"
+            },
+            {
+              "id": "o7",
+              "label": "難過"
+            },
+            {
+              "id": "o8",
+              "label": "生氣"
+            },
+            {
+              "id": "o9",
+              "label": "委屈"
+            },
+            {
+              "id": "o10",
+              "label": "孤單"
+            },
+            {
+              "id": "o11",
+              "label": "麻木"
+            },
+            {
+              "id": "o12",
+              "label": "說不上來"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "body",
+          "label": "身體哪裡有感覺",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "胸口悶"
+            },
+            {
+              "id": "o2",
+              "label": "肩頸緊"
+            },
+            {
+              "id": "o3",
+              "label": "胃不舒服"
+            },
+            {
+              "id": "o4",
+              "label": "頭痛"
+            },
+            {
+              "id": "o5",
+              "label": "沒力氣"
+            },
+            {
+              "id": "o6",
+              "label": "沒有特別"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        },
+        {
+          "id": "from",
+          "label": "大概跟什麼有關",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "工作／課業"
+            },
+            {
+              "id": "o2",
+              "label": "人"
+            },
+            {
+              "id": "o3",
+              "label": "身體"
+            },
+            {
+              "id": "o4",
+              "label": "錢"
+            },
+            {
+              "id": "o5",
+              "label": "沒有特別原因"
+            }
+          ],
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "need",
+          "label": "我現在需要",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "休息一下"
+            },
+            {
+              "id": "o2",
+              "label": "有人聽我說"
+            },
+            {
+              "id": "o3",
+              "label": "一個人靜一下"
+            },
+            {
+              "id": "o4",
+              "label": "吃點東西"
+            },
+            {
+              "id": "o5",
+              "label": "出去走走"
+            },
+            {
+              "id": "o6",
+              "label": "把事情做完"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        }
+      ]
+    }
+  ]
+}

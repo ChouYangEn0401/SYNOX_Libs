@@ -20,3 +20,7 @@
 `/cal_ics` 會在你自己的資料夾（個人版 `data/calendar/files/`、伺服器版 `data/users/<id>/calendar/files/`）暫時寫一個 .ics、
 送出後馬上刪掉，所以 `pack.json` 宣告了 `filesystem:own`（這是工具庫裡唯一需要宣告的能力）。不連網、不開別的程式。
 （0.1.1 起；0.1.0 寫在全部人共用的 `data/packs/calendar/`，SYNOX 的資料歸屬檢查不讓 `data: user` 的工具這樣用。）
+檔名每次不一樣（`export-<時間>-<亂數>.ics`，0.1.2 起）：同時匯出兩次不會互相蓋掉；萬一程式在送出前被關掉而留下檔案，
+下次匯出時會先清掉（10 分鐘以前的）。
+
+**個人版與伺服器版**：伺服器版每人一份（`data/users/<id>/calendar.json.enc`，用每個人自己的金鑰加密），別人的指令、面板、AI 都看不到；但伺服器的管理者有主金鑰，**解得開每個人的資料**。個人版改成伺服器版時，舊資料不會自己搬（[ADR-0006](../../docs/adr/0006-personal-and-server-mode.md)）。

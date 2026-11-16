@@ -1,0 +1,172 @@
+{
+  "id": "lament",
+  "name": "哀歌 · 把痛苦帶到主面前",
+  "description": "很難的日子用這個。照詩篇哀歌的走法：呼求、訴說、求告、信靠、交託。",
+  "group": "與神同行",
+  "order": 6,
+  "when": "很難、很痛的日子：照詩篇哀歌的走法，把痛苦帶到主面前。",
+  "minutes": 15,
+  "moods": ["痛苦", "難過", "憤怒", "無力", "麻木"],
+  "tags": ["靈修", "哀歌", "詩篇", "難處", "交託"],
+  "structure": "n-part",
+  "reflection": "prayer",
+  "flow": ["prayer", "events", "feelings", "trust", "plan"],
+  "default_theme": "midnight",
+  "default_layout": "letter",
+  "closing_label": "給主的話",
+  "closing_hint": "剩下說不完的，就寫在這裡。不用結論，也不用漂亮。",
+  "closing_placeholder": "主啊，我還有話想說…",
+  "sections": [
+    {
+      "id": "cry",
+      "title": "呼求",
+      "color": "#c8322c",
+      "icon": "🕯",
+      "fields": [
+        {
+          "id": "address",
+          "label": "先開口",
+          "kind": "fill",
+          "pattern": "主啊，我現在 {} 。",
+          "hint": "詩篇也是這樣開頭的",
+          "ai_hint": "一格：作者此刻的狀態（例：很累、撐不住），用作者自己的字。"
+        },
+        {
+          "id": "how_long",
+          "label": "這件事壓在心上多久了？",
+          "kind": "choice",
+          "options": [
+            { "id": "today", "label": "今天" },
+            { "id": "days", "label": "好幾天" },
+            { "id": "months", "label": "好幾個月" },
+            { "id": "years", "label": "好幾年" }
+          ],
+          "ai_hint": "作者說了這件事壓了多久才選。"
+        }
+      ]
+    },
+    {
+      "id": "tell",
+      "title": "訴說",
+      "color": "#6b4c9a",
+      "icon": "🌧",
+      "fields": [
+        {
+          "id": "what",
+          "label": "發生了什麼事？照實說就好",
+          "kind": "text",
+          "placeholder": "我…",
+          "min_rows": 3,
+          "ai_hint": "發生的事，照實寫，保留作者的用字。"
+        },
+        {
+          "id": "feel",
+          "label": "此刻的感覺（可複選）",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "sad", "label": "難過" },
+            { "id": "angry", "label": "生氣" },
+            { "id": "afraid", "label": "害怕" },
+            { "id": "shame", "label": "羞愧" },
+            { "id": "alone", "label": "孤單" },
+            { "id": "powerless", "label": "無力" },
+            { "id": "numb", "label": "麻木" },
+            { "id": "betrayed", "label": "被辜負" },
+            { "id": "unknown", "label": "說不上來" }
+          ],
+          "ai_hint": "從選項挑作者說出的感覺；說不清楚就選「說不上來」。"
+        },
+        {
+          "id": "honest",
+          "label": "有沒有想對主說、卻覺得不該說的話？",
+          "kind": "text",
+          "placeholder": "主啊，我不明白為什麼…",
+          "color": "#6b4c9a",
+          "hint": "詩篇裡也有「祢為什麼丟棄我」",
+          "ai_hint": "作者想對主說卻覺得不該說的話：照原文保留，不要淡化、修飾或改成禱告詞。"
+        }
+      ]
+    },
+    {
+      "id": "ask",
+      "title": "求告",
+      "color": "#2456b8",
+      "icon": "🙏",
+      "fields": [
+        {
+          "id": "petition",
+          "label": "求主為我做的事",
+          "kind": "list",
+          "placeholder": "求祢…",
+          "min_rows": 3,
+          "color": "#2456b8",
+          "ai_hint": "求主為作者做的事，一件一行。"
+        },
+        {
+          "id": "others",
+          "label": "這件事裡，我也為誰求？",
+          "kind": "list",
+          "ai_hint": "作者也為誰求，一件一行。"
+        }
+      ]
+    },
+    {
+      "id": "trust",
+      "title": "信靠",
+      "color": "#1f7a4d",
+      "icon": "⚓",
+      "fields": [
+        {
+          "id": "remember",
+          "label": "以前主做過的哪一件事，我現在還記得？",
+          "kind": "text",
+          "hint": "哀歌轉彎的地方，多半是想起以前",
+          "ai_hint": "作者想起主以前做過的事；沒提到就留空。"
+        },
+        {
+          "id": "verse",
+          "label": "今天扶住我的一句話",
+          "kind": "short_text",
+          "placeholder": "經文，或別人說過的一句話",
+          "ai_hint": "扶住作者的那一句（照作者寫的）；作者沒寫就留空，不要自己補經文。"
+        },
+        {
+          "id": "still_true",
+          "label": "就算什麼都還沒改變，我仍然相信的是",
+          "kind": "multi_choice",
+          "options": [
+            { "id": "here", "label": "主仍然在" },
+            { "id": "heard", "label": "主聽見了" },
+            { "id": "good", "label": "主是良善的" },
+            { "id": "not_end", "label": "這不是結局" },
+            { "id": "unsure", "label": "我不確定，但我還在這裡" }
+          ],
+          "hint": "最後一項也是信心",
+          "ai_hint": "挑作者表達過的；作者不確定就選「我不確定，但我還在這裡」，不要替作者選信心滿滿的答案。"
+        }
+      ]
+    },
+    {
+      "id": "entrust",
+      "title": "交託",
+      "color": "#b5623c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "hand_over",
+          "label": "放手",
+          "kind": "fill",
+          "pattern": "主啊，我把 {} 交在祢手上；今天我自己只做 {} 。",
+          "ai_hint": "兩格：交在主手上的事、今天作者自己只做的事。"
+        },
+        {
+          "id": "next_small",
+          "label": "今天還做得到的一件小事",
+          "kind": "short_text",
+          "hint": "吃飯、睡覺、打一通電話，都算",
+          "ai_hint": "今天還做得到的一件小事。"
+        }
+      ]
+    }
+  ]
+}

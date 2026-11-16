@@ -1,0 +1,179 @@
+{
+  "id": "lectio",
+  "name": "默想 · 慢慢讀一段話",
+  "description": "讀、默想、禱告、安靜四步。不求讀多，只停在一句話上。",
+  "group": "與神同行",
+  "order": 10,
+  "default_hidden": true,
+  "when": "心很吵、讀不下長篇經文，或想安靜在主面前的時候。",
+  "minutes": 10,
+  "moods": [
+    "浮躁",
+    "疲累",
+    "平靜"
+  ],
+  "tags": [
+    "靈修",
+    "默想",
+    "經文"
+  ],
+  "structure": "n-part",
+  "reflection": "prayer",
+  "flow": [
+    "scripture",
+    "reflection",
+    "prayer",
+    "trust"
+  ],
+  "default_theme": "dawn",
+  "default_layout": "letter",
+  "closing_label": "給主的話",
+  "closing_hint": "今天想對主說的一段話。也可以換色。",
+  "closing_placeholder": "親愛的主耶穌，今天…",
+  "sections": [
+    {
+      "id": "read",
+      "title": "讀",
+      "color": "#1f7a4d",
+      "icon": "📖",
+      "fields": [
+        {
+          "id": "passage",
+          "label": "今天的經文",
+          "kind": "short_text",
+          "placeholder": "例：書卷名 章:節",
+          "ai_hint": "經文出處照作者寫的抄；沒有就留空，不要自己補經文。"
+        },
+        {
+          "id": "word",
+          "label": "把我停住的一個字或一句話",
+          "kind": "short_text",
+          "hint": "慢慢讀兩三遍，哪裡停住就是哪裡。",
+          "ai_hint": "照作者寫的那個字或那句抄；沒有就留空。"
+        }
+      ]
+    },
+    {
+      "id": "think",
+      "title": "默想",
+      "color": "#2456b8",
+      "icon": "✧",
+      "fields": [
+        {
+          "id": "why",
+          "label": "為什麼是這一句",
+          "kind": "text",
+          "ai_hint": "用作者自己的話；沒提到就留空，不替作者下結論。"
+        },
+        {
+          "id": "touch",
+          "label": "它碰到我生活的哪一塊",
+          "kind": "multi_choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "工作／課業"
+            },
+            {
+              "id": "o2",
+              "label": "家庭"
+            },
+            {
+              "id": "o3",
+              "label": "關係"
+            },
+            {
+              "id": "o4",
+              "label": "金錢"
+            },
+            {
+              "id": "o5",
+              "label": "身體"
+            },
+            {
+              "id": "o6",
+              "label": "服事"
+            },
+            {
+              "id": "o7",
+              "label": "未來"
+            },
+            {
+              "id": "o8",
+              "label": "內心深處"
+            }
+          ],
+          "ai_hint": "從選項挑作者自己說出的；沒有對得上的就不選。"
+        }
+      ]
+    },
+    {
+      "id": "pray",
+      "title": "禱告",
+      "color": "#c8322c",
+      "icon": "🕊",
+      "fields": [
+        {
+          "id": "line",
+          "label": "回應主",
+          "kind": "fill",
+          "pattern": "主啊，祢藉這句話讓我看見 {}，我想對祢說 {}。",
+          "ai_hint": "兩格：看見什麼、想對主說什麼。"
+        }
+      ]
+    },
+    {
+      "id": "rest",
+      "title": "安靜",
+      "color": "#b5623c",
+      "icon": "☾",
+      "fields": [
+        {
+          "id": "still",
+          "label": "安靜了多久",
+          "kind": "choice",
+          "options": [
+            {
+              "id": "o1",
+              "label": "一分鐘"
+            },
+            {
+              "id": "o2",
+              "label": "三分鐘"
+            },
+            {
+              "id": "o3",
+              "label": "五分鐘以上"
+            },
+            {
+              "id": "o4",
+              "label": "靜不下來"
+            }
+          ],
+          "hint": "靜不下來也照實勾，那也是今天的樣子。",
+          "ai_hint": "只照作者自己說的選；沒提到就不選。"
+        },
+        {
+          "id": "after",
+          "label": "安靜之後的心",
+          "kind": "scale",
+          "options": [
+            {
+              "id": "o1",
+              "label": "安穩"
+            },
+            {
+              "id": "o2",
+              "label": "好一點"
+            },
+            {
+              "id": "o3",
+              "label": "還是亂"
+            }
+          ],
+          "ai_hint": "作者自己評價了才選；不要替作者打分數。"
+        }
+      ]
+    }
+  ]
+}
