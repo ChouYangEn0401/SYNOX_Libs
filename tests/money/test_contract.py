@@ -54,7 +54,7 @@ def file_url(path):
 
 def test_manifest_is_accepted_by_strict_install_check():
     m = read_manifest()
-    assert m.version == "0.4.0-alpha.1" and m.stage == "alpha" and m.kind == "python" and m.data == "user"
+    assert m.version == "0.5.0-alpha.1" and m.stage == "alpha" and m.kind == "python" and m.data == "user"
     assert m.capabilities == ["filesystem:own"]
     assert m.python == {"module": "pack", "package": True}
     app = m.web["app"]

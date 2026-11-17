@@ -13,6 +13,12 @@
   `/gcal_status` 改成 `ai=False`（跟另外三個外部工具一樣，SKILL 改成請使用者自己打）。測試加一條 S6（log 裡沒有那些值）。
 
 ### Added
+- **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
+  **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
+  格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；
+  `/money_formats` 列出能用的與壞掉的。**寫檢討的 AI** 改成注入的提供者介面：`/money_review_run` 請接上的 AI 寫，
+  SYNOX 現在沒有給工具用的 AI 入口，所以預設回 `llm_unavailable`、什麼都不寫（AI 助理照舊用 `report` → `review_save`）。
+  不搬：兩個只適合一份私人試算表版面、又要第三方 xlsx 套件的匯入（通用的 CSV 匯入本來就有）。`requires.pip` 仍是空的。
 - **`guitar` 0.1.0-alpha.1 → 0.2.0-alpha.1（小節譜；仍是 alpha、尚未實機驗證）**：新指令 `/chord_chart`，把和弦進行排成一格一小節的譜（每行 4 小節，可改）：認得 `| C | G D/F# | Am | F |`、`C G Am F`（一個和弦一小節）、`C / / / G / / /`（照拍子）、`Am . . G`／`Am:3`（拍數）、`[主歌]`／`前奏：`、`%`、`N.C.`、`(x2)`、`|: :|`、Key／Capo／4/4／♩ 資訊行、和弦在上歌詞在下（歌詞照欄位分到小節）、`[C]` 夾在歌詞裡；也收 AI 看譜的照片填的小節譜 JSON（格式見 README，含照片上和弦位置 `image.marks`）。第一行可以先寫移法（`+2`、`G→A`），不貼＝用上次的譜。最後一份小節譜存在保管箱（每人一份），`GET /data` 多一個 `chart`。面板多一個「小節譜」分頁（格子、和弦圖、移調、Capo、每行幾小節、複製、列印、選照片把和弦標在照片上；照片只在頁面記憶體裡）。另有獨立樣板 `docs/guitar/chart_template.html`（不連網，換掉 `chart-data` 那段 JSON 就是一份新譜；`scripts/guitar_template.py` 從 panel.html 同步）。
   聊天指令會把換行併成空白（整份譜變一行），所以移法和譜在同一行也認得（`到 Eb {…}`、`G 到 A …`）；一行的譜改成「像和弦的字都移」並在回覆說明，要保留排版用面板。
 - **`guitar` 0.1.0-alpha.1（新工具，`stage` alpha；**尚未實機驗證**，試過之後才發 0.1.0）**：把「吉他和弦全書」做成工具。`/chord`（查按法，一次可以好幾個）、`/chord_tp`（貼一份譜直接移調：`+2`、`-3`、`G→A`、`到 A`；和弦行與 `[C]` 夾在歌詞裡都認得，移調後和弦盡量留在原本那一欄；升降記號照新調寫；不貼譜＝用上次那份）、`/chord_capo`（夾幾格、用哪組手型最好彈）、`/chord_arp`（分散和弦 TAB）、`/chord_key`（一個調的和弦與常見進行）。網頁面板 `panel.html`（即時移調、capo 選擇、和弦圖、查和弦、分散和弦），資料走 `GET /api/packs/guitar/data`。只存最後一次貼的譜（保管箱、每人一份）；不連網、不碰檔案。`tests/test_guitar.py` 逐弦檢查每個按法的組成音；`catalog.json` 多一個建議群組「音樂」。
