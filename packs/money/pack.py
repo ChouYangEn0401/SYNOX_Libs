@@ -1,4 +1,4 @@
-"""💰 記帳 0.4.0 的入口：install() 只把 bridge/ 8 個領域檔的表掛到 SYNOX 上。
+"""💰 記帳的入口：install() 只把 bridge/ 9 個領域檔的表掛到 SYNOX 上。
 
     指令      kit.command(group, cmd.name, …)            /money_<name>；人打字、AI、排程都走這裡
     畫面動作  pack.app_action(cmd.name, …)（cmd.app=True）  同名、同危險程度；欄位檢查、權限、稽核照那個指令
@@ -14,9 +14,9 @@
 
 from synox.packs import kit
 
-from .bridge import compat, flow, home, ledger, piggy, plan, review, session, setup, table
+from .bridge import compat, flow, home, ledger, piggy, plan, review, session, setup, statements, table
 
-DOMAINS = (ledger, home, plan, setup, flow, review, piggy, compat)
+DOMAINS = (ledger, home, plan, setup, flow, review, piggy, compat, statements)
 
 
 def install(app, pack):

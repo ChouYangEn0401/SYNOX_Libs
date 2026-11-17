@@ -29,7 +29,7 @@ from typing import Any, Callable, Optional
 
 from synox.packs import kit
 
-from . import compat
+from . import compat, writer
 
 BOOK_DIR = "book"                 # 這個人的檔案資料夾底下，引擎的 home（資料庫、附檔、備份、封存都在裡面）
 
@@ -71,7 +71,8 @@ def today_of(tz_offset) -> date:
 class Book:
     """一次呼叫拿到的帳本。conn：資料庫連線；actor：寫進改動紀錄的「誰」（synox:<來源>，不放名字）；
     today：帳本的今天；user_id：SYNOX 給的整數編號；path(*parts)：這個人自己的檔案資料夾裡的路徑（擋 ..、絕對路徑）；
-    fresh：這次是不是剛建好的空帳本；screen：這次是不是畫面送來的（金額已經是最小單位）。"""
+    fresh：這次是不是剛建好的空帳本；screen：這次是不是畫面送來的（金額已經是最小單位）；
+    reviewer：寫檢討的提供者（bridge/writer.py；沒有＝None，/money_review_run 回 llm_unavailable）。"""
     conn: Any
     actor: str
     today: Any
@@ -79,6 +80,7 @@ class Book:
     path: Callable[..., str]
     fresh: bool = False
     screen: bool = False
+    reviewer: Optional[Callable] = None
 
 
 class Locks:
@@ -177,7 +179,7 @@ def open_book(pack, user, *, screen: bool = False):
         conn, fresh, today = _connect(home)
         try:
             book = Book(conn=conn, actor=actor_of(), today=today, user_id=uid, path=own_path, fresh=fresh,
-                        screen=bool(screen))
+                        screen=bool(screen), reviewer=writer.provider_of(pack))
             compat.on_open(pack, uid, book)
             yield book
         finally:

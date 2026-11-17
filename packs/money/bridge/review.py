@@ -1,6 +1,8 @@
 """檢討（W7）：檢討清單與全文、套用建議、回覆、AI 寫完存回來、週／月報表的數字、該做哪一份、一批混合紀錄。
 
-這個工具不叫任何 AI：SYNOX 的 AI 讀 report（review=yes 時連寫檢討的規則一起給）→ 照手冊寫 → 呼叫 review_save；
+這個工具自己不認得任何 AI：SYNOX 的 AI 讀 report（review=yes 時連寫檢討的規則一起給）→ 照手冊寫 → 呼叫 review_save；
+或是有人把「寫檢討的提供者」掛到工具上（bridge/writer.py，介面在 engine/services/llm.py），review_run 就請它寫；
+沒有提供者時 review_run 回 llm_unavailable（什麼都不寫），其他照常。
 存的時候照原本的規則驗證（等第、每組最多 4 點、建議分配的加總要合），對不起來的照存但標出來、套用時會擋。
 排程定時跑 review_due：回覆的那段字就是要送給使用者的週報／檢討書（回覆了就算送出），另外列出該寫的檢討。
 欄位名是契約（app/js/routes.js 照這些名字送值）：可以加，不要改名或拿掉。
@@ -233,6 +235,36 @@ def _notify():
     return notify
 
 
+STATUS_NAMES = (("done", "寫好了"), ("skipped", "略過"), ("deferred", "延後（AI 額度用完）"), ("failed", "失敗"),
+                ("running", "寫到一半"))
+
+
+def run_review_run(book, values) -> Result:
+    """請掛在工具上的「寫檢討的提供者」寫：給 kind（＋key）＝寫那一份；都不給＝把該寫的都寫（額度用完就停）。
+    沒有提供者 → llm_unavailable（引擎丟，table 轉成「❌ …」），什麼都不寫。"""
+    e = engine()
+    conn = book.conn
+    reviews, names = e["reviews"], e["report"].KIND_NAMES
+    status = dict(STATUS_NAMES)
+    kind = _kind(values.get("kind"))
+    if kind is None and (text_of(values, "key") or text_of(values, "period")):
+        raise kit.AppError("給了 key 也要給 kind（week 或 month）", code="invalid", status=400)
+    if kind is not None:
+        rv = reviews.run_one(conn, kind, _report_key(values, kind), book.reviewer, actor=book.actor)
+        rv.pop("metrics", None)
+        text = f"{names[rv['kind']]} {rv['key']}：{status.get(rv['status'], rv['status'])}"
+        if rv["status"] == "done":
+            text += "\n" + reviews.digest_text(rv, e["plans"].bucket_names(conn), decimals(conn))
+        elif rv.get("error"):
+            text += f"（{rv['error']}）"
+        return Result(data={"review": rv, "write_seq": e["db"].write_seq(conn)}, text=text,
+                      warnings=list(rv.get("problems") or []))
+    out = reviews.run_due(conn, book.reviewer, actor=book.actor, today=book.today)
+    lines = [f"{status[k]}：" + "、".join(f"{names[r['kind']]} {r['key']}" + (f"（{r['error']}）" if r.get("error") and k != "done" else "")
+                                       for r in out[k]) for k in ("done", "skipped", "deferred", "failed") if out[k]]
+    return Result(data={**out, "write_seq": e["db"].write_seq(conn)}, text="\n".join(lines) or "現在沒有該寫的檢討")
+
+
 # ── 一批混合紀錄 ───────────────────────────────────────────────────────────────
 
 def _result_line(conn, r: dict) -> str:
@@ -300,6 +332,9 @@ COMMANDS = (
         ai={"scenario": "要寫檢討、或使用者問這週這個月花在哪裡時"}, positional=2),
     Cmd("review_due", "現在該送的週報與檢討書、該寫哪一份檢討（給排程；回覆了就算送出）", WRITE, [
         Field("peek", "只看，不標成送出（yes／no）")], run_review_due, positional=0),
+    Cmd("review_run", "請接上的 AI 寫檢討（沒接上就回「沒有 AI」，其他照常）", WRITE, [
+        Field("kind", "week／month（不給＝把該寫的都寫）"),
+        Field("key", "哪一週或哪一期（例 2030-W03、2030-01）")], run_review_run, positional=0),
     Cmd("ingest", "一批混合紀錄（內容是一段 JSON；太長請分批）", WRITE, [
         Field("records", "紀錄（JSON）", required=True),
         Field("source_ref", "這一批的來源編號（重送不會多記）"),

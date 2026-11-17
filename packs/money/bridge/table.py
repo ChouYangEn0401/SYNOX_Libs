@@ -26,7 +26,7 @@ from isdtelekit.core.registry import DANGER, READ, WRITE, Field  # noqa: F401  �
 from synox.packs import kit
 
 TODO_TEXT = "這個功能還在做（記帳 0.4.0 正在重做），先用別的方式記下來。"
-DOMAINS = ("ledger", "home", "plan", "setup", "flow", "review", "piggy", "compat")
+DOMAINS = ("ledger", "home", "plan", "setup", "flow", "review", "piggy", "compat", "statements")
 CLEAR = "-"                      # 欄位給「-」＝清掉（跟 0.3.1 一樣）
 STATUS = MappingProxyType({"invalid": 400, "not_found": 404, "conflict": 409})
 MAX_DECIMALS = 3                 # 帳本的小數位數只收 0～3（設定頁的選單也是這幾個）

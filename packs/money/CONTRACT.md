@@ -1,4 +1,4 @@
-# 記帳工具 0.4.0 的契約（給一起開發的人看）
+# 記帳工具的契約（給一起開發的人看；0.4.0 定、0.5.0 加了對帳單匯入與寫檢討的提供者）
 
 這份寫的是**大家同時會用到、一次定死的介面**：名字、欄位、值怎麼寫、錯誤怎麼轉、隔離規則、檔案歸誰。
 照這份寫，每個人只改自己的檔，不用碰共用的檔。要改契約，在回報裡寫清楚「要改什麼、為什麼」，由主 session 決定。
@@ -14,9 +14,13 @@ packs/money/
   pack.py          很薄：install() 把 bridge 的表掛到 SYNOX 上
   CONTRACT.md      這一份
   engine/          邏輯層（W2 搬；schema.sql 是契約檔）
+    formats/       內建的對帳單格式描述檔（JSON；0.5.0）
+    services/statements/  通用的對帳單讀取器＋adapter 登記表（0.5.0）
   bridge/          SYNOX 的指令與畫面 ↔ engine：一個領域一個檔
     table.py       指令表的格式、錯誤怎麼轉、回覆怎麼排；金額與日期的共用解讀（第 5 節）
     session.py     「這個人的帳本」的唯一入口（契約檔）
+    statements.py  對帳單匯入的指令（0.5.0；邏輯在 engine/services/statements/）
+    writer.py      寫檢討的提供者從哪裡來（0.5.0；介面在 engine/services/llm.py）
   app/             完整的記帳畫面
     index.html、style.css（契約檔）、css/<分頁>.css
     js/api.js（轉接器，契約檔）、js/routes.js（對照表，契約檔）、js/main.js（契約檔）、js/dom.js、forms.js、info.js
@@ -42,7 +46,7 @@ packs/money/
 
 ## 2. 指令表（`bridge/table.py`）
 
-每個領域檔（`ledger`、`home`、`plan`、`setup`、`flow`、`review`、`piggy`、`compat`）匯出：
+每個領域檔（`ledger`、`home`、`plan`、`setup`、`flow`、`review`、`piggy`、`compat`、`statements`）匯出：
 
 ```python
 DOMAIN     = "ledger"
@@ -188,6 +192,9 @@ WEB_ROUTES = frozen({"summary": fn(book) -> dict})          # 只有 compat
 | `cat_rm` | W6 | WRITE | — | name* |
 | `template` | W6 | WRITE | — | name |
 | `import_csv` | W6 | WRITE | — | file*、dry_run |
+| `review_run` | 0.5.0 | WRITE | — | kind（week／month；不給＝把該寫的都寫）、key。請接上的「寫檢討的提供者」寫；沒有提供者回 `llm_unavailable`、什麼都不寫 |
+| `import_statement` | 0.5.0 | WRITE | — | file*、format（描述檔 id；不給＝照表頭自己認，剛好一份對得上才用）、account、book、close、dry_run。撲滿只支援整數幣別（跟 piggy 同一個守門） |
+| `formats` | 0.5.0 | READ | — | （無）列出能用的描述檔（內建＋自己的）與壞掉的（每一個問題） |
 
 這一節的指令不在 `routes.js` 裡：欄位由負責的人自己決定（名字、危險程度要改就在回報寫）。
 
@@ -276,6 +283,7 @@ with session.open_book(pack, user, screen=True) as book:    # 完整畫面的讀
     book.user_id   # SYNOX 給的整數編號
     book.path(*parts)   # 這個人自己的檔案資料夾裡的路徑（import_csv、attach 讀檔用）
     book.fresh     # 這次是不是剛建好的空帳本
+    book.reviewer  # 寫檢討的提供者（bridge/writer.py 決定；沒有＝None）。0.5.0 加的，只有 review_run 用
 ```
 
 開好之後、交給 run 之前，`open_book` 會叫 `compat.on_open(pack, uid, book)`（在寫入鎖裡）：
@@ -335,3 +343,13 @@ W6 在這裡判斷「剛建好、而且這個人有 0.3.1 的舊資料」→ 轉
   兩個假使用者 `OWNER`、`OTHER`、假的今天 `TODAY`（2030-01-15）。測試資料一律用假的（「範例便當店」「現金」「120」）。
 - JS 只用 `node --check` 與純 node 的小腳本；不開瀏覽器、不開埠。腳本放 `tests/money/js/`（共用的假 DOM 在 `prelude.mjs`；`state_text_check.mjs`、`render_home.mjs`、`money_format_check.mjs`），Python 測試用 `conftest.run_node_check` 跑。
 - 閘門：`test_isolation.py`（兩個人交錯跑每個讀、動作、指令；A 做完所有動作 B 的檔不變；兩條執行緒各記 200 筆；沒設資料夾引擎一定丟錯）、`test_deid.py`（去識別化）、`test_decimals.py`（小數位數兩條路、時差、小數帳本不開撲滿）、`tests/test_gates.py`（記帳的 import、碰檔案只准在哪些檔、隔離的靜態規則）。
+
+## 14. 對帳單匯入與寫檢討的提供者（0.5.0，ADR-0008）
+
+- **對帳單**：程式裡不寫任何券商的格式。`engine/services/statements/`：`files.py`（唯一碰檔案的地方，只讀：對帳單、
+  內建描述檔 `engine/formats/*.json`、自己檔案資料夾的 `formats/*.json`）、`tables.py`（html 表格與 CSV 讀成格子）、
+  `formats.py`（描述檔的格式與檢查）、adapter（`trades`、`futures`、`realized`，登記在 `__init__.py` 的 `ADAPTERS`）。
+  描述檔有錯不猜：列出每一個問題、那一份不能用。自己的描述檔跟內建的同一個 id → 用自己的。
+- **寫檢討的提供者**：`provider(prompt, schema, opts) -> {structured, model, cost_usd}`（`engine/services/llm.py`）。
+  從 `bridge/writer.py` 拿：掛在 pack 上的（`writer.register(pack, fn)`）→ SYNOX 給工具用的 AI（SDK 0.2.x 沒有，回 None）→ 沒有。
+  沒有提供者時 `review_run` 回 `llm_unavailable`，什麼都不寫；SYNOX 的 AI 照舊用 `report review=yes` → `review_save`。
