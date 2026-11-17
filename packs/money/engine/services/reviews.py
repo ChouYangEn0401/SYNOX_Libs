@@ -409,6 +409,61 @@ def validate(ctx: dict[str, Any], kind: str, data: dict[str, Any]) -> tuple[dict
 
 # ---------------------------------------------------------------- 跑
 
+def run_one(conn: sqlite3.Connection, kind: str, key: str | None, provider, *,
+            actor: str = "review-job") -> dict[str, Any]:
+    """請「寫檢討的提供者」（llm.py 的介面）寫一份：先標 running（COMMIT）、叫提供者（不在交易裡）、再存結果。
+    額度用完＝延後（DEFER 之後再試）；失敗＝標失敗附原因；成功照 validate 存（對不起來的照存、標出來）。"""
+    from . import llm
+    provider = llm.require(provider)
+    rep = report.build(conn, kind, key)
+    if rep["count"] == 0:
+        return skip(conn, kind, rep["key"], EMPTY, actor=actor)
+    ctx = _context(conn, rep)
+    model = settings.get(conn, "review.model") or None
+    previous = by_key(conn, kind, rep["key"])
+    with _write(conn, actor, f"review start {kind} {rep['key']}") as w:
+        _upsert(w, kind, rep["key"], rep["start"], rep["end"], status="running", started_at=_iso(_now()),
+                attempts=(previous["attempts"] if previous else 0) + 1, error=None, next_attempt_after=None,
+                metrics=snapshot(rep), model=model, source=actor.split(":", 1)[0])
+    try:
+        res = llm.call(provider, prompt(rep, ctx), schema(ctx, kind), {"model": model, "timeout": 300})
+    except llm.ProviderQuota as e:
+        later = _now() + DEFER
+        with _write(conn, actor, f"review defer {kind} {rep['key']}") as w:
+            rid = _upsert(w, kind, rep["key"], rep["start"], rep["end"], status="deferred", next_attempt_after=_iso(later),
+                          error=clean(f"AI 的額度用完，{later:%m/%d %H:%M} 之後再試" + (f"（重置：{e.resets}）" if e.resets else "")))
+        return get(conn, rid)
+    except llm.ProviderFailed as e:
+        with _write(conn, actor, f"review fail {kind} {rep['key']}") as w:
+            rid = _upsert(w, kind, rep["key"], rep["start"], rep["end"], status="failed", error=clean(str(e), 800),
+                          finished_at=_iso(_now()))
+        return get(conn, rid)
+    data, problems = validate(ctx, kind, res["structured"])
+    with _write(conn, actor, f"review save {kind} {rep['key']}") as w:
+        rid = _upsert(w, kind, rep["key"], rep["start"], rep["end"], status="done", **data, problems=problems,
+                      model=res.get("model") or model, cost_usd=res.get("cost_usd"), finished_at=_iso(_now()),
+                      error=None, sent_at=None)
+    return get(conn, rid)
+
+
+def run_due(conn: sqlite3.Connection, provider, *, actor: str = "review-job",
+            today: date | None = None) -> dict[str, Any]:
+    """該做的都做：太舊或沒資料的標略過、其他請提供者寫；額度用完就停（剩下的下次）。沒有提供者先丟 LlmUnavailable。"""
+    from . import llm
+    provider = llm.require(provider)
+    out: dict[str, list] = {"done": [], "skipped": [], "deferred": [], "failed": []}
+    for item in due(conn, today):
+        if item["action"] == "skip":
+            rv = skip(conn, item["kind"], item["key"], item["reason"], actor=actor)
+        else:
+            rv = run_one(conn, item["kind"], item["key"], provider, actor=actor)
+        out[rv["status"]].append({"id": rv["id"], "kind": rv["kind"], "key": rv["key"], "label": rv["label"],
+                                  "error": rv.get("error"), "grade": rv.get("grade")})
+        if rv["status"] == "deferred":
+            break                                            # 額度用完：剩下的等下次
+    return out
+
+
 def save_manual(w: Writer, kind: str, key: str | None, data: dict[str, Any]) -> int:
     """直接存一份檢討（例：聊天助理自己整理的、或測試）；一樣經過 validate。"""
     rep = report.build(w.conn, kind, key, with_transactions=False)
