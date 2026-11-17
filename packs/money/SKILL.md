@@ -46,4 +46,6 @@ description: 使用者提到花了多少錢、收入、轉帳存錢、代墊或�
 | 核對帳戶餘額 | `/money_balance` |
 | 水電瓦斯帳單 | `/money_bill` |
 | 把收據檔掛到一筆帳上 | `/money_attach` |
+| 匯入對帳單（成交明細、期貨選擇權日報表、已實現損益；網頁存成 html 或 CSV） | 檔案先放進自己的檔案資料夾，再打 `/money_import_statement <檔名>`（先加 `dry_run=yes` 試算）；能讀哪些格式：`/money_formats` |
+| 請接上的 AI 自動寫檢討 | `/money_review_run`（沒接上會說「還沒有接上」：那就照 skills/review.md 由你寫） |
 | 改設定、預算、類別 | 記帳本的「規劃」「設定」分頁 |

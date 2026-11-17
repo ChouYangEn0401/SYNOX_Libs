@@ -45,7 +45,7 @@ CONNECT_FORBIDDEN = tuple(m for m in FORBIDDEN_IMPORTS if m not in ("requests", 
 # 連網、開別的程式、動態載入（requests、socket、subprocess、importlib、pickle…）一樣不准。
 MONEY_IMPORTS = ALLOWED_IMPORTS + ("__future__", "typing", "types", "json", "sqlite3", "csv", "io", "hashlib", "decimal",
                                    "math", "calendar", "contextlib", "contextvars", "threading", "functools", "itertools",
-                                   "unicodedata", "difflib", "logging", "pathlib", "shutil", "tempfile")
+                                   "unicodedata", "difflib", "logging", "pathlib", "shutil", "tempfile", "html")
 MONEY_FORBIDDEN = tuple(m for m in FORBIDDEN_IMPORTS if m not in ("pathlib", "shutil", "threading"))
 # 碰檔案、開資料庫、開執行緒鎖：只准在這幾個檔（其餘的檔只拿 book.conn 與 session 給的路徑）
 MONEY_ONLY_IN = {
@@ -54,7 +54,9 @@ MONEY_ONLY_IN = {
     "shutil": {"engine/services/attachments.py", "engine/services/book.py"},
     "tempfile": {"engine/services/book.py"},
     "pathlib": {"engine/db.py", "engine/paths.py", "engine/seed.py", "engine/services/attachments.py",
-                "engine/services/book.py", "engine/services/csvio.py"},
+                "engine/services/book.py", "engine/services/csvio.py",
+                "engine/services/statements/files.py"},                # 對帳單匯入：只讀對帳單與格式描述檔
+    "html": {"engine/services/statements/tables.py"},                 # html.parser 讀網頁存下來的對帳單表格（只解析字串，不開檔、不連網）
 }
 MONEY_FILE_CALLS = {                                                     # 呼叫 → 准用的檔
     "open": {"engine/services/book.py"},

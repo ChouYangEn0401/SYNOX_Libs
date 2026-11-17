@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "id": "trades_csv",
+  "kind": "trades",
+  "title": "自己整理的交易清單（CSV）",
+  "about": "通用的 CSV：一列一筆買或賣。欄位：日期、代號、名稱、買賣（買進／賣出／當沖買／當沖賣）、股數、價格，選填價金、手續費、交易稅、淨收付（沒寫就照買賣自己算）。試算表另存成 CSV（UTF-8）就能用。",
+  "source": "csv",
+  "encoding": "utf-8",
+  "header": ["日期", "代號", "買賣", "股數", "價格"],
+  "columns": {
+    "date": "日期", "symbol": "代號", "name": "名稱", "type": "買賣", "shares": "股數", "price": "價格",
+    "gross": "價金", "fee": "手續費", "tax": "交易稅", "net": "淨收付"
+  },
+  "date_formats": ["%Y-%m-%d", "%Y/%m/%d"],
+  "types": {
+    "買進": {"action": "buy"}, "買": {"action": "buy"}, "buy": {"action": "buy"},
+    "賣出": {"action": "sell"}, "賣": {"action": "sell"}, "sell": {"action": "sell"},
+    "當沖買": {"action": "buy", "day_trade": true}, "當沖賣": {"action": "sell", "day_trade": true}
+  }
+}

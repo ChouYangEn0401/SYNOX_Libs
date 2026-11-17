@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "id": "tw_trades_html",
+  "kind": "trades",
+  "title": "股票成交明細（網頁存成 html）",
+  "about": "範例描述檔：台灣券商網頁對帳單常見的欄位（交易日期、類別、商品名稱、數額、單價、成交金額、手續費、交易稅、應收付金額），每天一列小計，當沖每一腳另有一列淨收付。你的對帳單欄位不一樣的話，複製這一份到自己檔案資料夾的 formats/，改 id 與欄位名。",
+  "source": "html",
+  "encoding": "utf-8",
+  "header": ["交易日期", "類別", "商品名稱", "數額", "單價", "成交金額", "手續費", "交易稅", "應收付金額"],
+  "columns": {
+    "date": "交易日期", "seq": "櫃員序號", "type": "類別", "product": "商品名稱", "shares": "數額", "price": "單價",
+    "gross": "成交金額", "fee": "手續費", "tax": "交易稅", "net": "應收付金額"
+  },
+  "date_formats": ["%Y/%m/%d"],
+  "product": {"pattern": "^(?P<name>.+?)[(](?P<code>[0-9A-Z]{4,6})[)]$", "example": "要像「範例公司(1234)」"},
+  "types": {
+    "現股買進": {"action": "buy"}, "零股買進": {"action": "buy"},
+    "現股賣出": {"action": "sell"}, "零股賣出": {"action": "sell"},
+    "現買當沖": {"action": "buy", "day_trade": true}, "現賣當沖": {"action": "sell", "day_trade": true}
+  },
+  "day_trade_sum": "現股當沖",
+  "subtotal": {"marker": "小計", "at": 0, "cells": {"gross": 2, "fee": 3, "tax": 4, "net": -1}}
+}

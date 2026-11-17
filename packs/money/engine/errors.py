@@ -60,3 +60,10 @@ class NoHome(LedgerError):
     exit_code = 1
     code = "no_home"
     http_status = 500
+
+
+class LlmUnavailable(LedgerError):
+    """要 AI 寫檢討，但沒有接上任何「寫檢討的提供者」：什麼都不寫，其他功能照常。"""
+    exit_code = 5
+    code = "llm_unavailable"
+    http_status = 503
