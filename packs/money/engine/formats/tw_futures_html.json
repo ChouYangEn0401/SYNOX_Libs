@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "id": "tw_futures_html",
+  "kind": "futures",
+  "title": "期貨選擇權日報表（網頁存成 html）",
+  "about": "範例描述檔：台灣期貨商網頁日報表常見的欄位。契約代號與每點多少錢是交易所公開的契約規格；選擇權的到期日照「那個月第幾個星期幾」推算（國定假日順延不算）。要加別的契約，複製到自己檔案資料夾的 formats/ 再加。",
+  "source": "html",
+  "encoding": "utf-8",
+  "header": ["報告書日期", "商品名稱", "買進口數", "賣出口數", "成交價", "手續費", "期交稅", "沖銷損益", "權利金收支"],
+  "columns": {
+    "date": "報告書日期", "product": "商品名稱", "open_close": "新/平倉", "buy_lots": "買進口數", "sell_lots": "賣出口數",
+    "price": "成交價", "fee": "手續費", "tax": "期交稅", "offset_pnl": "沖銷損益", "premium": "權利金收支"
+  },
+  "date_formats": ["%Y/%m/%d"],
+  "total_marker": "總計",
+  "skip_markers": ["合計"],
+  "futures": {
+    "pattern": "^(?P<code>[A-Z]{2,3}) ?(?P<ym>[0-9]{6})$",
+    "contracts": {
+      "TX": {"name": "臺股期貨", "multiplier": 200},
+      "MTX": {"name": "小型臺指", "multiplier": 50},
+      "TMF": {"name": "微型臺指", "multiplier": 10}
+    }
+  },
+  "options": {
+    "pattern": "^(?P<code>[A-Z0-9]{3}) ?(?P<ym>[0-9]{6}) ?(?P<side>買權|賣權) ?(?P<strike>[0-9]+(?:[.][0-9]+)?)$",
+    "sides": {"買權": "C", "賣權": "P"},
+    "name": "臺指選",
+    "multiplier": 50,
+    "contracts": {
+      "TXO": {"weekday": 2, "nth": 3},
+      "TX1": {"weekday": 2, "nth": 1}, "TX2": {"weekday": 2, "nth": 2}, "TX4": {"weekday": 2, "nth": 4}, "TX5": {"weekday": 2, "nth": 5},
+      "TXX": {"weekday": 4, "nth": 3}, "TXY": {"weekday": 4, "nth": 4}, "TXZ": {"weekday": 4, "nth": 5}
+    }
+  },
+  "rounding": {"per_row": 1},
+  "tolerance": 1
+}

@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "id": "tw_realized_html",
+  "kind": "realized",
+  "title": "已實現損益（網頁存成 html）",
+  "about": "範例描述檔：台灣券商網頁「已實現損益」常見的欄位（只有賣出那一筆）。當沖那一種用 day_trade_type 認，交易稅率拿來把費用拆成手續費與稅。",
+  "source": "html",
+  "encoding": "utf-8",
+  "header": ["商品名稱", "成交日期", "交易類別", "股數", "成交價", "帳面收入", "投資成本", "損益"],
+  "columns": {
+    "product": "商品名稱", "date": "成交日期", "type": "交易類別", "shares": "股數", "price": "成交價",
+    "income": "帳面收入", "cost": "投資成本", "pnl": "損益"
+  },
+  "date_formats": ["%Y/%m/%d"],
+  "product": {"pattern": "^(?P<name>.+?)[(](?P<code>[0-9A-Z]{4,6})[)]$", "example": "要像「範例公司(1234)」"},
+  "subtotal_markers": ["小計", "合計"],
+  "day_trade_type": "現股當沖",
+  "day_trade_tax_rate": 0.0015
+}
