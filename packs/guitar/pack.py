@@ -705,15 +705,49 @@ def chord_line(line):
     return found if found and other == 0 else None
 
 
+FLAT_NOTE = "ℹ️ 譜變成一行了（聊天指令會把換行併起來），像和弦的字都照和弦移；要保留排版請用網頁面板貼譜。"
+
+
+def flattened(text):
+    """聊天指令會把換行併成空白（指令樹照空白切參數），整份譜就變成一行。
+    只有一行、又不是整行和弦時，分不出哪些是和弦行、哪些是歌詞，就改成「每個像和弦的字都算」。"""
+    t = (text or "").strip()
+    return bool(t) and "\n" not in t and chord_line(t) is None
+
+
+def loose_line(line):
+    """一行裡每個自己一個字、看起來是和弦的（其他字不管）。格式同 chord_line。"""
+    found = []
+    for m in TOKEN.finditer(line):
+        ch, pre, post = _token_chord(m.group(0))
+        if ch:
+            found.append((m.start(), m.end(), ch, pre, post))
+    return found
+
+
+def _inline_chords(text):
+    return [c for c in (parse_chord(m.group(1)) for m in INLINE.finditer(text)) if c]
+
+
+def _inline_sub(text, fn):
+    return INLINE.sub(lambda m: f"[{fn(parse_chord(m.group(1)))}]" if parse_chord(m.group(1)) else m.group(0), text)
+
+
 def chords_in(text):
     """譜裡依序出現的每個和弦（和弦行裡的、和 [C] 夾在歌詞裡的）。"""
+    if flattened(text):
+        line, out, prev = text.strip(), [], 0
+        for start, end, ch, _, _ in loose_line(line):
+            out += _inline_chords(line[prev:start]) + [ch]
+            prev = end
+        return out + _inline_chords(line[prev:])
     out = []
     for line in (text or "").splitlines():
         found = chord_line(line)
         if found:
             out += [f[2] for f in found]
         else:
-            out += [c for c in (parse_chord(m.group(1)) for m in INLINE.finditer(line)) if c]
+            out += _inline_chords(line)
     return out
 
 
@@ -734,14 +768,19 @@ def _rewrite_line(line, found, fn):
 
 
 def rewrite(text, fn):
+    if flattened(text):
+        line, out, prev = text.strip(), "", 0
+        for start, end, ch, pre, post in loose_line(line):
+            out += _inline_sub(line[prev:start], fn) + pre + fn(ch) + post
+            prev = end
+        return out + _inline_sub(line[prev:], fn)
     lines = []
     for line in (text or "").splitlines():
         found = chord_line(line)
         if found:
             lines.append(_rewrite_line(line, found, fn))
         else:
-            lines.append(INLINE.sub(lambda m: f"[{fn(parse_chord(m.group(1)))}]" if parse_chord(m.group(1))
-                                    else m.group(0), line))
+            lines.append(_inline_sub(line, fn))
     return "\n".join(lines)
 
 
@@ -823,12 +862,13 @@ def split_spec(text):
     rest = "\n".join(lines[1:])
     if parse_shift(first, (0, False)) is not None:
         return first, rest
-    head, _, tail = first.partition(" ")
-    if parse_shift(head, (0, False)) is not None:
-        return head, (tail + ("\n" + rest if rest else "")).strip("\n")
-    m = re.match(r"^(\S+\s*(?:→|->|=>|>|到|to)\s*\S+)\s+(.*)$", first, re.I)
-    if m and parse_shift(m.group(1), (0, False)) is not None:
-        return m.group(1), (m.group(2) + ("\n" + rest if rest else "")).strip("\n")
+    # 移法和譜在同一行（聊天指令把換行併成空白）：移法最多三個字（+2、到 Eb、G 到 A），從短的試
+    words = first.split()
+    for n in range(1, min(3, len(words) - 1) + 1):
+        spec = " ".join(words[:n])
+        if parse_shift(spec, (0, False)) is not None:
+            tail = first.split(None, n)[n]
+            return spec, (tail + ("\n" + rest if rest else "")).strip("\n")
     return None, text
 
 
@@ -1630,6 +1670,8 @@ def install(app, pack):
             best = capo_options(moved, dst)[0]
             if best[0]:
                 head.append(f"💡 少按橫按：{capo_line(best, moved)}（/chord_capo 看整份）")
+        if flattened(sheet):
+            head.append(FLAT_NOTE)
         send(api, chat_id, "\n".join(head) + "\n\n" + out)
 
     def capo(api, chat_id, user, values):
@@ -1672,6 +1714,8 @@ def install(app, pack):
         if sheet:
             lines += ["", f"── 夾 Capo {use}、照 {key_name(shape_key)} 調手型彈的譜 ──" if use else "── 原譜 ──",
                       rewrite(sheet, lambda ch: chord_name(ch, -use, shape_key))]
+            if flattened(sheet):
+                lines.append(FLAT_NOTE)
         send(api, chat_id, "\n".join(lines))
 
     def arp(api, chat_id, user, values):

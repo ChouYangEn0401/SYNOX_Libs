@@ -103,6 +103,19 @@ def test_commands(make_bot, owner):
     assert data["last"].startswith("前奏") and "C_major" in data["lib"] and data["patterns"]
 
 
+def test_flattened_sheet_from_chat(g):
+    # 聊天指令照空白切參數，換行到 pack 時已經變成空白：移法和譜在同一行、整份譜一行
+    assert g.split_spec("到 Eb {\"a\": 1}") == ("到 Eb", "{\"a\": 1}")
+    assert g.split_spec("G 到 A C G") == ("G 到 A", "C G")
+    assert g.split_spec("+2 C G Am F") == ("+2", "C G Am F")
+    assert g.split_spec("C G Am F") == (None, "C G Am F")
+    flat = " ".join(SHEET.split())
+    assert g.flattened(flat) and not g.flattened(SHEET) and not g.flattened("C G Am F")
+    out = g.rewrite(flat, lambda ch: g.chord_name(ch, 2, (9, False)))
+    assert "E/G#" in out and "這是[A]一首[E]簡單的[F#m]歌" in out and "我想你" in out
+    assert [g.chord_name(c, 0, (7, False)) for c in g.chords_in(flat)][:4] == ["G", "D/F#", "Em", "C"]
+
+
 def test_server_mode_keeps_sheets_apart(make_bot):
     bot = make_bot("guitar", per_user=True)
     bot.say(100, "/chord_tp +1\nC G Am F")
