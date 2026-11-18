@@ -250,6 +250,13 @@ cd ~/work/SYNOX_Libs                              # 這個 repo
 
 開工前先跑，**把結果記下來**：之後才分得出哪些是本來就壞的、哪些是你弄壞的。本來就紅的不要順手修，寫進 PR 說明。
 
+> **現在的基準不是全綠**（2026-11-18，SYNOX `dev`、`SDK_VERSION` 0.2.4）：`151 failed, 1443 passed, 2 skipped`。
+> 原因只有一個（第 8 節第一列）：SYNOX 現在不載入沒經過安裝頁（沒有 `packs.lock`）的工具，而 `tests/conftest.py` 只在伺服器版替工具上鎖，
+> 個人版的測試裡工具根本沒載入（回「未知指令」、`registry.node(...)` 是 `None`、`synox_pack_<name>` 不在 `sys.modules`）。
+> 你的新工具用 `synox_bot`／`host_bot` 的個人版測試也會一樣紅，**這不是你的錯**；PR 說明裡照實寫「哪些紅是這個原因」。
+> 想先看到全綠的基準：SYNOX 改用加這條規則之前的那一版 `git -C "$SYNOX_HOME" checkout 97f005f~1`（`SDK_VERSION` 0.2.3），
+> 交件前再切回 `dev` 跑一次、兩個結果都寫進 PR。
+
 ### 5.4 開分支
 
 ```bash
@@ -384,6 +391,7 @@ SYNOX 在 Windows 上也可以雙擊 `Setup.bat` 建 `.venv`；之後的指令�
 
 | 落差 | 影響 | 現在怎麼辦 |
 |---|---|---|
+| **沒上鎖的工具不載入**：SYNOX 從 ADR 0028 S9（commit `97f005f`，2026-11-16）起，`pack_dirs` 指過去、`data/packs.lock` 裡沒有那一筆的工具一律不載入。`tests/conftest.py` 的 `synox_bot`／`host_bot` 只在 `mode="server"` 時呼叫 `trust_core` 上鎖，個人版沒有 | 對現在的 SYNOX `dev`：151 個測試紅（個人版的 `synox_bot`／`host_bot` 測試，含 test_access、test_isolation 的個人版、四個 connector、google-sheets、money 的 app 測試）。已驗證：個人版先 `lock.approve(...)` 之後工具就載得進來 | 等維護者修 `tests/conftest.py`（個人版也上鎖）；在那之前照 5.3 的說明比對基準，或用 SYNOX `97f005f~1` 跑 |
 | **面板的 `fetch` 網址**：SYNOX 從 ADR 0028 §5（2026-11-16）起把 `panel.html` 隔開，面板只能打**相對網址** `fetch("api/<route>")`，舊的 `fetch("/api/packs/<name>/<route>", {credentials: …})` 會被擋（401）。但這個 repo 的 5 個面板（todo、money、guitar、calendar、bullet）還是舊寫法，`tests/test_gates.py` 的 `panel_problems` 也**只收舊寫法** | 照現在的測試寫的面板，在新的 SYNOX 上讀不到資料 | 新工具**先不要做 `panel.html`**；真的需要，在 PR 說明提出，等維護者決定怎麼改測試與舊面板 |
 | ADR-0006 第 2、3 節的 M5（面板只打 `/api/packs/<自己>/…`、帶 `credentials`） | 同上，是舊的規則 | 以 SYNOX 的 `docs/pack-format.md`「`web.panel`」為準 |
 | `tests/test_costumes.py` 找 SYNOX 原始碼只看 `SYNOX_SRC` 與 `../SYNOX`，不看 `SYNOX_HOME` | SYNOX 不放旁邊又沒設 `SYNOX_SRC` 時，那一條會跳過 | 照 5.2 設 `SYNOX_SRC` |
