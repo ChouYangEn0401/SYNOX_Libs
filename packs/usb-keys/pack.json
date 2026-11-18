@@ -1,0 +1,39 @@
+{
+  "name": "usb-keys",
+  "title": "🔑 USB 鑰匙",
+  "summary": "把很多支隨身碟登記成鑰匙，選一把來鎖訊息或檔案；解開時那支碟要插著（用 usbtether 函式庫）",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "usb",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 60,
+  "python": { "module": "pack" },
+  "capabilities": ["filesystem:any", "subprocess"],
+  "publisher": "SYNOX_Libs",
+  "requires": {
+    "pip": ["usbtether==0.3.0 --hash=sha256:945ee70ff2f3ab14ebc86ad5ab22b68c511542acc91e30db8ac7020114947099"],
+    "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3"
+  },
+  "skill": "SKILL.md",
+  "storage": "vault",
+  "callers": {
+    "register": ["human"], "reregister": ["human"], "revoke": ["human"], "unlock": ["human"],
+    "lock_pw": ["human"], "folders": ["human"], "folder_add": ["human"], "folder_rm": ["human"]
+  },
+  "web": {
+    "app": {
+      "entry": "app/index.html",
+      "root": "app",
+      "title": "USB 鑰匙",
+      "kit": 1,
+      "reads": ["keys", "drives", "folders", "browse", "check"],
+      "actions": {
+        "register": "WRITE", "reregister": "DANGER", "revoke": "DANGER", "lock_pw": "WRITE", "unlock": "WRITE",
+        "folder_add": "WRITE", "folder_rm": "WRITE"
+      }
+    }
+  }
+}
