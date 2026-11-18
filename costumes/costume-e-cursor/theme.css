@@ -17,7 +17,7 @@
 [data-slot] .op .ow{color:var(--text)}
 [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-e-o-fade}
 [data-slot] .op-E .pr{color:var(--accent)}
-[data-slot] .op-E .l{animation:th-e-oE-key 1ms steps(1) calc(.35s + var(--i) * .17s) both}
+[data-slot] .op-E .l{animation:th-e-oE-key calc(.35s + var(--i) * .17s) linear 0s 1 normal none}
 [data-slot] .op-E .eye{transform-box:fill-box;transform-origin:50% 50%;animation:0.3s ease 1.4s 1 normal both running th-e-oE-eye}
 [data-slot] .op-E .mouth{transform-box:fill-box;transform-origin:50% 50%;animation:0.3s ease 1.4s 1 normal both running th-e-oE-eye}
 [data-slot] .op-E .mbody{animation:auto ease 0s 1 normal none running none}
@@ -62,8 +62,7 @@
   0% { opacity: 0; transform: translateY(6px); }
 }
 @keyframes th-e-oE-key { 
-  0% { max-width: 0px; opacity: 0; }
-  100% { max-width: 3em; opacity: 1; }
+  0%, 100% { opacity: 0; }
 }
 @keyframes th-e-oE-eye { 
   0% { transform: scaleY(0); }

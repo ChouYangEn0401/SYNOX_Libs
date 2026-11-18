@@ -127,12 +127,60 @@ def test_check_refuses_code_in_svg(broken, svg, what):
     (":root{--bg:red}", ":root 只能設 --th-"),
     ("@media (max-width:300px){[data-slot] .a{fill:red}}", "@media"),
     ("@font-face{font-family:x}", "at-rule"),
+    ("[data-slot] .a{animation:th-b-x 1ms steps(1) calc(.35s + var(--i) * .17s) both}\n@keyframes th-b-x{to{opacity:1}}", "steps()"),
+    ("[data-slot] .a{animation:1ms steps(1) 0s 1 normal forwards running th-b-x}\n@keyframes th-b-x{to{opacity:1}}", "steps()"),
 ])
 def test_check_refuses_bad_css(broken, css, what):
     with open(broken / "theme.css", "a", encoding="utf-8") as f:
         f.write("\n" + css + "\n")
     problems = bc.pack_problems(str(broken))
     assert any(what in p for p in problems), problems
+
+
+def test_fragile_check_leaves_normal_steps_animations_alone():
+    """只擋「幾 ms 的 steps() 又停在終點」；正常長度、會一直重複、或播完不停住的 steps() 照常可以用。"""
+    ok = ("[data-slot] .a{animation:0.78s steps(1) 0s 1 normal both running th-w-x}\n"
+          "[data-slot] .b{animation:1.2s steps(1) 0s infinite normal none running th-w-x}\n"
+          "[data-slot] .c{animation:th-e-x calc(.35s + var(--i) * .17s) linear 0s 1 normal none}\n"
+          "[data-slot] .d{animation:0s linear 0s 1 normal none running th-w-x}\n")
+    assert bc.fragile_animations(ok) == []
+
+
+def test_cursor_opening_types_all_five_letters_and_keeps_them():
+    """系列 E 的開場：S Y N O X 五個字都在（第 5 個是 X），而且動畫播完一定看得到。
+    以前是「1ms steps(1) 延遲 both」：終點進度算成 0.99999999999989，steps(1) 取整成 0，X 一直停在透明。
+    現在是整段藏起來、時間＝要等多久、fill none：播完就是元素原本的樣子；打字動畫不靠「剛好算到 1」。"""
+    folder = os.path.join(bc.COSTUMES, "costume-e-cursor")
+    with open(os.path.join(folder, "slots", "opening.svg"), encoding="utf-8") as f:
+        svg = f.read()
+    letters = re.findall(r'<g class="l [^"]*\b(ce-v\d)"[^>]*><svg class="v"[^>]*><path class="gl" d="M[^"]+"', svg)
+    assert letters == [f"ce-v{i}" for i in range(5)]
+    with open(os.path.join(folder, "theme.css"), encoding="utf-8") as f:
+        css = f.read()
+    rules = {head: body for head, body in bc._css_blocks(css)}
+    anim = dict(bc.decls_of(rules["[data-slot] .op-E .l"]))["animation"]
+    toks = bc.split_top(anim, " ")
+    assert "th-e-oE-key" in toks and "none" in toks and not {"both", "forwards"} & set(toks), anim
+    assert "steps(" not in anim
+    assert re.sub(r"\s+", "", rules["@keyframes th-e-oE-key"]) == "0%,100%{opacity:0;}"   # 只在等的時候藏
+    for head, body in rules.items():                                                     # 字本身沒有被藏起來
+        if re.search(r"\.l\b|ce-v\d", head):
+            assert not re.search(r"(^|;)\s*(opacity\s*:\s*0|visibility\s*:\s*hidden)", body), head
+
+
+def test_css_fixups_are_already_in_the_costumes_and_versions_match():
+    """costumes/ 是 extract 的輸出：CSS_FIXUPS 換過的樣子要已經在檔案裡（重跑 extract 不會變），升過的版本也一致。"""
+    for letter in bc.CSS_FIXUPS:
+        folder = os.path.join(bc.COSTUMES, bc.costume_id(letter))
+        with open(os.path.join(folder, "theme.css"), encoding="utf-8") as f:
+            css = f.read()
+        assert bc.apply_fixups(letter, css) == css
+        for old, new in bc.CSS_FIXUPS[letter]:
+            assert old not in css and new in css
+    for name in NAMES:
+        letter = re.match(r"^costume-([a-z])-", name).group(1).upper()
+        with open(os.path.join(bc.COSTUMES, name, "pack.json"), encoding="utf-8") as f:
+            assert json.load(f)["version"] == bc.VERSIONS.get(letter, bc.VERSION), name
 
 
 def test_check_refuses_missing_slot_token_and_size(broken):

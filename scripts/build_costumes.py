@@ -46,7 +46,10 @@ ONLINE_URL = "https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR"           # 公
 COLLECTION = {"id": "wardrobe", "title": "SYNOX 衣櫃", "category": "衣櫃／外觀",
               "summary": "26 套外觀：整個聊天介面的顏色、吉祥物、開場一起換。不帶任何程式，換回預設隨時可以。"}
 VERSION = "1.0.0"
-SLOTS = ("mascot.idle", "mascot.think", "mascot.happy", "mascot.warn", "opening", "wordmark", "appicon")
+# 個別升過版的套（extract 重新產生時照這裡寫，不要退回 VERSION）：
+# 1.0.1 = 開場動畫改成穩定的寫法（CSS_FIXUPS；E 的 X 不見、W 開機字同一種寫法）
+VERSIONS = {"E": "1.0.1", "W": "1.0.1"}
+SLOTS =("mascot.idle", "mascot.think", "mascot.happy", "mascot.warn", "opening", "wordmark", "appicon")
 SLOT_FILES = {"mascot.idle": "slots/idle.svg", "mascot.think": "slots/think.svg", "mascot.happy": "slots/happy.svg",
               "mascot.warn": "slots/warn.svg", "opening": "slots/opening.svg", "wordmark": "slots/wordmark.svg",
               "appicon": "slots/appicon.svg"}
@@ -193,6 +196,42 @@ def css_problems(name: str, css: str, letter: str) -> list:
     for m in media:
         if "prefers-color-scheme" not in m and "prefers-reduced-motion" not in m:
             out.append(f"{name}: @media {m.strip()} 不准（只收深淺色、減少動態）")
+    out += [f"{name}: {p}" for p in fragile_animations(css)]
+    return out
+
+
+SUBFRAME_MS = 50                      # 比一個畫面（約 16ms）再寬一點：比這短的 steps() 動畫，終點全靠浮點數算剛好
+
+
+def _time_ms(tok: str):
+    m = re.fullmatch(r"(\d*\.?\d+)(ms|s)", tok.strip())
+    if not m:
+        return None
+    return float(m.group(1)) * (1 if m.group(2) == "ms" else 1000)
+
+
+def fragile_animations(css: str) -> list:
+    """不穩的動畫寫法：播一次、steps()、停在終點（both／forwards），而且只有幾 ms 長。
+    這種寫法的終點進度要剛好算到 1，steps() 才會跳到最後一格；延遲是 calc() 算出來的時候常常算成 0.99999999999989，
+    steps() 往下取整就停在第一格、而且一直停在那裡（E 的開場第 5 個字 X 就是這樣不見的）。
+    要「時間到才出現」改成：整段藏起來（0%、100% 都是藏）、時間＝要等多久、fill 用 none，播完就是元素原本的樣子。"""
+    out = []
+    for head, body in _css_blocks(css):
+        if head.startswith("@"):
+            continue
+        for k, v in decls_of(body):
+            if k != "animation":
+                continue
+            for part in split_top(v):
+                toks = split_top(part, " ")
+                if "infinite" in toks or not ({"both", "forwards"} & set(toks)):
+                    continue
+                if not any(t.startswith("steps(") or t in ("step-end", "step-start") for t in toks):
+                    continue
+                times = [t for t in (_time_ms(t) for t in toks) if t is not None]
+                if times and times[0] < SUBFRAME_MS:
+                    out.append(f"動畫「{part}」只有 {times[0]:g}ms 又用 steps() 停在終點："
+                               "終點會因為浮點誤差停在第一格；改成整段藏起來、播完露出原本樣子（見 fragile_animations）")
     return out
 
 
@@ -944,6 +983,40 @@ def clean_svg(svg: str) -> str:
     return svg
 
 
+# 品牌提案頁的寫法搬到 SVG 之後不穩的地方：extract 轉好 theme.css 之後照這張表換（舊的那段找不到就停下來，表要跟著改）。
+# 「1ms steps(1) …延遲… both」想做的是「時間到才出現」，可是終點進度常常算成 0.99999999999989，steps(1) 取整成 0，
+# 就一直停在藏起來的樣子（E 的開場 X 不見）。改成整段藏起來、時間＝要等多久、fill 用 none：播完就是元素原本的樣子（看得到）。
+# max-width 在 SVG 的 <g> 上本來就沒有作用（那是品牌頁 HTML 版用來讓游標跟著字走的），一起拿掉。
+CSS_FIXUPS = {
+    "E": [
+        ("[data-slot] .op-E .l{animation:th-e-oE-key 1ms steps(1) calc(.35s + var(--i) * .17s) both}",
+         "[data-slot] .op-E .l{animation:th-e-oE-key calc(.35s + var(--i) * .17s) linear 0s 1 normal none}"),
+        ("@keyframes th-e-oE-key { \n  0% { max-width: 0px; opacity: 0; }\n  100% { max-width: 3em; opacity: 1; }\n}",
+         "@keyframes th-e-oE-key { \n  0%, 100% { opacity: 0; }\n}"),
+    ],
+    "W": [
+        ("[data-slot][data-slot] .op-W .wboot .t-span{animation:1ms steps(1) 0s 1 normal both running th-w-wp-o-line}",
+         "[data-slot][data-slot] .op-W .wboot .t-span{animation:0s linear 0s 1 normal none running th-w-wp-o-line}"),
+        ("[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-delay:0.2s}",
+         "[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-duration:0.2s}"),
+        ("[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-delay:0.4s}",
+         "[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-duration:0.4s}"),
+        ("@keyframes th-w-wp-o-line { \n  0% { visibility: hidden; }\n  100% { visibility: visible; }\n}",
+         "@keyframes th-w-wp-o-line { \n  0%, 100% { visibility: hidden; }\n}"),
+    ],
+}
+
+
+def apply_fixups(letter: str, css: str) -> str:
+    for old, new in CSS_FIXUPS.get(letter, []):
+        if new in css:
+            continue
+        if css.count(old) != 1:
+            raise SystemExit(f"系列 {letter} 的 theme.css 找不到要換的那段（CSS_FIXUPS 要跟著改）：{old[:60]}")
+        css = css.replace(old, new)
+    return css
+
+
 def extract(brand: str, cache: str, only=None) -> None:
     try:
         from playwright.sync_api import sync_playwright
@@ -1106,7 +1179,7 @@ def extract(brand: str, cache: str, only=None) -> None:
                 if r.get("kf") in used:
                     text = re.sub(r"^@keyframes\s+[\w-]+", f"@keyframes {kfp}{r['kf']}", r["css"])
                     css_lines.append(fix(text))
-            theme_css = "\n".join(css_lines) + "\n"
+            theme_css = apply_fixups(sid, "\n".join(css_lines) + "\n")
             write_costume(s, slots, theme_css, extras_l, extras_d)
         browser.close()
 
@@ -1125,7 +1198,7 @@ def write_costume(s: dict, slots: dict, theme_css: str, extras_l: dict, extras_d
     folder = os.path.join(COSTUMES, cid)
     os.makedirs(os.path.join(folder, "slots"), exist_ok=True)
     why = {w.split("|", 1)[0]: w.split("|", 1)[1] for w in s["why"]}
-    pack = {"name": cid, "kind": "theme", "version": VERSION, "title": s["name"],
+    pack = {"name": cid, "kind": "theme", "version": VERSIONS.get(s["id"], VERSION), "title": s["name"],
             "summary": f"{s['one']}。SYNOX 衣櫃 · 系列 {s['id']}：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
             "publisher": PUBLISHER, "stage": STAGE,
             "theme": {"contract": CONTRACT, "tokens": {"light": tokens_of(s, "light"), "dark": tokens_of(s, "dark")},
