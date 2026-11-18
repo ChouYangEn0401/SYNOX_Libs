@@ -3,6 +3,8 @@
 給**第一次接手的人**：外部開發者、雲端的 Claude Code session（Linux 容器）、任何 AI agent。
 讀完這一頁，你應該能在一台乾淨的 Linux 上 clone → 建環境 → 跑測試 → 寫一個新工具 → 自己驗 → 開 PR。
 細節（每個欄位、每支腳本）在 [CONTRIBUTING-TOOLS.md](CONTRIBUTING-TOOLS.md)；這一頁是入口和規矩，不重複那裡的表。
+SYNOX（主程式）那邊也有同樣給新開發者的入口：SYNOX repo 的 `docs/HANDOFF.md`（全貌、目錄地圖、ADR 摘要、雲端注意事項）與
+`docs/development.md`（clone → 建環境 → 跑測試 → 開發 pack → 交 PR；改核心的規則）。要看工具在 SYNOX 裡怎麼被載入、檢查，讀那兩份。
 
 **一句話**：你只做「改程式＋開 PR」。合併、打包發佈、簽章、更新線上頁都是維護者的事，你不做、也做不了。
 
@@ -174,6 +176,9 @@ money 的分層（[packs/money/CONTRACT.md](../packs/money/CONTRACT.md)）：
 | `synox_bot` | 真的 SYNOX `build()`：真的 loader、保管箱加密、權限、`mode="server"` 每人一份 | 雙人隔離、落地是密文、權限 |
 | `host_bot` | 跟 SYNOX 自己測試同一個介面（可以接假 AI） | 從 SYNOX 搬來的測試、要假 AI 的 |
 
+`synox_bot`／`host_bot` 在 `build()` 之前會先把這個 repo 的每個工具寫進 `data/packs.lock`（`conftest.approve_all`：個人版照安裝頁的預設、
+伺服器版鎖成 core），跟擁有者在安裝頁按確認一樣——SYNOX 從 ADR 0028 S9 起不載入沒上鎖的工具。新工具放進 `packs/` 就自動涵蓋，不用另外處理。
+
 範例：`tests/test_notes.py`（`synox_bot`，十幾行）。接外面服務的工具一律用**假的 HTTP**（看 `tests/test_todoist.py` 怎麼換掉傳輸）。
 
 新工具除了 `tests/test_<name>.py`，還要在這幾個既有測試各加一行（不加會紅）：
@@ -250,12 +255,8 @@ cd ~/work/SYNOX_Libs                              # 這個 repo
 
 開工前先跑，**把結果記下來**：之後才分得出哪些是本來就壞的、哪些是你弄壞的。本來就紅的不要順手修，寫進 PR 說明。
 
-> **現在的基準不是全綠**（2026-11-18，SYNOX `dev`、`SDK_VERSION` 0.2.4）：`151 failed, 1443 passed, 2 skipped`。
-> 原因只有一個（第 8 節第一列）：SYNOX 現在不載入沒經過安裝頁（沒有 `packs.lock`）的工具，而 `tests/conftest.py` 只在伺服器版替工具上鎖，
-> 個人版的測試裡工具根本沒載入（回「未知指令」、`registry.node(...)` 是 `None`、`synox_pack_<name>` 不在 `sys.modules`）。
-> 你的新工具用 `synox_bot`／`host_bot` 的個人版測試也會一樣紅，**這不是你的錯**；PR 說明裡照實寫「哪些紅是這個原因」。
-> 想先看到全綠的基準：SYNOX 改用加這條規則之前的那一版 `git -C "$SYNOX_HOME" checkout 97f005f~1`（`SDK_VERSION` 0.2.3），
-> 交件前再切回 `dev` 跑一次、兩個結果都寫進 PR。
+對 SYNOX `dev` 的基準應該是**全綠**（2026-11-18，`SDK_VERSION` 0.2.4：設好 `SYNOX_SRC` 時 `1595 passed, 1 skipped`；跳過的見第 7 節）。
+你這裡不是全綠：先確認 SYNOX 是 `dev` 的最新版、`SYNOX_HOME` 指對，還是紅就把紅的那幾條寫進 PR 說明，不要為了變綠去改既有測試的期望。
 
 ### 5.4 開分支
 
@@ -272,6 +273,7 @@ cp -r packs/notes packs/<工具名>         # 從最簡單的範本開始；改 
 ```
 
 - 小步 commit，訊息寫**做了什麼、為什麼**。
+- 測試用 `synox_bot`／`host_bot`（真的 SYNOX）或 `make_bot`（假 store）；不要在測試裡自己寫 `packs.lock`、也不要繞過 SYNOX 的檢查（conftest 已經替每個工具上鎖）。
 - 要共用 `packs/_shared/` 的程式（中文日期 `zhdate`、Google 登入 `googleauth`）：不要 import，改 `scripts/sync_shared.py` 的對照、跑它複製進來。
 - 範例、測試資料一律假的（`me@example.com`、`<使用者>`、`0123…`），見第 6.2 節。
 
@@ -283,7 +285,7 @@ cp -r packs/notes packs/<工具名>         # 從最簡單的範本開始；改 
 "$PY" scripts/build.py --check                   # 這個 repo 的規定：requires.sdk、stage、入口欄位、catalog、公開頁是不是最新
 "$PY" scripts/build.py <工具名> --out /tmp/try   # 試打包這一個（用 SYNOX 的 zip_pack；index.json 只列它；不動 repo 的檔）
 "$PY" scripts/build_site.py                      # 新工具：入口頁多一張卡片、產生 docs/site/<工具名>.html（要 commit）
-"$PY" -m pytest -q                               # 全部；跟 5.3 的基準比，只能多、不能少
+"$PY" -m pytest -q                               # 全部，要全綠（跟 5.3 的基準一樣；skipped 只能是第 7 節列的那幾種）
 "$PY" scripts/public_check.py                    # 隱私檢查（第 6.2 節）；有發現＝結束碼 1
 ```
 
@@ -379,19 +381,20 @@ SYNOX 在 Windows 上也可以雙擊 `Setup.bat` 建 `.venv`；之後的指令�
   - 沒有 `node`：`tests/money/` 裡幾條跑網頁 JS 的測試（`skipif(NODE is None)`）；
   - 找不到 SYNOX 原始碼：`tests/test_costumes.py` 的最後一條（設 `SYNOX_SRC`，或把 SYNOX 放在旁邊的 `../SYNOX`）；
   - SYNOX 太舊（沒有多檔工具）：`tests/money/` 的兩條。照 5.1 用 `dev` 就不會跳。
+  - `tests/money/test_contract.py` 有一條「每個指令都做好了」：照設計會跳過（它只在還有沒做完的指令時才跑）。
   跳過的數字寫進 PR 說明。
 - **不需要、也不准拿**任何私人資料或金鑰：沒有 Telegram token、AI 金鑰、簽章私鑰、使用者的資料檔（`data/`、`*.enc`、`config.json`）。
   測試要的東西全部是假的；如果某件事看起來非要真的帳號才能做，停下來寫進 PR 說明，不要自己去找。
 - **不要在容器裡跑真的 SYNOX 伺服器、開對外的埠、連真的外部服務**。要看工具在 SYNOX 裡的樣子，用 `synox_bot` 測試就好。
 - **私人的計畫與設計稿不在這個 repo**：如果你的任務有那種文件，維護者會另外經加密分支提供（解密方法寫在那條分支自己的 README）；
   解出來的內容只用來工作，**不准寫進這個 repo 的檔案、commit 訊息、PR 說明**，工作完刪掉明文。
+  解密用的私鑰**只會由維護者設在雲端環境的祕密（secret／環境變數）裡**，不在任何分支、任何檔案；環境裡沒有那個祕密就停下來回報，不要去別處找、不要請人貼給你。
 - 網路：`pip install` 與 `git clone` 要連網；測試本身不連網（連網的程式碼一律被假傳輸換掉）。
 
 ## 8. 已知落差（文件或測試跟現在的 SYNOX 對不上，還沒修）
 
 | 落差 | 影響 | 現在怎麼辦 |
 |---|---|---|
-| **沒上鎖的工具不載入**：SYNOX 從 ADR 0028 S9（commit `97f005f`，2026-11-16）起，`pack_dirs` 指過去、`data/packs.lock` 裡沒有那一筆的工具一律不載入。`tests/conftest.py` 的 `synox_bot`／`host_bot` 只在 `mode="server"` 時呼叫 `trust_core` 上鎖，個人版沒有 | 對現在的 SYNOX `dev`：151 個測試紅（個人版的 `synox_bot`／`host_bot` 測試，含 test_access、test_isolation 的個人版、四個 connector、google-sheets、money 的 app 測試）。已驗證：個人版先 `lock.approve(...)` 之後工具就載得進來 | 等維護者修 `tests/conftest.py`（個人版也上鎖）；在那之前照 5.3 的說明比對基準，或用 SYNOX `97f005f~1` 跑 |
 | **面板的 `fetch` 網址**：SYNOX 從 ADR 0028 §5（2026-11-16）起把 `panel.html` 隔開，面板只能打**相對網址** `fetch("api/<route>")`，舊的 `fetch("/api/packs/<name>/<route>", {credentials: …})` 會被擋（401）。但這個 repo 的 5 個面板（todo、money、guitar、calendar、bullet）還是舊寫法，`tests/test_gates.py` 的 `panel_problems` 也**只收舊寫法** | 照現在的測試寫的面板，在新的 SYNOX 上讀不到資料 | 新工具**先不要做 `panel.html`**；真的需要，在 PR 說明提出，等維護者決定怎麼改測試與舊面板 |
 | ADR-0006 第 2、3 節的 M5（面板只打 `/api/packs/<自己>/…`、帶 `credentials`） | 同上，是舊的規則 | 以 SYNOX 的 `docs/pack-format.md`「`web.panel`」為準 |
 | `tests/test_costumes.py` 找 SYNOX 原始碼只看 `SYNOX_SRC` 與 `../SYNOX`，不看 `SYNOX_HOME` | SYNOX 不放旁邊又沒設 `SYNOX_SRC` 時，那一條會跳過 | 照 5.2 設 `SYNOX_SRC` |
@@ -403,7 +406,7 @@ SYNOX 在 Windows 上也可以雙擊 `Setup.bat` 建 `.venv`；之後的指令�
 - [ ] `tests/test_<name>.py`；`test_gates.py`（`ALLOWED_CAPS`）、`test_build.py`（`SMOKE`）各一行；接外面服務的加進 `CONNECT`
 - [ ] `CHANGELOG.md` 的 `[Unreleased]` 一行；`README.md` 的工具表一行（說明頁那格寫「（還沒有說明頁）」）
 - [ ] `"$PY" scripts/build_site.py` 跑過、`docs/site/index.html` 與 `docs/site/<name>.html` 一起 commit
-- [ ] 5.6 的每一條都過；全部測試跟基準比沒有變少
+- [ ] 5.6 的每一條都過；全部測試全綠（skipped 只有第 7 節列的那幾種）
 - [ ] `public_check.py` 沒有發現；diff 裡沒有本機路徑、真名、信箱、token、`.pem`
 - [ ] 沒動 `VERSION`、`dist/`、`scripts/links.py` 的 `LINK_MODE`、別的工具的檔（除非 PR 說明寫了為什麼）
 - [ ] 開 PR、說明照 5.7 第 3 點；不合併、不發版、不簽章
