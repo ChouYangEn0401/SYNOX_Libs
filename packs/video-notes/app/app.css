@@ -1,0 +1,13 @@
+/* 只補共用樣式（/_synox/kit.css）沒有的；顏色跟著 kit.css 的深淺色。 */
+.page { max-width: 880px; margin: 0 auto; padding: 16px; }
+section { margin: 24px 0; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.row h2 { margin: 0 auto 0 0; }
+.hint { white-space: pre-wrap; }
+.job { margin: 8px 0; }
+.job .label { overflow-wrap: anywhere; }
+.progress { margin: 6px 0 0 0; padding-left: 20px; }
+.note { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 60vh; overflow: auto; font-size: 14px; }
+.num { width: 3em; text-align: right; }
+#keyword { flex: 1 1 200px; min-width: 0; }
+details { margin-top: 12px; }
