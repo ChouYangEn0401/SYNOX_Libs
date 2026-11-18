@@ -80,7 +80,7 @@
 
 | 東西 | 在哪 |
 |---|---|
-| 鑰匙清單（公鑰、硬體指紋、名字） | SYNOX 的 `data/usb-keys/files/keyring/registry.json`（伺服器版是 `data/users/<id>/usb-keys/files/keyring/`）（不是 usbtether 命令列預設的那一份；兩邊的鑰匙不共用） |
+| 鑰匙清單（公鑰、硬體指紋、名字） | SYNOX 的 `data/usb-keys/files/keyring/registry.json`；伺服器版是 `data/users/<id>/usb-keys/files/keyring/`。跟 usbtether 命令列預設的那一份分開，兩邊的鑰匙不共用 |
 | 「記住在這台」的解鎖資料 | 同一個資料夾的 `secrets/`，Windows DPAPI 封住 |
 | 可以用的資料夾、每把鑰匙的保護方式、哪個 `.utenc` 是哪把鑰匙鎖的 | `pack.store`（SYNOX 保管箱，密文） |
 | 鑰匙的私鑰 | 隨身碟上的 `.usbtether` |
