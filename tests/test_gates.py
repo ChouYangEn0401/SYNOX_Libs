@@ -30,7 +30,9 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
                 **{name: ["network"] for name in CONNECT}}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0006 P1）
-LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",)}
+LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",),
+                       # guitar：和弦圖的 PNG（zlib 壓縮、struct 打包；只在記憶體，不寫檔）、全形字正規化、「是不是要找…」
+                       "guitar": ("zlib", "struct", "unicodedata", "difflib")}
 # 接外面服務的多准：requests、urllib.parse、編碼／雜湊／亂數、XML（CalDAV）、時區、型別、log
 CONNECT_IMPORTS = ALLOWED_IMPORTS + ("requests", "urllib", "base64", "hashlib", "secrets", "uuid", "xml", "zoneinfo",
                                      "typing", "logging", "__future__")

@@ -87,7 +87,9 @@ def test_capo_prefers_open_shapes(g):
 def test_commands(make_bot, owner):
     bot = make_bot("guitar")
     bot.say(owner, "/chord Am7")
-    assert "x 0 2 0 1 0" in bot.last(owner) and "組成音" in bot.last(owner)
+    assert "x 0 2 0 1 0" in bot.last(owner)                            # 預設：圖＋一行按法（沒有圖時退回這一行）
+    bot.say(owner, "/chord_info Am7")
+    assert "組成音" in bot.last(owner)
     bot.say(owner, "/chord_tp +2\n" + SHEET)
     reply = bot.last(owner)
     assert "G → A" in reply and "F#m" in reply and "E/G#" in reply
@@ -96,7 +98,7 @@ def test_commands(make_bot, owner):
     bot.say(owner, "/chord_capo Bb")
     assert "Capo 3" in bot.last(owner)
     bot.say(owner, "/chord_arp Am F C G")
-    assert "e|" in bot.last(owner)
+    assert "e(1)|" in bot.last(owner)
     bot.say(owner, "/chord_key Am")
     assert "Am G F E" in bot.last(owner)
     data = bot.route("guitar", "data")
