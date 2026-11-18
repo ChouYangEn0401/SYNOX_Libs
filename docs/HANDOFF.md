@@ -213,8 +213,8 @@ money 的分層（[packs/money/CONTRACT.md](../packs/money/CONTRACT.md)）：
 
 ```bash
 python3 --version                       # 要 3.11 以上
-mkdir -p ~/work && cd ~/work
-git clone <這個 repo 的網址> SYNOX_Libs   # 雲端 session 通常已經 clone 好了，跳過這行
+mkdir -p ~/work && cd ~/work             # 已經 clone 好了（雲端 session 通常是）：改成 cd 到那個 clone 的上一層
+git clone <這個 repo 的網址> SYNOX_Libs   # 已經 clone 好了就跳過；資料夾名不是 SYNOX_Libs 的話，下面的 SYNOX_Libs 都換成它
 # SYNOX 跟這個 repo 在同一個 GitHub 帳號底下，repo 名字是 SYNOX：
 SYNOX_URL=$(git -C SYNOX_Libs remote get-url origin | sed 's#SYNOX_Libs\(\.git\)\?$#SYNOX.git#')
 git clone --branch dev "$SYNOX_URL" SYNOX
@@ -228,7 +228,7 @@ git clone --branch dev "$SYNOX_URL" SYNOX
 ### 5.2 建環境
 
 ```bash
-cd ~/work
+cd ~/work                                         # 5.1 的那個上一層資料夾
 python3 -m venv SYNOX/.venv
 SYNOX/.venv/bin/pip install -e "./SYNOX[dev]"     # 裝 SYNOX（requests、cryptography、websocket-client）＋pytest
 export SYNOX_HOME="$PWD/SYNOX"                    # 明寫 SYNOX 在哪（找的順序見 README「找 SYNOX 的順序」）
@@ -244,7 +244,7 @@ PY="$SYNOX_HOME/.venv/bin/python"
 ### 5.3 跑一次測試，記下基準
 
 ```bash
-cd ~/work/SYNOX_Libs
+cd ~/work/SYNOX_Libs                              # 這個 repo
 "$PY" -m pytest -q 2>&1 | tail -5                 # 記下 passed／skipped／failed 的數字
 ```
 
