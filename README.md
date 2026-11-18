@@ -22,17 +22,17 @@
 | [🗂 notion](packs/notion/README.md) | `/notion 會議`、`/notion_read`、`/notion_row` | 用你自己的 integration token 搜尋、讀、加一列、改欄位 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/B36np3VigMinvyFuyz74dJ) |
 | [✅ todoist](packs/todoist/README.md) | `/todoist !! 繳電費 明天`、`/todoist_list`、`/todoist_done 3` | Todoist 的待辦：看、加、完成、改期 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/D3zgGcZ9h1LRrDLu2QD5Mw) |
 | [📅 google-calendar](packs/google-calendar/README.md) | `/gcal 明天 14:00 看牙醫`、`/gcal_today`、`/gcal_setup` | 直接看、加、刪你的 Google 日曆 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/NyhRhPrRL1n9NMMbMEv3mx) |
-| [📊 google-sheets](packs/google-sheets/README.md) | `/gsheet 2026-11-16\|午餐\|120`、`/gsheet_ok <碼>`、`/gsheet_read` | Google 試算表**只加列**：先預覽、你自己打確認碼才寫；不改、不刪格子 | 🧪 alpha | 接外面的服務 | （還沒有說明頁） |
+| [📊 google-sheets](packs/google-sheets/README.md) | `/gsheet 2026-11-16\|午餐\|120`、`/gsheet_ok <碼>`、`/gsheet_read` | Google 試算表**只加列**：先預覽、你自己打確認碼才寫；不改、不刪格子 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/H74Xn3PdwzCsseG9dEkq1r) |
 | [🍎 apple-reminders](packs/apple-reminders/README.md) | `/applerem`、`/applerem_add`、`/applerem_status` | CalDAV 提醒事項（iCloud 升級過的 Apple 不開放，見說明） | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp) |
 | [🎸 guitar](packs/guitar/README.md) | `/chord Am7`、`/chord_tp +2`＋貼譜、`/chord_capo Bb` | 吉他和弦：查按法、貼一份譜直接移調、Capo 建議、分散和弦 TAB；網頁面板有和弦圖 | 🧪 alpha | 音樂 | （還沒有說明頁） |
 
-- 前六個：資料加密存在你自己的電腦（保管箱）、不連網、不開別的程式；伺服器版每個人一份（money 0.4.0 例外：帳本是你自己資料夾裡的檔，沒有加密）。
-- 後四個（2026-11-12 從 SYNOX 主程式的 `connectors/` 搬來）：只連自己那個服務的官方 API（只用 `requests`）、不開埠、
+- 不連網的七個（notes、todo、money、calendar、bullet、diary、guitar）：資料加密存在你自己的電腦（保管箱）、不連網、不開別的程式；伺服器版每個人一份（money 0.4.0 起例外：帳本是你自己資料夾裡的檔，沒有加密）。
+- 接外面服務的 notion、todoist、google-calendar、apple-reminders（2026-11-12 從 SYNOX 主程式的 `connectors/` 搬來）：只連自己那個服務的官方 API（只用 `requests`）、不開埠、
   token／帳號加密存在保管箱、只給擁有者（`access: owner`）；都只對假傳輸測過，還沒對真的服務長時間用過。
 - `google-sheets`（2026-11-16 新寫，[ADR-0005](docs/adr/0005-google-sheets-append-only.md)）：同樣的規矩，再加「只加列」：沒有改格子、刪列的功能，
   寫入一定要你本人打確認碼。登入用裝置碼（不開埠），權限只有 `drive.file`（只看得到它自己建的試算表）。還沒在真的 Google 帳號上試過。
 - 全部先標 **🧪 alpha**（維護者決定），意思與升級條件見下面「穩定度」。
-- **個人版與伺服器（多人）版**（[docs/adr/0006](docs/adr/0006-personal-and-server-mode.md)）：前六個兩種都能用，伺服器版每人一份、互相看不到；
+- **個人版與伺服器（多人）版**（[docs/adr/0006](docs/adr/0006-personal-and-server-mode.md)）：不連網的七個兩種都能用，伺服器版每人一份、互相看不到；
   接外面服務的五個伺服器版也能裝，但**只有擁有者用得到**（成員打了跟不存在一樣），要等密鑰改成每個人在網頁自己「連接」才會開給成員。
   裝了這些工具不會改變個人版的行為。個人版改成伺服器版時，SYNOX 不會自動搬舊資料（舊檔留著，改回個人版就又用它們）。
 
@@ -83,6 +83,9 @@ SYNOX 在 `/help` 那一頁的標題、網頁工具頁、安裝報告、`doctor`
 
 ## 給開發者
 
+第一次來（外部開發者、雲端的 Linux session、AI agent）：先看 [docs/HANDOFF.md](docs/HANDOFF.md)——從 clone 到開 PR 的完整步驟（Linux 指令）、規矩、已知落差。
+下面的指令是 Windows 寫法；Linux 把 `<SYNOX>\.venv\Scripts\python.exe` 換成 `$SYNOX_HOME/.venv/bin/python`、`set` 換成 `export`。
+
 ```
 set SYNOX_HOME=<SYNOX 資料夾>             建議明寫（見下面「找 SYNOX 的順序」）
 <SYNOX>\.venv\Scripts\python.exe -m pytest -q                測試（不連網、不開埠、不連 Telegram、不叫 AI）
@@ -120,15 +123,16 @@ SYNOX 那邊的 theme pack 實作如果跟這個格式不一樣：改 `build_cos
 3. 後備：跟這個 repo 並排的 `..\SYNOX`（只是維護者的方便，不要依賴）。
 都找不到時會列出試過的位置和怎麼設。
 
-**要哪一版的 SYNOX**：打包與測試用到 SYNOX 的 `requires.sdk` 檢查（`synox.packs.manifest.sdk_problem`、`SDK_VERSION` 0.2.0）
-與 `stage` 檢查（`synox.packs.manifest.STAGES`），也就是 SYNOX 分支 `feat/connectors-to-libs`（2026-11-12）合併之後的版本；
+**要哪一版的 SYNOX**：用 SYNOX 主線 `dev` 的最新版（寫這段時 `SDK_VERSION` 是 0.2.4）。最低要求：`SDK_VERSION` 0.2.3 以上
+（`money`、`google-sheets` 宣告 `requires.sdk >=0.2.3`；money 還要支援多檔工具 `python.package`）。打包與測試用到 SYNOX 的 `requires.sdk` 檢查
+（`synox.packs.manifest.sdk_problem`）與 `stage` 檢查（`synox.packs.manifest.STAGES`），2026-11-12 的 `feat/connectors-to-libs` 之前的 SYNOX 都沒有；
 更舊的 SYNOX：沒有 `requires.sdk` 的會在 import 時失敗，沒有 `stage` 的打包時說「SYNOX 太舊、不認得 stage」。
 （工具的 `pack.json` 多寫 `stage`，舊 SYNOX 裝的時候會忽略它，不會壞。）
 
 | 依賴 | 版本 | 為什麼 |
 |---|---|---|
-| SYNOX（主程式） | 含 `requires.sdk` 與 `stage` 的版本（`feat/connectors-to-libs` 之後；SYNOX 本體版號仍是 0.2.0） | 打包用它的 `zip_pack`（安裝時的第 1、2 關）、測試用它的 `build()` |
-| SYNOX SDK | `>=0.2,<0.3` | 每個工具的 `requires.sdk` |
+| SYNOX（主程式） | 主線 `dev` 的最新版；最低是 `SDK_VERSION` 0.2.3 以上、支援多檔工具的版本 | 打包用它的 `zip_pack`（安裝時的第 1、2 關）、測試用它的 `build()` |
+| SYNOX SDK | `>=0.2,<0.3`（money、google-sheets：`>=0.2.3,<0.3`） | 每個工具的 `requires.sdk` |
 
 - **每個工具一個資料夾** `packs/<name>/`：`pack.json`、`SKILL.md`（給 AI）、`README.md`（給人）、程式、（選用）`panel.html`。格式見 SYNOX 的 `docs/pack-format.md`；
   從頭到尾的步驟（含 `help` 區塊、入口頁卡片的 `site` 區塊、要改哪些測試）見 [docs/CONTRIBUTING-TOOLS.md](docs/CONTRIBUTING-TOOLS.md)。
@@ -173,7 +177,9 @@ SYNOX 那邊的 theme pack 實作如果跟這個格式不一樣：改 `build_cos
 | `scripts/sync_shared.py` | `packs/_shared/` 的共用程式複製進用到的工具（`zhdate`：calendar、todo、google-calendar、todoist；`googleauth`：google-sheets） |
 | `scripts/_synox.py` | 找 SYNOX（`SYNOX_HOME` → 跑腳本的 Python 裝的那份 → 後備 `../SYNOX`） |
 | `catalog.json` | 建議群組 |
-| `docs/` | 文件（索引 [docs/README.md](docs/README.md)：CONTRIBUTING-TOOLS、RELEASING、ARTIFACTS） |
+| `docs/` | 文件（索引 [docs/README.md](docs/README.md)：HANDOFF、CONTRIBUTING-TOOLS、RELEASING、ARTIFACTS） |
+| `tests/` | pytest（`conftest.py` 的 `make_bot`／`synox_bot`／`host_bot`；`tests/money/` 是記帳的） |
+| `AGENTS.md`、`CLAUDE.md` | 給 AI agent 的精簡說明（指到 [docs/HANDOFF.md](docs/HANDOFF.md)） |
 | `docs/adr/` | 設計決定 |
 | `docs/sources.md` | 每個檔從哪裡搬來 |
 | `VERSION`、`CHANGELOG.md` | 工具庫本身的版本（每個工具的版本在自己的 `pack.json`） |

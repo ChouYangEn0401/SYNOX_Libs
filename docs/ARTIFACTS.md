@@ -15,10 +15,12 @@ SYNOX 的 `synox/packs/catalog.py` 寫死了入口頁、衣櫃頁與 9 個工具
 | 記帳（money） | `docs/site/money.html` | https://claude.ai/artifact/6kA9jSkwVFPPBthsCjmz6d | 手寫 |
 | 行事曆（calendar） | `docs/site/calendar.html` | https://claude.ai/artifact/Fm6dXH5oiua8zPY3U5RYQ5 | 手寫 |
 | 子彈筆記（bullet） | `docs/site/bullet.html` | https://claude.ai/artifact/BTdPArDtbddRk4ijNqExZ3 | 手寫 |
+| 每日日記（diary） | `docs/site/diary.html` | https://claude.ai/artifact/HRobvC114kdVY9CtkocFMt | 手寫 |
 | Notion | `docs/site/notion.html` | https://claude.ai/artifact/B36np3VigMinvyFuyz74dJ | 手寫 |
 | Todoist | `docs/site/todoist.html` | https://claude.ai/artifact/D3zgGcZ9h1LRrDLu2QD5Mw | 手寫 |
 | Google 日曆 | `docs/site/google-calendar.html` | https://claude.ai/artifact/NyhRhPrRL1n9NMMbMEv3mx | 手寫 |
 | Apple 提醒事項 | `docs/site/apple-reminders.html` | https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp | 手寫 |
+| Google 試算表（google-sheets） | `docs/site/google-sheets.html` | https://claude.ai/artifact/H74Xn3PdwzCsseG9dEkq1r | **產生**：`scripts/build_site.py` |
 
 這張表跟 `docs/artifacts.json` 是同一份資料；以 JSON 為準（`python scripts/build_site.py --list-republish` 印的就是它）。
 新工具沒有手寫頁時，`build_site.py` 會產生 `docs/site/<名字>.html`，第一次發佈前它還沒有網址（見下面「新增一頁」）。

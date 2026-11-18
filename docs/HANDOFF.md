@@ -344,7 +344,8 @@ SYNOX 在 Windows 上也可以雙擊 `Setup.bat` 建 `.venv`；之後的指令�
 ### 6.3 簽章（`pack.sig.json`）
 
 - 官方工具的 `.synoxpack` 由**維護者**在自己的電腦用 Ed25519 私鑰簽（`synox-sdk sign`，zip 裡多一個 `pack.sig.json`）；
-  SYNOX 安裝時驗出「✅ 官方」。規格：SYNOX 的 `docs/adr/0028-pack-signatures-official-badge.md`、`docs/signing.md`。
+  SYNOX 安裝時驗出「✅ 官方」。規格：SYNOX 的 `docs/adr/0028-pack-signatures-official-badge.md`、`docs/signing.md`；
+  工具庫這邊的發佈步驟：[RELEASING.md](RELEASING.md)「簽章」（寫這段時 SYNOX 還沒放官方公鑰，所以現在所有工具都顯示「⚠️ 不是官方」）。
 - **私鑰只有維護者有，不會給任何人、任何雲端 session**。你不簽、也不需要簽。
 - 交件時：**不要**把 `pack.sig.json` 放進 `packs/<name>/`（`zip_pack` 會丟掉它，簽完再改任何檔簽章都會失效）；
   **不要**用自己的鑰匙簽官方工具；**不要**在 repo 裡放任何 `.pem` 或私鑰。

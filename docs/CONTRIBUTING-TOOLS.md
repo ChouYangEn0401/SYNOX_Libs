@@ -2,7 +2,8 @@
 
 給人，也給之後接手的 Claude。每一步的指令都在這個 repo 跑過（`scripts/build.py`、`scripts/build_site.py`、`scripts/links.py`、
 `scripts/site_stamp.py`）。發佈到 GitHub 與線上頁的步驟在 [RELEASING.md](RELEASING.md)、[ARTIFACTS.md](ARTIFACTS.md)。
-Windows 把 `python` 換成 `<SYNOX>\.venv\Scripts\python.exe`（找 SYNOX 的順序見 [README「給開發者」](../README.md#給開發者)）。
+Windows 把 `python` 換成 `<SYNOX>\.venv\Scripts\python.exe`、Linux 換成 `$SYNOX_HOME/.venv/bin/python`（找 SYNOX 的順序見 [README「給開發者」](../README.md#給開發者)）。
+第一次來、只拿到這個 repo（外部開發者、雲端 session）：先看 [HANDOFF.md](HANDOFF.md)（從 clone 到開 PR、規矩、已知落差），這一頁是它的細節。
 
 ## 一眼看完：加一個資料夾，會出現在哪
 
@@ -30,7 +31,8 @@ packs/<名字>/                 名字：小寫英數與 -（例 google-calendar
                               多個檔的工具（money 的做法）：pack.py 加子資料夾，pack.json 寫 "python": {"module": "pack", "package": true}
   SKILL.md                    給 AI 看的用法
   README.md                   給人看：指令、設定、資料存哪、現在的狀態（入口頁沒有手寫說明頁時連到這裡）
-  panel.html、app/            選用：網頁面板／完整畫面（money 的做法，ADR-0003）
+  panel.html、app/            選用：網頁面板／完整畫面（money 的做法，ADR-0003）。面板的 fetch 網址規則測試與 SYNOX 現在對不上，
+                              新工具先不要做面板（HANDOFF.md 第 8 節）
 tests/test_<名字>.py          測試（第 4 節）
 ```
 
@@ -123,6 +125,7 @@ tests/test_<名字>.py          測試（第 4 節）
 ```bash
 python -m pytest -q                                   # 全部（不連網、不開埠、不連 Telegram、不叫 AI）
 python -m pytest -q tests/test_<名字>.py              # 只跑這個工具
+python -m synox.sdk check packs/<名字>                # SYNOX 安裝時的第 1、2 關（結束碼 0＝可以裝、2＝一定會被擋）
 ```
 
 新工具要動到的測試：
@@ -132,6 +135,8 @@ python -m pytest -q tests/test_<名字>.py              # 只跑這個工具
 | `tests/test_<名字>.py` | 新增：主要指令跑一輪。只用 `pack.store` 的用 `make_bot`（快，假 store）；要真的 SYNOX（保管箱、權限、伺服器版）用 `synox_bot`／`host_bot`（`tests/conftest.py`）。接外面服務的一律假 HTTP |
 | `tests/test_gates.py` | `ALLOWED_CAPS` 加一行（宣告的 capabilities）；接外面服務的也加進 `CONNECT`（規矩：只用 network、`access: owner`） |
 | `tests/test_build.py` | `SMOKE` 加一行：裝進空的 SYNOX 後跑的一個指令與回覆裡要有的字 |
+| `tests/test_access.py` | 接外面服務的：`CONNECT` 加名字（伺服器版成員、訪客都用不到） |
+| `tests/test_isolation.py` | 本機工具建議：`CASES` 加一行（雙人隔離與落地密文，ADR-0006 第 6 節 S1、S2） |
 | `catalog.json` | 選填：放進建議群組（只能列存在的工具，`build.py` 擋） |
 
 這些會自動涵蓋新工具（不用改）：`tests/test_links.py`（index.json 有它、版本對、連結對）、`tests/test_build_site.py`（入口頁是產生器現在的輸出）、
