@@ -1,7 +1,16 @@
 """🎸 吉他和弦：查和弦、貼一份譜直接移調、Capo 建議、分散和弦 TAB、一個調裡有哪些和弦、一格一小節的小節譜。
 
 指令（群組 chord）：
-  /chord <和弦…>          查按法（Am7、D/F#、Bb，一次可以好幾個）
+  /chord <和弦…> [說明]   和弦圖（圖片）＋一行按法（Am7、D/F#、Bb，一次可以好幾個）；單一個可以翻其他按法
+  /chord_info <和弦…>     完整說明：每根手指、組成音、提醒、其他按法
+  /chord_alt <和弦> [N]   第 N 種按法的和弦圖
+  /chord_easy <和弦…>     最好按（不用大橫按）的按法
+  /chord_tones <和弦…>    組成音與音程、每條弦彈到的音
+  /chord_all <根音>       一個根音的常用和弦（C、Cm、C7…）排成一張圖
+  /chord_basic            入門先練的 8 個開放和弦
+  /chord_change <A> <B>   從 A 換到 B 每根手指怎麼動
+  /chord_strum [刷法]      節奏刷法
+  /chord_prog <調> [進行]  一個調的常見和弦進行（附和弦圖）
   /chord_tp <移法> <譜>    整份譜移調（+2、-3、G→A、到 A）；譜可以是「和弦在上、歌詞在下」或 [C] 夾在歌詞裡
   /chord_capo [N] [譜或調] 夾 Capo 用哪一組手型最好彈；給 N＝直接把譜改成夾第 N 格的手型
   /chord_arp <和弦…> [型態] 分散和弦（指彈）的 TAB 譜
@@ -820,6 +829,82 @@ def describe_short(ch, key=None):
     return f"{name}：{frets_text(v['frets'])}（{v['label']}）{extra}{approx_note(ch)}"
 
 
+# ── 組成音與音程、最好按的按法、一個根音的全部、入門和弦、和弦進行 ─────────────────────────
+
+INTERVAL_NAME = {0: "根音", 1: "小二度", 2: "大二度（九音）", 3: "小三度", 4: "大三度", 5: "完全四度", 6: "減五度",
+                 7: "完全五度", 8: "增五度", 9: "大六度", 10: "小七度", 11: "大七度"}
+
+
+def interval_name(quality, iv):
+    """半音數 → 音程名稱；減七和弦的 9 個半音是「減七度」，不是大六度。"""
+    if quality == "dim7" and iv == 9:
+        return "減七度"
+    return INTERVAL_NAME[iv % 12]
+
+
+def tones_text(ch, key=None):
+    """組成音＋音程，和第一個按法每條弦彈到的音（第6弦→第1弦）。"""
+    root, q, bass = ch["root"], ch["quality"], ch["bass"]
+    lines = [f"🎵 {own_name(ch)}（{QUAL[q][1]}）{approx_note(ch)}"]
+    lines += [f"・{spell(root + iv, key)}：{interval_name(q, iv)}" for iv in QUAL[q][2]]
+    if bass is not None and (bass - root) % 12 not in QUAL[q][2]:
+        lines.append(f"・{spell(bass, key)}：低音（不在和弦裡，外加的）")
+    elif bass is not None:
+        lines.append(f"・低音彈 {spell(bass, key)}（和弦裡的音，轉位）")
+    vs = voicings(root, q, bass)
+    if vs:
+        v = vs[0]
+        per = [f"{STRING_NAME[i]}（{6 - i} 弦）" + ("不彈" if f is None else spell(STRING_PC[i] + f, key))
+               for i, f in enumerate(v["frets"])]
+        lines.append(f"按 {frets_text(v['frets'])} 時每條弦：" + "、".join(per))
+    return "\n".join(lines)
+
+
+def easiest(ch):
+    """最好按的那個按法：開放 → 簡易 → 有空弦的斜線 → 第一個。"""
+    vs = voicings(ch["root"], ch["quality"], ch["bass"])
+    if not vs:
+        return None
+    for want in ("open", "easy"):
+        got = next((v for v in vs if v["kind"] == want), None)
+        if got:
+            return got
+    return next((v for v in vs if v["kind"] == "slash" and 0 in v["frets"]), vs[0])
+
+
+ALL_QUALITIES = ("major", "minor", "7", "m7", "maj7", "sus2", "sus4", "add9")
+BASIC = ("C", "G", "Am", "Em", "D", "A", "E", "Dm")      # 入門先練的開放和弦（「吉他和弦全書」入門和弦）
+
+
+def find_progression(key, pick):
+    """調＋（編號或名稱的一部分，空的＝第一個）→ (名稱, [和弦])；找不到回 None。"""
+    tonic, minor = key
+    progs = PROGS_MINOR if minor else PROGS_MAJOR
+    pick = (pick or "").strip()
+    i = 0
+    if pick:
+        if pick.isdigit() and 1 <= int(pick) <= len(progs):
+            i = int(pick) - 1
+        else:
+            i = next((k for k, (name, _) in enumerate(progs) if pick.lower() in name.lower()), None)
+            if i is None:
+                return None
+    name, seq = progs[i]
+    chords = key_chords(key)
+    out = []
+    for d in seq:
+        if d == 7:                                                   # 小調的 V：借和聲小調的大三和弦
+            out.append({"root": (tonic + 7) % 12, "suffix": "", "quality": "major", "bass": None, "approx": False})
+        else:
+            out.append(chords[d][1])
+    return name, out
+
+
+def progression_list(key):
+    progs = PROGS_MINOR if key[1] else PROGS_MAJOR
+    return "\n".join(f"{i}. {name}" for i, (name, _) in enumerate(progs, 1))
+
+
 # ── 和弦圖（SVG＋PNG，同一份圖元畫兩次） ───────────────────────────────────────
 # 樣子照「吉他和弦全書」的 renderChordSVG：直的六條弦（左＝第6弦）、橫的格線、琴枕粗線或「5fr」、上面 × 不彈／○ 空弦、
 # 圓點（裡面是手指編號）、橫按畫成一條圓頭的棒子、根音的點是綠色。資料一律來自 voicings()（跟文字的按法是同一份）。
@@ -1475,7 +1560,8 @@ def arp_tab(chords, pattern, key=None):
 
 
 ARP_LEGEND = ("T：拇指，彈根音（最低那條弦）", "1：食指，第 3 弦（G）", "2：中指，第 2 弦（B）", "3：無名指，第 1 弦（e）",
-              "左邊的 e(1)…E(6)＝第 1 弦（最細）…第 6 弦（最粗）；線上的數字＝按第幾格，0＝空弦")
+              "e（1 弦）＝最細的弦，E（6 弦）＝最粗的弦（TAB 左邊寫成 e(1)…E(6)）",
+              "線上的數字＝左手按第幾格，0＝空弦")
 
 
 def arp_reply(chords, pattern):
@@ -1486,7 +1572,7 @@ def arp_reply(chords, pattern):
     name = next((n for n, s in PATTERNS if s == pattern), "自訂")
     head = f"🎸 分散和弦：{name} {'-'.join(pattern)}"
     return (Html(f"<b>{esc(head)}</b>\n<pre>{esc(tab)}</pre>\n" + "\n".join(esc(x) for x in ARP_LEGEND)),
-            head + "\n" + tab + "\n" + "\n".join(ARP_LEGEND))
+            head + "\n```\n" + tab + "\n```\n" + "\n".join(ARP_LEGEND))
 
 
 # ── 換和弦（「吉他和弦全書」的換和弦分析器） ──────────────────────────────────
@@ -1632,7 +1718,7 @@ def strum_reply(i):
     head = f"🎸 刷法 {i + 1}：{name}（{meter}）"
     tail = [f"感覺：{feel}", f"用在：{use}"] + list(STRUM_LEGEND)
     return (Html(f"<b>{esc(head)}</b>\n<pre>{esc(grid)}</pre>\n" + "\n".join(esc(x) for x in tail)),
-            head + "\n" + grid + "\n" + "\n".join(tail))
+            head + "\n```\n" + grid + "\n```\n" + "\n".join(tail))
 
 
 def strum_list():
@@ -2311,6 +2397,14 @@ def install(app, pack):
         out = send_image(api, chat_id, [img], caption=caption, reply_markup=markup)
         return bool((out or {}).get("ok"))
 
+    def picture_or_text(api, chat_id, cells, caption, title, markup=None, text=None):
+        """圖＋圖說（使用者看到的）；經 AI 呼叫時不出按鈕，文字（text，沒給＝圖說）另外給 AI（SYNOX 會再補
+        「已經傳了 N 張圖」）；圖送不出去就送文字。"""
+        via_ai = getattr(api, "via_ai", False)
+        ok = picture(api, chat_id, cells, caption, title, None if via_ai else markup)
+        if via_ai or not ok:
+            send(api, chat_id, text or caption)
+
     def unknown_reply(api, chat_id, raw, bad):
         api.send_message(chat_id, "❓ " + "；".join(bad or [f"看不懂「{raw}」是什麼和弦"])
                          + "\n例：/chord Am7、/chord D/F#、/chord Bb F Gm、/chord F major 7")
@@ -2340,10 +2434,7 @@ def install(app, pack):
                     cells.append(diagram_cell(c, vs[0]))
         if bad:
             caption += "\n⚠️ " + "；".join(bad)
-        if via_ai:
-            api.send_message(chat_id, caption + "\n（和弦圖已經直接給使用者看了）")    # 給 AI 的文字結果
-        if not picture(api, chat_id, cells, caption, " ".join(names) + " 和弦圖", markup) and not via_ai:
-            send(api, chat_id, caption)
+        picture_or_text(api, chat_id, cells, caption, " ".join(names) + " 和弦圖", markup)
         if detail:
             send(api, chat_id, "\n\n".join(describe(c) for c in chords))
 
@@ -2400,11 +2491,7 @@ def install(app, pack):
         others = [f"{i + 1}. {v['label']} {frets_text(v['frets'])}" for i, v in enumerate(vs) if i != idx]
         full = caption + ("\n其他按法：" + "；".join(others) if others else "")
         markup = pager_markup(ch, idx, len(vs)) if interactive(api) else None
-        if getattr(api, "via_ai", False):
-            api.send_message(chat_id, full + "\n（和弦圖已經直接給使用者看了）")
-            picture(api, chat_id, [diagram_cell(ch, vs[idx])], caption, f"{own_name(ch)} 和弦圖")
-        elif not picture(api, chat_id, [diagram_cell(ch, vs[idx])], caption, f"{own_name(ch)} 和弦圖", markup):
-            send(api, chat_id, full)
+        picture_or_text(api, chat_id, [diagram_cell(ch, vs[idx])], caption, f"{own_name(ch)} 和弦圖", markup, text=full)
 
     def page_to(api, chat_id, message_id, ch, i, edit):
         vs = voicings(ch["root"], ch["quality"], ch["bass"])
@@ -2442,6 +2529,82 @@ def install(app, pack):
             chords, _ = resolve_chords(":".join(parts[1:]))
             if chords:
                 send(api, cb.chat_id, "\n\n".join(describe(c) for c in chords[:MAX_DIAGRAMS]))
+
+    def tones(api, chat_id, user, values):
+        got = parse_input(api, chat_id, values["text"].strip())
+        if not got:
+            return
+        chords, bad = got
+        key = detect_key(chords) if len(chords) > 1 else None
+        text = "\n\n".join(tones_text(c, key) for c in chords[:MAX_DIAGRAMS])
+        send(api, chat_id, text + ("\n⚠️ " + "；".join(bad) if bad else ""))
+
+    def easy(api, chat_id, user, values):
+        got = parse_input(api, chat_id, values["text"].strip())
+        if not got:
+            return
+        chords, bad = got
+        cells, lines = [], []
+        for c in chords[:MAX_DIAGRAMS]:
+            v = easiest(c)
+            if v is None:
+                lines.append(f"{own_name(c)}：找不到好按的按法")
+                continue
+            cells.append(diagram_cell(c, v))
+            line = f"{own_name(c)}　{frets_text(v['frets'])}（{v['label']}）"
+            if v["kind"] not in ("open", "easy"):
+                line += "：沒有不用橫按的按法"
+            if v.get("tip"):
+                line += "\n　💡 " + v["tip"]
+            lines.append(line)
+        caption = "🎸 最好按的按法\n" + "\n".join(lines) + ("\n⚠️ " + "；".join(bad) if bad else "")
+        picture_or_text(api, chat_id, cells, caption, " ".join(own_name(c) for c in chords) + " 簡易和弦圖")
+
+    def all_(api, chat_id, user, values):
+        import unicodedata
+        raw = unicodedata.normalize("NFKC", values["text"].strip())
+        raw = raw[:1].upper() + raw[1:]
+        pc = note_pc(raw.replace(" ", ""))
+        if pc is None:
+            api.send_message(chat_id, f"❓ 「{raw}」不是根音。例：/chord_all C、/chord_all Bb、/chord_all F#")
+            return
+        name = raw.replace(" ", "")
+        chords = [{"root": pc, "root_txt": name, "suffix": QUAL[q][0], "quality": q, "bass": None, "approx": False}
+                  for q in ALL_QUALITIES]
+        chords = [c for c in chords if voicings(pc, c["quality"])]
+        cells = [diagram_cell(c, voicings(pc, c["quality"])[0]) for c in chords]
+        caption = f"🎸 {name} 開頭的常用和弦\n" + "\n".join(describe_short(c) for c in chords) + \
+            "\n（按法：第6弦→第1弦，x＝不彈；其他種類例如 /chord " + name + "dim7）"
+        picture_or_text(api, chat_id, cells, caption, f"{name} 常用和弦圖")
+
+    def basic(api, chat_id, user, values):
+        chords = [parse_chord(n) for n in BASIC]
+        cells = [diagram_cell(c, voicings(c["root"], c["quality"])[0]) for c in chords]
+        caption = ("🎸 入門先練這 8 個（都不用橫按）\n" + "\n".join(describe_short(c) for c in chords)
+                   + "\n💡 先練 C、G、Am、Em 四個就能彈很多歌（1564／6415 進行）；/chord_change C Am 看換法")
+        picture_or_text(api, chat_id, cells, caption, "入門和弦圖")
+
+    def prog(api, chat_id, user, values):
+        import unicodedata
+        raw = unicodedata.normalize("NFKC", (values.get("text") or "").strip())
+        head, _, pick = raw.partition(" ")
+        key = parse_key(head)
+        if key is None:
+            api.send_message(chat_id, "❓ 第一個字寫調：/chord_prog G、/chord_prog G 卡農、/chord_prog Am 2")
+            return
+        found = find_progression(key, pick)
+        if found is None:
+            api.send_message(chat_id, f"❓ {key_name(key)} 調沒有「{pick}」這個進行，可以選：\n" + progression_list(key))
+            return
+        name, chords = found
+        names = [chord_name(c, 0, key) for c in chords]
+        uniq = _uniq(chords)
+        cells = [diagram_cell(dict(c, root_txt=spell(c["root"], key)), easiest(c)) for c in uniq if easiest(c)]
+        caption = (f"🎸 {key_name(key)} 調・{name}\n" + " → ".join(names)
+                   + "\n" + "\n".join(f"{chord_name(c, 0, key)}　{frets_text(easiest(c)['frets'])}" for c in uniq
+                                      if easiest(c))
+                   + "\n其他進行：" + "；".join(progression_list(key).split("\n")))
+        picture_or_text(api, chat_id, cells, caption, f"{key_name(key)} 調 {name} 和弦圖")
 
     def tp(api, chat_id, user, values):
         spec, sheet = split_spec(values["text"])
@@ -2677,6 +2840,20 @@ def install(app, pack):
     kit.command(g, "strum", strum, "節奏刷法：不寫＝列出 22 種，寫編號或名稱＝那一種的刷法格子", positional=1,
                 usage="[編號或名稱]（例：7、folk rock、華爾滋）",
                 fields=[Field("text", "刷法的編號或名稱（不寫＝列出全部）")])
+    kit.command(g, "easy", easy, "最好按的按法：每個和弦挑不用大橫按的那個（和弦圖），說明最低音是不是根音", positional=1,
+                usage="<和弦…>（例：F Bm B、Bb Cm）",
+                fields=[Field("text", "和弦名稱，可以一次好幾個", required=True)])
+    kit.command(g, "tones", tones, "和弦的組成音與音程（根音、大三度、完全五度…），和每條弦彈到的音", positional=1,
+                usage="<和弦…>（例：Cmaj7、D/F#、Bdim7）",
+                fields=[Field("text", "和弦名稱，可以一次好幾個", required=True)])
+    kit.command(g, "all", all_, "一個根音的常用和弦（大三、小三、7、m7、maj7、sus2、sus4、add9）排成一張和弦圖", positional=1,
+                usage="<根音>（例：C、Bb、F#）",
+                fields=[Field("text", "根音（C、Bb、F#…）", required=True)])
+    kit.command(g, "basic", basic, "入門先練的 8 個開放和弦（C G Am Em D A E Dm）的和弦圖", positional=0,
+                usage="", fields=[])
+    kit.command(g, "prog", prog, "一個調的常見和弦進行（1564、卡農…），附和弦圖；不寫進行＝第一個", positional=1,
+                usage="<調> [進行的編號或名稱]（例：G、G 卡農、Am 2）",
+                fields=[Field("text", "調，後面可以寫第幾個進行或名稱", required=True)])
     kit.command(g, "tp", tp, "貼一份譜直接移調", effect=WRITE, positional=1,
                 usage="<移法> 換行貼譜（移法：+2、-3、G→A、到 A；不貼譜＝用上次那份）",
                 fields=[Field("text", "移法，下一行起是譜", required=True)])

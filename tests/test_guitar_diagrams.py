@@ -330,3 +330,50 @@ def test_change_and_strum(bot, g):
     assert "<pre>" in text
     text = plain(text)
     assert "D - D U - U D U" in text and "1 & 2 & 3 & 4 &" in text
+
+
+# ── 其他指令：組成音、最好按、一個根音、入門、和弦進行 ─────────────────────────
+
+def test_tones_names_intervals_and_strings(bot):
+    Shots(bot.api)
+    bot.say(OWNER, "/chord_tones Cmaj7")
+    reply = bot.last(OWNER)
+    for part in ("C：根音", "E：大三度", "G：完全五度", "B：大七度", "e（1 弦）E", "E（6 弦）不彈"):
+        assert part in reply, part
+    bot.say(OWNER, "/chord_tones Bdim7")
+    assert "減七度" in bot.last(OWNER)                       # dim7 的 9 個半音不叫大六度
+    bot.say(OWNER, "/chord_tones D/F#")
+    assert "低音彈 F#" in bot.last(OWNER)
+
+
+def test_easy_picks_the_no_barre_voicing(bot, g):
+    shots = Shots(bot.api)
+    bot.say(OWNER, "/chord_easy F Bm B")
+    cap = shots.sent[0]["caption"]
+    assert "F　x x 3 2 1 1" in cap and "Bm　x x 4 4 3 2" in cap
+    assert "不是根音 B" in cap                                # 簡易 B 的低音是 F#
+    assert len(shots.sent[0]["images"]) == 1 and "x x 3 2 1 1" in shots.sent[0]["images"][0]["svg"]
+
+
+def test_all_basic_and_prog_send_one_picture(bot):
+    shots = Shots(bot.api)
+    bot.say(OWNER, "/chord_all bb")
+    out = shots.sent[-1]
+    assert out["caption"].startswith("🎸 Bb 開頭") and "Bbm7" in out["caption"] and "x 1 3 3 3 1" in out["images"][0]["svg"]
+    bot.say(OWNER, "/chord_basic")
+    assert "C：x 3 2 0 1 0" in shots.sent[-1]["caption"] and "Dm：x x 0 2 3 1" in shots.sent[-1]["caption"]
+    bot.say(OWNER, "/chord_prog G 卡農")
+    cap = shots.sent[-1]["caption"]
+    assert "G → D → Em → Bm → C → G → C → D" in cap and "Bm　" in cap
+    bot.say(OWNER, "/chord_prog Am 3")
+    assert "Am → G → F → E" in shots.sent[-1]["caption"]                 # 小調的 V 借大三和弦
+    bot.say(OWNER, "/chord_prog G 不存在")
+    assert "卡農" in bot.last(OWNER) and "❓" in bot.last(OWNER)
+
+
+def test_text_fallbacks_fence_the_tab(g):
+    _html, text = g.arp_reply([g.parse_chord("Am")], g.PATTERNS[0][1])
+    assert "\n```\ne(1)" not in text and "```" in text
+    body = text.split("```")[1]
+    assert "e(1)" in body and "E(6)" in body
+    assert "e（1 弦）＝最細的弦" in text
