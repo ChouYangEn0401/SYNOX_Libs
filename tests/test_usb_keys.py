@@ -17,6 +17,7 @@ NAME = "usb-keys"
 MODULE = "synox_pack_usb_keys"
 AI_OK = {"keys", "drives", "lock", "unlock_check"}
 HUMAN_ONLY = {"register", "reregister", "revoke", "unlock", "lock_pw", "folders", "folder_add", "folder_rm"}
+STEPUP = {"revoke", "reregister"}
 
 try:
     import usbtether
@@ -49,6 +50,19 @@ class Rig:
         self.bot.say(OWNER_ID, text)
         assert self.bot.app.tasks.wait(10)
         return self.bot.last()
+
+    def authenticator(self):
+        """擁有者設定好手機驗證器（假時鐘），回一個「現在的 6 位數」的函式。"""
+        from synox import guard
+        from synox.guard.testing import Clock, code_for, enroll
+        self.guard, self.clock = guard.of(self.bot.app), Clock()
+        secret = enroll(self.guard, OWNER_ID, self.clock)
+        return lambda: code_for(secret, self.clock)
+
+    def unlock_stepup(self):
+        """在聊天裡用驗證器解鎖（SYNOX 的 /unlock），之後危險的指令才跑得動。"""
+        code = self.authenticator()
+        self.say(f"/unlock {code()}")
 
 
 @pytest.fixture
@@ -106,7 +120,11 @@ def test_ai_sees_only_the_safe_commands(synox_bot):
         assert allowed == (name in AI_OK), name
         assert node.ai == (name in AI_OK), name
         with origin.using(origin.Origin("telegram", OWNER_ID, surface="telegram")):      # 本人在 Telegram 打
-            assert policy.decide(bot.app, owner, node, via=TYPED).allowed, name
+            decision = policy.decide(bot.app, owner, node, via=TYPED)
+            if name in STEPUP:          # 撤銷、重新登記：一定要先用手機驗證器解鎖（還沒設定驗證器＝不能用）
+                assert not decision.allowed and decision.reason == "stepup_unset", name
+            else:
+                assert decision.allowed, name
     # 會改資料的是 WRITE；救不回來的（重新登記、撤銷）是 DANGER；AI 能叫的沒有 DANGER
     assert {n for n, node in leaves.items() if str(node.effect).upper() == "DANGER"} == {"reregister", "revoke"}
     # AI 的工具參數裡沒有密碼欄
@@ -130,6 +148,7 @@ def test_manifest_declares_dependency_and_scope():
     assert m.requires["pip"] == ["usbtether==0.3.0 --hash=sha256:"
                                  "945ee70ff2f3ab14ebc86ad5ab22b68c511542acc91e30db8ac7020114947099"]
     assert set(m.raw["callers"]) == HUMAN_ONLY and all(v == ["human"] for v in m.raw["callers"].values())
+    assert set(m.raw["stepup"]) == STEPUP
     app = m.raw["web"]["app"]
     assert "remote" not in app                                    # 不從手機用
     assert set(app["actions"]) <= HUMAN_ONLY
@@ -170,9 +189,12 @@ def test_lock_check_unlock_message_and_unplugged(rig):
     assert "鎖好了" in reply and "明天" not in reply
     msg = next(line for line in reply.splitlines() if line.startswith("utmsg1:"))
     assert "要用「書桌」解開（現在插著）" in rig.say(f"/usb_unlock_check {msg}")
-    assert "明天 9 點開會" in rig.say(f"/usb_unlock {msg}")
+    reply = rig.say(f"/usb_unlock {msg}")                          # 聊天裡不解開訊息：只能在畫面上
+    assert "只能在 SYNOX 網頁" in reply and "明天" not in reply
+    client = opened(rig.bot)
+    assert ok(client.do("unlock", {"text": msg}))["text"] == "明天 9 點開會"
     rig.probe.clear()                                              # 拔掉
-    assert "沒插著" in rig.say(f"/usb_unlock {msg}")
+    refused(client.do("unlock", {"text": msg}), "沒插著")
     assert "現在沒插著" in rig.say(f"/usb_unlock_check {msg}")
     assert "不是 USB 鑰匙鎖過的" in rig.say("/usb_unlock_check hello")
     assert "沒有叫「別把」的鑰匙" in rig.say("/usb_lock 別把 hi")
@@ -183,17 +205,26 @@ def test_revoke_needs_the_name_again_and_then_data_is_gone(rig):
     _, mount = plug(rig)
     rig.say(f"/usb_register {mount} 書桌")
     msg = next(x for x in rig.say("/usb_lock 書桌 祕密").splitlines() if x.startswith("utmsg1:"))
+    assert "手機驗證器" in rig.say("/usb_revoke 書桌 confirm=書桌")        # 沒設定驗證器：不能撤銷
+    assert "🟢 書桌" in rig.say("/usb_keys")
+    code = rig.authenticator()
+    assert "解鎖" in rig.say("/usb_revoke 書桌 confirm=書桌")              # 設定了、還沒解鎖：一樣不行
+    assert "🟢 書桌" in rig.say("/usb_keys")
+    rig.say(f"/unlock {code()}")                                    # 之後 SYNOX 會問要不要接著做剛剛被擋的那個
     warn = rig.say("/usb_revoke 書桌")
     assert "永遠打不開" in warn and "🟢 書桌" in rig.say("/usb_keys")
     assert "撤銷了「書桌」" in rig.say("/usb_revoke 書桌 confirm=書桌")
     assert "還沒有登記" in rig.say("/usb_keys")
-    assert "已經撤銷" in rig.say(f"/usb_unlock {msg}")
+    assert "已經撤銷" in rig.say(f"/usb_unlock_check {msg}")
+    refused(opened(rig.bot).do("unlock", {"text": msg}), "已經撤銷")
 
 
 @needs_usbtether
 def test_reregister_needs_overwrite_word(rig):
     _, mount = plug(rig)
     rig.say(f"/usb_register {mount} 書桌")
+    assert "手機驗證器" in rig.say(f"/usb_reregister {mount} 新書桌 confirm=覆蓋")
+    rig.unlock_stepup()
     rig.say("/usb_revoke 書桌 confirm=書桌")
     assert "confirm 填「覆蓋」" in rig.say(f"/usb_reregister {mount} 新書桌")
     assert "重新登記好了" in rig.say(f"/usb_reregister {mount} 新書桌 confirm=覆蓋")
@@ -220,7 +251,8 @@ def test_files_only_inside_allowed_folders_and_never_overwrite(rig):
     assert "要用「書桌」解開" in rig.say("/usb_unlock_check file=1/sub/a.txt.utenc")
     assert "免得蓋掉" in rig.say("/usb_unlock file=1/sub/a.txt.utenc")
     (work / "sub" / "a.txt").unlink()
-    assert "解開了" in rig.say("/usb_unlock file=1/sub/a.txt.utenc")
+    reply = rig.say("/usb_unlock file=1/sub/a.txt.utenc")
+    assert reply == "🔓 解開了：1/sub/a.txt（.utenc 檔還在）" and str(rig.tmp) not in reply   # 只回資料夾裡的路徑
     assert (work / "sub" / "a.txt").read_text(encoding="utf-8") == "hello file"
     assert "拿掉了" in rig.say("/usb_folder_rm 1")
     assert "還沒有可以用的資料夾" in rig.say("/usb_unlock_check file=1/sub/a.txt.utenc")
@@ -254,6 +286,20 @@ def test_app_danger_actions_ask_first(rig):
     _, mount = plug(rig)
     client = opened(rig.bot)
     ok(client.do("register", {"mount": mount, "label": "書桌"}))
+    refused(client.do("revoke", {"key": "書桌", "confirm": "書桌"}, confirmed=True), "手機驗證器")
+    code = rig.authenticator()
+    refused(client.do("revoke", {"key": "書桌", "confirm": "書桌"}, confirmed=True), "解鎖")
+    seen = []                                 # 畫面的來源（解鎖是照入口算的）：從一次讀取裡拿
+    from synox.guard import origin
+    module = sys.modules[MODULE]
+    real = module.new_ring
+    module.new_ring = lambda home: (seen.append(origin.current()), real(home))[1]
+    ok(client.read("keys"))
+    module.new_ring = real
+    from synox.guard.origin import Origin
+    o = seen[0]
+    assert o.kind == "web"
+    assert rig.guard.stepup.unlock(OWNER_ID, code(), origin=Origin("web", OWNER_ID, surface=o.surface)).ok
     status, data = client.do("revoke", {"key": "書桌", "confirm": "書桌"})
     assert status == 409 and data["code"] == "confirm" and "永遠打不開" in data["confirm"]["text"]
     refused(client.do("revoke", {"key": "書桌", "confirm": "不對"}, confirmed=True), "再打一次鑰匙的名字")

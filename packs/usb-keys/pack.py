@@ -22,6 +22,8 @@ from synox.packs import kit
 
 NOT_INSTALLED = ("🔑 USB 鑰匙要用的 usbtether 函式庫還沒裝在 SYNOX 的環境裡。"
                  "請照工具說明（README「安裝 usbtether」）裝好 0.3.0 版，再重新載入工具。")
+TEXT_ONLY_ON_SCREEN = ("🔐 訊息只能在 SYNOX 網頁「🔑 USB 鑰匙」的畫面上解開：解開的字只顯示在畫面上，不送進聊天。"
+                       "聊天裡只能解開檔案（file=資料夾編號/檔名.utenc）。")
 NO_PASSWORD_IN_CHAT = ("🔐 密碼不要打在聊天裡：請到 SYNOX 網頁打開「🔑 USB 鑰匙」的畫面輸入。"
                        "剛剛那則訊息請自己刪掉。")
 PROTECT = ("記住", "密碼", "不保護")
@@ -194,12 +196,12 @@ def install(app, pack):
                           else f"❌ 有好幾把符合「{name}」：請用完整的名字。")
         return hit[0]
 
-    def label_of(user, key_id):
+    def key_of(user, key_id):
+        """鑰匙 id → KeyRecord（含已撤銷的）；不在清單裡回 None。"""
         try:
-            k = ring(user).get(key_id)
+            return ring(user).get(key_id)
         except Exception:
             return None
-        return k.label or short(k.key_id)
 
     def drive_rows(user):
         out = []
@@ -299,6 +301,13 @@ def install(app, pack):
             raise Problem("❌ 找不到這個檔。")
         return real
 
+    def shown(user, path):
+        """實際路徑 → 「資料夾編號/相對路徑」（回覆只給這個，不印完整路徑）。"""
+        for n, base in enumerate(folders(user), 1):
+            if inside(base, path):
+                return f"{n}/" + os.path.relpath(os.path.realpath(path), os.path.realpath(base)).replace(os.sep, "/")
+        return os.path.basename(path)
+
     def lock_core(user, values, password=None):
         key = find_key(user, values.get("key"))
         text, file = values.get("text") or "", values.get("file") or ""
@@ -340,10 +349,14 @@ def install(app, pack):
             if key_id is None:
                 return {"known": False, "label": "", "id": "",
                         "text": "🤔 .utenc 檔本身不記是哪把鑰匙，這個檔也不是在這裡鎖的：插著的鑰匙只有一把時，解開會直接用那一把。"}
-        label = label_of(user, key_id)
-        if label is None:
+        k = key_of(user, key_id)
+        if k is None:
             return {"known": False, "label": "", "id": key_id,
-                    "text": f"🤔 要用的鑰匙（id {short(key_id)}…）不在你的鑰匙清單裡（別的電腦登記的，或已經撤銷）。"}
+                    "text": f"🤔 要用的鑰匙（id {short(key_id)}…）不在你的鑰匙清單裡（別的電腦登記的）。"}
+        label = k.label or short(k.key_id)
+        if not k.active:
+            return {"known": True, "label": label, "id": key_id, "present": False, "revoked": True,
+                    "text": f"⛔ 鎖它的鑰匙「{label}」已經撤銷：打不開了。"}
         present = ring(user).is_present(key_id)
         return {"known": True, "label": label, "id": key_id, "present": present,
                 "text": f"🔑 要用「{label}」解開" + ("（現在插著）。" if present else "（現在沒插著）。")}
@@ -352,6 +365,8 @@ def install(app, pack):
         text, file = values.get("text") or "", values.get("file") or ""
         if bool(text) == bool(file):
             raise Problem("❌ text（訊息）和 file（檔案）要填一個，而且只填一個。")
+        if text and kit.caller().kind != "web":     # 解開的訊息不進聊天（聊天紀錄、AI 都看不到）：只在畫面上
+            raise Problem(TEXT_ONLY_ON_SCREEN)
         password = password_from(values)
         r = ring(user)
         key_id = find_key(user, values["key"]).key_id if (values.get("key") or "").strip() else None
@@ -364,7 +379,7 @@ def install(app, pack):
         if os.path.exists(target):
             raise Problem(f"❌ 旁邊已經有 {os.path.basename(target)}：先把它移走或改名，免得蓋掉。")
         out = str(r.decrypt_file(path, key_id or file_key_id(user, path), keep=True, password=password))
-        return {"kind": "file", "name": os.path.basename(path), "out": os.path.basename(out)}
+        return {"kind": "file", "name": os.path.basename(path), "out": os.path.basename(out), "path": shown(user, out)}
 
     def folder_add_core(user, values):
         raw = (values.get("path") or "").strip().strip('"')
@@ -463,10 +478,8 @@ def install(app, pack):
         return (f"🔒 用「{out['label']}」鎖好了：{out['name']} → {out['out']}\n"
                 f"原檔還在：確認鎖好的檔解得開之後，再自己決定要不要刪原檔。")
 
-    def unlock_text(out):
-        if out["kind"] == "message":
-            return "🔓 解開了（只給你看）：\n" + out["text"]
-        return f"🔓 解開了：{out['name']} → {out['out']}（.utenc 檔還在）"
+    def unlock_text(out):                       # 聊天只會走到檔案（訊息在 unlock_core 就擋了）
+        return f"🔓 解開了：{out['path']}（.utenc 檔還在）"
 
     def folders_text(rows):
         if not rows:
@@ -543,7 +556,7 @@ def install(app, pack):
                 ai=False, positional=2, fields=reg_fields + [confirm_field])
     kit.command(g, "revoke", revoke_cmd, "撤銷一把鑰匙：用它鎖的東西永遠打不開（只有你本人）", effect=DANGER,
                 ai=False, positional=1, fields=[key_field, confirm_field])
-    kit.command(g, "unlock", unlock_cmd, "解開鎖住的訊息或檔案（只有你本人）", effect=WRITE, ai=False, positional=1,
+    kit.command(g, "unlock", unlock_cmd, "解開鎖住的檔案；訊息只能在畫面上解開（只有你本人）", effect=WRITE, ai=False, positional=1,
                 fields=[text_field, file_field, Field("key", "鑰匙的名字（選填）", check=kit.max_len(40)),
                         password_field])
     kit.command(g, "lock_pw", lock_pw_cmd, "用要密碼的鑰匙上鎖（密碼只在畫面輸入；只有你本人）", effect=WRITE,

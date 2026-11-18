@@ -17,7 +17,8 @@
   加密與驗證隨身碟全部交給 usbtether 0.3.0（`requires.pip` 釘版本＋sha256；
   SYNOX 不替 kind=python 的工具裝套件，README 寫怎麼自己裝；沒裝時每個指令都說怎麼裝，不會壞）。AI 只能 `/usb_keys`、`/usb_drives`、
   `/usb_lock`、`/usb_unlock_check`；解開、登記、重新登記、撤銷、密碼上鎖、資料夾設定都是 `ai=False`＋`callers: human`。
-  密碼只收工具畫面（`web.app`）來的，聊天裡打的一律拒、那幾個指令不進 log；撤銷／重新登記要再打一次名字或「覆蓋」，畫面另有危險確認。
+  密碼只收工具畫面（`web.app`）來的，聊天裡打的一律拒、那幾個指令不進 log；撤銷／重新登記要再打一次名字或「覆蓋」，而且一定要先用手機驗證器解鎖（`stepup`），畫面另有危險確認。
+  解開的訊息只在工具畫面上顯示；聊天裡的 `/usb_unlock` 只解開檔案、只回「資料夾編號/檔名」。
   檔案只限擁有者設定的資料夾、不刪原檔、不覆蓋已有的檔。聊天裡打的指令丟 `app.tasks`（讀隨身碟要 2 秒左右）。
   `tests/test_usb_keys.py`（usbtether 的 `InMemoryProbe`＋暫存資料夾；沒裝 usbtether 時那幾條跳過）；`catalog.json` 多一個建議群組「USB 鑰匙」。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。

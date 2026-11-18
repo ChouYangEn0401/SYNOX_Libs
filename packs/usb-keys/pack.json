@@ -23,6 +23,7 @@
     "register": ["human"], "reregister": ["human"], "revoke": ["human"], "unlock": ["human"],
     "lock_pw": ["human"], "folders": ["human"], "folder_add": ["human"], "folder_rm": ["human"]
   },
+  "stepup": ["revoke", "reregister"],
   "web": {
     "app": {
       "entry": "app/index.html",
