@@ -30,7 +30,10 @@ from isdtelekit.testing import OWNER_ID, BotHarness, FakeChannel  # noqa: E402
 
 from synox.packs import manifest as synox_manifest  # noqa: E402
 
-PACK_NAMES = tuple(os.path.basename(f) for f in _synox.pack_folders())     # 全部工具
+# 公開的工具（工具庫的公開規矩、index.json、公開頁都只看這些）。私人工具（pack.json "publish": false，
+# docs/CONTRIBUTING-TOOLS.md「私人工具」）不在這裡：它們只在自己電腦打包，由自己的 tests/test_<名字>.py 測。
+PACK_NAMES = tuple(os.path.basename(f) for f in _synox.pack_folders(private=False))
+ALL_PACK_NAMES = tuple(os.path.basename(f) for f in _synox.pack_folders())  # 連私人工具
 PLANNER = ("calendar", "todo", "bullet")                                     # make_bot（假 store）測得了的
 OTHER_ID = 555
 # 2026-11-09 是星期一；測試的「現在」固定在這一刻
