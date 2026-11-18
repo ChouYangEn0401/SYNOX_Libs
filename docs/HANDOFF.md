@@ -49,7 +49,7 @@ packs/<name>/
   pack.py        程式：install(app, pack)（必要；kind=python）
   SKILL.md       給 AI 看：什麼時候用哪個指令（必要）
   README.md      給人看：指令、設定、資料存哪、現在的狀態（必要）
-  panel.html     選用：SYNOX 網頁工具頁的小面板（先看第 8 節的已知落差）
+  panel.html     選用：SYNOX 網頁工具頁的小面板（下面 3.6：只能用相對網址 fetch("api/<route>")）
   app/           選用：完整的網頁畫面（web.app；money 的做法，ADR-0003）
   bridge/、engine/  選用：多檔工具的子模組（money 的做法，下面 3.4）
 tests/test_<name>.py   測試（必要；放 repo 的 tests/，不放在工具資料夾裡）
@@ -193,6 +193,81 @@ money 的分層（[packs/money/CONTRACT.md](../packs/money/CONTRACT.md)）：
 `test_gates.py` 對單檔工具的 `pack.py` 有白名單：本機工具只准 import `re`、`time`、`datetime`、`dataclasses`、`collections`、
 `isdtelekit`、`synox`（`os` 只有 calendar、diary 這種要寫檔的才准，而且只准特定呼叫）；`json`、`math`、`random` 這些也不在名單裡。
 真的需要別的標準函式庫：在 `test_gates.py` 照 `LOCAL_EXTRA_IMPORTS`／`DIARY_IMPORTS` 的寫法加，**旁邊寫為什麼**，PR 說明裡也寫。
+
+### 3.6 `panel.html`（選用：網頁工具頁的小面板）
+
+SYNOX 網頁的工具頁可以替工具掛一小格**唯讀**面板（例：記帳的「這個月花了多少」、待辦的「逾期／今天／之後」）。
+從 SYNOX 的 ADR 0028 §5（2026-11-16）起，面板**一律隔開**（官方的也一樣）：工具頁先替看得到這個工具的人拿一張票，
+再用 `<iframe sandbox="allow-scripts">` 掛 `/packs/<name>/panel/<票>/`。面板是「沒有來源」的小頁：沒有 cookie、讀不到登入、
+打不到 SYNOX 的 `/api/`、碰不到主頁，也不能開新視窗、送表單、導頁、用 `localStorage`。
+
+要做三件事：
+
+1. `pack.json`：`"web": {"panel": "panel.html", "api": ["GET /today"]}`（只支援 GET；route 名字是小寫英數字、`_`、`-`）。
+2. `pack.py`：`pack.web_route("today", today)`；`today(user)` 回可以轉 JSON 的東西，**只回這個人自己的**（`pack.store.of(user)`）。
+3. `panel.html`：一個檔、不載外部資源；讀資料**只寫相對網址** `fetch("api/today")`——前面不加 `/`、不帶第二個參數
+   （不用 `credentials`、不用 `method`）、不帶 `?`。瀏覽器把它接成 `/packs/<name>/panel/<票>/api/today`，
+   SYNOX 只認票、以拿票的那個人的身分叫 `today(user)`；沒在 `web.api` 宣告的 route 打不到。
+
+```python
+# pack.py（install 裡）
+def today(user):
+    items = pack.store.of(user).load({"items": []})["items"]
+    return {"open": len(items), "items": [{"text": t["text"]} for t in items]}
+
+pack.web_route("today", today)
+```
+
+```html
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>待辦面板</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1d2330; --muted: #5d6675; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #171b22; --fg: #e7eaf0; --muted: #9aa3b2; } }
+  body { margin: 0; padding: 12px; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+  .muted { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="muted" id="sub">讀取中…</div>
+<ul id="list"></ul>
+<script>
+(function () {
+  fetch("api/today")   // 相對網址＝/packs/<name>/panel/<票>/api/today；不帶 cookie、不帶第二個參數
+    .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
+    .then(function (d) {
+      document.getElementById("sub").textContent = "還沒做完 " + d.open + " 項";
+      d.items.forEach(function (t) {
+        var li = document.createElement("li");
+        li.textContent = t.text;                 // 字一律 textContent，不用 innerHTML
+        document.getElementById("list").appendChild(li);
+      });
+    })
+    .catch(function (e) { document.getElementById("sub").textContent = "讀不到（" + e.message + "）"; });
+})();
+</script>
+</body>
+</html>
+```
+
+測試會擋的（`tests/test_gates.py` 的 `panel_problems`，連「故意寫錯一定抓得到」的樣子也有測試）：
+
+- `fetch(` 的網址只能是寫死的 `"api/<route>"`，route 要在 `web.api` 宣告過；
+- 不准舊的絕對網址 `/api/packs/…`（隔開的面板沒有 cookie，打它會 401）、不准 `credentials`、不准 `fetch` 的第二個參數；
+- 不准 `innerHTML`、`outerHTML`、`insertAdjacentHTML`、`document.write`、`localStorage`、`sessionStorage`、`indexedDB`、`http://`、`https://`、
+  `XMLHttpRequest`、`WebSocket`、`EventSource`、`sendBeacon`、`document.cookie`、`window.open`、`window.top`、`window.parent`、`postMessage`、`<form`。
+
+`tests/test_synox_integration.py` 的 `test_panel_reads_its_data_through_the_ticket` 用真的 SYNOX（不開埠，直接叫網頁層）走一次：
+拿票 → 開面板 → 照瀏覽器的方式把相對網址接在面板網址後面、不帶 cookie、`Origin: null` → 一定要讀得到 JSON；舊網址一定讀不到。
+有 `panel.html` 的工具自動涵蓋，不用另外加。
+
+- 讀不到時把狀態碼顯示出來（上面範例的 `catch`），不要整格空白。
+- 複製到剪貼簿（`navigator.clipboard`）在隔開的面板裡可能被瀏覽器擋：一定要有「請手動選取」之類的退路。
+- 面板只能**看**。要改資料、要完整畫面，是 `web.app`（工具服務；money 的做法，ADR-0003），不是面板。
 
 ## 4. 命名與版本
 
@@ -393,10 +468,11 @@ SYNOX 在 Windows 上也可以雙擊 `Setup.bat` 建 `.venv`；之後的指令�
 
 ## 8. 已知落差（文件或測試跟現在的 SYNOX 對不上，還沒修）
 
+（已修：面板的 `fetch` 網址。SYNOX ADR 0028 §5 把面板隔開之後，這個 repo 的 5 個面板與 `panel_problems` 原本還是舊的
+`/api/packs/<name>/…` 帶 `credentials`；2026-11-18 改成相對網址 `fetch("api/<route>")`，測試反過來抓舊寫法。現在的寫法見 3.6。）
+
 | 落差 | 影響 | 現在怎麼辦 |
 |---|---|---|
-| **面板的 `fetch` 網址**：SYNOX 從 ADR 0028 §5（2026-11-16）起把 `panel.html` 隔開，面板只能打**相對網址** `fetch("api/<route>")`，舊的 `fetch("/api/packs/<name>/<route>", {credentials: …})` 會被擋（401）。但這個 repo 的 5 個面板（todo、money、guitar、calendar、bullet）還是舊寫法，`tests/test_gates.py` 的 `panel_problems` 也**只收舊寫法** | 照現在的測試寫的面板，在新的 SYNOX 上讀不到資料 | 新工具**先不要做 `panel.html`**；真的需要，在 PR 說明提出，等維護者決定怎麼改測試與舊面板 |
-| ADR-0006 第 2、3 節的 M5（面板只打 `/api/packs/<自己>/…`、帶 `credentials`） | 同上，是舊的規則 | 以 SYNOX 的 `docs/pack-format.md`「`web.panel`」為準 |
 | `tests/test_costumes.py` 找 SYNOX 原始碼只看 `SYNOX_SRC` 與 `../SYNOX`，不看 `SYNOX_HOME` | SYNOX 不放旁邊又沒設 `SYNOX_SRC` 時，那一條會跳過 | 照 5.2 設 `SYNOX_SRC` |
 
 ## 9. 交件前檢查清單
@@ -404,6 +480,7 @@ SYNOX 在 Windows 上也可以雙擊 `Setup.bat` 建 `.venv`；之後的指令�
 - [ ] `packs/<name>/`：`pack.json`（第 3.1 節每個欄位）、`pack.py`、`SKILL.md`（有 YAML 標頭）、`README.md`；資料夾裡沒有草稿與真資料
 - [ ] `version` 是 `0.1.0-alpha.1` 之類（帶 `-alpha.N`）、`stage` 是 `test` 或 `alpha`、`requires.sdk` 有寫
 - [ ] `tests/test_<name>.py`；`test_gates.py`（`ALLOWED_CAPS`）、`test_build.py`（`SMOKE`）各一行；接外面服務的加進 `CONNECT`
+- [ ] 有 `panel.html` 的：只用相對網址 `fetch("api/<route>")`、route 在 `web.api` 宣告過（3.6）
 - [ ] `CHANGELOG.md` 的 `[Unreleased]` 一行；`README.md` 的工具表一行（說明頁那格寫「（還沒有說明頁）」）
 - [ ] `"$PY" scripts/build_site.py` 跑過、`docs/site/index.html` 與 `docs/site/<name>.html` 一起 commit
 - [ ] 5.6 的每一條都過；全部測試全綠（skipped 只有第 7 節列的那幾種）

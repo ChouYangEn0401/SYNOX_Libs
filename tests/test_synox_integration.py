@@ -1,8 +1,10 @@
 """用 SYNOX 本體（真的 loader、真的保管箱加密、真的 AI 工具清單）載入這個 repo 的 packs/（六個工具一起）。
 跟 SYNOX 自己的 tests/conftest.py 同一套假東西：FakeAdapter、FakeChannel，不連網、不開埠。"""
 
+import json
 import os
 import sys
+from urllib.parse import urljoin, urlsplit
 
 import pytest
 
@@ -117,3 +119,42 @@ def test_every_tool_loads_together(tmp_path):
     assert len(groups) == len(set(groups)) == len(PACK_NAMES)
     assert "加好了" in say(app, api, OWNER_ID, "/todo 買牛奶")
     assert "記下了" in say(app, api, OWNER_ID, "/note 買牛奶")
+
+
+PANEL_PACKS = [n for n in PACK_NAMES if os.path.isfile(os.path.join(PACKS, n, "panel.html"))]
+
+
+@pytest.mark.parametrize("name", PANEL_PACKS)
+def test_panel_reads_its_data_through_the_ticket(tmp_path, name):
+    """面板是隔開的（SYNOX ADR 0028 §5）：工具頁拿一張票、用 <iframe sandbox="allow-scripts"> 掛 /packs/<name>/panel/<票>/。
+    面板裡寫的相對網址 api/<route> 照瀏覽器的方式接在面板網址後面、不帶 cookie、Origin 是 null，要真的讀得到 JSON；
+    舊的絕對網址 /api/packs/<name>/<route> 從面板（沒有 cookie）打一定讀不到。不開埠：直接叫 WebUI.handle。"""
+    from synox.web import server as web_server
+    from test_gates import panel_routes
+
+    app, _api, _ = make_app(tmp_path)
+    ui = app.extras["synox_web"]
+    base = "http://127.0.0.1:8830"
+    host = {"Host": "127.0.0.1:8830"}
+    sid, session = ui.sessions.create(OWNER_ID)                      # 擁有者在工具頁（有 cookie 的主頁）
+    status, _h, body = ui.handle("POST", f"/api/packs/{name}/panel-ticket",
+                                 {**host, "Origin": base, "Cookie": f"{web_server.COOKIE}={sid}",
+                                  "X-SYNOX-CSRF": session.csrf})
+    assert status == 200, body
+    page = f"/packs/{name}/panel/{json.loads(body)['ticket']}/"
+    status, headers, html = ui.handle("GET", page, host)                 # iframe 裡：沒有 cookie
+    assert status == 200 and dict(headers)["Content-Security-Policy"].startswith("sandbox allow-scripts")
+    routes = panel_routes(html.decode("utf-8"))
+    assert routes, "面板裡沒有 fetch(\"api/<route>\")"
+    frame = {**host, "Origin": "null", "Sec-Fetch-Site": "cross-site"}  # opaque origin 送出的請求長這樣
+    for route in routes:
+        path = urlsplit(urljoin(base + page, f"api/{route}")).path
+        assert path == f"{page}api/{route}"
+        status, headers, data = ui.handle("GET", path, frame)
+        h = dict(headers)
+        assert status == 200, data
+        assert h["Access-Control-Allow-Origin"] == "null" and h["Content-Type"].startswith("application/json")
+        json.loads(data)
+        old = f"/api/packs/{name}/{route}"                               # 舊寫法：從面板打，沒有 cookie
+        assert ui.handle("GET", old, {**host, "Origin": "null"})[0] == 401
+        assert ui.handle("GET", old, frame)[0] in (401, 403)

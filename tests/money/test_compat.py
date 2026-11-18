@@ -295,7 +295,9 @@ def test_panel_html_reads_the_summary_route():
     from .conftest import MONEY
     with open(os.path.join(MONEY, "panel.html"), encoding="utf-8") as f:
         html = f.read()
-    assert "/api/packs/money/summary" in html and "innerHTML" not in html and "http" not in html.replace("/api/", "")
+    # 面板是隔開的（沒有 cookie）：讀相對網址 api/summary，不是舊的 /api/packs/money/summary
+    assert 'fetch("api/summary")' in html and "/api/packs/" not in html
+    assert "innerHTML" not in html and "http" not in html
     for key in ("d.total", "d.budget", "d.spent", "d.left", "d.by_category", "d.unit"):
         assert key in html, key
 

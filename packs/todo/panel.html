@@ -47,7 +47,7 @@
     });
     box.appendChild(ul);
   }
-  fetch("/api/packs/todo/today", { credentials: "same-origin" })
+  fetch("api/today")   // 相對網址＝/packs/todo/panel/<票>/api/today（面板是隔開的：沒有 cookie，不用帶登入資料）
     .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
     .then(function (d) {
       document.getElementById("title").textContent = "✅ " + d.label;

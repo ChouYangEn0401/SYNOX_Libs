@@ -30,7 +30,7 @@
 (function () {
   var unit = "元";
   function fmt(n) { return Number(n).toLocaleString("zh-TW", { maximumFractionDigits: 3 }) + " " + unit; }
-  fetch("/api/packs/money/summary", { credentials: "same-origin" })
+  fetch("api/summary")   // 相對網址＝/packs/money/panel/<票>/api/summary（面板是隔開的：沒有 cookie，不用帶登入資料）
     .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
     .then(function (d) {
       unit = d.unit || "元";

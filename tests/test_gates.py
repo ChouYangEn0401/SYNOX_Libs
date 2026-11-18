@@ -8,7 +8,8 @@
 - 接外面服務的（notion、todoist、google-calendar、apple-reminders，2026-11-12 從 SYNOX connectors/ 搬來；google-sheets 2026-11-16 新寫）：
   只宣告、也只用得到 network（requests）；一樣不開別的程式、不動態執行、不碰檔案、不讀環境變數；只給擁有者（access: owner）。
 - 多人契約（docs/adr/0006 第 2 節）：入口欄位都明寫（test_declares_scope）；M3 不用 chat_id 分人、M4 模組層級不放會變的狀態、
-  M5 面板只打自己的 API、不用 innerHTML／localStorage（最後一段的 AST／文字檢查，連檢查本身也有壞樣子的測試）。"""
+  M5 面板只用相對網址 fetch("api/<route>") 打自己宣告的 API（SYNOX ADR 0028 §5 的隔開面板；舊的 /api/packs/ 會 401）、
+  不用 innerHTML／localStorage（最後一段的 AST／文字檢查，連檢查本身也有壞樣子的測試）。"""
 
 import ast
 import os
@@ -422,18 +423,38 @@ def module_state_problems(tree, hooks=(), extra_calls=()) -> list:
     return out
 
 
+# 面板讀資料的網址（SYNOX ADR 0028 §5，2026-11-16 起）：面板是隔開的小頁（<iframe sandbox="allow-scripts">，
+# 沒有 cookie），只能打**相對網址** "api/<route>"＝/packs/<name>/panel/<票>/api/<route>。route 的字照 SYNOX
+# web/server.py 的 PANEL_RE；不帶 ?（route 是 fn(user)，不收參數）。
+PANEL_FETCH = re.compile(r"""\s*(["'`])api/([a-z0-9][a-z0-9_-]{0,31})\1\s*""")
+# 隔開之後本來就做不到、看到就是寫錯或還以為自己同源的：讀登入、開新視窗、碰主頁、送表單
+PANEL_FORBIDDEN = ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write", "localStorage", "sessionStorage",
+                   "indexedDB", "http://", "https://", "XMLHttpRequest", "WebSocket", "EventSource", "sendBeacon",
+                   "document.cookie", "window.open", "window.top", "window.parent", "postMessage", "<form")
+
+
+def panel_routes(html: str) -> list:
+    """面板 fetch 的 route（照出現的順序）：只算合規則的相對網址 "api/<route>"。"""
+    return [m.group(2) for m in re.finditer(r"\bfetch\s*\(" + PANEL_FETCH.pattern, html)]
+
+
 def panel_problems(name: str, html: str) -> list:
-    """M5：panel.html 不用 innerHTML、localStorage、sessionStorage、外部網址；fetch 只打 /api/packs/<自己的名字>/。"""
-    out = [f"用了 {word}" for word in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write", "localStorage",
-                                      "sessionStorage", "indexedDB", "http://", "https://", "XMLHttpRequest",
-                                      "WebSocket", "EventSource", "sendBeacon") if word in html]
-    calls = re.findall(r"\bfetch\s*\(\s*([^,)]*)", html)
-    for arg in calls:
-        found = re.fullmatch(r"""\s*(["'`])(/api/packs/([^/"'`]+)/[^"'`$]*)\1\s*""", arg)
-        if not found:
-            out.append(f"fetch({arg.strip()}) 的網址不是寫死的 /api/packs/{name}/…")
-        elif found.group(3) != name:
-            out.append(f"fetch 打到別的工具：{found.group(2)}")
+    """M5：panel.html 不用 innerHTML、localStorage、外部網址…；fetch 只寫相對網址 fetch("api/<route>")。
+
+    舊寫法 fetch("/api/packs/<name>/<route>", {credentials: "same-origin"}) 在隔開的面板裡沒有 cookie → 401，
+    所以 /api/packs/、credentials、第二個參數（只有 GET、不用帶登入資料）都要抓出來。name 只用在訊息裡：
+    相對網址本來就只到得了自己這個 pack 的 /packs/<name>/panel/<票>/api/。"""
+    out = [f"用了 {word}" for word in PANEL_FORBIDDEN if word in html]
+    if "/api/packs/" in html:
+        out.append('用了舊的絕對網址 /api/packs/…（隔開的面板沒有 cookie，打它會 401）：改成 fetch("api/<route>")')
+    if "credentials" in html:
+        out.append("寫了 credentials（面板沒有 cookie，帶了也沒用；是舊寫法，拿掉）")
+    for m in re.finditer(r"\bfetch\s*\(\s*([^,)]*)(\s*,)?", html):
+        arg = m.group(1)
+        if not PANEL_FETCH.fullmatch(arg):
+            out.append(f'fetch({arg.strip()}) 的網址不是寫死的相對網址 "api/<route>"（{name} 的面板）')
+        if m.group(2):
+            out.append(f"fetch({arg.strip()}, …) 帶了第二個參數（面板只能 GET、不用帶登入資料）")
     return out
 
 
@@ -477,7 +498,7 @@ def test_m5_panel_only_talks_to_its_own_api(name):
     m = synox_manifest.read(folder(name), strict=True)
     assert panel_problems(name, html) == []
     assert "fetch(" in html and "textContent" in html
-    routes = set(re.findall(r"""fetch\(\s*["'`]/api/packs/[^/]+/([^"'`?]+)""", html))
+    routes = set(panel_routes(html))
     assert routes and routes <= set(m.web.get("api", [])), routes      # 只打自己在 pack.json 宣告的 route
 
 
@@ -509,10 +530,21 @@ def f():
 """
 BAD_PANEL = """
 <script>
-fetch("/api/packs/other/today");
+fetch("/api/packs/todo/today", { credentials: "same-origin" });
 fetch(url);
 fetch("https://evil.example/x");
-el.innerHTML = x; localStorage.setItem("a", 1);
+fetch("/api/me");
+fetch("../../other/panel/x/api/today");
+fetch("api/today?all=1");
+fetch("api/today", { method: "POST" });
+el.innerHTML = x; localStorage.setItem("a", 1); document.cookie; window.open("x");
+</script>
+"""
+GOOD_PANEL = """
+<script>
+fetch("api/today").then(function (r) { return r.json(); });
+fetch('api/data');
+el.textContent = "ok";
 </script>
 """
 
@@ -527,6 +559,14 @@ def test_static_checks_catch_the_bad_shapes():
         assert needle in found, needle
     assert module_state_problems(ast.parse("transport = None\n"), {"transport"}) == []
     found = panel_problems("todo", BAD_PANEL)
-    assert any("別的工具" in p for p in found) and any("fetch(url)" in p for p in found)
-    assert any("innerHTML" in p for p in found) and any("localStorage" in p for p in found)
-    assert any("https://" in p for p in found)
+    text = "\n".join(found)
+    assert "舊的絕對網址 /api/packs/" in text and "credentials" in text            # 舊寫法（SYNOX ADR 0028 §5 之前）
+    for call in ('fetch("/api/packs/todo/today")', "fetch(url)", 'fetch("https://evil.example/x")', 'fetch("/api/me")',
+                 'fetch("../../other/panel/x/api/today")', 'fetch("api/today?all=1")'):
+        assert f"{call} 的網址不是寫死的相對網址" in text, call
+    assert 'fetch("api/today", …) 帶了第二個參數' in text
+    assert 'fetch("api/today") 的網址' not in text                                  # 合規則的那一個本身不算錯
+    for word in ("innerHTML", "localStorage", "https://", "document.cookie", "window.open"):
+        assert f"用了 {word}" in text, word
+    assert panel_problems("todo", GOOD_PANEL) == []
+    assert panel_routes(GOOD_PANEL) == ["today", "data"] and panel_routes(BAD_PANEL) == ["today"]

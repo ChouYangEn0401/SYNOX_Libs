@@ -2,7 +2,7 @@
   "name": "guitar",
   "title": "🎸 吉他和弦",
   "summary": "查和弦按法、貼一份譜直接移調、Capo 建議、分散和弦 TAB、一格一小節的小節譜（不用上網）",
-  "version": "0.2.0-alpha.1",
+  "version": "0.2.0-alpha.2",
   "stage": "alpha",
   "kind": "python",
   "group": "chord",

@@ -3,10 +3,10 @@
   "order": ["notes", "todo", "money", "calendar", "bullet", "diary", "notion", "todoist", "google-calendar", "google-sheets", "apple-reminders"],
   "tools": {
     "notes": {"line": "記一筆、找、刪", "example": "/note 買牛奶"},
-    "todo": {"line": "重要度、專案、到期日、打勾完成", "example": "/todo !! 繳電費 明天"},
+    "todo": {"line": "重要度、專案、到期日、打勾完成", "example": "/todo !! 繳電費 明天", "status": "網頁面板改了讀資料的網址，還沒在真的 SYNOX 網頁上實機試過"},
     "money": {"line": "支出、收入、轉帳、預算、信用卡、週月檢討，附完整的記帳畫面", "example": "/money 120 午餐", "status": "還沒在真的 SYNOX／Telegram 上實機試過"},
-    "calendar": {"line": "存在這台電腦的行程，可以匯出給別的日曆用", "example": "/cal 明天 14:00 看牙醫"},
-    "bullet": {"line": "快速記錄、今天、月誌、搬到今天", "example": "/bj • 買牛奶"},
+    "calendar": {"line": "存在這台電腦的行程，可以匯出給別的日曆用", "example": "/cal 明天 14:00 看牙醫", "status": "網頁面板改了讀資料的網址，還沒在真的 SYNOX 網頁上實機試過"},
+    "bullet": {"line": "快速記錄、今天、月誌、搬到今天", "example": "/bj • 買牛奶", "status": "網頁面板改了讀資料的網址，還沒在真的 SYNOX 網頁上實機試過"},
     "diary": {"name": "每日日記", "line": "挑題組寫一篇（靈修、心情、反思、工作），做成一頁 HTML 或一張卡片", "example": "/diary 今天很好", "status": "還沒在真的 SYNOX／Telegram 上實機試過"},
     "notion": {"line": "搜尋、讀頁面、加一列、改欄位", "example": "/notion 會議", "status": "還沒真的連上去測過，只用假資料試過"},
     "todoist": {"line": "看、加、完成、改期 Todoist 的待辦", "example": "/todoist !! 繳電費 明天", "status": "還沒真的連上去測過，只用假資料試過"},
