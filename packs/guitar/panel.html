@@ -1077,7 +1077,7 @@
     showTab(data.chart ? "chart" : "tp");
   }
 
-  fetch("/api/packs/guitar/data", { credentials: "same-origin" })
+  fetch("api/data")   // 相對網址＝/packs/guitar/panel/<票>/api/data（面板是隔開的：沒有 cookie，不用帶登入資料）
     .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
     .then(start)
     .catch(function (e) { $("status").textContent = "讀不到和弦資料（" + e.message + "）"; $("status").className = "warn"; });
