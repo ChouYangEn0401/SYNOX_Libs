@@ -1,6 +1,6 @@
 {
   "說明": "工具在公開入口頁（docs/site/index.html）卡片上的字，scripts/build_site.py 讀。不打包進 .synoxpack，所以改這裡不用升工具的 version。每一欄都可以不寫：沒寫就用 pack.json 的 site 區塊，再沒有就從 pack.json 猜（title 的 emoji 與名字、summary、help 的第一個範例、capabilities 有沒有 network）。欄位與優先順序見 docs/CONTRIBUTING-TOOLS.md「公開頁上的樣子」。order：卡片順序（沒列的照 pack.json 的 order、再照名字排在後面）。",
-  "order": ["notes", "todo", "money", "calendar", "bullet", "diary", "notion", "todoist", "google-calendar", "google-sheets", "apple-reminders"],
+  "order": ["notes", "todo", "money", "calendar", "bullet", "diary", "notion", "todoist", "google-calendar", "google-sheets", "apple-reminders", "usb-keys"],
   "tools": {
     "notes": {"line": "記一筆、找、刪", "example": "/note 買牛奶"},
     "todo": {"line": "重要度、專案、到期日、打勾完成", "example": "/todo !! 繳電費 明天"},
@@ -12,6 +12,7 @@
     "todoist": {"line": "看、加、完成、改期 Todoist 的待辦", "example": "/todoist !! 繳電費 明天", "status": "還沒真的連上去測過，只用假資料試過"},
     "google-calendar": {"line": "看今天／這週、加行程、刪行程", "example": "/gcal 明天 14:00 看牙醫", "status": "還沒真的連上去測過，只用假資料試過"},
     "google-sheets": {"line": "建試算表、看、往後加列；先預覽、你自己打確認碼才寫，不改、不刪格子", "example": "/gsheet 2026-11-16|午餐|120", "status": "還沒在真的 SYNOX／Google 帳號上實機試過，只用假資料試過"},
-    "apple-reminders": {"line": "看、加、完成提醒事項（新版 iCloud 的讀不到）", "example": "/applerem_add 買牛奶", "status": "還沒真的連上去測過，只用假資料試過"}
+    "apple-reminders": {"line": "看、加、完成提醒事項（新版 iCloud 的讀不到）", "example": "/applerem_add 買牛奶", "status": "還沒真的連上去測過，只用假資料試過"},
+    "usb-keys": {"line": "把隨身碟登記成鑰匙，選一把鎖訊息或檔案；解開時那支碟要插著", "example": "/usb_keys", "status": "還沒在真的隨身碟上實機試過，只用假的隨身碟試過；要另外裝 usbtether 函式庫"}
   }
 }

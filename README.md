@@ -25,7 +25,10 @@
 | [📊 google-sheets](packs/google-sheets/README.md) | `/gsheet 2026-11-16\|午餐\|120`、`/gsheet_ok <碼>`、`/gsheet_read` | Google 試算表**只加列**：先預覽、你自己打確認碼才寫；不改、不刪格子 | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/H74Xn3PdwzCsseG9dEkq1r) |
 | [🍎 apple-reminders](packs/apple-reminders/README.md) | `/applerem`、`/applerem_add`、`/applerem_status` | CalDAV 提醒事項（iCloud 升級過的 Apple 不開放，見說明） | 🧪 alpha | 接外面的服務 | [看說明](https://claude.ai/artifact/Jm4tdCTZdaQ1mc1waTatYp) |
 | [🎸 guitar](packs/guitar/README.md) | `/chord Am7`、`/chord_tp +2`＋貼譜、`/chord_capo Bb` | 吉他和弦：查按法、貼一份譜直接移調、Capo 建議、分散和弦 TAB；網頁面板有和弦圖 | 🧪 alpha | 音樂 | （還沒有說明頁） |
+| [🔑 usb-keys](packs/usb-keys/README.md) | `/usb_keys`、`/usb_lock 書桌 明天開會`、`/usb_unlock_check utmsg1:…` | 把很多支隨身碟登記成鑰匙，選一把鎖訊息或檔案；解開時那支碟要插著（用 usbtether 函式庫，要另外裝） | 🧪 alpha | USB 鑰匙 | （還沒有說明頁） |
 
+- `usb-keys`（2026-11-18 新寫）：不連網；只給擁有者（`access: owner`）。加密與驗證隨身碟全部由 usbtether 0.3.0 函式庫做
+  （`requires.pip` 釘版本＋雜湊；SYNOX 不替 kind=python 的工具裝套件，要照工具 README 自己裝一次）；解開、登記、撤銷只有本人，密碼只在工具畫面輸入。
 - 不連網的七個（notes、todo、money、calendar、bullet、diary、guitar）：資料加密存在你自己的電腦（保管箱）、不連網、不開別的程式；伺服器版每個人一份（money 0.4.0 起例外：帳本是你自己資料夾裡的檔，沒有加密）。
 - 接外面服務的 notion、todoist、google-calendar、apple-reminders（2026-11-12 從 SYNOX 主程式的 `connectors/` 搬來）：只連自己那個服務的官方 API（只用 `requests`）、不開埠、
   token／帳號加密存在保管箱、只給擁有者（`access: owner`）；都只對假傳輸測過，還沒對真的服務長時間用過。
