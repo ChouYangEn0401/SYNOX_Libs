@@ -31,8 +31,8 @@ packs/<名字>/                 名字：小寫英數與 -（例 google-calendar
                               多個檔的工具（money 的做法）：pack.py 加子資料夾，pack.json 寫 "python": {"module": "pack", "package": true}
   SKILL.md                    給 AI 看的用法
   README.md                   給人看：指令、設定、資料存哪、現在的狀態（入口頁沒有手寫說明頁時連到這裡）
-  panel.html、app/            選用：網頁面板／完整畫面（money 的做法，ADR-0003）。面板的 fetch 網址規則測試與 SYNOX 現在對不上，
-                              新工具先不要做面板（HANDOFF.md 第 8 節）
+  panel.html、app/            選用：網頁面板（唯讀小格）／完整畫面（money 的做法，ADR-0003）。面板是隔開的，
+                              讀資料只寫相對網址 fetch("api/<route>")（不加 /、不帶 credentials；HANDOFF.md 3.6 有範例）
 tests/test_<名字>.py          測試（第 4 節）
 ```
 

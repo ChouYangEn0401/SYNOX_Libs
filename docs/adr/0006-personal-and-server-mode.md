@@ -6,7 +6,11 @@
 - 編號：寫的時候叫 ADR-0003；合進 main 時 0003（工具的完整畫面）、0004（記帳重做）已經有了，先改成 0005；後來 0005 又給了 google-sheets（只增不改的設計），再改成 0006。
 - 之後才加進來的 `money` 0.4.0（多檔工具、帳本是沒加密的 SQLite，ADR-0004）與 `diary`：入口標準、M3、M4 一樣套，M3／M4 改成看工具裡每個 `.py`；個別准的模組層級呼叫列在 `tests/test_gates.py` 的 `M4_EXTRA_CALLS`（各有理由）；S2／S5 對 money 改成「每人一個資料夾、沒有別人的字」，不檢查密文（`tests/test_isolation.py`）；diary 的 S1／S2 在 `tests/test_diary.py`。
 - 後記（2026-11-18，文件整理）：M5 與第 3 節的 `panel.html` 寫法（`fetch("/api/packs/<name>/…", {credentials: …})`）已被 SYNOX ADR 0028 §5（2026-11-16，面板一律隔開）取代：
-  現在的 SYNOX 只收相對網址 `fetch("api/<route>")`，舊寫法會 401。這個 repo 的面板與 `tests/test_gates.py` 的 `panel_problems` 還沒改（[HANDOFF.md](../HANDOFF.md) 第 8 節）。
+  現在的 SYNOX 只收相對網址 `fetch("api/<route>")`，舊寫法會 401。
+- 後記（2026-11-18，面板改好了）：5 個面板（todo、money、guitar、calendar、bullet）改成相對網址 `fetch("api/<route>")`、不帶 `credentials`；
+  M5（`tests/test_gates.py` 的 `panel_problems`）反過來：只收相對網址，抓 `/api/packs/`、`credentials`、`fetch` 的第二個參數；
+  `tests/test_synox_integration.py` 用真的 SYNOX 走一次「拿票 → 開面板 → 相對網址讀得到、舊網址讀不到」。
+  新工具可以做面板，寫法照 [HANDOFF.md](../HANDOFF.md) 3.6。下面第 2、3 節與 T3 寫的是當時的規則，留著當紀錄。
 - 對照的 SYNOX：`src/synox/packs/loader.py`、`manifest.py`、`secrets.py`、`connect.py`、`policy.py`、`web/server.py`、`docs/pack-format.md`
 
 ## 背景
@@ -64,7 +68,7 @@ SYNOX 有兩種用法，寫在 `config.json` 的 `mode`：
 | M2 | 個人檔案只經 `pack.path_of(user, …)`；不准 `pack.path(…)`、不准自己組路徑、不准系統暫存資料夾 | 第 2 關；`test_gates` 的檔案白名單 |
 | M3 | 分人的鍵只能是 `user`（handler 給的那個）或 `cb.clicker_id`；**不准用 `chat_id`** 當鍵 | `test_gates` 加靜態檢查（待辦 T3） |
 | M4 | 模組層級不准放會變的狀態：沒有 dict／list／set 快取、沒有共用的 HTTP session、沒有「上一次的結果」。空資料用函式回新的（`def empty()`），不拿常數淺拷貝 | `test_gates` 加 AST 檢查（待辦 T3）；`tests/test_isolation.py` |
-| M5 | 面板 route `fn(user)` 只回這個人自己的；`panel.html` 只打自己宣告的 `/api/packs/<name>/…`，用 `textContent` 不用 `innerHTML`，不用 `localStorage` | 雙人面板測試（待辦 T2）；`test_gates` 掃 panel（待辦 T3） |
+| M5 | 面板 route `fn(user)` 只回這個人自己的；`panel.html` 只打自己宣告的 `/api/packs/<name>/…`（2026-11-18 起是相對網址 `api/<route>`，見開頭後記），用 `textContent` 不用 `innerHTML`，不用 `localStorage` | 雙人面板測試（待辦 T2）；`test_gates` 掃 panel（待辦 T3） |
 | M6 | 匯出檔寫在 `path_of(user)` 底下、送出後刪掉；檔名不固定（同一個人同時匯出兩次不互踩） | 測試：送完資料夾是空的 |
 | M7 | 密鑰（token、密碼、client secret）不出現在回覆、AI 工具結果、log；設定密鑰的指令一律 `ai=False` | 每個外部工具一條 log 測試（待辦 T4） |
 | M8 | 「上次列出來的編號」這類暫存也算個人資料，照 M1 存 | 雙人測試 |
@@ -108,6 +112,7 @@ def install(app, pack):
 - 外部工具固定有 `status`、`logout` 兩個指令，都 `ai=False`。
 
 **`panel.html`**：一個檔、不載外部資源、只 `fetch("/api/packs/<name>/<route>", {credentials: "same-origin"})`、只用 `textContent`。
+（2026-11-18 起：只寫相對網址 `fetch("api/<route>")`、不帶 `credentials`；見開頭後記與 HANDOFF.md 3.6。）
 
 ### 4. 接外面服務的工具在伺服器版的政策
 
@@ -224,6 +229,7 @@ google-calendar 的 OAuth（要來回貼網址）先不排，等 SYNOX 的「連
 - M4：AST 掃模組層級的賦值，值是 `{}`／`[]`／`set()`／`dict()`／`list()` 的不准（常數表用 tuple 或寫進白名單）；
   `HTTP = None`、`transport = None` 這種「測試換掉用」的改成函式（T5）。
 - M5：`panel.html` 不准有 `innerHTML`、`localStorage`、`sessionStorage`、`http://`、`https://`；`fetch(` 的網址只能是 `/api/packs/<自己的名字>/`。
+  （2026-11-18 起反過來：只能是相對網址 `"api/<route>"`，`/api/packs/`、`credentials` 一律抓出來；見開頭後記。）
 - （實際：M4 的「常數表」不改成 tuple——全部是對照表（`_CN`、`KIND_NAMES`…），改成 tuple 會動到程式；規則改成
   「有內容的 dict／list／set 名字要全大寫、整個模組沒有地方改它、不拿它淺拷貝」，空的一律不准，模組層級的呼叫只准
   `re.compile`／`tuple`／`frozenset`，函式裡不准 `global`。`X = None` 的掛勾在 T5 之前暫列白名單 `TEST_HOOKS`。

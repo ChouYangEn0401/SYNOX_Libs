@@ -29,5 +29,5 @@ PY="$SYNOX_HOME/.venv/bin/python"           # 先 python3 -m venv "$SYNOX_HOME/.
 - 測試不連網、不開埠、不叫 AI；接外面服務用假 HTTP。
 - **全部用假資料**：不寫真名、信箱、帳號、金額、本機路徑、token、私鑰。不需要也不准拿任何私人資料或金鑰。
 - 對 SYNOX `dev` 的測試應該全綠；`synox_bot`／`host_bot` 會先替每個工具寫 `packs.lock`（SYNOX 不載入沒上鎖的工具），不要在測試裡繞過它，也不要為了變綠改既有測試的期望。
-- 新工具先不要做 `panel.html`（測試與 SYNOX 的面板網址規則對不上，見 HANDOFF 第 8 節）。
+- `panel.html`（選用）是隔開的小頁：讀資料只寫相對網址 `fetch("api/<route>")`（前面不加 `/`、不帶 `credentials`、route 在 `web.api` 宣告過），字用 `textContent`；舊的 `/api/packs/<name>/…` 會 401，測試會擋。範例在 HANDOFF 3.6。
 - 小步 commit，訊息寫做了什麼、為什麼。
