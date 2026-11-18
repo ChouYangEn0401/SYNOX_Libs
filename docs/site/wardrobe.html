@@ -3915,7 +3915,7 @@ footer a { color: var(--ink-2); }
   <a href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/tag/v0.3.0" target="_blank" rel="noopener">發佈頁 v0.3.0</a>
   <a href="index.html">全部工具</a>
 </footer>
-<p class="stamp" data-online="https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR">線上版 <a href="https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR">https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR</a> · 本機版 docs/site/wardrobe.html · 頁面版本 <span data-stamp>dc16d0751e · 2026-11-19</span></p>
+<p class="stamp" data-online="https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR">線上版 <a href="https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR">https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR</a> · 本機版 docs/site/wardrobe.html · 頁面版本 <span data-stamp>3927926009 · 2026-11-19</span></p>
 </div>
 
 <script>
@@ -3932,18 +3932,44 @@ footer a { color: var(--ink-2); }
     set(nx);
     try { localStorage.setItem("synox.wardrobe.theme", nx); } catch (e) { /* 沒關係 */ }
   });
-  /* 開場：捲到才播一次，按「重播」再播。
+  /* 開場：捲到才播一次，按「重播」再播——兩條路都走同一個 replay()。
      做法：加上 cw-rs（開場裡的動畫全部 none）→ 讀一次 offsetWidth 逼瀏覽器把樣式算完（動畫取消）→ 拿掉 cw-rs → 再算一次
      （同樣的動畫重新開始、從 0 播）。不靠 cloneNode。拿掉 class 寫在 finally：中途出錯也不會卡在「動畫全關」。
-     保險：播到該結束的時間（最長的那一段＋1 秒）還沒播完的（分頁在背景、瀏覽器沒在算畫面），直接跳到終點，不會停在半途或空白。
+     播放中又被觸發（連按、捲動自動播放撞上按鈕）：舊的那一輪作廢（cwRun），乾淨地從頭重來，不會有半途跳終點。
+     保險（watch）只在「動畫真的卡住」時才介入：動畫自己的時鐘（currentTime）連續約 1.5 秒一動也不動
+     （分頁在背景、瀏覽器沒在畫畫面），才把沒播完的跳到終點，不會停在半途或空白。
+     不用「播到該結束的時間＋幾秒」這種牆上時鐘：機器卡一下、第一格畫面晚到時，動畫還在正常播就被截斷（V 最長、最容易碰到）。
+     動畫被暫停（開發者工具、測試）時不介入。
      系統開了「減少動態效果」：上面的 CSS 已經把動畫全關，畫面就是終態；這裡什麼都不做。 */
   var still = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  var STALL_MS = 1500, POLL_MS = 300, GIVE_UP_MS = 120000;
   function oneShots(svg) {
     if (!svg || !svg.getAnimations) return [];
     return svg.getAnimations({ subtree: true }).filter(function (a) {
       var t = a.effect && a.effect.getComputedTiming ? a.effect.getComputedTiming() : null;
       return t && t.iterations !== Infinity && t.endTime !== Infinity;
     });
+  }
+  function watch(screen, svg, run) {
+    var best = -1, stalled = 0, prev = performance.now(), born = prev;
+    (function tick() {
+      if (screen.cwRun !== run) return;                   /* 又觸發了一次：交給新的那一輪 */
+      var now = performance.now(), dt = Math.min(now - prev, POLL_MS + 200);   /* 主執行緒卡住的那一大段不算「卡住」 */
+      prev = now;
+      var left = oneShots(svg).filter(function (a) { return a.playState !== "finished"; });
+      if (!left.length || now - born > GIVE_UP_MS) return;
+      if (left.some(function (a) { return a.playState === "paused"; })) stalled = 0;      /* 有人暫停了它：不介入 */
+      else {
+        var cur = 0;
+        left.forEach(function (a) { cur = Math.max(cur, +a.currentTime || 0); });
+        if (cur > best) { best = cur; stalled = 0; } else stalled += dt;
+        if (stalled >= STALL_MS) {
+          left.forEach(function (a) { try { a.finish(); } catch (e) { /* 沒關係 */ } });
+          return;
+        }
+      }
+      setTimeout(tick, POLL_MS);
+    })();
   }
   function replay(screen) {
     if (!screen || (still && still.matches)) return;
@@ -3952,13 +3978,8 @@ footer a { color: var(--ink-2); }
     screen.classList.add("cw-rs");
     try { void screen.offsetWidth; } finally { screen.classList.remove("cw-rs"); }
     void screen.offsetWidth;
-    var run = (screen.cwRun || 0) + 1, end = 0;
-    screen.cwRun = run;
-    oneShots(svg).forEach(function (a) { end = Math.max(end, a.effect.getComputedTiming().endTime); });
-    if (end > 0) setTimeout(function () {
-      if (screen.cwRun !== run) return;                   /* 又按了一次重播：交給新的那一輪 */
-      oneShots(svg).forEach(function (a) { if (a.playState !== "finished") { try { a.finish(); } catch (e) { /* 沒關係 */ } } });
-    }, end + 1000);
+    screen.cwRun = (screen.cwRun || 0) + 1;
+    watch(screen, svg, screen.cwRun);
   }
   document.addEventListener("click", function (ev) {
     var b = ev.target.closest && ev.target.closest("[data-replay]");

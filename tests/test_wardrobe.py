@@ -3,7 +3,7 @@
 這裡只做靜態檢查（不開瀏覽器）。瀏覽器實測的結果寫在 commit 訊息裡；這些測試擋的是當時找到的三個原因不要再回來：
 - 公開頁把每條規則限定在那張卡片（.cw-<字母>）時，G–Z 自己的規則寫成 [data-slot][data-slot]，兩個都被換掉就一條都對不到
   （G–Z 的開場動畫在公開頁上根本沒播，按重播當然也沒反應）；
-- 重播不能只靠 cloneNode：改成「先把動畫全關、逼瀏覽器算一次、再放回去」，播不完的直接跳到終點；
+- 重播不能只靠 cloneNode：改成「先把動畫全關、逼瀏覽器算一次、再放回去」，卡住（瀏覽器不畫畫面）才跳到終點、正常播放中絕不截斷；
 - 系統開了減少動態效果時不播、畫面是終態。"""
 import os
 import re
@@ -80,9 +80,33 @@ def test_replay_restarts_by_toggling_animation_off_and_on():
 
 
 def test_replay_never_leaves_the_opening_half_way():
+    """卡住（瀏覽器不畫畫面）時才把沒播完的跳到終點；連按兩次：舊的那輪不去動新的。"""
     js = _script(_page())
-    assert "a.finish()" in js and "endTime" in js and "setTimeout" in js      # 播不完的（瀏覽器沒在算畫面）跳到終點
-    assert "cwRun" in js                                                      # 連按兩次：舊的那輪不去動新的
+    assert "a.finish()" in js and "currentTime" in js and "cwRun" in js
+
+
+def test_safety_net_never_cuts_a_normally_playing_opening():
+    """V 的開場有 48 段動畫、最長 2.92 秒；舊版保險是「按下去＋最長時間＋1 秒」的牆上時鐘，機器卡一下（第一格晚到 1 秒以上）
+    動畫還在正常播就被跳到終點。現在：只看動畫自己的時鐘有沒有在走，連續卡住 >= 1 秒以上才介入；暫停中的不碰。"""
+    for text in (_template(), _page()):
+        js = _script(text)
+        watch = re.search(r"function watch\(screen, svg, run\) \{(.*?)\s+\}\s+function replay", js, re.S).group(1)
+        assert "endTime" not in watch and not re.search(r"setTimeout\([^)]*end", watch)      # 沒有「最長時間＋N 秒」的固定死線
+        assert "currentTime" in watch and "stalled" in watch                                  # 看動畫時鐘有沒有在走
+        assert '"paused"' in watch                                                            # 暫停中的不介入
+        assert watch.index("a.finish()") > watch.index("STALL_MS")                            # finish 只在卡住門檻之後
+        assert "screen.cwRun !== run" in watch                                                # 舊的那輪自己退場
+        assert int(re.search(r"STALL_MS = (\d+)", js).group(1)) >= 1000
+
+
+def test_autoplay_and_replay_button_share_one_path():
+    """捲到才播（IntersectionObserver）和按「重播」都只呼叫 replay()，沒有各走各的。"""
+    js = re.sub(r"/\*.*?\*/", "", _script(_page()), flags=re.S)       # 不算註解
+    assert js.count("function replay(") == 1
+    assert len(re.findall(r"(?<![A-Za-z])replay\(", js)) == 3        # 定義 1 ＋ 按鈕 1 ＋ IntersectionObserver 1
+    assert re.search(r"isIntersecting\) \{ replay\(e\.target\); io\.unobserve", js)
+    assert 'replay(b.closest(".cw-open").querySelector(".cw-screen"))' in js
+    assert js.count(".finish()") == 1 and js.count("classList.add(\"cw-rs\")") == 1
 
 
 def test_replay_respects_reduced_motion():
