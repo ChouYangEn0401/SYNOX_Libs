@@ -11,6 +11,7 @@
 - **`google-calendar` 0.1.1 → 0.1.2**（ADR-0006 C1、P5）：`/gcal_setup`、`/gcal_code`、`/gcal_token` 打的 client secret、授權碼、
   refresh token 原本整串印在 `[ROUTE]` log（兩種模式都中）；`install` 改成對這三個叫 `kit.redact_in_logs`。
   `/gcal_status` 改成 `ai=False`（跟另外三個外部工具一樣，SKILL 改成請使用者自己打）。測試加一條 S6（log 裡沒有那些值）。
+- **網頁面板改成 SYNOX 現在的網址寫法：`todo`、`calendar`、`bullet` 0.1.2 → 0.1.3-alpha.1，`money` 0.5.0-alpha.1 → 0.5.0-alpha.2，`guitar` 0.2.0-alpha.1 → 0.2.0-alpha.2**（**alpha，尚未實機驗證**）：SYNOX 從 ADR 0028 §5 起把工具的 `panel.html` 隔開（`<iframe sandbox="allow-scripts">`，面板沒有 cookie），舊的 `fetch("/api/packs/<name>/<route>", {credentials: …})` 從面板打會 401，5 個面板都讀不到資料。改成相對網址 `fetch("api/<route>")`（每個面板只改這一行）。`tests/test_gates.py` 的 M5（`panel_problems`）反過來：只收相對網址，抓 `/api/packs/`、`credentials`、`fetch` 的第二個參數、`document.cookie`、`window.open` 這類隔開之後本來就做不到的；`tests/test_synox_integration.py` 用真的 SYNOX 走一次「拿票 → 開面板 → 相對網址讀得到 JSON、舊網址讀不到」。HANDOFF.md 多一節 3.6（面板的寫法與範例），拿掉「新工具先不要做面板」。
 
 ### Added
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。

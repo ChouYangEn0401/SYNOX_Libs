@@ -1,5 +1,7 @@
 # 📅 calendar（行事曆）
 
+> **0.1.3-alpha.1：alpha（尚未實機驗證）**——網頁面板改成 SYNOX 現在的寫法（隔開的面板只能用相對網址讀資料），只在這個 repo 的自動測試裡跑過，還沒在真的 SYNOX 網頁上試過。指令沒有變。
+
 | 指令 | 做什麼 |
 |---|---|
 | `/cal <時間 標題>` | 加一個行程：`/cal 明天 14:00 看牙醫`、`/cal 下週一下午三點半 開會 location=三樓`、`/cal 11/20 整天 員工旅遊` |
@@ -14,7 +16,7 @@
 - 沒寫年的日期今年已經過了就算明年；「15號」過了算下個月；沒寫結束時間預設一小時；沒寫時間＝整天。
 - **提醒**：SYNOX 還沒有給 pack 用的排程 API，所以這個 pack 不會自己響。加有時間的行程時會附一行
   `/remind_add 13:30 看牙醫 date=2026-11-10`，要提醒就照打。
-- 網頁介面的工具頁有「今天＋7 天」面板（`GET /api/packs/calendar/today`）。
+- 網頁介面的工具頁有「今天＋7 天」面板（`panel.html`，資料來自 `pack.json` 宣告的 `GET /today`）。
 
 資料：`data/calendar.json.enc`（保管箱加密；伺服器版每人一份 `data/users/<id>/calendar.json.enc`）。
 `/cal_ics` 會在你自己的資料夾（個人版 `data/calendar/files/`、伺服器版 `data/users/<id>/calendar/files/`）暫時寫一個 .ics、

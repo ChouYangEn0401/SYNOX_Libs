@@ -2,7 +2,7 @@
   "name": "money",
   "title": "💰 記帳",
   "summary": "記支出、收入、轉帳；每期收入怎麼分、各格預算、信用卡與分期、週月檢討；附完整的記帳畫面（帳本存在你自己的資料夾，沒有加密）",
-  "version": "0.5.0-alpha.1",
+  "version": "0.5.0-alpha.2",
   "stage": "alpha",
   "kind": "python",
   "group": "money",
