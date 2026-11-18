@@ -395,7 +395,9 @@ def pack_all(out_dir: str) -> dict:
 
 def _scope_css(css: str, scope: str) -> str:
     """theme.css 原本假設整頁只有一套外觀；公開頁同時放 26 套，所以每條規則多限定在 .<scope> 底下。
-    :root 那幾段（--th- 變數）不搬：公開頁用 about.json 的 extras 在 .<scope> 上設（26 套的同名變數才不會互蓋）。"""
+    :root 那幾段（--th- 變數）不搬：公開頁用 about.json 的 extras 在 .<scope> 上設（26 套的同名變數才不會互蓋）。
+    只換第一個 [data-slot]：G–Z 這一套自己的規則寫成 [data-slot][data-slot]（特異度多一級），兩個都換的話會變成
+    「.cw-x [data-slot].cw-x [data-slot]」＝要同一個元素又是卡片又是 slot，一條都對不到（以前公開頁上 G–Z 的開場動畫全部沒在播）。"""
     out = []
     for media, head, body in _css_media_blocks(css):
         if head.startswith("@keyframes"):
@@ -403,7 +405,7 @@ def _scope_css(css: str, scope: str) -> str:
             continue
         if all(" ".join(s.split()) in ROOT_SELECTORS for s in head.split(",")):
             continue
-        sels = ",".join(s.replace("[data-slot]", f".{scope} [data-slot]") for s in head.split(","))
+        sels = ",".join(s.replace("[data-slot]", f".{scope} [data-slot]", 1) for s in head.split(","))
         rule = f"{sels}{{{body}}}"
         out.append(f"@media {media}{{{rule}}}" if media else rule)
     return "\n".join(out)

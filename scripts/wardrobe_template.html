@@ -104,6 +104,8 @@ footer a { color: var(--ink-2); }
 .stamp a { color: inherit; }
 @media (max-width: 520px) { .top a, footer a { display: inline-block; padding-block: 8px; } .cw { padding: 14px; } .cw h2 { font-size: 23px; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* 重播：先把開場裡的動畫全部拿掉一下，再放回去＝每個瀏覽器都從頭播一次（見最下面的 replay） */
+.cw-screen.cw-rs svg, .cw-screen.cw-rs svg * { animation: none !important; }
 
 /* 每一套的 token（淺色／深色） */
 {{TOKENS_CSS}}
@@ -172,14 +174,37 @@ footer a { color: var(--ink-2); }
     set(nx);
     try { localStorage.setItem("synox.wardrobe.theme", nx); } catch (e) { /* 沒關係 */ }
   });
-  /* 開場：捲到才播一次，按「重播」再播 */
+  /* 開場：捲到才播一次，按「重播」再播。
+     做法：加上 cw-rs（開場裡的動畫全部 none）→ 讀一次 offsetWidth 逼瀏覽器把樣式算完（動畫取消）→ 拿掉 cw-rs → 再算一次
+     （同樣的動畫重新開始、從 0 播）。不靠 cloneNode。拿掉 class 寫在 finally：中途出錯也不會卡在「動畫全關」。
+     保險：播到該結束的時間（最長的那一段＋1 秒）還沒播完的（分頁在背景、瀏覽器沒在算畫面），直接跳到終點，不會停在半途或空白。
+     系統開了「減少動態效果」：上面的 CSS 已經把動畫全關，畫面就是終態；這裡什麼都不做。 */
+  var still = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  function oneShots(svg) {
+    if (!svg || !svg.getAnimations) return [];
+    return svg.getAnimations({ subtree: true }).filter(function (a) {
+      var t = a.effect && a.effect.getComputedTiming ? a.effect.getComputedTiming() : null;
+      return t && t.iterations !== Infinity && t.endTime !== Infinity;
+    });
+  }
   function replay(screen) {
+    if (!screen || (still && still.matches)) return;
     var svg = screen.querySelector("svg");
-    if (svg) svg.replaceWith(svg.cloneNode(true));
+    if (!svg) return;
+    screen.classList.add("cw-rs");
+    try { void screen.offsetWidth; } finally { screen.classList.remove("cw-rs"); }
+    void screen.offsetWidth;
+    var run = (screen.cwRun || 0) + 1, end = 0;
+    screen.cwRun = run;
+    oneShots(svg).forEach(function (a) { end = Math.max(end, a.effect.getComputedTiming().endTime); });
+    if (end > 0) setTimeout(function () {
+      if (screen.cwRun !== run) return;                   /* 又按了一次重播：交給新的那一輪 */
+      oneShots(svg).forEach(function (a) { if (a.playState !== "finished") { try { a.finish(); } catch (e) { /* 沒關係 */ } } });
+    }, end + 1000);
   }
   document.addEventListener("click", function (ev) {
-    var b = ev.target.closest("[data-replay]");
-    if (b) replay(b.parentElement.querySelector(".cw-screen"));
+    var b = ev.target.closest && ev.target.closest("[data-replay]");
+    if (b) replay(b.closest(".cw-open").querySelector(".cw-screen"));
   });
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (es) {
