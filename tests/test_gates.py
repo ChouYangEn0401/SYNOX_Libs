@@ -23,11 +23,18 @@ from synox.sdk import author
 from conftest import PACK_NAMES, PACKS, PLANNER
 
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
+# 叫這台電腦上另外裝好的程式（video-notes：使用者自己裝的 Video Notes）：只給擁有者、只經 SYNOX 的 JobRunner（app.jobs）開程式，
+# 自己不連網、不動態執行；讀檔只讀那支程式產生的筆記。規則在 test_local_program_tools_only_use_app_jobs。
+LOCAL_PROGRAM = ("video-notes",)
 # pack 名稱 → 宣告的 capabilities（其他一律不准；每個都要明寫，沒有就寫 []——ADR-0006 C5）
 ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": ["filesystem:own"], "notes": [],
                 "diary": ["filesystem:own"],
                 "guitar": [],
-                **{name: ["network"] for name in CONNECT}}
+                **{name: ["network"] for name in CONNECT},
+                "video-notes": ["subprocess", "filesystem:any"]}
+# 宣告得比掃描看到的多（誠實的超集合）：{工具: (掃描會看到的, 理由)}
+SCAN_CAPS = {"video-notes": (["filesystem:own", "subprocess"],
+                             "讀的筆記在 Video Notes 自己的輸出資料夾（SYNOX 外面），路徑是執行時才知道的變數，掃描只看得出 filesystem:own")}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0006 P1）
 LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",)}
@@ -89,7 +96,7 @@ def test_every_tool_is_listed():
 @pytest.mark.parametrize("name", PACK_NAMES)
 def test_gate1_manifest_strict(name):
     m = synox_manifest.read(folder(name), strict=True)
-    assert m.kind == "python" and m.access == ("owner" if name in CONNECT else "member") and m.name == name
+    assert m.kind == "python" and m.access == ("owner" if name in CONNECT + LOCAL_PROGRAM else "member") and m.name == name
     assert os.path.isfile(m.skill_path) and os.path.isfile(os.path.join(folder(name), "README.md"))
     assert m.capabilities_declared and m.capabilities == ALLOWED_CAPS[name]
     if name in PLANNER:
@@ -128,10 +135,42 @@ def test_gate2_static_scan_passes(name):
     m = synox_manifest.read(folder(name), strict=True)
     report = synox_scan.scan(m)
     assert report.problems(m) == [], report.format(m)
-    assert report.required_capabilities == ALLOWED_CAPS[name], report.format(m)
+    assert report.required_capabilities == SCAN_CAPS.get(name, (ALLOWED_CAPS[name],))[0], report.format(m)
 
 
-@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n != "money"])
+LOCAL_PROGRAM_IMPORTS = ("json", "os", "re", "threading", "time", "isdtelekit", "synox")
+
+
+@pytest.mark.parametrize("name", LOCAL_PROGRAM)
+def test_local_program_tools_only_use_app_jobs(name):
+    """叫別的程式的工具：程式只經 app.jobs（JobRunner：argv 陣列、不經 shell、逾時與取消收整棵樹），
+    不 import subprocess／連網／動態載入；不讀環境變數；open 只在兩個地方：讀筆記（read_note）與寫網址清單（launch）。"""
+    text = source(name)
+    tree = ast.parse(text)
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            mods = [a.name for a in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            mods = [node.module or ""]
+        else:
+            continue
+        for mod in mods:
+            assert mod.split(".")[0] in LOCAL_PROGRAM_IMPORTS, f"{name}: unexpected import {mod}"
+            assert mod.split(".")[0] not in ("subprocess", "socket", "requests", "urllib", "http", "importlib", "ctypes")
+    for pattern in FORBIDDEN_TEXT:
+        if pattern != r"app\.jobs":
+            assert not re.search(pattern, text), f"{name}: {pattern}"
+    assert "shell=True" not in text and "os.system" not in text
+    owners = {}                                       # 每個節點 → 最裡面那一層函式（ast.walk 先外後內，後寫的蓋掉）
+    for fn in ast.walk(tree):
+        if isinstance(fn, ast.FunctionDef):
+            for node in ast.walk(fn):
+                owners[id(node)] = fn.name
+    opens = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "open"]
+    assert sorted(owners.get(id(n)) for n in opens) == ["launch", "read_note"]
+
+
+@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n != "money" and n not in LOCAL_PROGRAM])
 def test_no_network_subprocess_exec_or_stray_files(name):
     text = source(name)
     tree = ast.parse(text)

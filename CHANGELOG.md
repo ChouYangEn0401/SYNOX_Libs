@@ -17,6 +17,10 @@
   不進 `index.json`、`tools.zip`、`SHA256SUMS`、下載連結、公開頁，`catalog.json` 也不能列它；工具庫的公開規矩（`tests/test_gates.py` 等）
   只管公開的工具，私人工具由自己的測試管。寫錯型別（`"no"`、`0`）一律當私人並報錯。說明在 docs/CONTRIBUTING-TOOLS.md「私人工具」，
   測試 `tests/test_private_packs.py`。
+- **`video-notes` 0.1.0-alpha.1（新工具，🔧 test，尚未實機驗證）**：`/v2n <網址>` 把影片交給使用者電腦上另外裝好的 Video Notes
+  （它的命令列 `--json`）做筆記；`/v2n_status`、`/v2n_get`、`/v2n_list`、`/v2n_combine`（AI 叫的一律先送確認卡）、`/v2n_cancel`、
+  `/v2n_check`、`/v2n_setup`（只有本人）；附工具畫面。不附 Whisper／yt-dlp／AI 套件；只給擁有者；宣告 `subprocess`、`filesystem:any`。
+  工作結果只存保管箱，執行中的輸出讀完就刪。建議群組「影片筆記」。只對假的 Video Notes 測過（`tests/test_video_notes.py`）。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；

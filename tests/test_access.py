@@ -17,6 +17,8 @@ from synox.packs import manifest as synox_manifest
 from conftest import OTHER_ID, PACK_NAMES, PACKS
 
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
+# 只給擁有者的工具：接外面服務的（用擁有者的帳號）＋叫這台電腦上程式的（video-notes：設定的程式會被 SYNOX 執行）
+OWNER_ONLY = CONNECT + ("video-notes",)
 MEMBER = 77
 UNKNOWN = "未知指令"
 NO_PERMISSION = "沒有執行此指令的權限"
@@ -96,7 +98,7 @@ def test_server_mode_member_sees_exactly_what_access_says(synox_bot, name):
     bot.make(MEMBER, R.MEMBER, "member")
     member = bot.app.users.get(MEMBER)
     reg = bot.app.registry
-    if name in CONNECT:
+    if name in OWNER_ONLY:
         assert m.access == "owner"
         assert not reg.visible(member, group)
         for node in leaves:
