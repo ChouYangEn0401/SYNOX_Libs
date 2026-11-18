@@ -28,5 +28,6 @@ PY="$SYNOX_HOME/.venv/bin/python"           # 先 python3 -m venv "$SYNOX_HOME/.
 - 改了工具就升 `version`；沒實機試過的版本帶 `-alpha.N`；CHANGELOG `[Unreleased]` 一行。
 - 測試不連網、不開埠、不叫 AI；接外面服務用假 HTTP。
 - **全部用假資料**：不寫真名、信箱、帳號、金額、本機路徑、token、私鑰。不需要也不准拿任何私人資料或金鑰。
+- 對現在的 SYNOX `dev`，基準本來就有約 151 個紅（個人版測試的工具沒上鎖、不載入；HANDOFF 第 5.3、8 節）：只跟基準比，不要順手改 conftest。
 - 新工具先不要做 `panel.html`（測試與 SYNOX 的面板網址規則對不上，見 HANDOFF 第 8 節）。
 - 小步 commit，訊息寫做了什麼、為什麼。
