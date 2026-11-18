@@ -55,6 +55,7 @@ def _empty_host(tmp_path, packs_dir):
 def _say(app, api, text):
     from isdtelekit.core.channel import Inbound
     app.dispatcher.handle(api, Inbound("test", OWNER_ID, OWNER_ID, text, username="owner"), "typed")
+    assert app.tasks.wait(10)          # 丟到背景做的指令（usb-keys 讀隨身碟）要等它回
     return api.last(OWNER_ID)
 
 
