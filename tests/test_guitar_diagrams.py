@@ -261,7 +261,7 @@ def test_single_chord_pages_through_voicings_in_place(bot, g):
     bot.say(OWNER, "/chord F")
     out = shots.sent[0]
     n = len(g.voicings(5, "major"))
-    assert f"1／{n}" in out["caption"] and "1 3 3 2 1 1" in out["caption"]
+    assert out["caption"].startswith("🎸 F　1 3 3 2 1 1\n1／") and f"1／{n}" in out["caption"]   # 名稱＋一行按法
     assert labels(out["markup"])[:3] == ["‹ 上一個", f"1／{n}", "下一個 ›"]
     nxt = datas(out["markup"])[2]
     bot.api.send_message(OWNER, out["caption"], reply_markup=out["markup"])  # 讓 harness 找得到這顆按鈕

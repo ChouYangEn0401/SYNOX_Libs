@@ -971,11 +971,14 @@ def diagram_shapes(name, frets, fingers, root=None, x0=0.0, y0=0.0, footer=None)
         return root is not None and f is not None and (STRING_PC[i] + f) % 12 == root % 12
 
     barres = find_barres(frets, fingers)
-    covered = set()
+    covered, labels = set(), []
     for f, lo, hi, k in barres:
         y = row_y(f)
         shapes.append(("seg", sx[lo], y, sx[hi], y, 14, DOT))
-        shapes.append(("text", (sx[lo] + sx[hi]) / 2, y + 3.6, str(k), 10, "#FFFFFF", "middle", True))
+        lx = (sx[lo] + sx[hi]) / 2
+        if hi - lo == 1:                               # 只壓兩條弦：數字放在不是根音的那條上，才不會被根音的圈蓋住
+            lx = next((sx[i] for i in (lo, hi) if not is_root(i, f)), lx)
+        labels.append(("text", lx, y + 3.6, str(k), 10, "#FFFFFF", "middle", True))
         covered |= {i for i in range(lo, hi + 1) if frets[i] == f and fingers[i] == k}
     mark_y = gy - 13
     for i in range(6):
@@ -997,6 +1000,7 @@ def diagram_shapes(name, frets, fingers, root=None, x0=0.0, y0=0.0, footer=None)
             shapes.append(("circle", sx[i], y, 7.4, ROOT_DOT if is_root(i, f) else DOT, None, 0))
             if fingers[i]:
                 shapes.append(("text", sx[i], y + 3.6, str(fingers[i]), 10, "#FFFFFF", "middle", True))
+    shapes += labels                                   # 橫按的手指編號畫在根音的圈上面
     shapes.append(("text", x0 + CELL_W / 2, bottom + 22, footer if footer is not None else frets_text(frets), 12,
                    INK_SOFT, "middle", False))
     return shapes
@@ -1240,8 +1244,8 @@ def approx_note(ch):
 def page_caption(ch, vs, i):
     """一個按法的圖說：名稱、第幾個／共幾個、標籤、一行按法、提醒。"""
     v = vs[i]
-    lines = [f"🎸 {own_name(ch)}　{i + 1}／{len(vs)} {v['label']}",
-             f"按法：{frets_text(v['frets'])}（第6弦→第1弦，x＝不彈）", approx_note(ch)]
+    lines = [f"🎸 {own_name(ch)}　{frets_text(v['frets'])}",
+             f"{i + 1}／{len(vs)} {v['label']}（第6弦→第1弦，x＝不彈）", approx_note(ch)]
     if v.get("tip"):
         lines.append("💡 " + v["tip"])
     return "\n".join(x for x in lines if x)
