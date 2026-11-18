@@ -5,6 +5,8 @@
 - 範圍：`packs/` 全部 9 個工具、`tests/`、`scripts/build.py`
 - 編號：寫的時候叫 ADR-0003；合進 main 時 0003（工具的完整畫面）、0004（記帳重做）已經有了，先改成 0005；後來 0005 又給了 google-sheets（只增不改的設計），再改成 0006。
 - 之後才加進來的 `money` 0.4.0（多檔工具、帳本是沒加密的 SQLite，ADR-0004）與 `diary`：入口標準、M3、M4 一樣套，M3／M4 改成看工具裡每個 `.py`；個別准的模組層級呼叫列在 `tests/test_gates.py` 的 `M4_EXTRA_CALLS`（各有理由）；S2／S5 對 money 改成「每人一個資料夾、沒有別人的字」，不檢查密文（`tests/test_isolation.py`）；diary 的 S1／S2 在 `tests/test_diary.py`。
+- 後記（2026-11-18，文件整理）：M5 與第 3 節的 `panel.html` 寫法（`fetch("/api/packs/<name>/…", {credentials: …})`）已被 SYNOX ADR 0028 §5（2026-11-16，面板一律隔開）取代：
+  現在的 SYNOX 只收相對網址 `fetch("api/<route>")`，舊寫法會 401。這個 repo 的面板與 `tests/test_gates.py` 的 `panel_problems` 還沒改（[HANDOFF.md](../HANDOFF.md) 第 8 節）。
 - 對照的 SYNOX：`src/synox/packs/loader.py`、`manifest.py`、`secrets.py`、`connect.py`、`policy.py`、`web/server.py`、`docs/pack-format.md`
 
 ## 背景

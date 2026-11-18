@@ -13,15 +13,14 @@ from synox.config import SynoxConfig
 from synox.llm.fake import FakeAdapter
 from synox.vault import Vault
 
-from conftest import PACK_NAMES, PACKS, ROOT, trust_core
+from conftest import PACK_NAMES, PACKS, ROOT, approve_all
 
 
 def make_app(tmp_path, mode="personal"):
     data = tmp_path / "data"
     config = SynoxConfig.from_dict({"owner_id": OWNER_ID, "data_dir": str(data), "vault": {"mode": "file"},
                                     "llm": {"kind": "fake"}, "mode": mode}, require_token=False, root=str(tmp_path))
-    if mode == "server":                         # 沒鎖的 python 工具伺服器版只給擁有者：當作擁有者安裝時選了 core
-        trust_core(data, *(os.path.join(PACKS, n) for n in PACK_NAMES))
+    approve_all(data, mode)                      # 沒上鎖的工具 SYNOX 不載入；伺服器版另外鎖成 core（成員才用得到）
     api = FakeChannel()
     vault = Vault(b"k" * 32, str(data))
     app = build(config, home=api, adapter=FakeAdapter(None), vault=vault, pack_dirs=[PACKS])
@@ -109,6 +108,7 @@ def test_every_tool_loads_together(tmp_path):
     data = tmp_path / "data"
     config = SynoxConfig.from_dict({"owner_id": OWNER_ID, "data_dir": str(data), "vault": {"mode": "file"},
                                     "llm": {"kind": "fake"}}, require_token=False, root=str(tmp_path))
+    approve_all(data, "personal")
     api = FakeChannel()
     app = build(config, home=api, adapter=FakeAdapter(None), vault=Vault(b"k" * 32, str(data)), pack_dirs=[PACKS])
     status = {i.name: i.status for i in app.extras["synox_pack_report"].items}

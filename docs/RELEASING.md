@@ -16,6 +16,7 @@
 | (b) | 全部打包：`dist/`＋入口頁重新產生＋每頁下載連結改成現在的版本＋重新蓋頁面版本 | `python scripts/build.py`（先 `python scripts/build.py --check`） |
 | (c) | 測試（`test_links`、`test_site_pages`、`test_build_site` 一定要過） | `python -m pytest -q` |
 | (d) | commit（`dist/` 不進 git）、合併到 main | |
+| (d2) | 簽章（擁有者自己的電腦；SYNOX 放進官方公鑰之後才有「✅ 官方」）：每個 `.synoxpack` 加 `pack.sig.json`，再用**簽過的檔**重算 `index.json`／`SHA256SUMS`、重包 tools zip | 下面「簽章」 |
 | (e) | 上傳：先備份發佈頁上的 `index.json`，再傳全部檔，**最後**才換 `index.json` | 下面「上傳到發佈頁」 |
 | (f) | 列出改到的頁、用 Artifact 重新發佈到同一個網址、看頁面版本一樣 | `python scripts/build_site.py --list-republish --since <上次發佈的 commit>`；[ARTIFACTS.md](ARTIFACTS.md) |
 | (g) | 發佈頁標成 Latest 之後（只做一次）：`LINK_MODE = "latest"`、重新產生頁面、重新發佈全部線上頁 | 下面「標成 Latest」 |
@@ -49,7 +50,7 @@
 
 | 檔 | 說明 |
 |---|---|
-| `<name>-<version>.synoxpack` | 每個工具（10 個）與每套外觀（26 套）帶版本的檔 |
+| `<name>-<version>.synoxpack` | 每個工具（`packs/` 底下每個，現在 12 個）與每套外觀（26 套）帶版本的檔 |
 | `<name>.synoxpack` | 同一份內容、不帶版本的別名（給 `releases/latest/download/` 用） |
 | `tools-<VERSION>.zip`、`tools.zip` | 全部工具：`tools/*.synoxpack` ＋ 只列工具的 `tools/index.json`；`tools.zip` 是別名 |
 | `index.json` | 目錄：每個工具與外觀的版本、檔名、sha256、工具卡片的一句話 `line`（外觀 `kind: "theme"`、`collections.wardrobe`） |
@@ -80,6 +81,20 @@ python -m pytest -q
 # 4. commit；頁面有改的話，線上版 Artifact 也要重新發佈同一個網址（docs/ARTIFACTS.md）：
 python scripts/build_site.py --list-republish --since HEAD~1    # 例：跟上一個 commit 比有改的頁 → 線上網址
 ```
+
+### 簽章（只在擁有者自己的電腦）
+
+SYNOX 安裝時會驗 `.synoxpack` 裡的 `pack.sig.json`（Ed25519），驗過官方鑰匙才顯示「✅ 官方」；沒簽的顯示「⚠️ 不是官方」（照樣能裝）。
+規格與步驟的正本在 SYNOX 的 `docs/signing.md`（第 4 節「每次發佈官方工具」）與 `docs/adr/0028-pack-signatures-official-badge.md`；這裡只寫跟工具庫有關的：
+
+- **私鑰只在擁有者手上**：不進 repo、不進任何 git 資料夾、不給雲端 session 或任何代理。別台電腦（含雲端）只 build，不簽。
+- **先 build、再簽**：`scripts/build.py` 打出 `dist/` 之後，每一個 `.synoxpack`（含不帶版本的別名）都 `synox-sdk sign <檔> --key <私鑰>`、再 `synox-sdk verify <檔>`。
+- **簽完檔案就變了**：SYNOX 的「工具庫（官方）」會對每個檔的大小與 sha256 跟 `index.json` 比，所以 `index.json` 每一筆的 `sha256`／`size`、
+  `SHA256SUMS`、`tools-<VERSION>.zip`（與 `tools.zip`）都要用**簽過的檔**重算、重包。`scripts/build.py` 還不會這一步（寫這段時），要自己補。
+- 寫這段時 SYNOX 的 `OFFICIAL_PACK_PUBLIC_KEYS`（`src/synox/packs/signing.py`）還是空的：現在簽了也只會顯示「✍️ 作者簽章」，
+  擁有者照 SYNOX `docs/signing.md` 第 2、3 節產生鑰匙、把公鑰放進 SYNOX 並發版之後，才會是「✅ 官方」。
+- 目錄 `index.json` 本身還沒有簽章（SYNOX ADR 0028 §6，之後的事）。
+- 還沒簽也可以照下面上傳；之後補簽就是重新上傳簽過的檔與重算的 `index.json`（一樣最後才換 `index.json`）。
 
 ### 上傳到發佈頁（擁有者的 agent 跑）
 
