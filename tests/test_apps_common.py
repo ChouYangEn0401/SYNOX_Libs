@@ -35,7 +35,7 @@ TOOLS = app_tools()
 
 
 def test_there_is_at_least_one_app():
-    assert [t[0] for t in TOOLS] == ["money"]
+    assert [t[0] for t in TOOLS] == ["money", "usb-keys"]
 
 
 @pytest.mark.parametrize("name,folder,raw,app", TOOLS, ids=[t[0] for t in TOOLS])

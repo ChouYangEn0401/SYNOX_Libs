@@ -27,10 +27,22 @@ CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-remin
 ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": ["filesystem:own"], "notes": [],
                 "diary": ["filesystem:own"],
                 "guitar": [],
+                # usb-keys：自己的程式不開檔、不開程式，但它叫的 usbtether 會（讀寫使用者選的檔、在隨身碟寫 .usbtether；
+                # Windows 用 PowerShell 讀隨身碟的硬體資訊）——照實宣告，掃描器看不到函式庫裡面（見 DECLARED_BEYOND_SCAN）
+                "usb-keys": ["filesystem:any", "subprocess"],
                 **{name: ["network"] for name in CONNECT}}
+# 只給擁有者（access: owner）的本機工具：接外面服務的以外，碰到硬體或使用者電腦上任意檔案的
+OWNER_LOCAL = ("usb-keys",)
+# 宣告了、但第 2 關在工具自己的 .py 裡掃不到的能力：{工具: 理由}（能力是第三方函式庫用的；照實宣告比掃描結果多）
+DECLARED_BEYOND_SCAN = {
+    "usb-keys": "usbtether（requires.pip，釘版本＋雜湊）讀寫使用者選的檔、在隨身碟寫 .usbtether、用 PowerShell 讀隨身碟資訊",
+}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0006 P1）
 LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",)}
+# usb-keys 多准的 import：base64（解 utmsg1: 訊息的開頭，只讀出鑰匙 id，不解密）、usbtether（requires.pip 宣告的函式庫；
+# 加密與驗證隨身碟全部在它裡面，工具不自己寫加密）。os 只准 os.path.* 與列出使用者設定的資料夾（os.listdir，在 browse 裡）
+USB_KEYS_IMPORTS = ALLOWED_IMPORTS + ("base64", "usbtether")
 # 接外面服務的多准：requests、urllib.parse、編碼／雜湊／亂數、XML（CalDAV）、時區、型別、log
 CONNECT_IMPORTS = ALLOWED_IMPORTS + ("requests", "urllib", "base64", "hashlib", "secrets", "uuid", "xml", "zoneinfo",
                                      "typing", "logging", "__future__")
@@ -89,7 +101,7 @@ def test_every_tool_is_listed():
 @pytest.mark.parametrize("name", PACK_NAMES)
 def test_gate1_manifest_strict(name):
     m = synox_manifest.read(folder(name), strict=True)
-    assert m.kind == "python" and m.access == ("owner" if name in CONNECT else "member") and m.name == name
+    assert m.kind == "python" and m.access == ("owner" if name in CONNECT + OWNER_LOCAL else "member") and m.name == name
     assert os.path.isfile(m.skill_path) and os.path.isfile(os.path.join(folder(name), "README.md"))
     assert m.capabilities_declared and m.capabilities == ALLOWED_CAPS[name]
     if name in PLANNER:
@@ -128,7 +140,10 @@ def test_gate2_static_scan_passes(name):
     m = synox_manifest.read(folder(name), strict=True)
     report = synox_scan.scan(m)
     assert report.problems(m) == [], report.format(m)
-    assert report.required_capabilities == ALLOWED_CAPS[name], report.format(m)
+    if name in DECLARED_BEYOND_SCAN:
+        assert set(report.required_capabilities) <= set(ALLOWED_CAPS[name]), report.format(m)
+    else:
+        assert report.required_capabilities == ALLOWED_CAPS[name], report.format(m)
 
 
 @pytest.mark.parametrize("name", [n for n in PACK_NAMES if n != "money"])
@@ -137,6 +152,8 @@ def test_no_network_subprocess_exec_or_stray_files(name):
     tree = ast.parse(text)
     if name in CONNECT:
         forbidden, allowed = CONNECT_FORBIDDEN, CONNECT_IMPORTS
+    elif name == "usb-keys":
+        forbidden, allowed = FORBIDDEN_IMPORTS, USB_KEYS_IMPORTS
     else:
         forbidden = FORBIDDEN_IMPORTS
         allowed = (DIARY_IMPORTS if name == "diary" else ALLOWED_IMPORTS) + LOCAL_EXTRA_IMPORTS.get(name, ())
@@ -178,6 +195,17 @@ def test_no_network_subprocess_exec_or_stray_files(name):
         assert sorted(owners.get(id(n)) for n in opens) == ["_read_own", "_write_own", "text"]
         assert sorted({n.func.attr for n in os_calls}) == ["listdir", "remove"]
         assert "pack.path(" not in text and "pack.path_of(user, name)" in text and "pack.path_of(user, \"import.json\")" in text
+    elif name == "usb-keys":
+        # 自己不開檔（加密、讀寫檔都在 usbtether 裡）；os.* 只有 browse 裡列出使用者設定的資料夾（os.listdir）。
+        # 函式都在 install() 裡面：ast.walk 由外往內走，最後寫進去的是最裡面那一層
+        owners = {}
+        for fn in ast.walk(tree):
+            if isinstance(fn, ast.FunctionDef):
+                for n in ast.walk(fn):
+                    owners[id(n)] = fn.name
+        assert not opens
+        assert [(n.func.attr, owners.get(id(n))) for n in os_calls] == [("listdir", "browse")]
+        assert "pack.path(" not in text and 'pack.path_of(user, "keyring")' in text
     else:
         assert not opens and not os_calls, f"{name} must not touch files"
         assert "import os" not in text
