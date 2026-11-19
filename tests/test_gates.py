@@ -24,7 +24,7 @@ from conftest import PACK_NAMES, PACKS, PLANNER
 
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
 # pack 名稱 → 宣告的 capabilities（其他一律不准；每個都要明寫，沒有就寫 []——ADR-0006 C5）
-ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": ["filesystem:own"], "notes": [],
+ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": ["filesystem:own"], "notes": [], "habits": [],
                 "diary": ["filesystem:own"],
                 "guitar": [],
                 **{name: ["network"] for name in CONNECT}}
@@ -131,7 +131,7 @@ def test_gate2_static_scan_passes(name):
     assert report.required_capabilities == ALLOWED_CAPS[name], report.format(m)
 
 
-@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n != "money"])
+@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n not in ("money", "habits")])
 def test_no_network_subprocess_exec_or_stray_files(name):
     text = source(name)
     tree = ast.parse(text)
@@ -181,6 +181,34 @@ def test_no_network_subprocess_exec_or_stray_files(name):
     else:
         assert not opens and not os_calls, f"{name} must not touch files"
         assert "import os" not in text
+
+
+# 習慣與旅程（多檔工具：pack.py＋bridge.py＋engine/）：只准標準庫的純計算（日期、JSON、uuid、contextvars）；
+# 不碰檔案、不連網、不開別的程式——資料一律走 pack.store（保管箱）。
+HABITS_IMPORTS = ALLOWED_IMPORTS + ("__future__", "typing", "types", "json", "contextlib", "contextvars", "calendar", "uuid")
+
+
+def test_habits_no_network_subprocess_exec_or_files():
+    sources = python_sources("habits")
+    assert {"pack.py", "bridge.py", "engine/routines.py", "engine/milestones.py", "engine/storage.py"} <= set(sources)
+    for rel, text in sources.items():
+        for node in ast.walk(ast.parse(text)):
+            if isinstance(node, ast.ImportFrom) and node.level:      # 自己資料夾裡的相對 import
+                continue
+            if isinstance(node, ast.Import):
+                mods = [a.name for a in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                mods = [node.module or ""]
+            else:
+                if isinstance(node, ast.Call) and _call_name(node) in ("open", "os.makedirs", "os.remove", "os.listdir"):
+                    raise AssertionError(f"habits/{rel}: {_call_name(node)}(…) 不准（資料只走 pack.store）")
+                continue
+            for mod in mods:
+                top = mod.split(".")[0]
+                assert top not in FORBIDDEN_IMPORTS, f"habits/{rel}: import {mod}"
+                assert top in HABITS_IMPORTS, f"habits/{rel}: unexpected import {mod}"
+        for pattern in FORBIDDEN_TEXT:
+            assert not re.search(pattern, text), f"habits/{rel}: {pattern}"
 
 
 def money_sources():
@@ -323,6 +351,13 @@ M4_EXTRA_CALLS = {
     "diary": {
         "_Undefined": "範本引擎的「沒有值」記號：類別沒有任何欄位，大家共用同一個記號才比得出 `is UNDEF`",
         "timedelta": "不可變的時間長度（6 小時）",
+    },
+    "habits": {
+        "frozen": "bridge.py 的 frozen() 回 MappingProxyType（唯讀的指令表）",
+        "Field": "isdtelekit 的 Field：指令欄位的說明（不可變的描述，不放任何人的資料）",
+        "contextvars.ContextVar": "engine/storage.py 用它記「這一次呼叫是誰的資料」；每個執行情境各一份、進出時 set／reset",
+        "object": "「沒給」的記號（sentinel），沒有任何欄位",
+        "dict(_NUDGE_DEFAULT)": "_NUDGE_DEFAULT 是三個布林的預設值；dict() 每次回新的一份給單一習慣用，沒有共用到可變的東西",
     },
     "money": {
         "frozen": "bridge/table.py 的 frozen() 回 MappingProxyType（唯讀的指令表）",

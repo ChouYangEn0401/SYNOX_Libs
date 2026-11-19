@@ -9,7 +9,6 @@ run(values) -> (text, data)：指令只回 text，畫面動作只回 data（一�
 """
 import json
 import re
-import threading
 from dataclasses import dataclass
 from datetime import date, timedelta
 from types import MappingProxyType
@@ -23,9 +22,6 @@ from .engine import clock, milestones, routines, storage
 
 CLEAR = "-"
 _WEEKDAY_CHARS = {"一": 0, "二": 1, "三": 2, "四": 3, "五": 4, "六": 5, "日": 6, "天": 6}
-
-
-_FALLBACK_LOCK = threading.RLock()      # 測試的假保管箱沒有 lock；真的有
 
 
 class StoreBackend:
@@ -67,10 +63,11 @@ class Session:
 
     def __init__(self, pack, user):
         self.store = _store_of(pack, user)
-        self.lock = getattr(self.store, "lock", None) or _FALLBACK_LOCK
+        self.lock = getattr(self.store, "lock", None)           # 真的保管箱有；測試的假保管箱沒有（單執行緒，不需要）
 
     def __enter__(self):
-        self.lock.acquire()
+        if self.lock:
+            self.lock.acquire()
         self._bound = storage.bound(StoreBackend(self.store))
         self._bound.__enter__()
         return self
@@ -79,7 +76,8 @@ class Session:
         try:
             self._bound.__exit__(*exc)
         finally:
-            self.lock.release()
+            if self.lock:
+                self.lock.release()
         return False
 
 
