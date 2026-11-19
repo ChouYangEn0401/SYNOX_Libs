@@ -37,6 +37,7 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import links  # noqa: E402
+import pack_warnings  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COSTUMES = os.path.join(ROOT, "costumes")
@@ -368,11 +369,12 @@ def index_entry(folder: str, path: str) -> dict:
     info = about(folder)
     with open(path, "rb") as f:
         blob = f.read()
-    return {"name": raw["name"], "title": raw["title"], "summary": raw["summary"], "version": raw["version"],
-            "stage": raw.get("stage", STAGE), "kind": "theme", "category": COLLECTION["category"], "collection": COLLECTION["id"],
-            "series": info.get("letter", ""), "line": info.get("one", ""),
-            "group": "", "access": "owner", "capabilities": [], "requires": {}, "bundles": [],
-            "file": os.path.basename(path), "sha256": sha256_bytes(blob), "size": len(blob)}
+    entry = {"name": raw["name"], "title": raw["title"], "summary": raw["summary"], "version": raw["version"],
+             "stage": raw.get("stage", STAGE), "kind": "theme", "category": COLLECTION["category"], "collection": COLLECTION["id"],
+             "series": info.get("letter", ""), "line": info.get("one", ""),
+             "group": "", "access": "owner", "capabilities": [], "requires": {}, "bundles": [],
+             "file": os.path.basename(path), "sha256": sha256_bytes(blob), "size": len(blob)}
+    return pack_warnings.with_warnings(entry, raw)     # 外觀也照工具的規矩：pack.json 有 warnings 才多這一欄
 
 
 def pack_all(out_dir: str) -> dict:

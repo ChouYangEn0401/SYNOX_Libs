@@ -20,6 +20,9 @@
 命令列全部打包完會跑 scripts/build_site.py（重新產生入口頁 docs/site/index.html，新工具自動出現；沒有手寫說明頁的工具產生簡單頁）
 與 scripts/links.py（README 與 docs/site/*.html 的下載連結改成現在的版本；版本只看 pack.json）；--check 也檢查這兩樣。
 index.json 每個工具多帶一行 `line`（卡片上的一句話，跟入口頁同一份；SYNOX 的「工具庫（官方）」卡片會用）。
+pack.json 寫了 `warnings`（作者標的警告，SYNOX ADR 0041）就照 scripts/pack_warnings.py 整理後抄進那一筆（放在 line 後面）：
+使用者在清單上挑工具時還沒裝、看不到 pack.json，警告要在裝之前就看得到（只是預告；真正擋人的是安裝時簽過的 pack.json）。
+寫壞的不讓打包失敗，換成一條 malformed_warning 照樣列出，問題印成「⚠️ 注意」；沒寫 warnings 的那一筆跟以前逐位元組相同。
 SYNOX 在哪：scripts/_synox.py（SYNOX_HOME → 跑這支的 Python 裝的那份 → 後備並排的 ../SYNOX）。
 私人工具（pack.json "publish": false；docs/CONTRIBUTING-TOOLS.md「私人工具」）：全部打包時跳過（不進 index.json、tools.zip、
 SHA256SUMS、公開頁），catalog.json 也不能列它；只能指名打包（build.py <名字>），預設寫到 dist/private/
@@ -41,6 +44,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _synox  # noqa: E402
 import build_site  # noqa: E402
 import links  # noqa: E402
+import pack_warnings  # noqa: E402
 
 ROOT = _synox.LIBS_ROOT
 SDK_FILE = "synox_sdk.py"
@@ -160,13 +164,28 @@ def sha256_of(path: str) -> str:
 
 
 def entry_for(m, path: str, bundles: dict, lines: dict = None) -> dict:
-    return {"name": m.name, "title": m.title, "summary": m.summary, "version": m.version, "stage": m.raw.get("stage"),
-            "line": (lines or {}).get(m.name) or m.summary,                # 卡片上的一句話（scripts/build_site.py）
-            "kind": m.kind, "app": bool((m.web or {}).get("app")),          # 有完整畫面（工具服務，ADR-0003）
-            "group": m.group, "access": m.access, "capabilities": sorted(m.capabilities),
-            "requires": {k: v for k, v in (m.requires or {}).items() if k in ("synox", "sdk") and v},
-            "bundles": sorted(k for k, b in bundles.items() if m.name in b.get("packs", [])),
-            "file": os.path.basename(path), "sha256": sha256_of(path), "size": os.path.getsize(path)}
+    entry = {"name": m.name, "title": m.title, "summary": m.summary, "version": m.version, "stage": m.raw.get("stage"),
+             "line": (lines or {}).get(m.name) or m.summary,                # 卡片上的一句話（scripts/build_site.py）
+             "kind": m.kind, "app": bool((m.web or {}).get("app")),          # 有完整畫面（工具服務，ADR-0003）
+             "group": m.group, "access": m.access, "capabilities": sorted(m.capabilities),
+             "requires": {k: v for k, v in (m.requires or {}).items() if k in ("synox", "sdk") and v},
+             "bundles": sorted(k for k, b in bundles.items() if m.name in b.get("packs", [])),
+             "file": os.path.basename(path), "sha256": sha256_of(path), "size": os.path.getsize(path)}
+    return pack_warnings.with_warnings(entry, m.raw)
+
+
+def warning_notices(name: str, raw: dict) -> list:
+    """pack.json 的 warnings 寫壞的地方 → 給人看的話（不擋打包；index.json 照樣列出，看不懂的換成 malformed_warning）。"""
+    return [f"{name}: pack.json 的 {p}" for p in pack_warnings.of_pack(raw)[1]]
+
+
+def _raw_of(folder: str) -> dict:
+    try:
+        with open(os.path.join(folder, "pack.json"), encoding="utf-8") as f:
+            raw = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return raw if isinstance(raw, dict) else {}
 
 
 def build(names=None, out_dir: str = None, check_only: bool = False, root: str = ROOT, costumes: bool = True) -> dict:
@@ -192,8 +211,10 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
     hidden = private_names(root)
     problems += [f"catalog.json 的 {key} 列了私人工具 {n}（publish: false 的工具不能放進建議群組）"
                  for key, b in bundles.items() for n in b.get("packs", []) if n in hidden]
+    notices = []                                     # 不擋打包、但要讓人看到的（warnings 寫壞了）
     for folder in folders:
         problems += problems_of(folder)
+        notices += warning_notices(os.path.basename(folder), _raw_of(folder))
     if not names:                                    # 私人工具不打包、不擋發佈；只報 publish 寫錯型別（被當成私人了）
         for n in sorted(hidden):
             with open(os.path.join(root, "packs", n, "pack.json"), encoding="utf-8") as f:
@@ -201,13 +222,14 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
     if not names and costumes and root == ROOT:
         import build_costumes
         problems += [p for f in build_costumes.costume_folders() for p in build_costumes.pack_problems(f)]
+        notices += [n for f in build_costumes.costume_folders() for n in warning_notices(os.path.basename(f), _raw_of(f))]
     lines = {}
     try:                                             # 公開頁的資料（pack.json 的 site 區塊、docs/site-tools.json）
         lines = {t["name"]: t["line"] for t in build_site.tools(root)}
     except (ValueError, KeyError) as e:
         problems.append(f"公開頁資料：{e}")
     if problems or check_only:
-        return {"index": None, "problems": problems}
+        return {"index": None, "problems": problems, "notices": notices}
     out_dir = out_dir or default_out(names, root)
     full = not names and costumes and root == ROOT
     if full:
@@ -234,7 +256,7 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
     if not names:                                    # 多一道保險：全部打包的目錄裡不可能有私人工具
         problems += [f"{e['name']}: 私人工具不能進 index.json" for e in entries if e["name"] in hidden]
     if problems:
-        return {"index": None, "problems": problems}
+        return {"index": None, "problems": problems, "notices": notices}
     index = {"library": "SYNOX_Libs", "library_version": library_version(root),
              "built_with": {"synox": synox.__version__, "sdk": author.SDK_VERSION},
              "packs": entries, "bundles": bundles}
@@ -244,7 +266,7 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
         f.write(json.dumps(index, ensure_ascii=False, indent=2) + "\n")
     if full:
         release_extras(index, out_dir, root)
-    return {"index": index, "problems": []}
+    return {"index": index, "problems": [], "notices": notices}
 
 
 RELEASE_PATTERNS = re.compile(r"(\.synoxpack|^tools(-.+)?\.zip|^index\.json|^SHA256SUMS.*)$")
@@ -304,6 +326,10 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     args.out = args.out or default_out(args.names or None)
     result = build(args.names or None, args.out, args.check, costumes=not args.no_costumes)
+    if result.get("notices"):
+        print("⚠️ 注意（不擋打包；index.json 照樣列出，看不懂的那條換成 malformed_warning，SYNOX 會當作有警告）：")
+        for n in result["notices"]:
+            print("  - " + n)
     if result["problems"]:
         print("❌ 沒有打包：")
         for p in result["problems"]:
