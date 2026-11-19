@@ -7,9 +7,9 @@ const KINDS = [["event", "行程"], ["task", "今日清單卡片"], ["link", "�
 const hiddenKinds = new Set();                     // 這次開著畫面期間記住，不存起來
 
 function chip(item) {
-  const cls = ["chip", item.kind, item.done ? "done" : "", item.clash ? "clash" : "", item.is_focus ? "focus" : "",
+  const cls = ["chip", item.kind, item.done ? "done" : "", item.clash && item.clash.length ? "clash" : "", item.is_focus ? "focus" : "",
     item.status === "cancelled" ? "cancelled" : ""].filter(Boolean).join(" ");
-  const mark = item.clash ? "⚠ " : item.is_focus ? "⭐ " : item.kind === "task" ? "☐ " : "";
+  const mark = item.clash && item.clash.length ? "⚠ " : item.is_focus ? "⭐ " : item.kind === "task" ? "☐ " : "";
   return h("div", { class: cls, title: item.text }, (item.at ? `${item.at} ` : "") + mark + item.text);
 }
 
