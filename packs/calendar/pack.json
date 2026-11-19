@@ -1,19 +1,66 @@
 {
   "name": "calendar",
   "title": "📅 行事曆",
-  "summary": "加行程（明天 14:00 看牙醫）、看今天／這週、匯出 .ics（加密存在這台電腦）",
-  "version": "0.1.2",
+  "summary": "加行程（明天 14:00 看牙醫，可跨日、每週重複）、月曆總覽、今日清單與今天最重要的一件事、匯出 .ics；附完整的行事曆畫面（加密存在這台電腦）",
+  "version": "0.2.0-alpha.1",
   "stage": "alpha",
   "kind": "python",
   "group": "cal",
   "access": "member",
-  "surfaces": ["dm"],
+  "surfaces": [
+    "dm"
+  ],
   "data": "user",
   "order": 30,
-  "python": { "module": "pack" },
-  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
-  "capabilities": ["filesystem:own"],
+  "python": {
+    "module": "pack",
+    "package": true
+  },
+  "requires": {
+    "pip": [],
+    "config": [],
+    "env": {},
+    "synox": ">=0.2",
+    "sdk": ">=0.2.3,<0.3"
+  },
+  "capabilities": [
+    "filesystem:own"
+  ],
   "skill": "SKILL.md",
   "storage": "vault",
-  "web": { "panel": "panel.html", "api": ["GET /today"] }
+  "web": {
+    "panel": "panel.html",
+    "api": [
+      "GET /today"
+    ],
+    "app": {
+      "entry": "app/index.html",
+      "root": "app",
+      "title": "行事曆",
+      "kit": 1,
+      "reads": [
+        "month",
+        "day",
+        "today",
+        "agenda",
+        "clashes"
+      ],
+      "actions": {
+        "add": "WRITE",
+        "edit": "WRITE",
+        "status": "WRITE",
+        "rm": "WRITE",
+        "keep": "WRITE",
+        "task": "WRITE",
+        "task_edit": "WRITE",
+        "done": "WRITE",
+        "task_rm": "WRITE",
+        "focus": "WRITE"
+      },
+      "exports": [
+        "ics"
+      ],
+      "remote": true
+    }
+  }
 }
