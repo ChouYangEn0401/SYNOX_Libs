@@ -1,27 +1,36 @@
-"""📅 行事曆：/cal <時間 標題>、/cal_today、/cal_week、/cal_list [n]、/cal_rm <編號>、/cal_ics。
+"""📅 行事曆（0.2.0）：行程（有開始與結束、每週重複、撞時間提醒）、月曆總覽、今日清單與「今天最重要的一件事」，附完整網頁畫面。
 
-資料經 pack.store.of(user)（保管箱，密文；個人版 data/calendar.json.enc，伺服器版每人一份）：
-    {"events": [{id, title, day: "YYYY-MM-DD", start: "HH:MM"|"", end: "HH:MM"|"", all_day, location, note, at}],
-     "next_id": 1}
-編號（id）是固定的：/cal_today、/cal_week、/cal_list 看到的 [3] 就是 /cal_rm 3。
+指令：/cal <時間 標題>、/cal_today、/cal_week、/cal_list [n]、/cal_month [YYYY-MM]、/cal_edit、/cal_status、/cal_keep、/cal_clash、
+/cal_rm <編號>、/cal_ics，今日清單 /cal_task、/cal_tasks、/cal_task_edit、/cal_done、/cal_task_rm、/cal_focus。
 
-不連網、不開別的程式。唯一碰檔案的是 /cal_ics：在 pack.path_of(user, …)（這個人自己的資料夾：個人版
-data/calendar/files/、伺服器版 data/users/<id>/calendar/files/）寫一個暫存的 .ics、
-送出去之後馬上刪掉（行事曆內容不留明文在硬碟上）；所以 pack.json 宣告了 filesystem:own。
-檔名每次不一樣（export-<時間>-<亂數>.ics）：同一個人同時匯出兩次（Telegram 一次、AI 一次）不會互相蓋、互相刪；
-每次匯出前先清掉這個人資料夾裡留下的舊匯出檔（程序在寫完到刪掉之間被關掉時留下的明文；10 分鐘內的不動）。
+    指令      kit.command(group, name, …)                 人打字、AI 走這裡
+    畫面動作  pack.app_action(name, …)                    同名、同危險程度；欄位檢查、權限、稽核照那個指令
+    畫面讀    pack.app_read(name, …)
+    匯出      pack.app_export("ics", …)
+    小面板    pack.web_route("today", …)                  （pack.json web.api）
+
+這個檔要以套件身分載入（pack.json python.package=true）：engine/（純邏輯）、bridge/（服務層、文字）用相對 import。
+資料經 pack.store.of(user)（保管箱，密文；個人版 data/calendar.json.enc，伺服器版每人一份），形狀見 engine/store.py；
+0.1.2 的資料（行程只有 day／start／end）每次讀都先升級（只在記憶體），下一次寫入才存成新格式，編號不變。
+唯一碰檔案的是 /cal_ics（Telegram）：在 pack.path_of(user, …)（這個人自己的資料夾）寫一個暫存的 .ics、送出去就刪掉
+（行事曆內容不留明文在硬碟上），所以 pack.json 宣告了 filesystem:own。畫面的匯出不經檔案（直接回位元組）。
+檔名每次不一樣（export-<時間>-<亂數>.ics）；每次匯出前先清掉這個人資料夾裡留下的舊匯出檔（10 分鐘內的不動）。
 提醒：SYNOX 沒有給 pack 用的排程 API，加行程時回一行 /remind_add 給使用者自己決定要不要設。
+月曆上顯示別的工具的東西（習慣、旅程…）：只有 `pack.link_sources`（見 engine/links.py）；現在的 SYNOX 沒有這個機制，所以沒有。
 """
 
 import os
 import re
 import secrets
-import time
 from datetime import date, datetime, timedelta
 
 from isdtelekit.core.registry import WRITE, Field
 
 from synox.packs import kit
+
+from .bridge import service, text
+from .engine import ics as ics_mod
+from .engine.errors import CalError
 
 
 def now() -> datetime:
@@ -280,100 +289,6 @@ def day_label(day, today) -> str:
     return f"{names[diff]} {base}" if diff in names else base
 # <<< zhdate
 
-def empty() -> dict:
-    """新的空資料（每次都是新的 dict 和 list：拿模組層級的常數做 dict(...) 只是淺拷貝，第一次寫入會改到共用的 list，
-    伺服器版就會把前一個人的第一筆帶進下一個人的檔案）。"""
-    return {"events": [], "next_id": 1}
-DEFAULT_MINUTES = 60
-_TIME_RANGE = _re.compile(r"^(\d{1,2}):(\d{2})(?:\s*[-~～]\s*(\d{1,2}):(\d{2}))?$")
-
-
-def check_time(value: str):
-    """Field(check=…)：HH:MM 或 HH:MM-HH:MM。"""
-    m = _TIME_RANGE.match(value.strip())
-    if not m:
-        return "要是 HH:MM 或 HH:MM-HH:MM（例如 14:00-15:30）"
-    nums = [int(x) for x in m.groups() if x is not None]
-    if any(h > 23 for h in nums[0::2]) or any(mm > 59 for mm in nums[1::2]):
-        return "不是真的時間"
-    if len(nums) == 4 and (nums[2], nums[3]) <= (nums[0], nums[1]):
-        return "結束要比開始晚"
-    return None
-
-
-def plus_minutes(hhmm: str, minutes: int) -> str:
-    h, m = int(hhmm[:2]), int(hhmm[3:])
-    total = min(h * 60 + m + minutes, 23 * 60 + 59)
-    return f"{total // 60:02d}:{total % 60:02d}"
-
-
-def sort_key(e: dict):
-    return (e["day"], e.get("start") or "", e["id"])
-
-
-def line(e: dict, today: date, with_day: bool = True) -> str:
-    """'[3] 明天 11/10（二） 14:00–15:00 看牙醫 @診所'"""
-    parts = [f"[{e['id']}]"]
-    if with_day:
-        parts.append(day_label(date.fromisoformat(e["day"]), today))
-    if e.get("all_day") or not e.get("start"):
-        parts.append("整天")
-    else:
-        parts.append(e["start"] + (f"–{e['end']}" if e.get("end") else ""))
-    parts.append(e["title"])
-    if e.get("location"):
-        parts.append(f"@{e['location']}")
-    return " ".join(parts)
-
-
-# ── iCalendar（RFC 5545）──────────────────────────────────────────────
-
-def ics_escape(text: str) -> str:
-    return (str(text).replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,")
-            .replace("\r\n", "\\n").replace("\n", "\\n"))
-
-
-def ics_fold(content_line: str) -> str:
-    """一行超過 75 個位元組就折行（續行開頭一個空白），不把一個中文字切成兩半。"""
-    out, current, size = [], "", 0
-    for ch in content_line:
-        n = len(ch.encode("utf-8"))
-        limit = 75 if not out else 74
-        if size + n > limit:
-            out.append(current)
-            current, size = "", 0
-        current += ch
-        size += n
-    out.append(current)
-    return "\r\n ".join(out)
-
-
-def to_ics(events, stamp: datetime) -> str:
-    """整本行事曆 → .ics 文字。時間用「浮動時間」（沒有時區＝照匯入那一邊的當地時間）。"""
-    lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//SYNOX//calendar pack 0.1//ZH-TW", "CALSCALE:GREGORIAN",
-             "X-WR-CALNAME:SYNOX 行事曆"]
-    dtstamp = stamp.strftime("%Y%m%dT%H%M%S")
-    for e in sorted(events, key=sort_key):
-        day = date.fromisoformat(e["day"])
-        lines += ["BEGIN:VEVENT", f"UID:synox-cal-{e['id']}-{e.get('at', 0)}@synox.local", f"DTSTAMP:{dtstamp}"]
-        if e.get("all_day") or not e.get("start"):
-            lines.append(f"DTSTART;VALUE=DATE:{day.strftime('%Y%m%d')}")
-            lines.append(f"DTEND;VALUE=DATE:{(day + timedelta(days=1)).strftime('%Y%m%d')}")
-        else:
-            start = e["start"].replace(":", "")
-            end = (e.get("end") or plus_minutes(e["start"], DEFAULT_MINUTES)).replace(":", "")
-            lines.append(f"DTSTART:{day.strftime('%Y%m%d')}T{start}00")
-            lines.append(f"DTEND:{day.strftime('%Y%m%d')}T{end}00")
-        lines.append("SUMMARY:" + ics_escape(e["title"]))
-        if e.get("location"):
-            lines.append("LOCATION:" + ics_escape(e["location"]))
-        if e.get("note"):
-            lines.append("DESCRIPTION:" + ics_escape(e["note"]))
-        lines.append("END:VEVENT")
-    lines.append("END:VCALENDAR")
-    return "".join(ics_fold(x) + "\r\n" for x in lines)
-
-
 EXPORT_NAME = re.compile(r"^export(?:-(\d{14})-[0-9a-f]+)?\.ics$")   # 0.1.2 以前是固定的 export.ics
 STALE_EXPORT_SECONDS = 10 * 60
 
@@ -410,97 +325,195 @@ def _write_own(path: str, text: str) -> None:
         f.write(text)
 
 
+
+# ── 欄位（指令與畫面動作共用同一份）────────────────────────────────
+
+def _check_priority(value: str):
+    return None if value.strip() in ("0", "1", "2", "3") else "重要程度要是 0–3（0 沒標、1 低、2 中、3 高）"
+
+
+def _check_yes_no(value: str):
+    return None if value.strip().lower() in ("yes", "no") else "要是 yes 或 no"
+
+
+def _fields() -> dict:
+    """指令與畫面動作共用的欄位表（函式：每次都是新的，模組層級不放物件）。"""
+    _N = Field("n", "編號（3，或重複行程的某一次 3@2026-11-12）", required=True, check=service.check_eid)
+    _TASK_N = Field("n", "卡片編號", required=True, check=kit.positive_int)
+    EVENT_FIELDS = (
+        Field("date", "日期 YYYY-MM-DD（AI／畫面用；人直接寫在句子裡）", check=check_ymd),
+        Field("time", "時間 HH:MM 或 HH:MM-HH:MM（沒有＝整天）", check=service.check_time),
+        Field("end_date", "跨日行程的結束那天 YYYY-MM-DD", check=check_ymd),
+        Field("location", "地點"),
+        Field("note", "備註"),
+        Field("repeat", "每週重複哪幾天（二四、週末、一到五；none＝不重複）"),
+        Field("until", "重複到哪天 YYYY-MM-DD"),
+    )
+    FIELDS = {
+        "add": (Field("text", "時間和標題（AI 給了 date 就只放標題）", required=True), *EVENT_FIELDS),
+        "edit": (_N, Field("title", "新標題"), *EVENT_FIELDS),
+        "status": (_N, Field("state", "狀態（planned、done、not_done、cancelled；後面可接原因）", required=True),
+                   Field("note", "沒做的原因")),
+        "keep": (Field("a", "編號", required=True, check=service.check_eid),
+                 Field("b", "另一個編號", required=True, check=service.check_eid)),
+        "rm": (_N,),
+        "task": (Field("text", "要做的事", required=True), Field("date", "排在哪天 YYYY-MM-DD（預設今天）", check=check_ymd),
+                 Field("detail", "細節"), Field("priority", "重要程度 0–3", check=_check_priority)),
+        "task_edit": (_TASK_N, Field("title", "新標題"), Field("detail", "細節（- ＝清掉）"),
+                      Field("priority", "重要程度 0–3", check=_check_priority),
+                      Field("date", "改排到哪天 YYYY-MM-DD", check=check_ymd)),
+        "done": (_TASK_N, Field("done", "yes／no（不給＝反過來）", check=_check_yes_no)),
+        "task_rm": (_TASK_N,),
+        "focus": (Field("n", "卡片編號（- ＝清掉）", required=True), Field("date", "哪一天（預設今天）", check=check_ymd)),
+    }
+    return FIELDS
+
+
+def _minus30(hhmm: str) -> str:
+    total = int(hhmm[:2]) * 60 + int(hhmm[3:])
+    total = total - 30 if total >= 30 else total
+    return f"{total // 60:02d}:{total % 60:02d}"
+
+
 def install(app, pack):
     g = pack.group
+    FIELDS = _fields()
 
-    def events(user):
-        return list((pack.store.of(user).load(None) or {}).get("events", []))
+    def cal(user):
+        return service.Cal(pack, user, lambda: now())
 
-    def add(api, chat_id, user, values):
-        today = now().date()
-        text = values["text"].strip()
-        if values.get("date"):
-            day = date.fromisoformat(values["date"])
-            start = end = None
-            if values.get("time"):
-                m = _TIME_RANGE.match(values["time"].strip())
-                start = f"{int(m.group(1)):02d}:{m.group(2)}"
-                end = f"{int(m.group(3)):02d}:{m.group(4)}" if m.group(3) else None
-            title = text
-        else:
-            w = parse_when(text, today)
-            if w.error:
-                api.send_message(chat_id, f"❌ {w.error}。")
+    def guarded(fn):
+        """服務層的錯（CalError）→ 「❌ …」；其他的錯交給 SYNOX。"""
+        def handler(api, chat_id, user, values):
+            try:
+                reply = fn(cal(user), values)
+            except CalError as e:
+                api.send_message(chat_id, f"❌ {e}")
                 return
-            if w.day is None and w.start is None:
-                api.send_message(chat_id, "❌ 看不出是哪一天。例：/cal 明天 14:00 看牙醫、/cal 11/20 整天 員工旅遊")
-                return
-            day, start, end, title = w.day or today, w.start, w.end, w.rest
-        title = title.replace("整天", "").strip() if start is None else title
-        if not title:
-            api.send_message(chat_id, "❌ 要有標題。例：/cal 明天 14:00 看牙醫")
-            return
-        if start and not end:
-            end = plus_minutes(start, DEFAULT_MINUTES)
-        event = {"title": title, "day": day.isoformat(), "start": start or "", "end": end or "",
-                 "all_day": start is None, "location": values.get("location", "").strip(),
-                 "note": values.get("note", "").strip(), "at": int(time.time())}
+            if reply:
+                api.send_message(chat_id, reply)
+        return handler
 
-        def append(d):
-            d.setdefault("events", [])
-            event["id"] = int(d.get("next_id") or 1)
-            d["next_id"] = event["id"] + 1
-            d["events"].append(event)
-            return event["id"]
+    def lines_of(cards, today, with_day=True):
+        return [text.line(c, today, day_label, with_day) for c in cards]
 
-        pack.store.of(user).update(append, empty())
-        lines = ["📅 加好了：" + line(event, today)]
-        if day < today:
-            lines.append("（這一天已經過了，當作紀錄。）")
-        elif start:
-            lines.append(f"要提醒的話：/remind_add {plus_minutes(start, -30) if start >= '00:30' else start} "
-                         f"{title} date={day.isoformat()}")
-        api.send_message(chat_id, "\n".join(lines))
+    # ── 指令的文字 ────────────────────────────────────────────────────
 
-    def show(api, chat_id, header, rows, today, empty, with_day=True):
+    def r_add(c, values):
+        out = service.add_event(c, values, parse_when)
+        card, today = out["event"], c.today()
+        rows = ["📅 加好了：" + text.line(card, today, day_label)]
+        if out["past"]:
+            rows.append("（這一天已經過了，當作紀錄。）")
+        elif not card["all_day"] and not card["series_id"] and not card["repeat"]:
+            rows.append(f"要提醒的話：/remind_add {_minus30(card['start'][11:16])} {card['title']} date={card['day']}")
+        return "\n".join(rows + text.clash_lines(out["clashes"]))
+
+    def r_edit(c, values):
+        out = service.edit_event(c, values)
+        return "\n".join(["📅 改好了：" + text.line(out["event"], c.today(), day_label)] + text.clash_lines(out["clashes"]))
+
+    def r_status(c, values):
+        state, _, rest = values["state"].strip().partition(" ")
+        out = service.set_status(c, values["n"], state, (values.get("note") or rest).strip())
+        return "📅 " + text.line(out["event"], c.today(), day_label)
+
+    def r_rm(c, values):
+        return "🗑 刪掉了：" + text.line(service.remove_event(c, values["n"])["event"], c.today(), day_label)
+
+    def r_keep(c, values):
+        return "👌 兩個都留：" + service.keep_clash(c, values["a"], values["b"])["clash"]["text"]
+
+    def r_clash(c, values):
+        rows = service.read_clashes(c, {"days": values.get("days") or 60})["clashes"]
         if not rows:
-            api.send_message(chat_id, f"{header}\n{empty}")
-            return
-        api.send_message(chat_id, "\n".join([header] + [line(e, today, with_day) for e in rows]))
+            return "📅 接下來沒有撞時間的行程。"
+        return "\n".join([f"⚠ {len(rows)} 組撞時間："] + [f"  · {x['text']}" for x in rows])
 
-    def today_(api, chat_id, user, values):
-        today = now().date()
-        rows = sorted((e for e in events(user) if e["day"] == today.isoformat()), key=sort_key)
-        show(api, chat_id, f"📅 {day_label(today, today)}", rows, today, "今天沒有行程。", with_day=False)
+    def r_today(c, values):
+        today = c.today()
+        day = service.read_day(c, {})
+        rows = lines_of(day["events"], today, with_day=False)
+        body = [f"📅 {day_label(today, today)}"] + (rows or ["今天沒有行程。"])
+        return "\n".join(body + text.tasks_block(day["tasks"]) + text.clash_lines(day["clashes"]))
 
-    def week(api, chat_id, user, values):
-        today = now().date()
+    def r_week(c, values):
+        today = c.today()
+        out = service.read_agenda(c, {"days": 7})
         last = today + timedelta(days=6)
-        rows = sorted((e for e in events(user) if today.isoformat() <= e["day"] <= last.isoformat()), key=sort_key)
-        show(api, chat_id, f"📅 這 7 天（{today.month}/{today.day}–{last.month}/{last.day}）", rows, today,
-             "這 7 天沒有行程。")
+        seen, rows = set(), []
+        for d in out["days"]:
+            for card in d["items"]:
+                if card["id"] not in seen:
+                    seen.add(card["id"])
+                    rows.append(card)
+        head = f"📅 這 7 天（{today.month}/{today.day}–{last.month}/{last.day}）"
+        return "\n".join([head] + (lines_of(rows, today) or ["這 7 天沒有行程。"]) + text.clash_lines(out["conflicts"]))
 
-    def list_(api, chat_id, user, values):
-        today = now().date()
-        n = int(values.get("n") or 10)
-        rows = sorted((e for e in events(user) if e["day"] >= today.isoformat()), key=sort_key)[:n]
-        show(api, chat_id, f"📅 接下來 {len(rows)} 個行程", rows, today, "接下來沒有行程。用 /cal 明天 14:00 看牙醫 加一個。")
+    def r_list(c, values):
+        cards = service.read_upcoming(c, int(values.get("n") or 10))
+        head = f"📅 接下來 {len(cards)} 個行程"
+        return "\n".join([head] + (lines_of(cards, c.today()) or ["接下來沒有行程。用 /cal 明天 14:00 看牙醫 加一個。"]))
 
-    def rm(api, chat_id, user, values):
-        n = int(values["n"])
+    def r_month(c, values):
+        m = service.read_month(c, {"month": values.get("month") or ""})
+        rows = [f"📅 {m['label']}：{m['counts']['events']} 個行程、{m['counts']['tasks']} 張卡片"]
+        for d in m["days"]:
+            if not d["in_month"] or not d["items"]:
+                continue
+            names = "、".join((x["at"] + " " if x.get("at") else "") + x["text"] for x in d["items"][:3])
+            more = f" …還有 {len(d['items']) - 3} 件" if len(d["items"]) > 3 else ""
+            rows.append(f"{int(d['date'][5:7])}/{int(d['date'][8:])}（{WEEK_NAMES[d['weekday']]}）{names}{more}")
+        return "\n".join(rows if len(rows) > 1 else rows + ["這個月沒有東西。"])
 
-        def drop(d):
-            lst = d.setdefault("events", [])
-            for i, e in enumerate(lst):
-                if e["id"] == n:
-                    return lst.pop(i)
-            return None
+    def r_task(c, values):
+        t = service.add_task(c, values)["task"]
+        return f"✅ 加進清單：#{t['id']} {t['title']}（{t['date']}）"
 
-        gone = pack.store.of(user).update(drop, empty())
-        if gone is None:
-            api.send_message(chat_id, f"❌ 沒有 [{n}] 這個行程（/cal_list 看編號）。")
-            return
-        api.send_message(chat_id, "🗑 刪掉了：" + line(gone, now().date()))
+    def r_task_edit(c, values):
+        t = service.edit_task(c, values)["task"]
+        return f"✅ 改好了：#{t['id']} {t['title']}（{t['date']}）"
+
+    def r_done(c, values):
+        t = service.toggle_task(c, values)["task"]
+        return ("☑ 做完了：" if t["done"] else "☐ 還沒做完：") + f"#{t['id']} {t['title']}"
+
+    def r_task_rm(c, values):
+        return f"🗑 刪掉了：#{service.remove_task(c, values['n'])['task']['id']}"
+
+    def r_focus(c, values):
+        out = service.set_focus(c, values)
+        if not out["focus"]:
+            return f"🎯 {out['date']} 沒有指定最重要的事了。"
+        return f"🎯 {out['date']} 最重要的一件事：#{out['task']['id']} {out['task']['title']}"
+
+    def r_tasks(c, values):
+        rows = text.tasks_block(service.read_day(c, {"date": values.get("date") or ""})["tasks"])
+        return "\n".join(rows) if rows else "✅ 這一天的清單是空的（/cal_task 買牛奶）。"
+
+    # ── 指令 ──────────────────────────────────────────────────────────
+
+    def command(name, fn, summary, **kw):
+        kit.command(g, name, guarded(fn), summary, fields=FIELDS.get(name, ()), **kw)
+
+    command("add", r_add, "加一個行程（明天 14:00 看牙醫）", default=True, effect=WRITE, positional=1,
+            usage="<時間 標題>（例：明天 14:00 看牙醫） [location=…] [note=…] [repeat=二四 until=2026-12-31]")
+    command("edit", r_edit, "改一個行程（編號看 /cal_list；沒給的不動，- ＝清掉）", effect=WRITE, positional=1)
+    command("status", r_status, "標記完成了／這次沒做／取消了（planned、done、not_done、cancelled）", effect=WRITE, positional=2)
+    command("keep", r_keep, "撞時間的兩個行程「兩個都留」", effect=WRITE, positional=2)
+    kit.command(g, "clash", guarded(r_clash), "看哪些行程撞時間", fields=[Field("days", "往後看幾天", check=kit.positive_int)])
+    command("today", r_today, "今天的行程與今日清單")
+    command("week", r_week, "這 7 天的行程")
+    kit.command(g, "list", guarded(r_list), "接下來的行程（預設 10 個）", fields=[Field("n", "幾個", check=kit.positive_int)])
+    kit.command(g, "month", guarded(r_month), "這個月（或指定月份）有什麼",
+                fields=[Field("month", "YYYY-MM", check=service.check_month)])
+    command("rm", r_rm, "刪掉一個行程（編號看 /cal_list；重複行程的 3@日期＝只跳過那一次）", effect=WRITE, positional=1)
+    command("task", r_task, "加一張今日清單的卡片", effect=WRITE, positional=1)
+    kit.command(g, "tasks", guarded(r_tasks), "今日清單", fields=[Field("date", "哪一天 YYYY-MM-DD（預設今天）", check=check_ymd)])
+    command("task_edit", r_task_edit, "改一張卡片（沒給的不動）", effect=WRITE, positional=1)
+    command("done", r_done, "勾起來／取消勾（done=yes／no；不給＝反過來）", effect=WRITE, positional=1)
+    command("task_rm", r_task_rm, "刪掉一張卡片", effect=WRITE, positional=1)
+    command("focus", r_focus, "挑今天最重要的一件事（卡片編號；- ＝清掉）", effect=WRITE, positional=1)
 
     def ics(api, chat_id, user, values):
         when = now()
@@ -509,12 +522,12 @@ def install(app, pack):
                 os.remove(pack.path_of(user, name))
             except OSError:
                 pass
-        rows = events(user)
+        rows = service.all_events(cal(user))
         if not rows:
             api.send_message(chat_id, "📅 行事曆是空的，沒有東西可以匯出。")
             return
         path = pack.path_of(user, export_name(when))  # data: user：每個人自己的資料夾（不是全部人共用的 pack.path）
-        _write_own(path, to_ics(rows, when))
+        _write_own(path, ics_mod.to_ics(rows, when))
         try:
             api.send_document(chat_id, path, caption=f"📅 {len(rows)} 個行程。在 Google 日曆（設定 → 匯入）或 "
                                                      f"iPhone（點開檔案 → 加入行事曆）匯入。")
@@ -524,29 +537,74 @@ def install(app, pack):
             except OSError:
                 pass
 
-    kit.command(g, "add", add, "加一個行程（明天 14:00 看牙醫）", default=True, effect=WRITE, positional=1,
-                usage="<時間 標題>（例：明天 14:00 看牙醫） [location=…] [note=…]",
-                fields=[Field("text", "時間和標題（AI 給了 date 就只放標題）", required=True),
-                        Field("date", "日期 YYYY-MM-DD（AI 用；人直接寫在句子裡）", check=check_ymd),
-                        Field("time", "時間 HH:MM 或 HH:MM-HH:MM（沒有＝整天）", check=check_time),
-                        Field("location", "地點"),
-                        Field("note", "備註")])
-    kit.command(g, "today", today_, "今天的行程")
-    kit.command(g, "week", week, "這 7 天的行程")
-    kit.command(g, "list", list_, "接下來的行程（預設 10 個）", fields=[Field("n", "幾個", check=kit.positive_int)])
-    kit.command(g, "rm", rm, "刪掉一個行程（編號看 /cal_list）", effect=WRITE,
-                fields=[Field("n", "編號", required=True, check=kit.positive_int)])
     kit.command(g, "ics", ics, "整本行事曆匯出成 .ics 檔（給 Google／Apple 日曆匯入）")
 
+    # ── 小面板（panel.html）──────────────────────────────────────────
+
     def today_route(user):
-        """Web UI 面板（panel.html）：今天與接下來 7 天。只回這個人自己的。"""
-        today = now().date()
-        last = today + timedelta(days=6)
-        rows = sorted((e for e in events(user) if today.isoformat() <= e["day"] <= last.isoformat()), key=sort_key)
-        return {"today": today.isoformat(), "label": day_label(today, today),
-                "events": [{"id": e["id"], "day": e["day"], "label": day_label(date.fromisoformat(e["day"]), today),
-                            "time": "整天" if e.get("all_day") or not e.get("start")
-                            else e["start"] + (f"–{e['end']}" if e.get("end") else ""),
-                            "title": e["title"], "location": e.get("location", "")} for e in rows]}
+        """面板：今天與接下來 7 天的行程、今天的清單。只回這個人自己的。"""
+        c = cal(user)
+        today = c.today()
+        data = service.read_today(c)
+        rows = []
+        for d in data["agenda"]:
+            for card in d["items"]:
+                rows.append({"id": card["id"], "day": d["date"], "label": day_label(date.fromisoformat(d["date"]), today),
+                             "time": "整天" if card["all_day"] else (card["range"] or card["time"]),
+                             "title": card["title"], "location": card["location"]})
+        return {"today": today.isoformat(), "label": day_label(today, today), "events": rows,
+                "tasks": [{"id": t["id"], "title": t["title"], "done": bool(t.get("done")), "focus": t["is_focus"]}
+                          for t in data["tasks"]["tasks"]]}
 
     pack.web_route("today", today_route)
+
+    # ── 完整畫面（web.app）──────────────────────────────────────────
+
+    if not hasattr(pack, "app_read"):               # 舊版 SYNOX 沒有工具服務：照樣能用指令
+        return
+
+    def refuse(e):
+        return kit.AppError(str(e))
+
+    def read(fn):
+        def handler(user, params):
+            try:
+                return fn(cal(user), params)
+            except CalError as e:
+                raise refuse(e) from None
+        return handler
+
+    for name, fn in (("month", service.read_month), ("day", service.read_day), ("today", service.read_today),
+                     ("agenda", service.read_agenda), ("clashes", service.read_clashes)):
+        pack.app_read(name, read(fn))
+
+    def action(name, fn):
+        fields = FIELDS[name]
+
+        def handler(user, values):
+            clean, missing, errors = kit.check_values(fields, values)
+            if missing or errors:
+                raise kit.AppError("；".join(errors) or "少了：" + "、".join(f.ask for f in missing))
+            try:
+                return fn(cal(user), clean)
+            except CalError as e:
+                raise refuse(e) from None
+        return handler
+
+    def status_values(c, v):
+        state, _, rest = v["state"].strip().partition(" ")
+        return service.set_status(c, v["n"], state, (v.get("note") or rest).strip())
+
+    for name, fn in (("add", lambda c, v: service.add_event(c, v, parse_when)), ("edit", service.edit_event),
+                     ("status", status_values), ("rm", lambda c, v: service.remove_event(c, v["n"])),
+                     ("keep", lambda c, v: service.keep_clash(c, v["a"], v["b"])), ("task", service.add_task),
+                     ("task_edit", service.edit_task), ("done", service.toggle_task),
+                     ("task_rm", lambda c, v: service.remove_task(c, v["n"])), ("focus", service.set_focus)):
+        pack.app_action(name, action(name, fn))
+
+    def export_ics(user, params):
+        c = cal(user)
+        return kit.Download(f"calendar-{c.today().isoformat()}.ics", "text/calendar; charset=utf-8",
+                            ics_mod.to_ics(service.all_events(c), c.now()).encode("utf-8"))
+
+    pack.app_export("ics", export_ics)

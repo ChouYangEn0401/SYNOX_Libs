@@ -26,6 +26,8 @@
 <h1 id="title">📅 行事曆</h1>
 <div class="muted" id="sub">今天起 7 天</div>
 <ul id="list"></ul>
+<h2 id="tasksHead" hidden>今日清單</h2>
+<ul id="tasks"></ul>
 <script>
 (function () {
   var list = document.getElementById("list");
@@ -38,15 +40,23 @@
     li.appendChild(document.createTextNode(title + (loc ? "　@" + loc : "")));
     list.appendChild(li);
   }
-  fetch("api/today")   // 相對網址＝/packs/calendar/panel/<票>/api/today（面板是隔開的：沒有 cookie，不用帶登入資料）
+  // 面板在隔開的小框裡跑（沒有 cookie、碰不到 /api/）：只能打相對網址 api/<route>
+  fetch("api/today")
     .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
     .then(function (d) {
       document.getElementById("title").textContent = "📅 " + d.label;
       if (!d.events.length) {
         document.getElementById("sub").textContent = "這 7 天沒有行程（/cal 明天 14:00 看牙醫）";
-        return;
       }
       d.events.forEach(function (e) { item(e.label, e.time, e.title, e.location); });
+      var tasks = document.getElementById("tasks");
+      (d.tasks || []).forEach(function (t) {
+        var li = document.createElement("li");
+        li.className = t.done ? "done" : "";
+        li.textContent = (t.done ? "☑ " : (t.focus ? "⭐ " : "☐ ")) + t.title;
+        tasks.appendChild(li);
+      });
+      document.getElementById("tasksHead").hidden = !(d.tasks || []).length;
     })
     .catch(function (e) { document.getElementById("sub").textContent = "讀不到（" + e.message + "）"; });
 })();
