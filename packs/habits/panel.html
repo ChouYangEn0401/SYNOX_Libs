@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>習慣面板</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1d2330; --muted: #5d6675; --bar: #e6e9ef; --ok: #2f8a4e; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #171b22; --fg: #e7eaf0; --muted: #9aa3b2; --bar: #2b313c; --ok: #4cbb72; } }
+  body { margin: 0; padding: 12px; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, "Microsoft JhengHei", "PingFang TC", sans-serif; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .bar { height: 8px; background: var(--bar); border-radius: 4px; overflow: hidden; margin: 4px 0; }
+  .fill { height: 100%; background: var(--ok); }
+  ul { padding-left: 18px; margin: 6px 0 0; }
+</style>
+</head>
+<body>
+<div class="muted" id="day">今天</div>
+<div id="due"><span class="muted">…</span></div>
+<div id="ms"></div>
+<script>
+(function () {
+  function put(el, text) { el.textContent = text; }
+  function li(t) { var x = document.createElement("li"); put(x, t); return x; }
+  fetch("/api/packs/habits/summary", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (d) {
+    d = d.data || d;
+    put(document.getElementById("day"), d.today || "今天");
+    var due = document.getElementById("due"); due.textContent = "";
+    if (!d.due || !d.due.length) { var p = document.createElement("div"); put(p, "今天沒有還沒做的 🎉"); due.appendChild(p); }
+    else { var ul = document.createElement("ul"); d.due.forEach(function (r) { ul.appendChild(li(r.name + (r.at ? "（" + r.at + "）" : ""))); }); due.appendChild(ul); }
+    var ms = document.getElementById("ms");
+    (d.milestones || []).forEach(function (m) {
+      var t = document.createElement("div"); t.className = "muted"; put(t, m.emoji + " " + m.name + "　" + m.done + "/" + m.total); ms.appendChild(t);
+      var b = document.createElement("div"); b.className = "bar"; var f = document.createElement("div"); f.className = "fill";
+      f.style.width = (m.total ? Math.round(m.done / m.total * 100) : 0) + "%"; b.appendChild(f); ms.appendChild(b);
+    });
+  }).catch(function () { put(document.getElementById("due"), "讀不到資料"); });
+})();
+</script>
+</body>
+</html>
