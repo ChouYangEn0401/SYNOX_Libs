@@ -1,0 +1,39 @@
+{
+  "name": "workspace",
+  "title": "🗂️ 工作區",
+  "summary": "在你指定的一個工作區資料夾裡看資料夾、讀文字檔、用內建範本建新專案；只有一份固定的菜單，不執行任何程式",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "ws",
+  "category": "電腦",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 90,
+  "python": { "module": "pack" },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
+  "capabilities": ["filesystem:any"],
+  "callers": { "root": ["human"], "new": ["human"], "mkdir": ["human"] },
+  "skill": "SKILL.md",
+  "storage": "vault",
+  "help": {
+    "featured": ["ls", "read", "tree", "new", "find"],
+    "commands": {
+      "ls": {"plain": "看工作區裡一個資料夾有什麼", "examples": [{"text": "my-app", "note": "看 my-app 裡面"}]},
+      "read": {"plain": "讀工作區裡的一個文字檔", "examples": ["my-app/notes.txt"]},
+      "tree": {"plain": "看一個資料夾的樹狀圖", "examples": ["my-app"]},
+      "find": {"plain": "用名字的一部分找檔案", "examples": ["notes"]},
+      "new": {"plain": "用內建範本建新專案，先給你看清單再建", "examples": [{"text": "python-cli my-app", "note": "建一個小程式專案"}, "empty my-notes"]},
+      "mkdir": {"plain": "在工作區裡建一個資料夾", "examples": ["my-app/docs"]},
+      "root": {"plain": "設定工作區是哪個資料夾", "examples": [{"text": "default", "note": "用文件裡的 SYNOX_Workspace"}]},
+      "templates": {"plain": "看有哪些內建範本"},
+      "status": {"plain": "看工作區設在哪和最近的改動"}
+    }
+  },
+  "site": {
+    "line": "只在你指定的一個資料夾裡看檔案、讀文字檔、用範本建專案；固定菜單，不執行任何程式",
+    "example": "/ws_new python-cli my-app",
+    "status": "alpha（尚未實機驗證）：只在自動測試裡跑過"
+  }
+}

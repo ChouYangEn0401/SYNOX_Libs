@@ -27,7 +27,10 @@ from conftest import PACK_NAMES, PACKS, PLANNER
 OWNER_LOCAL = ("projects",)
 # 靜態掃描看不出「路徑是使用者填的資料夾」（變數路徑它只算 filesystem:own），所以 projects 宣告的 filesystem:any 比掃出來的寬——
 # 這是照實宣告（讀 pack 以外的資料夾），不是漏掃；多寫的保險由 tests/test_projects.py 的靜態規則守（只讀、只在 engine/scan.py）
-SCAN_SEES = {"projects": ["filesystem:own"]}
+SCAN_SEES = {"projects": ["filesystem:own"],
+             # workspace 也一樣：路徑全是變數（使用者設的工作區），掃描器只看得出 filesystem:own；宣告 filesystem:any 是因為它真的
+             # 讀寫工具自己資料夾以外的地方，安裝報告要標紅給使用者看（ADR-0009 #7）
+             "workspace": ["filesystem:own"]}
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
 # 叫這台電腦上另外裝好的程式（video-notes：使用者自己裝的 Video Notes）：只給擁有者、只經 SYNOX 的 JobRunner（app.jobs）開程式，
 # 自己不連網、不動態執行；讀檔只讀那支程式產生的筆記。規則在 test_local_program_tools_only_use_app_jobs。
@@ -37,6 +40,7 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
                 "diary": ["filesystem:own"],
                 "guitar": [],
                 "projects": ["filesystem:any"],
+                "workspace": ["filesystem:any"],
                 **{name: ["network"] for name in CONNECT},
                 "video-notes": ["subprocess", "filesystem:any"],
                 # usb-keys：自己的程式不開檔、不開程式，但它叫的 usbtether 會（讀寫使用者選的檔、在隨身碟寫 .usbtether；
@@ -46,7 +50,8 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
 SCAN_CAPS = {"video-notes": (["filesystem:own", "subprocess"],
                              "讀的筆記在 Video Notes 自己的輸出資料夾（SYNOX 外面），路徑是執行時才知道的變數，掃描只看得出 filesystem:own")}
 # 只給擁有者（access: owner）的本機工具：接外面服務的以外，碰到硬體或使用者電腦上任意檔案的
-OWNER_LOCAL = ("usb-keys",) + OWNER_LOCAL
+# workspace：讀寫使用者設的工作區資料夾（ADR-0009：單人版專用）
+OWNER_LOCAL = ("usb-keys", "workspace") + OWNER_LOCAL
 # 宣告了、但第 2 關在工具自己的 .py 裡掃不到的能力：{工具: 理由}（能力是第三方函式庫用的；照實宣告比掃描結果多）
 DECLARED_BEYOND_SCAN = {
     "usb-keys": "usbtether（requires.pip，釘版本＋雜湊）讀寫使用者選的檔、在隨身碟寫 .usbtether、用 PowerShell 讀隨身碟資訊",
@@ -59,6 +64,8 @@ LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",),
 # usb-keys 多准的 import：base64（解 utmsg1: 訊息的開頭，只讀出鑰匙 id，不解密）、usbtether（requires.pip 宣告的函式庫；
 # 加密與驗證隨身碟全部在它裡面，工具不自己寫加密）。os 只准 os.path.* 與列出使用者設定的資料夾（os.listdir，在 browse 裡）
 USB_KEYS_IMPORTS = ALLOWED_IMPORTS + ("base64", "usbtether")
+# workspace 多准的 import（都是標準函式庫、不連網、不開程式）：權杖、檔案類型、Unicode 正規化、型別
+WORKSPACE_IMPORTS = ALLOWED_IMPORTS + ("secrets", "stat", "unicodedata", "typing", "__future__")
 PACKAGE_LOCAL = ("calendar",)                      # 本機工具裡的多檔工具（pack.py 的相對 import 不看；其餘檔見 test_calendar_package_files）
 # calendar 的 bridge/、engine/：純標準函式庫的邏輯（日期、正規表示式、雜湊、型別），不碰檔案、不連網、不開程式
 CALENDAR_IMPORTS = ("re", "datetime", "calendar", "hashlib", "typing", "__future__", "dataclasses")
@@ -209,7 +216,8 @@ def test_no_network_subprocess_exec_or_stray_files(name):
         forbidden, allowed = FORBIDDEN_IMPORTS, USB_KEYS_IMPORTS
     else:
         forbidden = FORBIDDEN_IMPORTS
-        allowed = (DIARY_IMPORTS if name == "diary" else ALLOWED_IMPORTS) + LOCAL_EXTRA_IMPORTS.get(name, ())
+        allowed = ({"diary": DIARY_IMPORTS, "workspace": WORKSPACE_IMPORTS}.get(name, ALLOWED_IMPORTS)
+                   + LOCAL_EXTRA_IMPORTS.get(name, ()))
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             mods = [a.name for a in node.names]
@@ -262,6 +270,18 @@ def test_no_network_subprocess_exec_or_stray_files(name):
         assert not opens
         assert [(n.func.attr, owners.get(id(n))) for n in os_calls] == [("listdir", "browse")]
         assert "pack.path(" not in text and 'pack.path_of(user, "keyring")' in text
+    elif name == "workspace":
+        # 讀寫使用者設的工作區（ADR-0009）：open 只有兩個——write_new（"x"＝只建新檔）與 read_file（"rb"）；
+        # os.* 只有 lstat、listdir、mkdir（沒有刪、改名、建連結）；路徑一律經 resolve()（tests/test_workspace.py 細測）
+        owners = {}
+        for fn in ast.walk(tree):
+            if isinstance(fn, ast.FunctionDef):
+                for n in ast.walk(fn):
+                    owners.setdefault(id(n), fn.name)
+        assert sorted(owners.get(id(n)) for n in opens) == ["read_file", "write_new"]
+        assert sorted(ast.literal_eval(n.args[1]) for n in opens) == ["rb", "x"]
+        assert sorted({n.func.attr for n in os_calls}) == ["listdir", "lstat", "mkdir"]
+        assert "pack.path(" not in text and "pack.path_of(" not in text
     else:
         assert not opens and not os_calls, f"{name} must not touch files"
         assert "import os" not in text

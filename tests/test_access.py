@@ -19,7 +19,8 @@ from conftest import OTHER_ID, PACK_NAMES, PACKS
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
 # 只給擁有者的工具：接外面服務的（用擁有者的帳號）＋叫這台電腦上程式的（video-notes：設定的程式會被 SYNOX 執行）
 # 只給擁有者的本機工具（碰硬體、碰使用者電腦上任意檔案）：權限跟接外面服務的一樣
-OWNER_ONLY = CONNECT + ("video-notes", "usb-keys", "projects")
+# workspace：讀寫你電腦上工作區資料夾（ADR-0009：單人版專用）
+OWNER_ONLY = CONNECT + ("video-notes", "usb-keys", "projects", "workspace")
 MEMBER = 77
 UNKNOWN = "未知指令"
 NO_PERMISSION = "沒有執行此指令的權限"
@@ -54,7 +55,31 @@ def _user(bot, tg_id):
 
 
 def test_every_tool_is_listed():
-    assert set(CONNECT) <= set(PACK_NAMES) and {"money", "diary"} <= set(PACK_NAMES)
+    assert set(OWNER_ONLY) <= set(PACK_NAMES) and {"money", "diary"} <= set(PACK_NAMES)
+
+
+def test_workspace_writes_are_human_only_in_the_real_synox(synox_bot, tmp_path):
+    """workspace（ADR-0009）：真的 SYNOX 載入後，root／new／mkdir 不給 AI（工具清單沒有、policy 拒）、
+    門禁核心的範圍只准 human；看的指令擁有者的 AI 拿得到。"""
+    import sys
+
+    from synox.guard.testing import as_origin
+    bot = synox_bot("workspace")
+    (tmp_path / "home" / "Documents").mkdir(parents=True)
+    sys.modules["synox_pack_workspace"].home_dir = lambda: str(tmp_path / "home")   # 萬一擋不住也不碰真的家目錄
+    reg = bot.app.registry
+    owner = bot.app.users.get(OWNER_ID)
+    for name in ("root", "new", "mkdir"):
+        node = reg.node(f"ws.{name}")
+        assert node.ai is False and not policy.decide(bot.app, owner, node, via=AI).allowed, name
+    for name in ("ls", "read", "tree", "find"):
+        assert policy.decide(bot.app, owner, reg.node(f"ws.{name}"), via=AI).allowed, name
+    with as_origin("ai", OWNER_ID):
+        bot.say(OWNER_ID, "/ws_root default")
+    assert "還沒設定工作區" not in bot.last(OWNER_ID) and "設定好了" not in bot.last(OWNER_ID)
+    bot.say(OWNER_ID, "/ws_status")
+    assert "還沒設定工作區" in bot.last(OWNER_ID)
+    assert not (tmp_path / "home" / "Documents" / "SYNOX_Workspace").exists()
 
 
 @pytest.mark.parametrize("name", PACK_NAMES)

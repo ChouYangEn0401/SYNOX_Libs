@@ -90,6 +90,17 @@
   每一套 theme.css 與 slot SVG 用到哪些 `var(--…)`（核心 token、吉祥物 token、進階 token、自己在 `:root` 宣告的 `--th-`、規則裡的區域變數），
   哪裡不經變數寫死顏色（吉祥物與 App 圖示的刻意配色另外標出）。給 SYNOX 核心做「套用前缺漏檢查」用；26 套都沒有用到核心沒有的變數。
   測試守住：清單是最新的、每一套只用核心或自己提供的變數、抄的 token 名字跟 SYNOX 的合約一樣。
+- **`workspace` 0.1.0-alpha.1（新工具，`stage` alpha，**alpha（尚未實機驗證）**）**（[ADR-0009](docs/adr/0009-workspace-tool.md) v0）：
+  讓 SYNOX 在你指定的**一個工作區資料夾**裡看資料夾（`/ws`）、讀文字檔（`/ws_read`）、樹狀圖（`/ws_tree`）、用名字找（`/ws_find`），
+  以及用內建範本建新專案（`/ws_new empty|python-cli <名字>`：先送一張列出完整檔案清單的確認卡，按了才建）、建資料夾（`/ws_mkdir`）。
+  **固定菜單、不執行任何程式**：不開別的程式、不動態執行、不連網；使用者給的路徑只經 `resolve()` 一個入口
+  （擋 `..`、絕對路徑、磁碟機代號、`:`、`%`、`~`、全形與長得像的斜線和點、控制字元、保留名稱、結尾空白或點、`-` 開頭，路上有連結一律拒，
+  解開後再確認還在工作區、名字沒被換成別名），再比對禁區（`.git`、`.ssh`、`.env`、金鑰、`AppData`、瀏覽器資料…）。
+  只建新東西（不覆蓋、不刪、不改），不建可執行的副檔名；`root`／`new`／`mkdir` 只給本人（`callers`、`kit.require_human()`、`ai=False`）；
+  `access: owner`、`capabilities: ["filesystem:any"]`（安裝報告會標紅，這是對的）。每個改動記一行稽核（不記內容）。
+  `tests/test_workspace.py`：ADR 第 4 節攻擊清單逐項（被拒、tmp 底下一個位元組都沒變）、先建 junction 再寫入、確認卡發出後才換成 junction、
+  工作區本身被換成 junction、硬連結、原始碼掃描；`test_gates`（`ALLOWED_CAPS`、`OWNER_LOCAL`、`SCAN_SEES`）、`test_build`（`SMOKE`）、
+  `test_access`（擁有者專用＋真的 SYNOX 裡 AI 叫不到寫入指令）一起補上；`catalog.json` 多一個「電腦工作區」群組。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；

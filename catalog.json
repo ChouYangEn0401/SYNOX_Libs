@@ -25,6 +25,11 @@
       "summary": "吉他和弦：查按法、貼譜直接移調、Capo 建議、分散和弦 TAB（不用上網）",
       "packs": ["guitar"]
     },
+    "workspace": {
+      "title": "電腦工作區",
+      "summary": "在你指定的一個資料夾裡看檔案、讀文字檔、用內建範本建新專案；固定菜單，不執行任何程式（只給擁有者）",
+      "packs": ["workspace"]
+    },
     "planner": {
       "title": "規劃：行程與筆記",
       "summary": "行事曆、待辦、子彈筆記",
