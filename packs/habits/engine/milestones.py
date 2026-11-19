@@ -24,7 +24,7 @@ import re
 import uuid
 from datetime import date, datetime, timedelta
 
-from . import clock, storage
+from . import clock, errors, storage
 
 DOC = "milestones"      # storage 裡這份資料的名字
 
@@ -126,7 +126,7 @@ def _migrate_cell(c: dict) -> None:
 def _find(data: dict, mid: str) -> dict:
     m = next((x for x in data["milestones"] if x["id"] == mid), None)
     if m is None:
-        raise KeyError(mid)
+        raise errors.NotFound(mid)
     return m
 
 
@@ -285,13 +285,13 @@ def occurrences(start: str, end: str) -> list[dict]:
     return out
 
 
-def create(payload: dict) -> dict:
+def _create(payload: dict) -> dict:
     name = str(payload.get("name", "")).strip()
     if not name:
-        raise ValueError("旅程要有一個名字")
+        raise errors.Refused("旅程要有一個名字")
     cadence = str(payload.get("cadence", "daily"))
     if cadence not in CADENCE_IDS:
-        raise ValueError(f"未知的節奏：{cadence}")
+        raise errors.Refused(f"未知的節奏：{cadence}")
     start = str(payload.get("start_date", "")).strip() or clock.today().isoformat()
     _parse_date(start)  # validate-ish
 
@@ -320,7 +320,7 @@ def create(payload: dict) -> dict:
     return _view(m)
 
 
-def update(mid: str, payload: dict) -> dict:
+def _update(mid: str, payload: dict) -> dict:
     """只改 meta（name/goal/emoji/overtime/start）；**藍圖任務標題不從這裡改**。"""
     data = _load()
     m = _find(data, mid)
@@ -351,7 +351,7 @@ def delete(mid: str) -> bool:
 # ---------------------------------------------------------------- cell ops
 def _cell(m: dict, idx: int) -> dict:
     if idx < 0 or idx >= len(m["cells"]):
-        raise IndexError(idx)
+        raise errors.NoCell(idx)
     return m["cells"][idx]
 
 
@@ -360,7 +360,7 @@ def complete(mid: str, idx: int, done: bool = True) -> dict:
     m = _find(data, mid)
     c = _cell(m, idx)
     if c["type"] == "rest":
-        raise ValueError("休息節點不用打卡")
+        raise errors.Refused("休息節點不用打卡")
     c["state"] = "done" if done else "pending"
     _touch(m)
     _save(data)
@@ -373,7 +373,7 @@ def edit_cell(mid: str, idx: int, payload: dict) -> dict:
     m = _find(data, mid)
     c = _cell(m, idx)
     if c["type"] == "rest":
-        raise ValueError("休息節點沒有紀錄欄位")
+        raise errors.Refused("休息節點沒有紀錄欄位")
     if "mood" in payload:
         c["mood"] = str(payload["mood"])[:MAX_TEXT]
     if payload.get("add_note"):
@@ -392,11 +392,11 @@ def insert(mid: str, idx: int, where: str, kind: str, payload: dict | None = Non
     """
     payload = payload or {}
     if kind not in _CELL_TYPES:
-        raise ValueError(f"未知的節點類型：{kind}")
+        raise errors.Refused(f"未知的節點類型：{kind}")
     data = _load()
     m = _find(data, mid)
     if idx < 0 or idx > len(m["cells"]):
-        raise IndexError(idx)
+        raise errors.NoCell(idx)
     at = idx + 1 if where == "after" else idx
     blueprint = bool(payload.get("blueprint")) and kind == "task"
 
@@ -423,8 +423,28 @@ def remove_cell(mid: str, idx: int) -> dict:
     m = _find(data, mid)
     c = _cell(m, idx)
     if not c.get("ins"):
-        raise ValueError("這是排定好的藍圖任務，鎖住了不能刪——它只是往後挪，不會消失。")
+        raise errors.Refused("這是排定好的藍圖任務，鎖住了不能刪——它只是往後挪，不會消失。")
     del m["cells"][idx]
     _touch(m)
     _save(data)
     return _view(m)
+
+
+def create(*args, **kwargs):
+    """create 的外層：欄位裡看不懂的數字／日期（int()、fromisoformat 丟的 ValueError、TypeError）回給人看的一句話。"""
+    try:
+        return _create(*args, **kwargs)
+    except errors.Refused:
+        raise
+    except (ValueError, TypeError):
+        raise errors.Refused("有欄位的值看不懂（數字、日期或時間的寫法不對）") from None
+
+
+def update(*args, **kwargs):
+    """update 的外層：欄位裡看不懂的數字／日期（int()、fromisoformat 丟的 ValueError、TypeError）回給人看的一句話。"""
+    try:
+        return _update(*args, **kwargs)
+    except errors.Refused:
+        raise
+    except (ValueError, TypeError):
+        raise errors.Refused("有欄位的值看不懂（數字、日期或時間的寫法不對）") from None

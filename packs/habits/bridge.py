@@ -18,7 +18,7 @@ from isdtelekit.core.registry import DANGER, READ, WRITE, Field  # noqa: F401
 
 from synox.packs import kit
 
-from .engine import clock, milestones, routines, storage
+from .engine import clock, errors, milestones, routines, storage
 
 CLEAR = "-"
 _WEEKDAY_CHARS = {"一": 0, "二": 1, "三": 2, "四": 3, "五": 4, "六": 5, "日": 6, "天": 6}
@@ -82,14 +82,14 @@ class Session:
 
 
 def as_app_error(e: Exception) -> Optional[kit.AppError]:
-    """kit.AppError 原樣；引擎的「說不行」轉成 AppError；其他回 None（交給 SYNOX，訊息不外流）。"""
+    """kit.AppError 原樣；引擎的「說不行」（engine/errors.py 那幾種）轉成 AppError；其他回 None（交給 SYNOX，訊息不外流）。"""
     if isinstance(e, kit.AppError):
         return e
-    if isinstance(e, KeyError):
+    if isinstance(e, errors.NotFound):
         return kit.AppError("找不到這一筆", code="not_found", status=404)
-    if isinstance(e, IndexError):
+    if isinstance(e, errors.NoCell):
         return kit.AppError("沒有這一格", code="not_found", status=404)
-    if isinstance(e, (ValueError, LookupError)):
+    if isinstance(e, (errors.Refused, errors.NoMatch)):
         return kit.AppError(str(e), code="refused", status=409)
     return None
 
@@ -177,7 +177,7 @@ def resolve_routine(ref: str) -> dict:
         if len(hit) == 1:
             return hit[0]
         if len(hit) > 1:
-            raise LookupError(f"「{ref}」對到不只一個，給 id") from None
+            raise errors.NoMatch(f"「{ref}」對到不只一個，給 id") from None
         raise e
 
 
@@ -190,8 +190,8 @@ def resolve_journey(ref: str) -> dict:
     if len(hit) == 1:
         return milestones.get(hit[0]["id"])
     if not hit:
-        raise LookupError(f"找不到旅程「{ref}」")
-    raise LookupError("對到不只一個旅程：" + "、".join(f"「{r['name']}」（id {r['id']}）" for r in hit[:6]) + "——給 id")
+        raise errors.NoMatch(f"找不到旅程「{ref}」")
+    raise errors.NoMatch("對到不只一個旅程：" + "、".join(f"「{r['name']}」（id {r['id']}）" for r in hit[:6]) + "——給 id")
 
 
 # ── 回覆怎麼排 ──────────────────────────────────────────────────────────────────

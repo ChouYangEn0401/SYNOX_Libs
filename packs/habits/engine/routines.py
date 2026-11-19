@@ -16,7 +16,7 @@ import re
 import uuid
 from datetime import date, datetime, time, timedelta
 
-from . import clock, links, storage
+from . import clock, errors, links, storage
 
 DOC = "routines"        # storage 裡這份資料的名字
 
@@ -1390,11 +1390,11 @@ def _clean_time(item: dict, rec: dict, kind: str, repeat: str) -> dict:
     unit = {"min": "minutes", "mins": "minutes", "minute": "minutes", "分": "minutes",
             "分鐘": "minutes", "times": "count", "次": "count"}.get(unit, unit)
     if unit not in UNIT_IDS:
-        raise ValueError(f"未知的單位：{unit}（count＝次、minutes＝分鐘）")
+        raise errors.Refused(f"未知的單位：{unit}（count＝次、minutes＝分鐘）")
     if unit == "count":
         return {"unit": "count"}
     if kind != "habit" or repeat != "quota":
-        raise ValueError("用時間算的要搭配「想養成」＋「一期幾次」——一期花多少時間、哪天做都行。")
+        raise errors.Refused("用時間算的要搭配「想養成」＋「一期幾次」——一期花多少時間、哪天做都行。")
 
     def mins(key: str, alias: str) -> int:
         raw = item[key] if key in item else item.get(alias, _MISSING)
@@ -1404,16 +1404,16 @@ def _clean_time(item: dict, rec: dict, kind: str, repeat: str) -> dict:
             return 0
         n = parse_minutes(raw)
         if n is None:
-            raise ValueError(f"看不懂這個時間：{raw!r}（可以寫 90、90m、1.5h、1h30m）")
+            raise errors.Refused(f"看不懂這個時間：{raw!r}（可以寫 90、90m、1.5h、1h30m）")
         return n
 
     floor, target = mins("floor_min", "floor"), mins("target_min", "target")
     if floor <= 0:
-        raise ValueError("用時間算的習慣要有底線：一期至少幾分鐘（例如 90 或 1.5h）")
+        raise errors.Refused("用時間算的習慣要有底線：一期至少幾分鐘（例如 90 或 1.5h）")
     if max(floor, target) > MAX_PERIOD_MIN:
-        raise ValueError(f"一期最多設 {MAX_PERIOD_MIN // 60} 小時")
+        raise errors.Refused(f"一期最多設 {MAX_PERIOD_MIN // 60} 小時")
     if target and target <= floor:
-        raise ValueError("目標要比底線多（不想設目標就留白）")
+        raise errors.Refused("目標要比底線多（不想設目標就留白）")
     return {"unit": "minutes", "floor_min": floor, "target_min": target}
 
 
@@ -1423,18 +1423,18 @@ def _clean_each(raw) -> int:
         return 0
     n = parse_minutes(raw)
     if n is None:
-        raise ValueError(f"看不懂每次大約多久：{raw!r}（可以寫 30、30m、1h、1.5h）")
+        raise errors.Refused(f"看不懂每次大約多久：{raw!r}（可以寫 30、30m、1h、1.5h）")
     if n > MAX_DAY_MIN:
-        raise ValueError("每次最多估 24 小時")
+        raise errors.Refused("每次最多估 24 小時")
     return n
 
 
-def upsert(item: dict) -> dict:
+def _upsert(item: dict) -> dict:
     """新增或更新。只認得的欄位會被寫進去，其餘忽略。
     habit 的承諾期 start/end 一旦設定就不可改（承諾鎖）。"""
     name = str(item.get("name", "")).strip()
     if not name:
-        raise ValueError("提醒需要一個名字")
+        raise errors.Refused("提醒需要一個名字")
     data = _load()
     rid = str(item.get("id") or "").strip() or uuid.uuid4().hex[:8]
     rec = next((r for r in data["routines"] if r["id"] == rid), None)
@@ -1446,36 +1446,36 @@ def upsert(item: dict) -> dict:
 
     kind = str(item.get("kind", rec.get("kind", "reminder")))
     if kind not in KIND_IDS:
-        raise ValueError(f"未知的追蹤類型：{kind}")
+        raise errors.Refused(f"未知的追蹤類型：{kind}")
     repeat = str(item.get("repeat", rec["repeat"]))
     if repeat not in REPEAT_IDS:
-        raise ValueError(f"未知的週期：{repeat}")
+        raise errors.Refused(f"未知的週期：{repeat}")
     at = str(item.get("at", rec.get("at", ""))).strip()
     if at and _parse_time(at) is None:
-        raise ValueError(f"時間格式要像 20:00，收到的是：{at}")
+        raise errors.Refused(f"時間格式要像 20:00，收到的是：{at}")
     weekdays = item.get("weekdays", rec.get("weekdays"))
     weekdays = sorted({int(d) for d in (weekdays or []) if 0 <= int(d) <= 6})
     if repeat == "weekly" and not weekdays:
-        raise ValueError("每週提醒至少要選一個星期幾")
+        raise errors.Refused("每週提醒至少要選一個星期幾")
     backfill_mode = str(item.get("backfill_mode", rec.get("backfill_mode", _BACKFILL_DEFAULT)))
     backfill_mode = _BACKFILL_ALIAS.get(backfill_mode, backfill_mode)
     if backfill_mode not in BACKFILL_MODE_IDS:
-        raise ValueError(f"未知的補打卡模式：{backfill_mode}")
+        raise errors.Refused(f"未知的補打卡模式：{backfill_mode}")
     habit_mode = str(item.get("mode", rec.get("mode", _HABIT_MODE_DEFAULT)))
     if habit_mode not in HABIT_MODE_IDS:
-        raise ValueError(f"未知的打卡方式：{habit_mode}")
+        raise errors.Refused(f"未知的打卡方式：{habit_mode}")
     period = str(item.get("period", rec.get("period", _PERIOD_DEFAULT)))
     if period not in PERIOD_IDS:
-        raise ValueError(f"未知的期間單位：{period}")
+        raise errors.Refused(f"未知的期間單位：{period}")
     try:
         times = int(item.get("times", rec.get("times", _TIMES_DEFAULT)))
     except (TypeError, ValueError):
-        raise ValueError("一期要做幾次請填數字")
+        raise errors.Refused("一期要做幾次請填數字")
     if repeat == "quota" and not 1 <= times <= MAX_TIMES:
-        raise ValueError(f"一期的次數要在 1～{MAX_TIMES} 之間")
+        raise errors.Refused(f"一期的次數要在 1～{MAX_TIMES} 之間")
     if repeat == "quota" and kind != "habit":
         # 純提醒沒有打卡，配額（做幾次）就無從算起——與其存一筆永遠不會動的資料，不如講清楚。
-        raise ValueError("「一期幾次」要搭配「想養成」——純提醒沒有打卡，次數算不出來。")
+        raise errors.Refused("「一期幾次」要搭配「想養成」——純提醒沒有打卡，次數算不出來。")
     nudges = item.get("nudges", rec.get("nudges"))
     if not isinstance(nudges, dict):
         nudges = dict(_NUDGE_DEFAULT)
@@ -1484,10 +1484,10 @@ def upsert(item: dict) -> dict:
     each_min = _clean_each(item.get("each_min", item.get("each", rec.get("each_min", 0))))
     importance = str(item.get("importance", rec.get("importance", "core")) or "core").strip().lower()
     if importance not in IMPORTANCE_IDS:
-        raise ValueError(f"重要度只有 core（核心）／bonus（加分），收到的是：{importance}")
+        raise errors.Refused(f"重要度只有 core（核心）／bonus（加分），收到的是：{importance}")
     habit_kind = str(item.get("habit_kind", rec.get("habit_kind", "build")) or "build").strip().lower()
     if habit_kind not in HABIT_KIND_IDS:
-        raise ValueError(f"型態只有 build（養成）／bonus（加分）／nudge（提醒），收到的是：{habit_kind}")
+        raise errors.Refused(f"型態只有 build（養成）／bonus（加分）／nudge（提醒），收到的是：{habit_kind}")
     rec.update({
         **timed,
         "name": name[:40],
@@ -1528,13 +1528,13 @@ def upsert(item: dict) -> dict:
         if force or not rec.get("end_date"):
             new_end = str(item.get("end_date", "")).strip() or rec.get("end_date", "")
             if not new_end:
-                raise ValueError("想養成的習慣要設一個結束日（承諾期）")
+                raise errors.Refused("想養成的習慣要設一個結束日（承諾期）")
             start_d = _parse_date(rec["start_date"])
             end_d = _parse_date(new_end)
             if not end_d:
-                raise ValueError(f"結束日格式要像 2030-01-31，收到的是：{new_end}")
+                raise errors.Refused(f"結束日格式要像 2030-01-31，收到的是：{new_end}")
             if start_d and end_d < start_d:
-                raise ValueError("結束日不能早於開始日")
+                raise errors.Refused("結束日不能早於開始日")
             rec["end_date"] = new_end
     else:
         # 從 habit 改回 reminder：清掉承諾期（reminder 沒有訓練期）
@@ -1582,17 +1582,17 @@ def check(rid: str, day_iso: str = "", state: str = "done") -> dict:
     - habit 的 ✓（含 rep）只能在補打卡窗內（依 `backfill_mode`：h12／d3／always；
       reminder 不受此限，補提醒走 catch_up）。"""
     if state not in CHECK_STATES:
-        raise ValueError(f"未知的打卡狀態：{state}")
+        raise errors.Refused(f"未知的打卡狀態：{state}")
     day = _parse_date(day_iso) or clock.today()
     today = clock.today()
     now = clock.now()
     if day > today:
-        raise ValueError("不能打未來的卡")
+        raise errors.Refused("不能打未來的卡")
 
     data = _load()
     rec = next((r for r in data["routines"] if r["id"] == rid), None)
     if rec is None:
-        raise KeyError("not found")
+        raise errors.NotFound("not found")
     _migrate(rec)
 
     # 承諾期外的打卡：起跑前只放行 ✓（提早做到算超前，使用者要的），✗「跳過今天」
@@ -1600,16 +1600,16 @@ def check(rid: str, day_iso: str = "", state: str = "done") -> dict:
     # 但真正把關在這裡——UI 能點什麼是提示，不是保證。
     start_d, end_d = _commitment_window(rec)
     if end_d and day > end_d:
-        raise ValueError(f"承諾期已在 {end_d.isoformat()} 結束了，想繼續就開一條新的習慣。")
+        raise errors.Refused(f"承諾期已在 {end_d.isoformat()} 結束了，想繼續就開一條新的習慣。")
     if start_d and day < start_d and state == "cancel":
-        raise ValueError(f"{start_d.isoformat()} 才起跑，還沒開始的日子沒有「跳過」可言。")
+        raise errors.Refused(f"{start_d.isoformat()} 才起跑，還沒開始的日子沒有「跳過」可言。")
 
     if is_time(rec) and state != "none":
         # 時間配額記的是分鐘：「做了」要講做了多久，不然本期進度算不出來。清掉（none）照常。
-        raise ValueError(f"「{rec['name']}」是用時間記的——做了多久？"
+        raise errors.Refused(f"「{rec['name']}」是用時間記的——做了多久？"
                          "（habit.checkin --minutes 45；也可以寫 1h、1.5h）")
     if state in ("rep", "unrep") and rec.get("mode") != "reps":
-        raise ValueError("這條習慣不是「可以加碼」模式——先在編輯裡把打卡方式改成加碼。")
+        raise errors.Refused("這條習慣不是「可以加碼」模式——先在編輯裡把打卡方式改成加碼。")
 
     # 配額模式走自己的補記規則，**不看 backfill_mode**：本期內哪一天都能記
     # （「哪天做都行」本來就包含「週五才想起來週一做過」），但**跨期一律擋掉**——
@@ -1619,12 +1619,12 @@ def check(rid: str, day_iso: str = "", state: str = "done") -> dict:
         p_start, p_end = _period_bounds(rec.get("period", _PERIOD_DEFAULT), today)
         if not (p_start <= day <= p_end):
             unit = "這個月" if rec.get("period") == "month" else "這週"
-            raise ValueError(f"{unit}以外的日子不能改了——上一期已經關帳，"
+            raise errors.Refused(f"{unit}以外的日子不能改了——上一期已經關帳，"
                              f"沒做滿的不會結轉、也不用補回來。")
     mode = rec.get("backfill_mode", _BACKFILL_DEFAULT)
     if (rec.get("kind") == "habit" and rec.get("repeat") != "quota"
             and state in ("done", "rep") and not _can_makeup(day, now, mode)):
-        raise ValueError({
+        raise errors.Refused({
             "none": "這個習慣設成「不可補打卡」——只能當天打，今天已經過了。",
             "h12": "超過補打卡時間了——只能補該日結束後 12 小時內的卡。",
             "d3": "超過補打卡時間了——只能補 3 天內的卡。",
@@ -1679,25 +1679,25 @@ def log_minutes(rid: str, minutes, day_iso: str = "") -> dict:
     能回頭補，就等於能把沒做到的歷史改掉，安全帶 ① 會失效）。"""
     delta = parse_minutes(minutes, allow_negative=True)
     if delta is None:
-        raise ValueError(f"看不懂做了多久：{minutes!r}（可以寫 45、45m、1h、1.5h；按錯了用 -15 扣回來）")
+        raise errors.Refused(f"看不懂做了多久：{minutes!r}（可以寫 45、45m、1h、1.5h；按錯了用 -15 扣回來）")
     day = _parse_date(day_iso) or clock.today()
     today = clock.today()
     now = clock.now()
     if day > today:
-        raise ValueError("不能記未來的時間")
+        raise errors.Refused("不能記未來的時間")
     data = _load()
     rec = next((r for r in data["routines"] if r["id"] == rid), None)
     if rec is None:
-        raise KeyError("not found")
+        raise errors.NotFound("not found")
     _migrate(rec)
     if not is_time(rec):
-        raise ValueError(f"「{rec['name']}」不是用時間算的習慣——直接打卡就好（不用給分鐘）")
+        raise errors.Refused(f"「{rec['name']}」不是用時間算的習慣——直接打卡就好（不用給分鐘）")
     _start, end_d = _commitment_window(rec)
     if end_d and day > end_d:
-        raise ValueError(f"承諾期已在 {end_d.isoformat()} 結束了，想繼續就開一條新的習慣。")
+        raise errors.Refused(f"承諾期已在 {end_d.isoformat()} 結束了，想繼續就開一條新的習慣。")
     p_start, p_end = _period_bounds(rec.get("period", _PERIOD_DEFAULT), today)
     if not (p_start <= day <= p_end):
-        raise ValueError(f"{_period_word(rec.get('period'))}以外的日子不能改了——上一期已經關帳，"
+        raise errors.Refused(f"{_period_word(rec.get('period'))}以外的日子不能改了——上一期已經關帳，"
                          "沒做到的不會結轉、也不用補回來。")
     iso = day.isoformat()
     mins = dict(rec.get("minutes") or {})
@@ -1753,10 +1753,10 @@ def pin(rid: str, pinned: bool) -> dict | None:
 def _habit_rec(data: dict, rid: str) -> dict:
     rec = next((r for r in data["routines"] if r["id"] == rid), None)
     if rec is None:
-        raise KeyError("not found")
+        raise errors.NotFound("not found")
     _migrate(rec)
     if rec.get("kind") != "habit":
-        raise ValueError(f"「{rec['name']}」是純提醒，沒有暫停／這期夠了可言")
+        raise errors.Refused(f"「{rec['name']}」是純提醒，沒有暫停／這期夠了可言")
     return rec
 
 
@@ -1770,9 +1770,9 @@ def pause(rid: str, on: bool = True, until: str = "") -> dict:
     today = clock.today()
     until_d = _parse_date(until) if until else None
     if until and not until_d:
-        raise ValueError(f"看不懂哪天回來：{until!r}（寫 2030-01-31 這樣）")
+        raise errors.Refused(f"看不懂哪天回來：{until!r}（寫 2030-01-31 這樣）")
     if on and until_d and until_d < today:
-        raise ValueError("回來的日子不能早於今天")
+        raise errors.Refused("回來的日子不能早於今天")
     data = _load()
     rec = _habit_rec(data, rid)
     pauses = [dict(p) for p in rec.get("pauses") or [] if isinstance(p, dict)]
@@ -1824,7 +1824,7 @@ def find_habit(ref: str) -> dict:
     訊息裡每一條都帶 id 與承諾期（叫人給 id，就要把 id 列給他）。"""
     q = str(ref or "").strip()
     if not q:
-        raise LookupError("要哪一個習慣？")
+        raise errors.NoMatch("要哪一個習慣？")
     rows = [r for r in list_routines() if r.get("kind") == "habit"]
     hit = next((r for r in rows if r["id"] == q), None)
     if hit:
@@ -1837,10 +1837,10 @@ def find_habit(ref: str) -> dict:
     if len(part) == 1:
         return part[0]
     if not part:
-        raise LookupError(f"找不到叫「{q}」的習慣")
+        raise errors.NoMatch(f"找不到叫「{q}」的習慣")
     names = "、".join(f'「{r["name"]}」（id {r["id"]}，{r.get("start_date") or "?"}～{r.get("end_date") or "?"}）'
                       for r in part[:6])
-    raise LookupError(f"「{q}」對到不只一個習慣：{names}——給 id")
+    raise errors.NoMatch(f"「{q}」對到不只一個習慣：{names}——給 id")
 
 
 def delete(rid: str, force: bool = False) -> bool:
@@ -1852,7 +1852,17 @@ def delete(rid: str, force: bool = False) -> bool:
         return False
     _migrate(rec)
     if _habit_locked(rec, clock.today()) and not force:
-        raise ValueError("承諾期還沒結束，撐住！週期結束後才能刪掉這條習慣。")
+        raise errors.Refused("承諾期還沒結束，撐住！週期結束後才能刪掉這條習慣。")
     data["routines"] = [r for r in data["routines"] if r["id"] != rid]
     _save(data)
     return True
+
+
+def upsert(*args, **kwargs):
+    """upsert 的外層：欄位裡看不懂的數字／日期（int()、fromisoformat 丟的 ValueError、TypeError）回給人看的一句話。"""
+    try:
+        return _upsert(*args, **kwargs)
+    except errors.Refused:
+        raise
+    except (ValueError, TypeError):
+        raise errors.Refused("有欄位的值看不懂（數字、日期或時間的寫法不對）") from None

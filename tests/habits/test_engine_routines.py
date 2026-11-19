@@ -252,3 +252,10 @@ def test_old_basis_data_is_ignored_without_error(R):
     R.storage.save(R.DOC, data)
     got = next(r for r in R.list_routines() if r["id"] == v["id"])
     assert got["floor_min"] == 60 and not {"basis", "floor_x", "target_x"} & set(got)
+
+
+def test_bad_number_in_a_field_is_a_refusal_not_a_crash(R):
+    """欄位裡看不懂的數字回「說不行」（bridge 轉成給人看的話）；程式自己的 KeyError 不會被當成「找不到」。"""
+    errors = R.errors
+    with pytest.raises(errors.Refused):
+        add(R, repeat="days", every_days="abc")
