@@ -63,6 +63,7 @@ tests/test_<名字>.py          測試（第 4 節）
 | `auth` | `{"type": "token", "fields": [...]}` | 接外面服務、要 token 的（notion 的寫法） |
 | `help` | 下面 2a | 選填，強烈建議：`/help` 卡片的白話說明與範例 |
 | `site` | 下面 2b | 選填：入口頁卡片上的字 |
+| `warnings` | 下面 2c | 選填：作者標的警告（例「官方不保證安全」）；沒有要警告的就**整個不寫** |
 
 ### 2a. `help` 區塊（SYNOX `/help` 卡片、網頁「💡 範例」）
 
@@ -127,6 +128,23 @@ tests/test_<名字>.py          測試（第 4 節）
 `python -m synox install <檔>`；SYNOX 的 docs/install-packs.md）。SYNOX 安裝時不看 `publish`（不認得的上層欄位不影響安裝）。
 **`publish: false` 只管這個工具庫的打包與公開頁，不會讓檔案變成機密**：私人工具的程式要是不能進公開的 repo，
 就放在不推送的分支（例如 `local/…`），不要合併到 `main`。保證在 `tests/test_private_packs.py`。
+
+### 2d. 作者標的警告：`warnings`（SYNOX ADR 0041）
+
+```json
+"warnings": [{"code": "vendor_no_security_guarantee", "text": "官方不保證安全", "advice": "建議在 docker 或 sandbox 執行"}]
+```
+
+- 規則跟 SYNOX 一樣（`scripts/pack_warnings.py`，測試拿兩邊比對）：`code` 小寫英數字與 `_`、字母開頭、48 字內；`text` 60 字內；
+  `advice` 120 字內（選填）；最多 5 條。換行、控制字元、零寬、雙向文字控制字元會被拿掉，太長截斷加「…」。
+- `build.py` 把整理過的清單抄進 `index.json` 那一筆（`line` 後面）：使用者在 SYNOX 工具庫清單上挑工具時還沒裝、看不到 pack.json，
+  警告要在裝之前就看得到。**清單上的只是預告**：pack.json 受簽章保護，安裝時 SYNOX 用簽過的那一份重新檢查、要擁有者逐條確認。
+- 寫壞（不是清單、某條不是物件、code 不合格式…）**不會讓打包失敗**：那一條換成 `malformed_warning`（照樣顯示、照樣要確認），
+  `build.py` 與 `build.py --check` 印「⚠️ 注意」列出問題。
+- 公開頁：入口頁卡片與產生的工具頁在標題正下方用紅框列出每一條；帶警告的工具，`title`、`site.name`、`site.status` 不准有「官方」兩個字
+  （`build.py --check` 擋）。手寫說明頁要自己把每一條警告的字寫進去（紅色、放在標題附近），沒寫 `--check` 會擋。
+- 沒寫 `warnings` 的工具：`index.json` 那一筆、公開頁都跟以前一字不差。
+- 真機要驗的項目在 [testing/wardrobe-and-index-checklist.md](testing/wardrobe-and-index-checklist.md) 的 B 段。
 
 ## 3. 說明頁
 

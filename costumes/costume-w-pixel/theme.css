@@ -35,9 +35,9 @@
 [data-slot][data-slot] .op .ot{color:var(--th-lcdink)}
 [data-slot][data-slot] .op .wboot{color:var(--th-lcdink);opacity:0}
 [data-slot][data-slot] .op-W .wboot{animation:0.78s steps(1) 0s 1 normal both running th-w-wp-o-boot}
-[data-slot][data-slot] .op-W .wboot .t-span{animation:1ms steps(1) 0s 1 normal both running th-w-wp-o-line}
-[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-delay:0.2s}
-[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-delay:0.4s}
+[data-slot][data-slot] .op-W .wboot .t-span{animation:0s linear 0s 1 normal none running th-w-wp-o-line}
+[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-duration:0.2s}
+[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-duration:0.4s}
 [data-slot][data-slot] .op-W .ow{animation:0.64s steps(8) 0.8s 1 normal both running th-w-wp-o-drop}
 [data-slot][data-slot] .op-W .om{animation:0.36s steps(4) 1.5s 1 normal both running th-w-wp-o-rise}
 [data-slot][data-slot] .op-W .ot{animation:0.8s steps(1) 1.9s 1 normal both running th-w-wp-o-blink}
@@ -112,8 +112,7 @@
   100% { opacity: 0; }
 }
 @keyframes th-w-wp-o-line { 
-  0% { visibility: hidden; }
-  100% { visibility: visible; }
+  0%, 100% { visibility: hidden; }
 }
 @keyframes th-w-wp-o-drop { 
   0% { transform: translateY(-192px); }

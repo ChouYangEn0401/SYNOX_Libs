@@ -121,7 +121,7 @@ footer a { color: var(--muted); }
 /* 給開發者對版本：線上版和本機版的「頁面版本」一樣＝同一份 */
 .stamp { font-family: var(--mono); font-size: 10px; color: var(--faint); opacity: .55; padding-bottom: 28px; word-break: break-all; }
 .stamp a { color: inherit; }
-</style>
+{{{warn_css}}}</style>
 </head>
 <body>
 <!--# 樣板片段（產生時拿掉） -->
@@ -137,6 +137,33 @@ footer a { color: var(--muted); }
   </ul>
 </section>
 <!-- END:cmds -->
+<!--#
+  作者標的警告（pack.json 的 warnings，SYNOX ADR 0041）：只有帶警告的工具才有 warn 片段，放在標題區正下方、紅色；
+  warn_css 也只在有警告時才印進 style（沒有警告時整頁跟以前逐位元組相同）。這種工具的標題、徽章不准寫「官方」
+  （警告不放進徽章那一列；產生器遇到標題或 site.status 有「官方」就報錯不產生）。
+-->
+<!-- BEGIN:warn -->
+<section class="warn" role="note" aria-label="作者標的警告（{{count}} 條）">
+  <h2>⚠️ 作者標的警告</h2>
+  <ul>
+{{{items}}}
+  </ul>
+  <p class="w-note">這裡是預告。安裝時 SYNOX 會用簽過的 pack.json 再檢查、再列一次，要你逐條確認（網頁勾「我知道」，終端機 <code>--accept-warning 代號</code>）才會啟用；不確定就不要裝。</p>
+</section>
+<!-- END:warn -->
+<!-- BEGIN:warn_item -->    <li><span class="w-text">{{text}}</span>{{{advice}}}<code class="w-code">{{code}}</code></li>
+<!-- END:warn_item -->
+<!-- BEGIN:warn_advice --><span class="w-advice">{{advice}}</span><!-- END:warn_advice -->
+<!-- BEGIN:warn_css -->/* 作者標的警告（只有工具帶 warnings 時才印這一段） */
+.warn { border: 1.5px solid var(--bad); background: var(--bad-soft); color: var(--bad); border-radius: 14px; padding: 14px 18px; margin-block: 0 22px; }
+.warn h2 { color: var(--bad); }
+.warn ul { margin: 6px 0 0; padding-left: 1.2em; }
+.warn li { padding-block: 4px; }
+.warn .w-text { font-weight: 700; font-size: 16px; }
+.warn .w-advice { display: block; color: var(--ink); font-size: 15px; }
+.warn .w-code { display: inline-block; margin-top: 2px; font-size: 12px; color: var(--muted); }
+.warn .w-note { margin-top: 8px; color: var(--muted); font-size: 13.5px; }
+<!-- END:warn_css -->
 <div class="wrap">
 
 <header class="top">
@@ -156,7 +183,7 @@ footer a { color: var(--muted); }
   </div>
 </div>
 
-{{{commands}}}
+{{{warnings}}}{{{commands}}}
 <section>
   <h2>怎麼裝</h2>
   <ol class="steps">

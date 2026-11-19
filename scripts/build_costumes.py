@@ -6,6 +6,7 @@
     python scripts/build_costumes.py pack [--out dist]                  costumes/<id>/ → <out>/<id>-<版本>.synoxpack（只用標準函式庫）
     python scripts/build_costumes.py page                               costumes/ → docs/site/wardrobe.html（之後跑 site_stamp.py）
     python scripts/build_costumes.py check                              只檢查（不寫檔）：每一套都過「不帶程式」的規則
+    python scripts/build_costumes.py tokens [--write | --json]          每一套用到的顏色變數、寫死的顏色 → docs/costume-token-usage.md
 
 - extract 要 Playwright（Chromium）和 fontTools，而且要連網一次（Google Fonts 的字型，只拿來把字標轉成向量路徑，
   字型檔不進 repo、不進 pack）。品牌提案頁本身不進 repo；它是一頁自己帶全部東西的 HTML，每個系列是陣列 S 的一個物件，
@@ -37,6 +38,7 @@ import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import links  # noqa: E402
+import pack_warnings  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COSTUMES = os.path.join(ROOT, "costumes")
@@ -46,7 +48,10 @@ ONLINE_URL = "https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR"           # 公
 COLLECTION = {"id": "wardrobe", "title": "SYNOX 衣櫃", "category": "衣櫃／外觀",
               "summary": "26 套外觀：整個聊天介面的顏色、吉祥物、開場一起換。不帶任何程式，換回預設隨時可以。"}
 VERSION = "1.0.0"
-SLOTS = ("mascot.idle", "mascot.think", "mascot.happy", "mascot.warn", "opening", "wordmark", "appicon")
+# 個別升過版的套（extract 重新產生時照這裡寫，不要退回 VERSION）：
+# 1.0.1 = 開場動畫改成穩定的寫法（CSS_FIXUPS；E 的 X 不見、W 開機字同一種寫法；L 的載入條置中、走滿）
+VERSIONS = {"E": "1.0.1", "L": "1.0.1", "W": "1.0.1"}
+SLOTS =("mascot.idle", "mascot.think", "mascot.happy", "mascot.warn", "opening", "wordmark", "appicon")
 SLOT_FILES = {"mascot.idle": "slots/idle.svg", "mascot.think": "slots/think.svg", "mascot.happy": "slots/happy.svg",
               "mascot.warn": "slots/warn.svg", "opening": "slots/opening.svg", "wordmark": "slots/wordmark.svg",
               "appicon": "slots/appicon.svg"}
@@ -193,6 +198,62 @@ def css_problems(name: str, css: str, letter: str) -> list:
     for m in media:
         if "prefers-color-scheme" not in m and "prefers-reduced-motion" not in m:
             out.append(f"{name}: @media {m.strip()} 不准（只收深淺色、減少動態）")
+    out += [f"{name}: {p}" for p in fragile_animations(css)]
+    out += [f"{name}: {p}" for p in percent_translates(css)]
+    return out
+
+
+PERCENT_TRANSLATE = re.compile(r"translate(?:X|Y|3d)?\([^)]*\d%")
+
+
+def percent_translates(css: str) -> list:
+    """SVG 裡用百分比的 translate 定位：品牌頁 HTML 的 translateX(-50%) 是「自己寬度的一半」，SVG 的元素沒有 CSS 的方框，
+    百分比改成照整張 viewBox 算（480 寬的開場＝240px），東西整個被推走（L 的載入條跑到最左邊就是這樣）。
+    只看一般規則裡寫死的 transform（@keyframes 裡的進場位移不算）；同一條規則有寫 transform-box 的放行。"""
+    out = []
+    for head, body in _css_blocks(css):
+        if head.startswith("@"):
+            continue
+        decls = dict(decls_of(body))
+        v = decls.get("transform", "")
+        if PERCENT_TRANSLATE.search(v) and "transform-box" not in decls:
+            out.append(f"規則 {head.strip()[:60]} 的 transform「{v}」用百分比位移：在 SVG 裡是照整張畫面算，"
+                       "改成 px（見 percent_translates）")
+    return out
+
+
+SUBFRAME_MS = 50                      # 比一個畫面（約 16ms）再寬一點：比這短的 steps() 動畫，終點全靠浮點數算剛好
+
+
+def _time_ms(tok: str):
+    m = re.fullmatch(r"(\d*\.?\d+)(ms|s)", tok.strip())
+    if not m:
+        return None
+    return float(m.group(1)) * (1 if m.group(2) == "ms" else 1000)
+
+
+def fragile_animations(css: str) -> list:
+    """不穩的動畫寫法：播一次、steps()、停在終點（both／forwards），而且只有幾 ms 長。
+    這種寫法的終點進度要剛好算到 1，steps() 才會跳到最後一格；延遲是 calc() 算出來的時候常常算成 0.99999999999989，
+    steps() 往下取整就停在第一格、而且一直停在那裡（E 的開場第 5 個字 X 就是這樣不見的）。
+    要「時間到才出現」改成：整段藏起來（0%、100% 都是藏）、時間＝要等多久、fill 用 none，播完就是元素原本的樣子。"""
+    out = []
+    for head, body in _css_blocks(css):
+        if head.startswith("@"):
+            continue
+        for k, v in decls_of(body):
+            if k != "animation":
+                continue
+            for part in split_top(v):
+                toks = split_top(part, " ")
+                if "infinite" in toks or not ({"both", "forwards"} & set(toks)):
+                    continue
+                if not any(t.startswith("steps(") or t in ("step-end", "step-start") for t in toks):
+                    continue
+                times = [t for t in (_time_ms(t) for t in toks) if t is not None]
+                if times and times[0] < SUBFRAME_MS:
+                    out.append(f"動畫「{part}」只有 {times[0]:g}ms 又用 steps() 停在終點："
+                               "終點會因為浮點誤差停在第一格；改成整段藏起來、播完露出原本樣子（見 fragile_animations）")
     return out
 
 
@@ -288,7 +349,8 @@ def sha256_bytes(blob: bytes) -> str:
 
 def zip_costume(folder: str, out_dir: str) -> str:
     """跟 SYNOX 的 zip_pack 同一個格式：pack.json 在最上層、多一段 integrity.sha256（每個檔的雜湊）。
-    只放 PACKED 列的檔（about.json 是給公開頁用的，不進 pack）。zip 的時間固定，同樣的內容打出一樣的檔。"""
+    只放 PACKED 列的檔（about.json 是給公開頁用的，不進 pack）。zip 的時間、權限、「哪個系統做的」都固定：
+    同樣的內容在哪台電腦（Windows、Linux、雲端）打都是同一個檔、同一個 sha256。"""
     with open(os.path.join(folder, "pack.json"), encoding="utf-8") as f:
         raw = json.load(f)
     hashes = {}
@@ -303,6 +365,7 @@ def zip_costume(folder: str, out_dir: str) -> str:
         def put(name, data):
             info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 3                 # 「哪個系統做的」固定寫 Unix：預設照執行的電腦（Windows＝0），同內容在不同電腦會打出不同 sha256
             info.external_attr = 0o644 << 16
             z.writestr(info, data)
         put("pack.json", json.dumps(raw, ensure_ascii=False, indent=2) + "\n")
@@ -329,11 +392,12 @@ def index_entry(folder: str, path: str) -> dict:
     info = about(folder)
     with open(path, "rb") as f:
         blob = f.read()
-    return {"name": raw["name"], "title": raw["title"], "summary": raw["summary"], "version": raw["version"],
-            "stage": raw.get("stage", STAGE), "kind": "theme", "category": COLLECTION["category"], "collection": COLLECTION["id"],
-            "series": info.get("letter", ""), "line": info.get("one", ""),
-            "group": "", "access": "owner", "capabilities": [], "requires": {}, "bundles": [],
-            "file": os.path.basename(path), "sha256": sha256_bytes(blob), "size": len(blob)}
+    entry = {"name": raw["name"], "title": raw["title"], "summary": raw["summary"], "version": raw["version"],
+             "stage": raw.get("stage", STAGE), "kind": "theme", "category": COLLECTION["category"], "collection": COLLECTION["id"],
+             "series": info.get("letter", ""), "line": info.get("one", ""),
+             "group": "", "access": "owner", "capabilities": [], "requires": {}, "bundles": [],
+             "file": os.path.basename(path), "sha256": sha256_bytes(blob), "size": len(blob)}
+    return pack_warnings.with_warnings(entry, raw)     # 外觀也照工具的規矩：pack.json 有 warnings 才多這一欄
 
 
 def pack_all(out_dir: str) -> dict:
@@ -356,7 +420,9 @@ def pack_all(out_dir: str) -> dict:
 
 def _scope_css(css: str, scope: str) -> str:
     """theme.css 原本假設整頁只有一套外觀；公開頁同時放 26 套，所以每條規則多限定在 .<scope> 底下。
-    :root 那幾段（--th- 變數）不搬：公開頁用 about.json 的 extras 在 .<scope> 上設（26 套的同名變數才不會互蓋）。"""
+    :root 那幾段（--th- 變數）不搬：公開頁用 about.json 的 extras 在 .<scope> 上設（26 套的同名變數才不會互蓋）。
+    只換第一個 [data-slot]：G–Z 這一套自己的規則寫成 [data-slot][data-slot]（特異度多一級），兩個都換的話會變成
+    「.cw-x [data-slot].cw-x [data-slot]」＝要同一個元素又是卡片又是 slot，一條都對不到（以前公開頁上 G–Z 的開場動畫全部沒在播）。"""
     out = []
     for media, head, body in _css_media_blocks(css):
         if head.startswith("@keyframes"):
@@ -364,7 +430,7 @@ def _scope_css(css: str, scope: str) -> str:
             continue
         if all(" ".join(s.split()) in ROOT_SELECTORS for s in head.split(",")):
             continue
-        sels = ",".join(s.replace("[data-slot]", f".{scope} [data-slot]") for s in head.split(","))
+        sels = ",".join(s.replace("[data-slot]", f".{scope} [data-slot]", 1) for s in head.split(","))
         rule = f"{sels}{{{body}}}"
         out.append(f"@media {media}{{{rule}}}" if media else rule)
     return "\n".join(out)
@@ -452,6 +518,177 @@ def page_html() -> str:
     for k, v in repl.items():
         page = page.replace(k, v)
     return page
+
+
+# ── tokens：每一套用到哪些顏色變數、哪裡寫死顏色（給 SYNOX「套用前缺漏檢查」）────────────────
+
+TOKEN_DOC = os.path.join(ROOT, "docs", "costume-token-usage.md")
+MASCOT_SLOTS = ("mascot.idle", "mascot.think", "mascot.happy", "mascot.warn", "appicon")
+COLOR_ATTRS = ("fill", "stroke", "stop-color", "flood-color", "lighting-color", "color")
+COLOR_PROPS = ("fill", "stroke", "stop-color", "flood-color", "color", "background", "background-color", "border",
+               "border-color", "outline-color", "box-shadow", "text-shadow", "filter", "caret-color")
+LITERAL_COLOR = re.compile(r"#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\([^()]*\)")
+VAR_USE = re.compile(r"var\(\s*(--[\w-]+)")
+
+
+def _strip_var_fallbacks(value: str) -> str:
+    """var(--x, 後備) → var(--x)：後備值不算「寫死」（SYNOX 有給那個 token 就不會用到）。"""
+    out, i = [], 0
+    while True:
+        j = value.find("var(", i)
+        if j < 0:
+            out.append(value[i:])
+            return "".join(out)
+        out.append(value[i:j])
+        depth, k = 1, j + 4
+        while k < len(value) and depth:
+            depth += {"(": 1, ")": -1}.get(value[k], 0)
+            k += 1
+        m = re.match(r"var\(\s*(--[\w-]+)", value[j:k])
+        out.append(f"var({m.group(1)})" if m else value[j:k])
+        i = k
+
+
+# SYNOX 合約的進階 token（synox/theme/contract.py 的 ADVANCED_TOKENS；外觀包不給時 SYNOX 從核心色算）。
+# 跟 TOKENS、OPTIONAL_TOKENS 一樣是抄過來的一份：tests/test_costumes.py 有 SYNOX 原始碼時會比對，SYNOX 改了這裡要跟著改。
+ADVANCED_TOKENS = ("--bg-glow", "--surface-2", "--sunken", "--line-strong", "--text-2", "--accent-hover", "--accent-line",
+                   "--ok-soft", "--warn-soft", "--bad-soft", "--me", "--me-ink", "--m-hi", "--scrim", "--shadow-up")
+
+
+def synox_token_names() -> dict:
+    """核心認得的 token 名字（不帶 --）：照這支腳本抄的那份（不 import SYNOX，產生的報告在哪台電腦跑都一樣）。"""
+    return {"core": [t[2:] for t in TOKENS], "mascot": [t[2:] for t in OPTIONAL_TOKENS],
+            "advanced": [t[2:] for t in ADVANCED_TOKENS], "source": "SYNOX 外觀合約第 1 版（synox/theme/contract.py）"}
+
+
+def token_usage(folder: str, known: dict = None) -> dict:
+    """一套外觀：用到的變數（分成核心 token／吉祥物 token／這一套自己的 --th-／規則裡自己設的區域變數／不認得的）、
+    pack.json 給了哪些、哪裡寫死顏色（SVG 屬性、theme.css 的規則；var() 的後備值不算）。"""
+    known = known or synox_token_names()
+    with open(os.path.join(folder, "pack.json"), encoding="utf-8") as f:
+        raw = json.load(f)
+    with open(os.path.join(folder, "theme.css"), encoding="utf-8") as f:
+        css = f.read()
+    files = {"theme.css": re.sub(r"/\*.*?\*/", "", css, flags=re.S)}
+    for slot, rel in raw["theme"]["slots"].items():
+        with open(os.path.join(folder, *rel.split("/")), encoding="utf-8") as f:
+            files[slot] = f.read()
+    used = {}
+    for where, text in files.items():
+        for name in VAR_USE.findall(text):
+            used.setdefault(name, set()).add(where)
+    own, local = set(), set()
+    for head, body in _css_blocks(files["theme.css"]):
+        sels = [" ".join(s.split()) for s in head.split(",")]
+        for k, _v in decls_of(body):
+            if k.startswith("--"):
+                (own if all(s in ROOT_SELECTORS for s in sels) else local).add(k)
+    provided = {mode: sorted(raw["theme"]["tokens"].get(mode, {})) for mode in ("light", "dark")}
+    contract = set(known["core"]) | set(known["mascot"]) | set(known["advanced"])
+    groups = {"core": [], "mascot": [], "advanced": [], "own": [], "local": [], "unknown": []}
+    for name in sorted(used):
+        bare = name[2:]
+        if bare in known["core"]:
+            groups["core"].append(name)
+        elif bare in known["mascot"]:
+            groups["mascot"].append(name)
+        elif bare in known["advanced"]:
+            groups["advanced"].append(name)
+        elif name.startswith("--th-") and name in own:
+            groups["own"].append(name)
+        elif name in local:
+            groups["local"].append(name)
+        else:
+            groups["unknown"].append(name)
+    not_in_pack = [n for n in groups["core"] + groups["mascot"] + groups["advanced"]
+                   if not all(n in provided[m] for m in ("light", "dark"))]
+    hard = []
+    for where, text in files.items():
+        if where == "theme.css":
+            for head, body in _css_blocks(text):
+                if head.startswith("@keyframes"):
+                    for kf_head, kf_body in _css_blocks(body):
+                        for k, v in decls_of(kf_body):
+                            for c in LITERAL_COLOR.findall(_strip_var_fallbacks(v)):
+                                hard.append((where, f"@keyframes {head.split()[1]} {k}", c))
+                    continue
+                sels = [" ".join(s.split()) for s in head.split(",")]
+                if all(s in ROOT_SELECTORS for s in sels):
+                    continue                                     # :root 的 --th- 顏色就是「宣告」本身
+                for k, v in decls_of(body):
+                    if k in COLOR_PROPS or k.startswith("--"):
+                        for c in LITERAL_COLOR.findall(_strip_var_fallbacks(v)):
+                            hard.append((where, f"{head.strip()[:50]} {{{k}}}", c))
+            continue
+        for attr, v in re.findall(r'\s(' + "|".join(COLOR_ATTRS) + r')="([^"]*)"', text):
+            for c in LITERAL_COLOR.findall(_strip_var_fallbacks(v)):
+                hard.append((where, attr, c))
+    counted = {}
+    for where, what, c in hard:
+        key = (where, what, c.lower().replace(" ", ""))
+        counted[key] = counted.get(key, 0) + 1
+    return {"name": raw["name"], "version": raw["version"], "title": raw["title"],
+            "provided": provided, "used": {k: sorted(v) for k, v in sorted(used.items())}, "groups": groups,
+            "not_in_pack": not_in_pack, "own_defined": sorted(own),
+            "hardcoded": [{"file": w, "where": what, "color": c, "count": n, "mascot": w in MASCOT_SLOTS}
+                          for (w, what, c), n in sorted(counted.items())]}
+
+
+def token_report_md(rows: list, known: dict) -> str:
+    L = ["# 衣櫃外觀用到的顏色變數（token）", "",
+         "由 `python scripts/build_costumes.py tokens --write` 產生，**不要手改**（`tests/test_costumes.py` 會比對是不是最新的）。",
+         "給 SYNOX 核心做「套用前缺漏檢查」：一套外觀的 theme.css 與 slot SVG 用到的 `var(--…)`，在套用時都要有值。", "",
+         f"核心認得的 token 來源：{known['source']}。", "",
+         "## 怎麼讀", "",
+         "- **核心 token**：合約上的 12 色＋`--radius`、`--font-ui`、`--font-brand`。每一套的 pack.json 淺色／深色都給齊（`check` 會擋）。",
+         "- **吉祥物 token**：`--m1`、`--m2`、`--mi`、`--mb`（選用）；pack.json 有給就用，沒給 SYNOX 從核心色算（`DERIVED`）。",
+         "- **進階 token**：合約的進階名字（`--m-hi`、`--surface-2`…）；外觀包通常不給，SYNOX 從核心色算。",
+         "- **自己的 `--th-`**：這一套在 theme.css 的 `:root` 自己宣告（淺色、深色各一份），不需要核心提供。",
+         "- **區域變數**：規則裡自己設的（`--i`、`--n` 這種排第幾個的數字），不是顏色。",
+         "- **寫死的顏色**：不經變數、直接寫在 SVG 屬性或 theme.css 規則裡的顏色（`var(--x, #後備)` 的後備值不算）。",
+         "  吉祥物與 App 圖示（`mascot.*`、`appicon`）裡的多半是刻意的配色（高光、腮紅、陰影），換深淺色也不變；",
+         "  開場、字標裡的要特別看。", ""]
+    flagged = [r for r in rows if r["groups"]["unknown"] or r["not_in_pack"]]
+    L += ["## 要注意的", ""]
+    if not flagged:
+        L.append("- 沒有：每一套用到的變數都是核心 token、pack.json 有給的吉祥物 token、自己宣告的 `--th-`，或規則裡的區域變數。")
+    for r in flagged:
+        if r["groups"]["unknown"]:
+            L.append(f"- `{r['name']}`：用了核心可能沒有的變數 {' '.join(f'`{n}`' for n in r['groups']['unknown'])}")
+        if r["not_in_pack"]:
+            L.append(f"- `{r['name']}`：用了 pack.json 沒給的 token {' '.join(f'`{n}`' for n in r['not_in_pack'])}（要靠核心算出來）")
+    L += ["", "## 總表", "",
+          "| 外觀 | 版本 | 核心 token | 吉祥物 token | 進階 | 自己的 `--th-` | 區域變數 | 不認得 | 寫死的顏色（吉祥物／開場與字標） |",
+          "|---|---|---|---|---|---|---|---|---|"]
+
+    def names(lst):
+        return " ".join(f"`{n}`" for n in lst) or "—"
+    for r in rows:
+        g = r["groups"]
+        m = sum(h["count"] for h in r["hardcoded"] if h["mascot"])
+        o = sum(h["count"] for h in r["hardcoded"] if not h["mascot"])
+        L.append(f"| `{r['name']}` {r['title']} | {r['version']} | {names(g['core'])} | {names(g['mascot'])} | {names(g['advanced'])} | "
+                 f"{names(g['own'])} | {names(g['local'])} | {names(g['unknown'])} | {m}／{o} |")
+    L += ["", "## 寫死的顏色（逐套）", "",
+          "同一個地方、同一個顏色只列一次（後面是出現幾次）。★＝吉祥物或 App 圖示（多半是刻意的配色）。", ""]
+    for r in rows:
+        if not r["hardcoded"]:
+            continue
+        L.append(f"### `{r['name']}` {r['title']}")
+        L.append("")
+        for h in r["hardcoded"]:
+            star = "★ " if h["mascot"] else ""
+            L.append(f"- {star}`{h['file']}` {h['where']}：`{h['color']}`" + (f" ×{h['count']}" if h["count"] > 1 else ""))
+        L.append("")
+    return "\n".join(L).rstrip() + "\n"
+
+
+def token_report(as_json: bool = False):
+    known = synox_token_names()
+    rows = [token_usage(f, known) for f in costume_folders()]
+    if as_json:
+        return json.dumps({"source": known["source"], "costumes": rows}, ensure_ascii=False, indent=2) + "\n"
+    return token_report_md(rows, known)
 
 
 # ── extract：品牌提案頁 → costumes/<id>/（要 Playwright、fontTools、連網一次）─────────────
@@ -944,6 +1181,52 @@ def clean_svg(svg: str) -> str:
     return svg
 
 
+# 品牌提案頁的寫法搬到 SVG 之後不穩的地方：extract 轉好 theme.css 之後照這張表換（舊的那段找不到就停下來，表要跟著改）。
+# 「1ms steps(1) …延遲… both」想做的是「時間到才出現」，可是終點進度常常算成 0.99999999999989，steps(1) 取整成 0，
+# 就一直停在藏起來的樣子（E 的開場 X 不見）。改成整段藏起來、時間＝要等多久、fill 用 none：播完就是元素原本的樣子（看得到）。
+# max-width 在 SVG 的 <g> 上本來就沒有作用（那是品牌頁 HTML 版用來讓游標跟著字走的），一起拿掉。
+CSS_FIXUPS = {
+    "E": [
+        ("[data-slot] .op-E .l{animation:th-e-oE-key 1ms steps(1) calc(.35s + var(--i) * .17s) both}",
+         "[data-slot] .op-E .l{animation:th-e-oE-key calc(.35s + var(--i) * .17s) linear 0s 1 normal none}"),
+        ("@keyframes th-e-oE-key { \n  0% { max-width: 0px; opacity: 0; }\n  100% { max-width: 3em; opacity: 1; }\n}",
+         "@keyframes th-e-oE-key { \n  0%, 100% { opacity: 0; }\n}"),
+    ],
+    "W": [
+        ("[data-slot][data-slot] .op-W .wboot .t-span{animation:1ms steps(1) 0s 1 normal both running th-w-wp-o-line}",
+         "[data-slot][data-slot] .op-W .wboot .t-span{animation:0s linear 0s 1 normal none running th-w-wp-o-line}"),
+        ("[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-delay:0.2s}",
+         "[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-duration:0.2s}"),
+        ("[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-delay:0.4s}",
+         "[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-duration:0.4s}"),
+        ("@keyframes th-w-wp-o-line { \n  0% { visibility: hidden; }\n  100% { visibility: visible; }\n}",
+         "@keyframes th-w-wp-o-line { \n  0%, 100% { visibility: hidden; }\n}"),
+    ],
+    # L（格格）的載入條：品牌頁的 translateX(-50%) 是「自己寬度的一半」（置中在吉祥物底下）；搬到 SVG 的 <g> 之後
+    # 百分比改成照整張 viewBox 算（480 的一半＝240px），整條被推到畫面最左邊。改成實際的半寬（6 格、寬 57 → 28.5px）。
+    # 時間：原本第 6 格 0.9s 才亮、0.95s 整條就收掉，滿格只露 40ms 左右（看起來像沒走完）。每格提早一格（120ms）開始，
+    # 0.78s 走滿，吉祥物 0.85s 長完，滿格一直留到字標開始掉下來（1.05s）前才收。
+    "L": [
+        ("[data-slot][data-slot] .op-L .l-bar{transform:translateX(-50%)}",
+         "[data-slot][data-slot] .op-L .l-bar{transform:translateX(-28.5px)}"),
+        ("[data-slot][data-slot] .op-L .l-bar .t-i{animation:th-l-l-o-blink .3s steps(1) calc(var(--n) * 120ms) both, th-l-l-o-out .01s linear .95s forwards}",
+         "[data-slot][data-slot] .op-L .l-bar .t-i{animation:th-l-l-o-blink .3s steps(1) calc((var(--n) - 1) * 120ms) both, th-l-l-o-out .01s linear 1.04s forwards}"),
+        ("[data-slot][data-slot] .op-L .l-bar{opacity:0;animation:1s steps(1) 0s 1 normal both running th-l-l-o-bar}",
+         "[data-slot][data-slot] .op-L .l-bar{opacity:0;animation:1.1s steps(1) 0s 1 normal both running th-l-l-o-bar}"),
+    ],
+}
+
+
+def apply_fixups(letter: str, css: str) -> str:
+    for old, new in CSS_FIXUPS.get(letter, []):
+        if new in css:
+            continue
+        if css.count(old) != 1:
+            raise SystemExit(f"系列 {letter} 的 theme.css 找不到要換的那段（CSS_FIXUPS 要跟著改）：{old[:60]}")
+        css = css.replace(old, new)
+    return css
+
+
 def extract(brand: str, cache: str, only=None) -> None:
     try:
         from playwright.sync_api import sync_playwright
@@ -1106,7 +1389,7 @@ def extract(brand: str, cache: str, only=None) -> None:
                 if r.get("kf") in used:
                     text = re.sub(r"^@keyframes\s+[\w-]+", f"@keyframes {kfp}{r['kf']}", r["css"])
                     css_lines.append(fix(text))
-            theme_css = "\n".join(css_lines) + "\n"
+            theme_css = apply_fixups(sid, "\n".join(css_lines) + "\n")
             write_costume(s, slots, theme_css, extras_l, extras_d)
         browser.close()
 
@@ -1125,7 +1408,7 @@ def write_costume(s: dict, slots: dict, theme_css: str, extras_l: dict, extras_d
     folder = os.path.join(COSTUMES, cid)
     os.makedirs(os.path.join(folder, "slots"), exist_ok=True)
     why = {w.split("|", 1)[0]: w.split("|", 1)[1] for w in s["why"]}
-    pack = {"name": cid, "kind": "theme", "version": VERSION, "title": s["name"],
+    pack = {"name": cid, "kind": "theme", "version": VERSIONS.get(s["id"], VERSION), "title": s["name"],
             "summary": f"{s['one']}。SYNOX 衣櫃 · 系列 {s['id']}：整個聊天介面的顏色、吉祥物、開場一起換（只有圖和顏色，不帶程式）。",
             "publisher": PUBLISHER, "stage": STAGE,
             "theme": {"contract": CONTRACT, "tokens": {"light": tokens_of(s, "light"), "dark": tokens_of(s, "dark")},
@@ -1157,7 +1440,19 @@ def main(argv=None) -> int:
     pk.add_argument("--out", default=os.path.join(ROOT, "dist"))
     sub.add_parser("page", help="costumes/ → docs/site/wardrobe.html")
     sub.add_parser("check", help="只檢查")
+    tk = sub.add_parser("tokens", help="每一套用到的顏色變數與寫死的顏色（給 SYNOX 套用前缺漏檢查）")
+    tk.add_argument("--json", action="store_true", help="印 JSON（給程式讀）")
+    tk.add_argument("--write", action="store_true", help="寫到 docs/costume-token-usage.md")
     args = ap.parse_args(argv)
+    if args.cmd == "tokens":
+        text = token_report(as_json=args.json)
+        if args.write and not args.json:
+            with open(TOKEN_DOC, "w", encoding="utf-8", newline="\n") as f:
+                f.write(text)
+            print(TOKEN_DOC)
+        else:
+            sys.stdout.write(text)
+        return 0
     if args.cmd == "extract":
         extract(args.brand, args.fonts_cache, set(args.only or []) or None)
         return 0

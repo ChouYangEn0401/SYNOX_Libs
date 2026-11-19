@@ -19,6 +19,23 @@
   資料對照「吉他和弦全書」：補簡易 Bm `x x 0 4 3 2`、一指 G `x x 0 0 0 3`（都標「低音 D」）；簡易 B／Bb／Cm 的提醒寫明最低音不是根音；
   A 型 add9／madd9（要跨 5 格）拿掉；A 型 dim7 改成常見的 `x 3 4 2 4 x`（2-3-1-4）、m7b5 1-3-2-4；自動排的手指照格數給（差 3 格用小指），
   滑到第 0 格的手型不再把橫按的手指放在空弦上，還是要撐開 4 格的會標「要撐開」。
+- **衣櫃 `costume-l-blocks`（格格）1.0.0 → 1.0.1**：開場吉祥物底下那排綠色小格（載入條）跑到畫面最左邊、看起來沒走完。品牌頁用
+  `translateX(-50%)` 把它置中（自己寬度的一半）；搬進 SVG 之後百分比改成照整張畫面算（480 的一半），整條被推到最左邊。改成實際的半寬
+  `-28.5px`，回到吉祥物正下方。時間也調整：原本第 6 格 0.9s 才亮、0.95s 整條就收掉，滿格只露約 40ms；現在每格提早 120ms 開始，
+  0.78s 走滿、吉祥物 0.85s 長完，滿格留到字標開始掉下來（1.04s）才收。其他外觀不動。`build_costumes.py` 的 `CSS_FIXUPS` 多一組 L；
+  `check` 多擋「SVG 裡用百分比 translate 定位」這種寫法。
+- **衣櫃的 `.synoxpack` 在哪台電腦打都一樣**：zip 裡「哪個系統做的」原本照執行的電腦寫（Windows＝0、Linux＝3），同樣的內容在 Windows
+  打出來的 sha256 跟發佈頁上（Linux 打的）不一樣。固定寫 Unix 之後，沒改內容的 23 套在本機打出來跟發佈頁上的 1.0.0 一模一樣，
+  只有真的有改的 E、L、W 不一樣。（工具的 `.synoxpack` 是 SYNOX 的 `zip_pack` 打的，不在這次範圍。）
+- **衣櫃 `costume-e-cursor` 1.0.0 → 1.0.1、`costume-w-pixel` 1.0.0 → 1.0.1**：E 的開場打完字少了最後的「X」。原因是「時間到才出現」寫成
+  `1ms steps(1) 延遲 both`：第 5 個字的延遲是 `calc(.35s + 4 * .17s)`，播完時進度算成 0.99999999999989 而不是 1，`steps(1)` 往下取整成 0，
+  X 就一直停在透明（瀏覽器實測）。改成整段藏起來、時間＝要等多久、fill `none`，播完就是字原本的樣子。W 開機畫面的三行字是同一種寫法（目前沒出事），一起改。
+  `build_costumes.py` 加 `CSS_FIXUPS`（extract 之後照表換，重跑不會退回去）與 `VERSIONS`；`check` 多擋「幾 ms 的 steps() 又停在終點」這種寫法。
+- **衣櫃公開頁（`docs/site/wardrobe.html`）的開場與「↻ 重播開場」**：產生頁面時把規則限定在卡片裡的那一步，會把 G–Z 自己的規則
+  `[data-slot][data-slot] …` 兩個 `[data-slot]` 都換掉，變成一條都對不到——G–Z 的開場在公開頁上根本沒播（W 的開機字一直蓋在字標上），
+  按重播當然沒反應。改成只換第一個。重播改成「先把那個開場的動畫全關、讓瀏覽器算一次、再放回去」（不靠 `cloneNode`）；
+  播到該結束的時間還沒播完（分頁在背景、瀏覽器沒在畫）就直接跳到終點；系統開了「減少動態效果」就不播、畫面是終態。
+  `tests/test_wardrobe.py` 守這幾點（只改公開頁，`.synoxpack` 不受影響）。
 - **`money` 0.3.0 → 0.3.1**（SYNOX 獨立安全審查第 1 輪）：金額欄位改用 SYNOX 的 `kit.amount`（大於 0、最多兩位小數、不超過十億；預算與上限另外收 0＝拿掉）；`nan`、`inf` 這類不是一般數字的值一律擋下（以前會讓記一筆出錯、讓預算存成 NaN 之後每筆都壞）。
 - **`calendar` 0.1.2**（ADR-0006 T5、P1）：`/cal_ics` 的檔名改成每次不同（`export-<時間>-<亂數>.ics`），同一個人同時匯出兩次
   不會互相蓋、互相刪；匯出前先清掉這個人資料夾裡留下的舊匯出檔（舊版的 `export.ics`、10 分鐘以前的）。
@@ -60,6 +77,15 @@
   月曆上顯示別的工具的項目只留一個空的掛勾（`pack.link_sources`），沒有來源也不會出錯。
 - **`calendar` 面板修正（同版）**：舊面板顯示「讀不到（Failed to fetch）」——它用 `fetch("/api/packs/calendar/today", {credentials: …})`，
   但 SYNOX 的面板在沒有 `allow-same-origin` 的隔開 iframe 裡跑（沒有 cookie、碰不到 `/api/`），只准相對網址；改成 `fetch("api/today")`，面板也多了今天的清單。
+- **`index.json` 與公開頁帶作者標的警告（pack.json 的 `warnings`，SYNOX ADR 0041）**：`build.py` 把整理過的警告抄進 `index.json` 那一筆
+  （`line` 後面；規則跟 SYNOX 的 `packwarn` 一樣，`scripts/pack_warnings.py`），SYNOX 工具庫清單在安裝前就看得到；清單上的只是預告，
+  安裝時仍由簽過的 pack.json 重新檢查、逐條確認。寫壞的不讓打包失敗，換成 `malformed_warning` 並印「⚠️ 注意」。入口頁卡片與產生的工具頁
+  用紅框顯示；帶警告的工具標題、徽章不准有「官方」。沒寫 `warnings` 的工具，`index.json` 與頁面一字不差。
+  真機驗證清單：`docs/testing/wardrobe-and-index-checklist.md`（衣櫃頁開場、重播、下載；工具庫列表的警告；全部勾完才算過關）。
+- **衣櫃的顏色變數清單 [`docs/costume-token-usage.md`](docs/costume-token-usage.md)**（`python scripts/build_costumes.py tokens --write`；`--json` 給程式讀）：
+  每一套 theme.css 與 slot SVG 用到哪些 `var(--…)`（核心 token、吉祥物 token、進階 token、自己在 `:root` 宣告的 `--th-`、規則裡的區域變數），
+  哪裡不經變數寫死顏色（吉祥物與 App 圖示的刻意配色另外標出）。給 SYNOX 核心做「套用前缺漏檢查」用；26 套都沒有用到核心沒有的變數。
+  測試守住：清單是最新的、每一套只用核心或自己提供的變數、抄的 token 名字跟 SYNOX 的合約一樣。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；

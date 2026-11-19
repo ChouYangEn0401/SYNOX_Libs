@@ -104,6 +104,8 @@ footer a { color: var(--ink-2); }
 .stamp a { color: inherit; }
 @media (max-width: 520px) { .top a, footer a { display: inline-block; padding-block: 8px; } .cw { padding: 14px; } .cw h2 { font-size: 23px; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+/* 重播：先把開場裡的動畫全部拿掉一下，再放回去＝每個瀏覽器都從頭播一次（見最下面的 replay） */
+.cw-screen.cw-rs svg, .cw-screen.cw-rs svg * { animation: none !important; }
 
 /* 每一套的 token（淺色／深色） */
 .cw-a{--bg:#f3f6f8;--surface:#ffffff;--text:#131b26;--muted:#5d6b7e;--line:#dfe6ee;--accent:#0a7c70;--accent-ink:#ffffff;--accent2:#2f7fd6;--soft:#dff2ee;--ok:#12823b;--warn:#9a6400;--bad:#c62f2f;--radius:16px;--m1:#0d9484;--m2:#0a7c70;--mi:#ffffff;--mb:#ff8fa3;}
@@ -502,7 +504,7 @@ footer a { color: var(--ink-2); }
 .cw-e [data-slot] .op .ow{color:var(--text)}
 .cw-e [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-e-o-fade}
 .cw-e [data-slot] .op-E .pr{color:var(--accent)}
-.cw-e [data-slot] .op-E .l{animation:th-e-oE-key 1ms steps(1) calc(.35s + var(--i) * .17s) both}
+.cw-e [data-slot] .op-E .l{animation:th-e-oE-key calc(.35s + var(--i) * .17s) linear 0s 1 normal none}
 .cw-e [data-slot] .op-E .eye{transform-box:fill-box;transform-origin:50% 50%;animation:0.3s ease 1.4s 1 normal both running th-e-oE-eye}
 .cw-e [data-slot] .op-E .mouth{transform-box:fill-box;transform-origin:50% 50%;animation:0.3s ease 1.4s 1 normal both running th-e-oE-eye}
 .cw-e [data-slot] .op-E .mbody{animation:auto ease 0s 1 normal none running none}
@@ -546,8 +548,7 @@ footer a { color: var(--ink-2); }
   0% { opacity: 0; transform: translateY(6px); }
 }
 @keyframes th-e-oE-key{ 
-  0% { max-width: 0px; opacity: 0; }
-  100% { max-width: 3em; opacity: 1; }
+  0%, 100% { opacity: 0; }
 }
 @keyframes th-e-oE-eye{ 
   0% { transform: scaleY(0); }
@@ -659,33 +660,33 @@ footer a { color: var(--ink-2); }
 .cw-g [data-slot] .op .hi > .v > .bg{fill:var(--surface)}
 .cw-g [data-slot] .op .hi > .v > .bd{stroke:var(--line)}
 .cw-g [data-slot] .wm{color:var(--text)}
-.cw-g [data-slot].cw-g [data-slot] .masc .gmoon{transform-box:fill-box}
-.cw-g [data-slot].cw-g [data-slot] .masc .ghead{transform-box:fill-box}
-.cw-g [data-slot].cw-g [data-slot] .masc .gear{transform-box:fill-box}
-.cw-g [data-slot].cw-g [data-slot] .masc .gtail{transform-box:fill-box}
-.cw-g [data-slot].cw-g [data-slot] .masc .gtongue{transform-box:fill-box}
-.cw-g [data-slot].cw-g [data-slot] .masc .gmoon{transform-origin:50% 50%}
-.cw-g [data-slot].cw-g [data-slot] .masc .ghead{transform-origin:50% 100%}
-.cw-g [data-slot].cw-g [data-slot] .masc .gear{transform-origin:50% 100%}
-.cw-g [data-slot].cw-g [data-slot] .masc .mbody{filter:drop-shadow(1.2px 0 0 var(--th-rim)) drop-shadow(-1.2px 0 0 var(--th-rim)) drop-shadow(0 -1.2px 0 var(--th-rim))}
-.cw-g [data-slot].cw-g [data-slot] .masc .gtail{transform-origin:0% 100%;animation:1.9s ease-in-out 0s infinite normal none running th-g-g-wag}
-.cw-g [data-slot].cw-g [data-slot] .masc .gtongue{transform-origin:50% 0%;animation:0.5s ease-in-out 0s infinite normal none running th-g-g-pant}
-.cw-g [data-slot].cw-g [data-slot] .st-idle .gear.gl{animation:5.2s ease-in-out 0s infinite normal none running th-g-g-twitch}
-.cw-g [data-slot].cw-g [data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-g [data-slot].cw-g [data-slot] .st-think .ghead{animation:3s ease-in-out 0s infinite normal none running th-g-g-tilt}
-.cw-g [data-slot].cw-g [data-slot] .st-think .gtail{animation-duration:3s}
-.cw-g [data-slot].cw-g [data-slot] .st-happy .gtail{animation-duration:0.34s}
-.cw-g [data-slot].cw-g [data-slot] .st-warn .gtail{animation:auto ease 0s 1 normal none running none;transform:rotate(-22deg)}
-.cw-g [data-slot].cw-g [data-slot] .st-warn .gear{animation:2.4s ease-out 0s infinite normal none running th-g-g-perk}
-.cw-g [data-slot].cw-g [data-slot] .op-G .gmoon{animation:0.5s cubic-bezier(0.2, 1.3, 0.4, 1) 0s 1 normal both running th-g-g-o-moon}
-.cw-g [data-slot].cw-g [data-slot] .op-G .st-idle .mbody{animation:0.55s cubic-bezier(0.2, 1.4, 0.4, 1) 0.22s 1 normal both running th-g-g-o-dog}
-.cw-g [data-slot].cw-g [data-slot] .op-G .hi{animation:1.05s ease 1.55s 1 normal both running th-g-o-hi}
-.cw-g [data-slot].cw-g [data-slot] .op-G .l{animation:th-g-g-o-let .28s ease calc(1.05s + var(--i) * 110ms) both}
-.cw-g [data-slot].cw-g [data-slot] .op-G .l > .ps-before{opacity:0;animation:th-g-g-o-paw .78s ease calc(.5s + var(--i) * 110ms) both}
-.cw-g [data-slot].cw-g [data-slot] .op-G .l > .ps-before > .v > .bg{fill:var(--accent)}
-.cw-g [data-slot].cw-g [data-slot] .op-G .l:nth-of-type(2n+1) > .ps-before{--gy:-5px;--gr:78deg}
-.cw-g [data-slot].cw-g [data-slot] .op-G .l:nth-of-type(2n) > .ps-before{--gy:5px;--gr:102deg}
-.cw-g [data-slot].cw-g [data-slot] .op-G .ot{animation-delay:1.95s}
+.cw-g [data-slot][data-slot] .masc .gmoon{transform-box:fill-box}
+.cw-g [data-slot][data-slot] .masc .ghead{transform-box:fill-box}
+.cw-g [data-slot][data-slot] .masc .gear{transform-box:fill-box}
+.cw-g [data-slot][data-slot] .masc .gtail{transform-box:fill-box}
+.cw-g [data-slot][data-slot] .masc .gtongue{transform-box:fill-box}
+.cw-g [data-slot][data-slot] .masc .gmoon{transform-origin:50% 50%}
+.cw-g [data-slot][data-slot] .masc .ghead{transform-origin:50% 100%}
+.cw-g [data-slot][data-slot] .masc .gear{transform-origin:50% 100%}
+.cw-g [data-slot][data-slot] .masc .mbody{filter:drop-shadow(1.2px 0 0 var(--th-rim)) drop-shadow(-1.2px 0 0 var(--th-rim)) drop-shadow(0 -1.2px 0 var(--th-rim))}
+.cw-g [data-slot][data-slot] .masc .gtail{transform-origin:0% 100%;animation:1.9s ease-in-out 0s infinite normal none running th-g-g-wag}
+.cw-g [data-slot][data-slot] .masc .gtongue{transform-origin:50% 0%;animation:0.5s ease-in-out 0s infinite normal none running th-g-g-pant}
+.cw-g [data-slot][data-slot] .st-idle .gear.gl{animation:5.2s ease-in-out 0s infinite normal none running th-g-g-twitch}
+.cw-g [data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-g [data-slot][data-slot] .st-think .ghead{animation:3s ease-in-out 0s infinite normal none running th-g-g-tilt}
+.cw-g [data-slot][data-slot] .st-think .gtail{animation-duration:3s}
+.cw-g [data-slot][data-slot] .st-happy .gtail{animation-duration:0.34s}
+.cw-g [data-slot][data-slot] .st-warn .gtail{animation:auto ease 0s 1 normal none running none;transform:rotate(-22deg)}
+.cw-g [data-slot][data-slot] .st-warn .gear{animation:2.4s ease-out 0s infinite normal none running th-g-g-perk}
+.cw-g [data-slot][data-slot] .op-G .gmoon{animation:0.5s cubic-bezier(0.2, 1.3, 0.4, 1) 0s 1 normal both running th-g-g-o-moon}
+.cw-g [data-slot][data-slot] .op-G .st-idle .mbody{animation:0.55s cubic-bezier(0.2, 1.4, 0.4, 1) 0.22s 1 normal both running th-g-g-o-dog}
+.cw-g [data-slot][data-slot] .op-G .hi{animation:1.05s ease 1.55s 1 normal both running th-g-o-hi}
+.cw-g [data-slot][data-slot] .op-G .l{animation:th-g-g-o-let .28s ease calc(1.05s + var(--i) * 110ms) both}
+.cw-g [data-slot][data-slot] .op-G .l > .ps-before{opacity:0;animation:th-g-g-o-paw .78s ease calc(.5s + var(--i) * 110ms) both}
+.cw-g [data-slot][data-slot] .op-G .l > .ps-before > .v > .bg{fill:var(--accent)}
+.cw-g [data-slot][data-slot] .op-G .l:nth-of-type(2n+1) > .ps-before{--gy:-5px;--gr:78deg}
+.cw-g [data-slot][data-slot] .op-G .l:nth-of-type(2n) > .ps-before{--gy:5px;--gr:102deg}
+.cw-g [data-slot][data-slot] .op-G .ot{animation-delay:1.95s}
 .cw-g [data-slot] .cg-v0{--i:0}
 .cw-g [data-slot] .cg-v1{--i:1}
 .cw-g [data-slot] .cg-v2{--i:2}
@@ -784,22 +785,22 @@ footer a { color: var(--ink-2); }
 .cw-h [data-slot] .op .ow{color:var(--text)}
 .cw-h [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-h-o-fade}
 .cw-h [data-slot] .wm{color:var(--text)}
-.cw-h [data-slot].cw-h [data-slot] .masc .hlid{transform-box:fill-box}
-.cw-h [data-slot].cw-h [data-slot] .masc .hsteam path{transform-box:fill-box}
-.cw-h [data-slot].cw-h [data-slot] .masc .hlid{transform-origin:50% 100%}
-.cw-h [data-slot].cw-h [data-slot] .masc .hsteam path{animation:2.8s ease-in-out 0s infinite normal none running th-h-h-steam}
-.cw-h [data-slot].cw-h [data-slot] .masc .hsteam path:nth-of-type(2){animation-delay:-1.3s}
-.cw-h [data-slot].cw-h [data-slot] .st-happy .hlid{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-h-h-lid}
-.cw-h [data-slot].cw-h [data-slot] .st-warn .hlid{animation:0.28s linear 0s infinite normal none running th-h-h-rattle}
-.cw-h [data-slot].cw-h [data-slot] .masc .hpuff path{animation:0.56s ease-out 0s infinite normal none running th-h-h-puff}
-.cw-h [data-slot].cw-h [data-slot] .masc .hpuff path:nth-of-type(2){animation-delay:-0.28s}
-.cw-h [data-slot].cw-h [data-slot] .op-H .omw{animation:1.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-h-h-o-shift}
-.cw-h [data-slot].cw-h [data-slot] .op-H .om{animation:1.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-h-h-o-pour}
-.cw-h [data-slot].cw-h [data-slot] .op-H .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-h [data-slot].cw-h [data-slot] .op-H .pour{opacity:0;animation:1.8s ease-in 0s 1 normal both running th-h-h-o-stream}
-.cw-h [data-slot].cw-h [data-slot] .op-H .pour > .v > .bg{fill:var(--accent2)}
-.cw-h [data-slot].cw-h [data-slot] .op-H .ow{animation:0.9s cubic-bezier(0.3, 0.6, 0.3, 1) 0.68s 1 normal both running th-h-h-o-fill}
-.cw-h [data-slot].cw-h [data-slot] .op-H .ot{animation-delay:1.75s}
+.cw-h [data-slot][data-slot] .masc .hlid{transform-box:fill-box}
+.cw-h [data-slot][data-slot] .masc .hsteam path{transform-box:fill-box}
+.cw-h [data-slot][data-slot] .masc .hlid{transform-origin:50% 100%}
+.cw-h [data-slot][data-slot] .masc .hsteam path{animation:2.8s ease-in-out 0s infinite normal none running th-h-h-steam}
+.cw-h [data-slot][data-slot] .masc .hsteam path:nth-of-type(2){animation-delay:-1.3s}
+.cw-h [data-slot][data-slot] .st-happy .hlid{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-h-h-lid}
+.cw-h [data-slot][data-slot] .st-warn .hlid{animation:0.28s linear 0s infinite normal none running th-h-h-rattle}
+.cw-h [data-slot][data-slot] .masc .hpuff path{animation:0.56s ease-out 0s infinite normal none running th-h-h-puff}
+.cw-h [data-slot][data-slot] .masc .hpuff path:nth-of-type(2){animation-delay:-0.28s}
+.cw-h [data-slot][data-slot] .op-H .omw{animation:1.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-h-h-o-shift}
+.cw-h [data-slot][data-slot] .op-H .om{animation:1.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-h-h-o-pour}
+.cw-h [data-slot][data-slot] .op-H .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-h [data-slot][data-slot] .op-H .pour{opacity:0;animation:1.8s ease-in 0s 1 normal both running th-h-h-o-stream}
+.cw-h [data-slot][data-slot] .op-H .pour > .v > .bg{fill:var(--accent2)}
+.cw-h [data-slot][data-slot] .op-H .ow{animation:0.9s cubic-bezier(0.3, 0.6, 0.3, 1) 0.68s 1 normal both running th-h-h-o-fill}
+.cw-h [data-slot][data-slot] .op-H .ot{animation-delay:1.75s}
 .cw-h [data-slot] .ch-v0{--i:0}
 .cw-h [data-slot] .ch-v1{--i:1}
 .cw-h [data-slot] .ch-v2{--i:2}
@@ -897,26 +898,26 @@ footer a { color: var(--ink-2); }
 .cw-i [data-slot] .op .ow{color:var(--text)}
 .cw-i [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-i-o-fade}
 .cw-i [data-slot] .wm{color:var(--text)}
-.cw-i [data-slot].cw-i [data-slot] .masc .ileg{transform-box:fill-box}
-.cw-i [data-slot].cw-i [data-slot] .masc .iled .eye{transform-box:fill-box}
-.cw-i [data-slot].cw-i [data-slot] .masc .ileg{transform-origin:50% 0%}
-.cw-i [data-slot].cw-i [data-slot] .masc .iled{filter:drop-shadow(currentcolor 0px 0px 1.6px)}
-.cw-i [data-slot].cw-i [data-slot] .masc .ibulb{animation-duration:1.2s;animation-timing-function:steps(1);animation-iteration-count:infinite;animation-direction:normal;animation-fill-mode:none;animation-play-state:running;animation-name:th-i-i-chase;animation-timeline:auto;animation-range:normal;animation-delay:calc(var(--i) * -300ms)}
-.cw-i [data-slot].cw-i [data-slot] .st-think .ibulb{animation-duration:0.48s;animation-delay:calc(var(--i) * -120ms)}
-.cw-i [data-slot].cw-i [data-slot] .st-happy .ibulb{animation:0.42s steps(1) 0s infinite normal none running th-i-i-flash}
-.cw-i [data-slot].cw-i [data-slot] .st-warn .ibulb{animation:1.2s steps(1) 0s infinite normal none running th-i-i-flash;fill:rgb(255, 143, 61)}
-.cw-i [data-slot].cw-i [data-slot] .st-think .ileg.il{animation:0.36s ease-in-out 0s infinite normal none running th-i-i-run}
-.cw-i [data-slot].cw-i [data-slot] .st-think .ileg.ir{animation:0.36s ease-in-out -0.18s infinite normal none running th-i-i-run}
-.cw-i [data-slot].cw-i [data-slot] .op-I .iboard > .v > .bg{fill:var(--th-panel)}
-.cw-i [data-slot].cw-i [data-slot] .op-I .iboard > .v > .sh{fill:var(--m1)}
-.cw-i [data-slot].cw-i [data-slot] .op-I .iboard .ibd{opacity:0.9;animation:0.5s steps(1) 0s 4 normal both running th-i-i-o-bd}
-.cw-i [data-slot].cw-i [data-slot] .op-I .iboard .ibd > .v > .bd{stroke:var(--th-bulb)}
-.cw-i [data-slot].cw-i [data-slot] .op-I .ow{color:var(--mi);filter:drop-shadow(0 0 9px color-mix(in srgb, var(--mi) 65%, transparent));animation:1.1s steps(20) 0.3s 1 normal both running th-i-i-o-scroll, 0.5s steps(1) 1.4s 1 normal none running th-i-i-o-flick}
-.cw-i [data-slot].cw-i [data-slot] .op-I .om{animation:0.9s steps(9) 0s 1 normal both running th-i-i-o-in}
-.cw-i [data-slot].cw-i [data-slot] .op-I .st-idle .mbody{animation:0.18s ease-in-out 0s 5 normal none running th-i-i-o-bounce}
-.cw-i [data-slot].cw-i [data-slot] .op-I .ileg.il{animation:0.18s ease-in-out 0s 5 normal none running th-i-i-run}
-.cw-i [data-slot].cw-i [data-slot] .op-I .ileg.ir{animation:0.18s ease-in-out -0.09s 5 normal none running th-i-i-run}
-.cw-i [data-slot].cw-i [data-slot] .op-I .ot{animation-delay:1.75s}
+.cw-i [data-slot][data-slot] .masc .ileg{transform-box:fill-box}
+.cw-i [data-slot][data-slot] .masc .iled .eye{transform-box:fill-box}
+.cw-i [data-slot][data-slot] .masc .ileg{transform-origin:50% 0%}
+.cw-i [data-slot][data-slot] .masc .iled{filter:drop-shadow(currentcolor 0px 0px 1.6px)}
+.cw-i [data-slot][data-slot] .masc .ibulb{animation-duration:1.2s;animation-timing-function:steps(1);animation-iteration-count:infinite;animation-direction:normal;animation-fill-mode:none;animation-play-state:running;animation-name:th-i-i-chase;animation-timeline:auto;animation-range:normal;animation-delay:calc(var(--i) * -300ms)}
+.cw-i [data-slot][data-slot] .st-think .ibulb{animation-duration:0.48s;animation-delay:calc(var(--i) * -120ms)}
+.cw-i [data-slot][data-slot] .st-happy .ibulb{animation:0.42s steps(1) 0s infinite normal none running th-i-i-flash}
+.cw-i [data-slot][data-slot] .st-warn .ibulb{animation:1.2s steps(1) 0s infinite normal none running th-i-i-flash;fill:rgb(255, 143, 61)}
+.cw-i [data-slot][data-slot] .st-think .ileg.il{animation:0.36s ease-in-out 0s infinite normal none running th-i-i-run}
+.cw-i [data-slot][data-slot] .st-think .ileg.ir{animation:0.36s ease-in-out -0.18s infinite normal none running th-i-i-run}
+.cw-i [data-slot][data-slot] .op-I .iboard > .v > .bg{fill:var(--th-panel)}
+.cw-i [data-slot][data-slot] .op-I .iboard > .v > .sh{fill:var(--m1)}
+.cw-i [data-slot][data-slot] .op-I .iboard .ibd{opacity:0.9;animation:0.5s steps(1) 0s 4 normal both running th-i-i-o-bd}
+.cw-i [data-slot][data-slot] .op-I .iboard .ibd > .v > .bd{stroke:var(--th-bulb)}
+.cw-i [data-slot][data-slot] .op-I .ow{color:var(--mi);filter:drop-shadow(0 0 9px color-mix(in srgb, var(--mi) 65%, transparent));animation:1.1s steps(20) 0.3s 1 normal both running th-i-i-o-scroll, 0.5s steps(1) 1.4s 1 normal none running th-i-i-o-flick}
+.cw-i [data-slot][data-slot] .op-I .om{animation:0.9s steps(9) 0s 1 normal both running th-i-i-o-in}
+.cw-i [data-slot][data-slot] .op-I .st-idle .mbody{animation:0.18s ease-in-out 0s 5 normal none running th-i-i-o-bounce}
+.cw-i [data-slot][data-slot] .op-I .ileg.il{animation:0.18s ease-in-out 0s 5 normal none running th-i-i-run}
+.cw-i [data-slot][data-slot] .op-I .ileg.ir{animation:0.18s ease-in-out -0.09s 5 normal none running th-i-i-run}
+.cw-i [data-slot][data-slot] .op-I .ot{animation-delay:1.75s}
 .cw-i [data-slot] .ci-v0{--i:0}
 .cw-i [data-slot] .ci-v1{--i:1}
 .cw-i [data-slot] .ci-v2{--i:2}
@@ -1016,33 +1017,33 @@ footer a { color: var(--ink-2); }
 .cw-j [data-slot] .op .ow{color:var(--text)}
 .cw-j [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-j-o-fade}
 .cw-j [data-slot] .wm{color:var(--text)}
-.cw-j [data-slot].cw-j [data-slot] .masc .j-arm{transform-origin:34px 71px}
-.cw-j [data-slot].cw-j [data-slot] .masc .j-node{transform-box:fill-box;transform-origin:50% 50%}
-.cw-j [data-slot].cw-j [data-slot] .masc .j-sig{stroke-dasharray:16, 300;stroke-dashoffset:16}
-.cw-j [data-slot].cw-j [data-slot] .masc .j-cut{stroke-dasharray:26, 30, 44}
-.cw-j [data-slot].cw-j [data-slot] .st-idle .j-arm{animation:3.6s ease-in-out 0s infinite normal none running th-j-j-sway}
-.cw-j [data-slot].cw-j [data-slot] .st-idle .j-sig{animation:2.8s cubic-bezier(0.5, 0, 0.5, 1) 0s infinite normal none running th-j-j-sig}
-.cw-j [data-slot].cw-j [data-slot] .st-idle .j-node{animation:2.8s ease-out 0s infinite normal none running th-j-j-ping}
-.cw-j [data-slot].cw-j [data-slot] .st-think .j-sig{animation:1.1s cubic-bezier(0.5, 0, 0.5, 1) 0s infinite alternate none running th-j-j-sig}
-.cw-j [data-slot].cw-j [data-slot] .st-happy .j-sig{animation:1.3s cubic-bezier(0.5, 0, 0.5, 1) 0s infinite normal none running th-j-j-sig}
-.cw-j [data-slot].cw-j [data-slot] .st-warn .j-cut{animation:2.4s ease-in-out 0s infinite normal none running th-j-j-cut}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-big{transform-box:fill-box;transform-origin:50% 50%;animation:0.5s cubic-bezier(0.2, 1.5, 0.4, 1) 0s 1 normal both running th-j-j-o-pop}
-.cw-j [data-slot].cw-j [data-slot] .op-J .mbody > :not(.j-arm):not(.j-big){animation:0.25s ease 0.32s 1 normal both running th-j-j-o-in}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-link{stroke-dasharray:100;animation:0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.45s 1 normal both running th-j-j-o-draw}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-node{animation:0.4s cubic-bezier(0.2, 1.7, 0.4, 1) 0.82s 1 normal both running th-j-j-o-pop}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-sig{animation:2.8s cubic-bezier(0.5, 0, 0.5, 1) 1.6s infinite normal none running th-j-j-sig}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-arm{animation:auto ease 0s 1 normal none running none}
-.cw-j [data-slot].cw-j [data-slot] .op-J .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-j [data-slot].cw-j [data-slot] .op-J .om{transform:translateY(-12px) scale(1.3)}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-ring{opacity:0;animation:0.7s ease-out 0.95s 1 normal both running th-j-j-o-ring}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-ring > .v > .bd{stroke:var(--m2)}
-.cw-j [data-slot].cw-j [data-slot] .op-J .l{animation:th-j-j-o-letter .4s cubic-bezier(.2, 1.4, .4, 1) calc(1.02s + var(--i) * 70ms) both}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-under .t-i{animation:0.3s cubic-bezier(0.2, 1.7, 0.4, 1) 1.15s 1 normal both running th-j-j-o-pop}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-under .t-i > .v > .bg{fill:var(--m2)}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-under .t-i:last-of-type{animation-delay:1.6s}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-under .t-b{animation:0.45s cubic-bezier(0.4, 0, 0.2, 1) 1.2s 1 normal both running th-j-j-o-grow}
-.cw-j [data-slot].cw-j [data-slot] .op-J .j-under .t-b > .v > .bg{fill:var(--m1)}
-.cw-j [data-slot].cw-j [data-slot] .op-J .ot{animation-delay:1.7s}
+.cw-j [data-slot][data-slot] .masc .j-arm{transform-origin:34px 71px}
+.cw-j [data-slot][data-slot] .masc .j-node{transform-box:fill-box;transform-origin:50% 50%}
+.cw-j [data-slot][data-slot] .masc .j-sig{stroke-dasharray:16, 300;stroke-dashoffset:16}
+.cw-j [data-slot][data-slot] .masc .j-cut{stroke-dasharray:26, 30, 44}
+.cw-j [data-slot][data-slot] .st-idle .j-arm{animation:3.6s ease-in-out 0s infinite normal none running th-j-j-sway}
+.cw-j [data-slot][data-slot] .st-idle .j-sig{animation:2.8s cubic-bezier(0.5, 0, 0.5, 1) 0s infinite normal none running th-j-j-sig}
+.cw-j [data-slot][data-slot] .st-idle .j-node{animation:2.8s ease-out 0s infinite normal none running th-j-j-ping}
+.cw-j [data-slot][data-slot] .st-think .j-sig{animation:1.1s cubic-bezier(0.5, 0, 0.5, 1) 0s infinite alternate none running th-j-j-sig}
+.cw-j [data-slot][data-slot] .st-happy .j-sig{animation:1.3s cubic-bezier(0.5, 0, 0.5, 1) 0s infinite normal none running th-j-j-sig}
+.cw-j [data-slot][data-slot] .st-warn .j-cut{animation:2.4s ease-in-out 0s infinite normal none running th-j-j-cut}
+.cw-j [data-slot][data-slot] .op-J .j-big{transform-box:fill-box;transform-origin:50% 50%;animation:0.5s cubic-bezier(0.2, 1.5, 0.4, 1) 0s 1 normal both running th-j-j-o-pop}
+.cw-j [data-slot][data-slot] .op-J .mbody > :not(.j-arm):not(.j-big){animation:0.25s ease 0.32s 1 normal both running th-j-j-o-in}
+.cw-j [data-slot][data-slot] .op-J .j-link{stroke-dasharray:100;animation:0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.45s 1 normal both running th-j-j-o-draw}
+.cw-j [data-slot][data-slot] .op-J .j-node{animation:0.4s cubic-bezier(0.2, 1.7, 0.4, 1) 0.82s 1 normal both running th-j-j-o-pop}
+.cw-j [data-slot][data-slot] .op-J .j-sig{animation:2.8s cubic-bezier(0.5, 0, 0.5, 1) 1.6s infinite normal none running th-j-j-sig}
+.cw-j [data-slot][data-slot] .op-J .j-arm{animation:auto ease 0s 1 normal none running none}
+.cw-j [data-slot][data-slot] .op-J .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-j [data-slot][data-slot] .op-J .om{transform:translateY(-12px) scale(1.3)}
+.cw-j [data-slot][data-slot] .op-J .j-ring{opacity:0;animation:0.7s ease-out 0.95s 1 normal both running th-j-j-o-ring}
+.cw-j [data-slot][data-slot] .op-J .j-ring > .v > .bd{stroke:var(--m2)}
+.cw-j [data-slot][data-slot] .op-J .l{animation:th-j-j-o-letter .4s cubic-bezier(.2, 1.4, .4, 1) calc(1.02s + var(--i) * 70ms) both}
+.cw-j [data-slot][data-slot] .op-J .j-under .t-i{animation:0.3s cubic-bezier(0.2, 1.7, 0.4, 1) 1.15s 1 normal both running th-j-j-o-pop}
+.cw-j [data-slot][data-slot] .op-J .j-under .t-i > .v > .bg{fill:var(--m2)}
+.cw-j [data-slot][data-slot] .op-J .j-under .t-i:last-of-type{animation-delay:1.6s}
+.cw-j [data-slot][data-slot] .op-J .j-under .t-b{animation:0.45s cubic-bezier(0.4, 0, 0.2, 1) 1.2s 1 normal both running th-j-j-o-grow}
+.cw-j [data-slot][data-slot] .op-J .j-under .t-b > .v > .bg{fill:var(--m1)}
+.cw-j [data-slot][data-slot] .op-J .ot{animation-delay:1.7s}
 .cw-j [data-slot] .cj-v0{--i:0}
 .cw-j [data-slot] .cj-v1{--i:1}
 .cw-j [data-slot] .cj-v2{--i:2}
@@ -1130,27 +1131,27 @@ footer a { color: var(--ink-2); }
 .cw-k [data-slot] .op .ow{color:var(--text)}
 .cw-k [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-k-o-fade}
 .cw-k [data-slot] .wm{color:var(--text)}
-.cw-k [data-slot].cw-k [data-slot] .masc .k-dome{transform-box:fill-box;transform-origin:50% 100%}
-.cw-k [data-slot].cw-k [data-slot] .masc .k-sig{stroke-dasharray:26, 300;stroke-dashoffset:26}
-.cw-k [data-slot].cw-k [data-slot] .st-idle .k-dome{animation:2.6s ease-in-out 0s infinite normal none running th-k-k-beat}
-.cw-k [data-slot].cw-k [data-slot] .st-idle .k-s1{animation:2.6s linear 0s infinite normal none running th-k-k-run1}
-.cw-k [data-slot].cw-k [data-slot] .st-think .k-s1{animation:2.6s linear 0s infinite normal none running th-k-k-run1}
-.cw-k [data-slot].cw-k [data-slot] .st-idle .k-s2{animation:2.6s linear 0s infinite normal none running th-k-k-run2}
-.cw-k [data-slot].cw-k [data-slot] .st-think .k-s2{animation:2.6s linear 0s infinite normal none running th-k-k-run2}
-.cw-k [data-slot].cw-k [data-slot] .st-think .k-dome{animation:2.6s ease-in-out 0s infinite normal none running th-k-k-lean}
-.cw-k [data-slot].cw-k [data-slot] .st-think .k-wig{stroke-dasharray:5, 3;animation:1s linear 0s infinite normal none running th-k-k-wig}
-.cw-k [data-slot].cw-k [data-slot] .st-happy .k-dome{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-k-k-jump}
-.cw-k [data-slot].cw-k [data-slot] .st-happy .k-s1{animation:1.3s linear 0s infinite normal none running th-k-k-run1}
-.cw-k [data-slot].cw-k [data-slot] .st-happy .k-s2{animation:1.3s linear 0s infinite normal none running th-k-k-run1}
-.cw-k [data-slot].cw-k [data-slot] .st-warn .k-dome{animation:2.4s linear 0s infinite normal none running th-k-k-shiver}
-.cw-k [data-slot].cw-k [data-slot] .st-happy .k-tick{animation:1.3s steps(1) 0s infinite normal none running th-k-k-tick}
-.cw-k [data-slot].cw-k [data-slot] .op-K .k-trace{opacity:0.5}
-.cw-k [data-slot].cw-k [data-slot] .op-K .k-trace path{stroke-dasharray:100;animation:0.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-k-k-o-draw}
-.cw-k [data-slot].cw-k [data-slot] .op-K .k-ln{animation:0.01s linear 0.42s 1 normal both running th-k-k-o-in}
-.cw-k [data-slot].cw-k [data-slot] .op-K .k-dome{animation:0.75s cubic-bezier(0.3, 1.3, 0.4, 1) 0.42s 1 normal both running th-k-k-o-rise}
-.cw-k [data-slot].cw-k [data-slot] .op-K .k-sig{animation-delay:1.6s}
-.cw-k [data-slot].cw-k [data-slot] .op-K .l{animation:th-k-k-o-wave .55s cubic-bezier(.3, 0, .3, 1) calc(.95s + var(--i) * 75ms) both}
-.cw-k [data-slot].cw-k [data-slot] .op-K .ot{animation-delay:1.65s}
+.cw-k [data-slot][data-slot] .masc .k-dome{transform-box:fill-box;transform-origin:50% 100%}
+.cw-k [data-slot][data-slot] .masc .k-sig{stroke-dasharray:26, 300;stroke-dashoffset:26}
+.cw-k [data-slot][data-slot] .st-idle .k-dome{animation:2.6s ease-in-out 0s infinite normal none running th-k-k-beat}
+.cw-k [data-slot][data-slot] .st-idle .k-s1{animation:2.6s linear 0s infinite normal none running th-k-k-run1}
+.cw-k [data-slot][data-slot] .st-think .k-s1{animation:2.6s linear 0s infinite normal none running th-k-k-run1}
+.cw-k [data-slot][data-slot] .st-idle .k-s2{animation:2.6s linear 0s infinite normal none running th-k-k-run2}
+.cw-k [data-slot][data-slot] .st-think .k-s2{animation:2.6s linear 0s infinite normal none running th-k-k-run2}
+.cw-k [data-slot][data-slot] .st-think .k-dome{animation:2.6s ease-in-out 0s infinite normal none running th-k-k-lean}
+.cw-k [data-slot][data-slot] .st-think .k-wig{stroke-dasharray:5, 3;animation:1s linear 0s infinite normal none running th-k-k-wig}
+.cw-k [data-slot][data-slot] .st-happy .k-dome{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-k-k-jump}
+.cw-k [data-slot][data-slot] .st-happy .k-s1{animation:1.3s linear 0s infinite normal none running th-k-k-run1}
+.cw-k [data-slot][data-slot] .st-happy .k-s2{animation:1.3s linear 0s infinite normal none running th-k-k-run1}
+.cw-k [data-slot][data-slot] .st-warn .k-dome{animation:2.4s linear 0s infinite normal none running th-k-k-shiver}
+.cw-k [data-slot][data-slot] .st-happy .k-tick{animation:1.3s steps(1) 0s infinite normal none running th-k-k-tick}
+.cw-k [data-slot][data-slot] .op-K .k-trace{opacity:0.5}
+.cw-k [data-slot][data-slot] .op-K .k-trace path{stroke-dasharray:100;animation:0.8s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-k-k-o-draw}
+.cw-k [data-slot][data-slot] .op-K .k-ln{animation:0.01s linear 0.42s 1 normal both running th-k-k-o-in}
+.cw-k [data-slot][data-slot] .op-K .k-dome{animation:0.75s cubic-bezier(0.3, 1.3, 0.4, 1) 0.42s 1 normal both running th-k-k-o-rise}
+.cw-k [data-slot][data-slot] .op-K .k-sig{animation-delay:1.6s}
+.cw-k [data-slot][data-slot] .op-K .l{animation:th-k-k-o-wave .55s cubic-bezier(.3, 0, .3, 1) calc(.95s + var(--i) * 75ms) both}
+.cw-k [data-slot][data-slot] .op-K .ot{animation-delay:1.65s}
 .cw-k [data-slot] .ck-v0{--i:0}
 .cw-k [data-slot] .ck-v1{--i:1}
 .cw-k [data-slot] .ck-v2{--i:2}
@@ -1233,40 +1234,40 @@ footer a { color: var(--ink-2); }
 .cw-l [data-slot] .op .ow{color:var(--text)}
 .cw-l [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-l-o-fade}
 .cw-l [data-slot] .wm{color:var(--text)}
-.cw-l [data-slot].cw-l [data-slot] .masc .l-blk{transform-box:fill-box;transform-origin:50% 100%}
-.cw-l [data-slot].cw-l [data-slot] .masc .l-body{transform-box:fill-box;transform-origin:50% 100%}
-.cw-l [data-slot].cw-l [data-slot] .masc .l-ok{transform-box:fill-box;transform-origin:50% 100%}
-.cw-l [data-slot].cw-l [data-slot] .masc .l-bang{transform-box:fill-box;transform-origin:50% 100%}
-.cw-l [data-slot].cw-l [data-slot] .st-idle .l-body{animation:1.6s steps(1) 0s infinite normal none running th-l-l-bob}
-.cw-l [data-slot].cw-l [data-slot] .st-idle .l-blk{animation:1.6s steps(1) 0s infinite normal none running th-l-l-float}
-.cw-l [data-slot].cw-l [data-slot] .st-think .l-body{animation:1.2s steps(1) 0s infinite normal none running th-l-l-bob}
-.cw-l [data-slot].cw-l [data-slot] .st-think .l-spin rect{animation:1.2s steps(1) 0s infinite normal none running th-l-l-spin}
-.cw-l [data-slot].cw-l [data-slot] .st-think .l-spin rect:nth-of-type(2){animation-delay:0.3s}
-.cw-l [data-slot].cw-l [data-slot] .st-think .l-spin rect:nth-of-type(3){animation-delay:0.6s}
-.cw-l [data-slot].cw-l [data-slot] .st-think .l-spin rect:nth-of-type(4){animation-delay:0.9s}
-.cw-l [data-slot].cw-l [data-slot] .st-happy .l-body{animation:1.2s steps(1) 0s infinite normal none running th-l-l-hop}
-.cw-l [data-slot].cw-l [data-slot] .st-happy .l-ok{animation:1.2s steps(1) 0.15s infinite normal none running th-l-l-hop}
-.cw-l [data-slot].cw-l [data-slot] .st-happy .l-spark > *{animation:1.2s steps(1) 0s infinite normal none running th-l-l-twinkle}
-.cw-l [data-slot].cw-l [data-slot] .st-happy .l-spark > :nth-of-type(2){animation-delay:0.4s}
-.cw-l [data-slot].cw-l [data-slot] .st-warn .l-body{animation:2.4s steps(1) 0s infinite normal none running th-l-l-shake}
-.cw-l [data-slot].cw-l [data-slot] .st-warn .l-blk{animation:1.2s steps(1) 0s infinite normal none running th-l-l-float}
-.cw-l [data-slot].cw-l [data-slot] .st-warn .l-bang{animation:1.2s steps(1) 0s infinite normal none running th-l-l-flash}
-.cw-l [data-slot].cw-l [data-slot] .op-L .om{animation:0.85s steps(9) 0s 1 normal both running th-l-l-o-build}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-body{animation:auto ease 0s 1 normal none running none}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-blk{animation:auto ease 0s 1 normal none running none}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-blk{animation:0.6s steps(1) 0.85s 1 normal both running th-l-l-o-blink, 1.6s steps(1) 1.6s infinite normal none running th-l-l-float}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l{animation:th-l-l-o-drop .22s steps(3) calc(1.05s + var(--i) * 90ms) both}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar{transform:translateX(-50%)}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar .t-i{animation:th-l-l-o-blink .3s steps(1) calc(var(--n) * 120ms) both, th-l-l-o-out .01s linear .95s forwards}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar .t-i > .v > .bg{fill:var(--m1)}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar .t-i:nth-of-type(1){--n:1}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar .t-i:nth-of-type(2){--n:2}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar .t-i:nth-of-type(3){--n:3}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar .t-i:nth-of-type(4){--n:4}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar .t-i:nth-of-type(5){--n:5}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar .t-i:nth-of-type(6){--n:6}
-.cw-l [data-slot].cw-l [data-slot] .op-L .l-bar{opacity:0;animation:1s steps(1) 0s 1 normal both running th-l-l-o-bar}
-.cw-l [data-slot].cw-l [data-slot] .op-L .ot{animation-delay:1.65s}
+.cw-l [data-slot][data-slot] .masc .l-blk{transform-box:fill-box;transform-origin:50% 100%}
+.cw-l [data-slot][data-slot] .masc .l-body{transform-box:fill-box;transform-origin:50% 100%}
+.cw-l [data-slot][data-slot] .masc .l-ok{transform-box:fill-box;transform-origin:50% 100%}
+.cw-l [data-slot][data-slot] .masc .l-bang{transform-box:fill-box;transform-origin:50% 100%}
+.cw-l [data-slot][data-slot] .st-idle .l-body{animation:1.6s steps(1) 0s infinite normal none running th-l-l-bob}
+.cw-l [data-slot][data-slot] .st-idle .l-blk{animation:1.6s steps(1) 0s infinite normal none running th-l-l-float}
+.cw-l [data-slot][data-slot] .st-think .l-body{animation:1.2s steps(1) 0s infinite normal none running th-l-l-bob}
+.cw-l [data-slot][data-slot] .st-think .l-spin rect{animation:1.2s steps(1) 0s infinite normal none running th-l-l-spin}
+.cw-l [data-slot][data-slot] .st-think .l-spin rect:nth-of-type(2){animation-delay:0.3s}
+.cw-l [data-slot][data-slot] .st-think .l-spin rect:nth-of-type(3){animation-delay:0.6s}
+.cw-l [data-slot][data-slot] .st-think .l-spin rect:nth-of-type(4){animation-delay:0.9s}
+.cw-l [data-slot][data-slot] .st-happy .l-body{animation:1.2s steps(1) 0s infinite normal none running th-l-l-hop}
+.cw-l [data-slot][data-slot] .st-happy .l-ok{animation:1.2s steps(1) 0.15s infinite normal none running th-l-l-hop}
+.cw-l [data-slot][data-slot] .st-happy .l-spark > *{animation:1.2s steps(1) 0s infinite normal none running th-l-l-twinkle}
+.cw-l [data-slot][data-slot] .st-happy .l-spark > :nth-of-type(2){animation-delay:0.4s}
+.cw-l [data-slot][data-slot] .st-warn .l-body{animation:2.4s steps(1) 0s infinite normal none running th-l-l-shake}
+.cw-l [data-slot][data-slot] .st-warn .l-blk{animation:1.2s steps(1) 0s infinite normal none running th-l-l-float}
+.cw-l [data-slot][data-slot] .st-warn .l-bang{animation:1.2s steps(1) 0s infinite normal none running th-l-l-flash}
+.cw-l [data-slot][data-slot] .op-L .om{animation:0.85s steps(9) 0s 1 normal both running th-l-l-o-build}
+.cw-l [data-slot][data-slot] .op-L .l-body{animation:auto ease 0s 1 normal none running none}
+.cw-l [data-slot][data-slot] .op-L .l-blk{animation:auto ease 0s 1 normal none running none}
+.cw-l [data-slot][data-slot] .op-L .l-blk{animation:0.6s steps(1) 0.85s 1 normal both running th-l-l-o-blink, 1.6s steps(1) 1.6s infinite normal none running th-l-l-float}
+.cw-l [data-slot][data-slot] .op-L .l{animation:th-l-l-o-drop .22s steps(3) calc(1.05s + var(--i) * 90ms) both}
+.cw-l [data-slot][data-slot] .op-L .l-bar{transform:translateX(-28.5px)}
+.cw-l [data-slot][data-slot] .op-L .l-bar .t-i{animation:th-l-l-o-blink .3s steps(1) calc((var(--n) - 1) * 120ms) both, th-l-l-o-out .01s linear 1.04s forwards}
+.cw-l [data-slot][data-slot] .op-L .l-bar .t-i > .v > .bg{fill:var(--m1)}
+.cw-l [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(1){--n:1}
+.cw-l [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(2){--n:2}
+.cw-l [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(3){--n:3}
+.cw-l [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(4){--n:4}
+.cw-l [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(5){--n:5}
+.cw-l [data-slot][data-slot] .op-L .l-bar .t-i:nth-of-type(6){--n:6}
+.cw-l [data-slot][data-slot] .op-L .l-bar{opacity:0;animation:1.1s steps(1) 0s 1 normal both running th-l-l-o-bar}
+.cw-l [data-slot][data-slot] .op-L .ot{animation-delay:1.65s}
 .cw-l [data-slot] .cl-v0{--i:0}
 .cw-l [data-slot] .cl-v1{--i:1}
 .cw-l [data-slot] .cl-v2{--i:2}
@@ -1348,23 +1349,23 @@ footer a { color: var(--ink-2); }
 .cw-m [data-slot] .op .hi > .v > .bg{fill:var(--surface)}
 .cw-m [data-slot] .op .hi > .v > .bd{stroke:var(--line)}
 .cw-m [data-slot] .wm{color:var(--text)}
-.cw-m [data-slot].cw-m [data-slot] .masc .m-knob{transform-box:fill-box;transform-origin:50% 100%}
-.cw-m [data-slot].cw-m [data-slot] .masc .m-bow{transform-box:fill-box;transform-origin:50% 50%}
-.cw-m [data-slot].cw-m [data-slot] .masc .m-ring{transform-box:fill-box;transform-origin:50% 50%}
-.cw-m [data-slot].cw-m [data-slot] .st-think .m-knob{animation:1.3s ease-in-out 0s infinite normal none running th-m-m-ding-tap}
-.cw-m [data-slot].cw-m [data-slot] .st-happy .m-knob{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-m-m-ding-press}
-.cw-m [data-slot].cw-m [data-slot] .st-happy .m-ring{animation:1.3s ease-out 0s infinite normal none running th-m-m-ding-ring}
-.cw-m [data-slot].cw-m [data-slot] .st-happy .m-bow{animation:1.3s ease-in-out 0s infinite normal none running th-m-m-ding-bow}
-.cw-m [data-slot].cw-m [data-slot] .st-warn .m-knob{animation:2.4s ease-in-out 0s infinite normal none running th-m-m-ding-alert}
-.cw-m [data-slot].cw-m [data-slot] .op-M .om{animation:0.55s cubic-bezier(0.2, 0.9, 0.3, 1) 0s 1 normal both running th-m-m-open-rise}
-.cw-m [data-slot].cw-m [data-slot] .op-M .m-knob{animation:0.4s ease 0.55s 1 normal both running th-m-m-open-press}
-.cw-m [data-slot].cw-m [data-slot] .op-M .mbody{animation:0.4s ease 0.55s 1 normal both running th-m-m-open-squash}
-.cw-m [data-slot].cw-m [data-slot] .op-M .rg{opacity:0;animation:0.8s ease-out 0.7s 1 normal forwards running th-m-m-open-ring}
-.cw-m [data-slot].cw-m [data-slot] .op-M .rg > .v > .bd{stroke:var(--m2)}
-.cw-m [data-slot].cw-m [data-slot] .op-M .rg.r2{animation-delay:0.9s}
-.cw-m [data-slot].cw-m [data-slot] .op-M .hi{animation:1.05s ease 0.68s 1 normal both running th-m-o-hi}
-.cw-m [data-slot].cw-m [data-slot] .op-M .l{animation:th-m-o-pop .45s cubic-bezier(.2, 1.5, .4, 1) calc(1s + var(--i) * 60ms) both}
-.cw-m [data-slot].cw-m [data-slot] .op-M .ot{animation-delay:1.55s}
+.cw-m [data-slot][data-slot] .masc .m-knob{transform-box:fill-box;transform-origin:50% 100%}
+.cw-m [data-slot][data-slot] .masc .m-bow{transform-box:fill-box;transform-origin:50% 50%}
+.cw-m [data-slot][data-slot] .masc .m-ring{transform-box:fill-box;transform-origin:50% 50%}
+.cw-m [data-slot][data-slot] .st-think .m-knob{animation:1.3s ease-in-out 0s infinite normal none running th-m-m-ding-tap}
+.cw-m [data-slot][data-slot] .st-happy .m-knob{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-m-m-ding-press}
+.cw-m [data-slot][data-slot] .st-happy .m-ring{animation:1.3s ease-out 0s infinite normal none running th-m-m-ding-ring}
+.cw-m [data-slot][data-slot] .st-happy .m-bow{animation:1.3s ease-in-out 0s infinite normal none running th-m-m-ding-bow}
+.cw-m [data-slot][data-slot] .st-warn .m-knob{animation:2.4s ease-in-out 0s infinite normal none running th-m-m-ding-alert}
+.cw-m [data-slot][data-slot] .op-M .om{animation:0.55s cubic-bezier(0.2, 0.9, 0.3, 1) 0s 1 normal both running th-m-m-open-rise}
+.cw-m [data-slot][data-slot] .op-M .m-knob{animation:0.4s ease 0.55s 1 normal both running th-m-m-open-press}
+.cw-m [data-slot][data-slot] .op-M .mbody{animation:0.4s ease 0.55s 1 normal both running th-m-m-open-squash}
+.cw-m [data-slot][data-slot] .op-M .rg{opacity:0;animation:0.8s ease-out 0.7s 1 normal forwards running th-m-m-open-ring}
+.cw-m [data-slot][data-slot] .op-M .rg > .v > .bd{stroke:var(--m2)}
+.cw-m [data-slot][data-slot] .op-M .rg.r2{animation-delay:0.9s}
+.cw-m [data-slot][data-slot] .op-M .hi{animation:1.05s ease 0.68s 1 normal both running th-m-o-hi}
+.cw-m [data-slot][data-slot] .op-M .l{animation:th-m-o-pop .45s cubic-bezier(.2, 1.5, .4, 1) calc(1s + var(--i) * 60ms) both}
+.cw-m [data-slot][data-slot] .op-M .ot{animation-delay:1.55s}
 .cw-m [data-slot] .cm-v0{--i:0}
 .cw-m [data-slot] .cm-v1{--i:1}
 .cw-m [data-slot] .cm-v2{--i:2}
@@ -1467,19 +1468,19 @@ footer a { color: var(--ink-2); }
 .cw-n [data-slot] .op .ow{color:var(--text)}
 .cw-n [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-n-o-fade}
 .cw-n [data-slot] .wm{color:var(--text)}
-.cw-n [data-slot].cw-n [data-slot] .masc .n-tail{transform-box:view-box;animation:2.4s ease-in-out 0s infinite normal none running th-n-n-gk-wag}
-.cw-n [data-slot].cw-n [data-slot] .st-think .n-tail{animation-duration:3.6s}
-.cw-n [data-slot].cw-n [data-slot] .st-happy .n-tail{animation-duration:0.5s}
-.cw-n [data-slot].cw-n [data-slot] .st-warn .n-tail{animation:0.16s linear 0s infinite normal none running th-n-n-gk-shiver}
-.cw-n [data-slot].cw-n [data-slot] .op-N .om{animation:1.3s linear 0s 1 normal both running th-n-n-open-scurry}
-.cw-n [data-slot].cw-n [data-slot] .op-N .bug{opacity:0;animation:1.3s linear 0s 1 normal both running th-n-n-open-bug}
-.cw-n [data-slot].cw-n [data-slot] .op-N .bug > .v > .bg{fill:var(--bad)}
-.cw-n [data-slot].cw-n [data-slot] .op-N .bug .t-i{opacity:0.55}
-.cw-n [data-slot].cw-n [data-slot] .op-N .bug .t-i > .v > .bg{fill:var(--muted)}
-.cw-n [data-slot].cw-n [data-slot] .op-N .bug .t-i:first-of-type{transform:rotate(-24deg)}
-.cw-n [data-slot].cw-n [data-slot] .op-N .bug .t-i:last-of-type{transform:scaleX(-1) rotate(-24deg)}
-.cw-n [data-slot].cw-n [data-slot] .op-N .l{animation:th-n-o-fade .5s ease calc(1.25s + var(--i) * 70ms) both}
-.cw-n [data-slot].cw-n [data-slot] .op-N .ot{animation-delay:1.8s}
+.cw-n [data-slot][data-slot] .masc .n-tail{transform-box:view-box;animation:2.4s ease-in-out 0s infinite normal none running th-n-n-gk-wag}
+.cw-n [data-slot][data-slot] .st-think .n-tail{animation-duration:3.6s}
+.cw-n [data-slot][data-slot] .st-happy .n-tail{animation-duration:0.5s}
+.cw-n [data-slot][data-slot] .st-warn .n-tail{animation:0.16s linear 0s infinite normal none running th-n-n-gk-shiver}
+.cw-n [data-slot][data-slot] .op-N .om{animation:1.3s linear 0s 1 normal both running th-n-n-open-scurry}
+.cw-n [data-slot][data-slot] .op-N .bug{opacity:0;animation:1.3s linear 0s 1 normal both running th-n-n-open-bug}
+.cw-n [data-slot][data-slot] .op-N .bug > .v > .bg{fill:var(--bad)}
+.cw-n [data-slot][data-slot] .op-N .bug .t-i{opacity:0.55}
+.cw-n [data-slot][data-slot] .op-N .bug .t-i > .v > .bg{fill:var(--muted)}
+.cw-n [data-slot][data-slot] .op-N .bug .t-i:first-of-type{transform:rotate(-24deg)}
+.cw-n [data-slot][data-slot] .op-N .bug .t-i:last-of-type{transform:scaleX(-1) rotate(-24deg)}
+.cw-n [data-slot][data-slot] .op-N .l{animation:th-n-o-fade .5s ease calc(1.25s + var(--i) * 70ms) both}
+.cw-n [data-slot][data-slot] .op-N .ot{animation-delay:1.8s}
 .cw-n [data-slot] .cn-v0{--i:0}
 .cw-n [data-slot] .cn-v1{--i:1}
 .cw-n [data-slot] .cn-v2{--i:2}
@@ -1565,22 +1566,22 @@ footer a { color: var(--ink-2); }
 .cw-o [data-slot] .op .hi > .v > .bg{fill:var(--surface)}
 .cw-o [data-slot] .op .hi > .v > .bd{stroke:var(--line)}
 .cw-o [data-slot] .wm{color:var(--text)}
-.cw-o [data-slot].cw-o [data-slot] .masc .o-tail{transform-box:view-box;animation:0.7s ease-in-out 0s infinite normal none running th-o-o-dog-wag}
-.cw-o [data-slot].cw-o [data-slot] .st-think .o-tail{animation-duration:2s}
-.cw-o [data-slot].cw-o [data-slot] .st-happy .o-tail{animation-duration:0.26s}
-.cw-o [data-slot].cw-o [data-slot] .st-warn .o-tail{animation:auto ease 0s 1 normal none running none}
-.cw-o [data-slot].cw-o [data-slot] .masc .o-earl{transform-box:fill-box;transform-origin:88% 6%}
-.cw-o [data-slot].cw-o [data-slot] .masc .o-earr{transform-box:fill-box;transform-origin:12% 6%}
-.cw-o [data-slot].cw-o [data-slot] .st-idle .o-earl{animation:4.6s ease-in-out 0s infinite normal none running th-o-o-dog-ear}
-.cw-o [data-slot].cw-o [data-slot] .st-happy .o-earl{animation:0.52s ease-in-out 0s infinite normal none running th-o-o-dog-flap}
-.cw-o [data-slot].cw-o [data-slot] .st-happy .o-earr{animation:0.52s ease-in-out 0s infinite reverse none running th-o-o-dog-flap}
-.cw-o [data-slot].cw-o [data-slot] .masc .o-card{transform-box:fill-box;transform-origin:50% 0px;animation:2.4s ease-in-out 0s infinite normal none running th-o-o-dog-card}
-.cw-o [data-slot].cw-o [data-slot] .op-O .om{animation:1s linear 0.15s 1 normal both running th-o-o-dog-open-in}
-.cw-o [data-slot].cw-o [data-slot] .op-O .ball{animation:0.95s linear 0s 1 normal both running th-o-o-dog-open-ball}
-.cw-o [data-slot].cw-o [data-slot] .op-O .ball > .v > .bg{fill:var(--accent2)}
-.cw-o [data-slot].cw-o [data-slot] .op-O .hi{animation:1.05s ease 1.12s 1 normal both running th-o-o-hi}
-.cw-o [data-slot].cw-o [data-slot] .op-O .l{animation:th-o-o-pop .5s cubic-bezier(.2, 1.6, .4, 1) calc(1.2s + var(--i) * 65ms) both}
-.cw-o [data-slot].cw-o [data-slot] .op-O .ot{animation-delay:1.75s}
+.cw-o [data-slot][data-slot] .masc .o-tail{transform-box:view-box;animation:0.7s ease-in-out 0s infinite normal none running th-o-o-dog-wag}
+.cw-o [data-slot][data-slot] .st-think .o-tail{animation-duration:2s}
+.cw-o [data-slot][data-slot] .st-happy .o-tail{animation-duration:0.26s}
+.cw-o [data-slot][data-slot] .st-warn .o-tail{animation:auto ease 0s 1 normal none running none}
+.cw-o [data-slot][data-slot] .masc .o-earl{transform-box:fill-box;transform-origin:88% 6%}
+.cw-o [data-slot][data-slot] .masc .o-earr{transform-box:fill-box;transform-origin:12% 6%}
+.cw-o [data-slot][data-slot] .st-idle .o-earl{animation:4.6s ease-in-out 0s infinite normal none running th-o-o-dog-ear}
+.cw-o [data-slot][data-slot] .st-happy .o-earl{animation:0.52s ease-in-out 0s infinite normal none running th-o-o-dog-flap}
+.cw-o [data-slot][data-slot] .st-happy .o-earr{animation:0.52s ease-in-out 0s infinite reverse none running th-o-o-dog-flap}
+.cw-o [data-slot][data-slot] .masc .o-card{transform-box:fill-box;transform-origin:50% 0px;animation:2.4s ease-in-out 0s infinite normal none running th-o-o-dog-card}
+.cw-o [data-slot][data-slot] .op-O .om{animation:1s linear 0.15s 1 normal both running th-o-o-dog-open-in}
+.cw-o [data-slot][data-slot] .op-O .ball{animation:0.95s linear 0s 1 normal both running th-o-o-dog-open-ball}
+.cw-o [data-slot][data-slot] .op-O .ball > .v > .bg{fill:var(--accent2)}
+.cw-o [data-slot][data-slot] .op-O .hi{animation:1.05s ease 1.12s 1 normal both running th-o-o-hi}
+.cw-o [data-slot][data-slot] .op-O .l{animation:th-o-o-pop .5s cubic-bezier(.2, 1.6, .4, 1) calc(1.2s + var(--i) * 65ms) both}
+.cw-o [data-slot][data-slot] .op-O .ot{animation-delay:1.75s}
 .cw-o [data-slot] .co-v0{--i:0}
 .cw-o [data-slot] .co-v1{--i:1}
 .cw-o [data-slot] .co-v2{--i:2}
@@ -1682,16 +1683,16 @@ footer a { color: var(--ink-2); }
 .cw-p [data-slot] .op .hi > .v > .bg{fill:var(--surface)}
 .cw-p [data-slot] .op .hi > .v > .bd{stroke:var(--line)}
 .cw-p [data-slot] .wm{color:var(--text)}
-.cw-p [data-slot].cw-p [data-slot] .masc .pshk{transform-box:fill-box;transform-origin:50% 100%}
-.cw-p [data-slot].cw-p [data-slot] .st-idle .pshk{animation:5.4s ease-in-out 0s infinite normal none running th-p-p-nudge}
-.cw-p [data-slot].cw-p [data-slot] .st-think .pshk{animation:1.3s ease-in-out 0s infinite normal none running th-p-p-try}
-.cw-p [data-slot].cw-p [data-slot] .st-happy .pshk{animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-p-p-open}
-.cw-p [data-slot].cw-p [data-slot] .op > .v > .bg{fill:none}
-.cw-p [data-slot].cw-p [data-slot] .op-P .om{animation:0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0s 1 normal both running th-p-p-o-in}
-.cw-p [data-slot].cw-p [data-slot] .op-P .pshk{animation:1.75s cubic-bezier(0.3, 0.8, 0.3, 1) 0s 1 normal both running th-p-p-o-shk}
-.cw-p [data-slot].cw-p [data-slot] .op-P .hi{animation:0.95s ease 1.42s 1 normal both running th-p-o-hi}
-.cw-p [data-slot].cw-p [data-slot] .op-P .l{animation:th-p-p-o-let .7s cubic-bezier(.2, .7, .2, 1) calc(.5s + var(--i) * 80ms) both}
-.cw-p [data-slot].cw-p [data-slot] .op-P .ot{animation-delay:1.7s}
+.cw-p [data-slot][data-slot] .masc .pshk{transform-box:fill-box;transform-origin:50% 100%}
+.cw-p [data-slot][data-slot] .st-idle .pshk{animation:5.4s ease-in-out 0s infinite normal none running th-p-p-nudge}
+.cw-p [data-slot][data-slot] .st-think .pshk{animation:1.3s ease-in-out 0s infinite normal none running th-p-p-try}
+.cw-p [data-slot][data-slot] .st-happy .pshk{animation:2.6s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-p-p-open}
+.cw-p [data-slot][data-slot] .op > .v > .bg{fill:none}
+.cw-p [data-slot][data-slot] .op-P .om{animation:0.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0s 1 normal both running th-p-p-o-in}
+.cw-p [data-slot][data-slot] .op-P .pshk{animation:1.75s cubic-bezier(0.3, 0.8, 0.3, 1) 0s 1 normal both running th-p-p-o-shk}
+.cw-p [data-slot][data-slot] .op-P .hi{animation:0.95s ease 1.42s 1 normal both running th-p-o-hi}
+.cw-p [data-slot][data-slot] .op-P .l{animation:th-p-p-o-let .7s cubic-bezier(.2, .7, .2, 1) calc(.5s + var(--i) * 80ms) both}
+.cw-p [data-slot][data-slot] .op-P .ot{animation-delay:1.7s}
 .cw-p [data-slot] .cp-v0{--i:0}
 .cw-p [data-slot] .cp-v1{--i:1}
 .cw-p [data-slot] .cp-v2{--i:2}
@@ -1780,22 +1781,22 @@ footer a { color: var(--ink-2); }
 .cw-q [data-slot] .op .ow{color:var(--text)}
 .cw-q [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-q-o-fade}
 .cw-q [data-slot] .wm{color:var(--text)}
-.cw-q [data-slot].cw-q [data-slot] .masc .qcurl{transform-box:fill-box}
-.cw-q [data-slot].cw-q [data-slot] .masc .qtape{transform-box:fill-box}
-.cw-q [data-slot].cw-q [data-slot] .masc .qbox{transform-box:fill-box}
-.cw-q [data-slot].cw-q [data-slot] .masc .qcurl{transform-origin:100% 100%;animation:4.6s ease-in-out 0s infinite normal none running th-q-q-flap}
-.cw-q [data-slot].cw-q [data-slot] .masc .qtape{transform-origin:50% 50%}
-.cw-q [data-slot].cw-q [data-slot] .masc .qw{stroke-dasharray:1}
-.cw-q [data-slot].cw-q [data-slot] .masc .qchk{stroke-dasharray:1}
-.cw-q [data-slot].cw-q [data-slot] .st-think .qw{animation:2.6s linear 0s infinite normal none running th-q-q-write}
-.cw-q [data-slot].cw-q [data-slot] .st-happy .qchk{animation:2.6s ease-out 0s infinite normal none running th-q-q-tick}
-.cw-q [data-slot].cw-q [data-slot] .st-warn .qbox{transform-origin:50% 50%;animation:1.2s ease-in-out 0s infinite normal none running th-q-q-wait}
-.cw-q [data-slot].cw-q [data-slot] .op-Q .om{animation:0.8s cubic-bezier(0.3, 0.6, 0.3, 1) 0s 1 normal both running th-q-q-o-fall}
-.cw-q [data-slot].cw-q [data-slot] .op-Q .qtape{animation:0.26s cubic-bezier(0.2, 1.4, 0.4, 1) 0.72s 1 normal both running th-q-q-o-tape}
-.cw-q [data-slot].cw-q [data-slot] .op-Q .ow{animation:0.75s cubic-bezier(0.4, 0.1, 0.5, 1) 0.92s 1 normal both running th-q-q-o-write}
-.cw-q [data-slot].cw-q [data-slot] .op-Q .qul{transform:rotate(-1.4deg);animation:0.32s cubic-bezier(0.3, 0.8, 0.3, 1) 1.66s 1 normal both running th-q-q-o-ul}
-.cw-q [data-slot].cw-q [data-slot] .op-Q .qul > .v > .bg{fill:var(--th-m3)}
-.cw-q [data-slot].cw-q [data-slot] .op-Q .ot{animation-delay:1.9s}
+.cw-q [data-slot][data-slot] .masc .qcurl{transform-box:fill-box}
+.cw-q [data-slot][data-slot] .masc .qtape{transform-box:fill-box}
+.cw-q [data-slot][data-slot] .masc .qbox{transform-box:fill-box}
+.cw-q [data-slot][data-slot] .masc .qcurl{transform-origin:100% 100%;animation:4.6s ease-in-out 0s infinite normal none running th-q-q-flap}
+.cw-q [data-slot][data-slot] .masc .qtape{transform-origin:50% 50%}
+.cw-q [data-slot][data-slot] .masc .qw{stroke-dasharray:1}
+.cw-q [data-slot][data-slot] .masc .qchk{stroke-dasharray:1}
+.cw-q [data-slot][data-slot] .st-think .qw{animation:2.6s linear 0s infinite normal none running th-q-q-write}
+.cw-q [data-slot][data-slot] .st-happy .qchk{animation:2.6s ease-out 0s infinite normal none running th-q-q-tick}
+.cw-q [data-slot][data-slot] .st-warn .qbox{transform-origin:50% 50%;animation:1.2s ease-in-out 0s infinite normal none running th-q-q-wait}
+.cw-q [data-slot][data-slot] .op-Q .om{animation:0.8s cubic-bezier(0.3, 0.6, 0.3, 1) 0s 1 normal both running th-q-q-o-fall}
+.cw-q [data-slot][data-slot] .op-Q .qtape{animation:0.26s cubic-bezier(0.2, 1.4, 0.4, 1) 0.72s 1 normal both running th-q-q-o-tape}
+.cw-q [data-slot][data-slot] .op-Q .ow{animation:0.75s cubic-bezier(0.4, 0.1, 0.5, 1) 0.92s 1 normal both running th-q-q-o-write}
+.cw-q [data-slot][data-slot] .op-Q .qul{transform:rotate(-1.4deg);animation:0.32s cubic-bezier(0.3, 0.8, 0.3, 1) 1.66s 1 normal both running th-q-q-o-ul}
+.cw-q [data-slot][data-slot] .op-Q .qul > .v > .bg{fill:var(--th-m3)}
+.cw-q [data-slot][data-slot] .op-Q .ot{animation-delay:1.9s}
 .cw-q [data-slot] .cq-v0{--i:0}
 .cw-q [data-slot] .cq-v1{--i:1}
 .cw-q [data-slot] .cq-v2{--i:2}
@@ -1884,27 +1885,27 @@ footer a { color: var(--ink-2); }
 .cw-r [data-slot] .op .ow{color:var(--text)}
 .cw-r [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-r-o-fade}
 .cw-r [data-slot] .wm{color:var(--text)}
-.cw-r [data-slot].cw-r [data-slot] .masc .rlid{transform-box:fill-box}
-.cw-r [data-slot].cw-r [data-slot] .masc .rfood circle{transform-box:fill-box}
-.cw-r [data-slot].cw-r [data-slot] .masc .rlid{transform-origin:8% 100%}
-.cw-r [data-slot].cw-r [data-slot] .masc .rfood circle{transform-origin:50% 100%}
-.cw-r [data-slot].cw-r [data-slot] .st-think .rlid{animation:1.5s ease-in-out 0s infinite normal none running th-r-r-rattle}
-.cw-r [data-slot].cw-r [data-slot] .st-happy .rlid{transform:translateY(-15px) rotate(-9deg);animation:2.6s cubic-bezier(0.2, 1.4, 0.4, 1) 0s infinite normal none running th-r-r-up}
-.cw-r [data-slot].cw-r [data-slot] .st-happy .rfood circle{animation:2.6s cubic-bezier(0.2, 1.6, 0.4, 1) 0s infinite normal none running th-r-r-food}
-.cw-r [data-slot].cw-r [data-slot] .st-happy .rfood circle:nth-of-type(2){animation-delay:0.08s}
-.cw-r [data-slot].cw-r [data-slot] .st-happy .rfood circle:nth-of-type(3){animation-delay:0.16s}
-.cw-r [data-slot].cw-r [data-slot] .op-R .om{animation:0.4s cubic-bezier(0.2, 1.3, 0.4, 1) 0s 1 normal both running th-r-r-o-in, 0.32s ease 1.14s 1 normal both running th-r-r-o-shut}
-.cw-r [data-slot].cw-r [data-slot] .op-R .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-r [data-slot].cw-r [data-slot] .op-R .rlid{animation:1.42s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-r-r-o-lid}
-.cw-r [data-slot].cw-r [data-slot] .op-R .pc{opacity:0;animation:0.44s cubic-bezier(0.5, 0, 0.9, 0.6) 0s 1 normal both running th-r-r-o-drop}
-.cw-r [data-slot].cw-r [data-slot] .op-R .pc1{--x:-17px;animation-delay:0.3s}
-.cw-r [data-slot].cw-r [data-slot] .op-R .pc1 > .v > .bg{fill:var(--th-fy)}
-.cw-r [data-slot].cw-r [data-slot] .op-R .pc2{--x:0px;animation-delay:0.52s}
-.cw-r [data-slot].cw-r [data-slot] .op-R .pc2 > .v > .bg{fill:var(--th-fg)}
-.cw-r [data-slot].cw-r [data-slot] .op-R .pc3{--x:17px;animation-delay:0.74s}
-.cw-r [data-slot].cw-r [data-slot] .op-R .pc3 > .v > .bg{fill:var(--th-fr)}
-.cw-r [data-slot].cw-r [data-slot] .op-R .l{animation:th-r-o-pop .45s cubic-bezier(.2, 1.6, .4, 1) calc(1.22s + var(--i) * 65ms) both}
-.cw-r [data-slot].cw-r [data-slot] .op-R .ot{animation-delay:1.75s}
+.cw-r [data-slot][data-slot] .masc .rlid{transform-box:fill-box}
+.cw-r [data-slot][data-slot] .masc .rfood circle{transform-box:fill-box}
+.cw-r [data-slot][data-slot] .masc .rlid{transform-origin:8% 100%}
+.cw-r [data-slot][data-slot] .masc .rfood circle{transform-origin:50% 100%}
+.cw-r [data-slot][data-slot] .st-think .rlid{animation:1.5s ease-in-out 0s infinite normal none running th-r-r-rattle}
+.cw-r [data-slot][data-slot] .st-happy .rlid{transform:translateY(-15px) rotate(-9deg);animation:2.6s cubic-bezier(0.2, 1.4, 0.4, 1) 0s infinite normal none running th-r-r-up}
+.cw-r [data-slot][data-slot] .st-happy .rfood circle{animation:2.6s cubic-bezier(0.2, 1.6, 0.4, 1) 0s infinite normal none running th-r-r-food}
+.cw-r [data-slot][data-slot] .st-happy .rfood circle:nth-of-type(2){animation-delay:0.08s}
+.cw-r [data-slot][data-slot] .st-happy .rfood circle:nth-of-type(3){animation-delay:0.16s}
+.cw-r [data-slot][data-slot] .op-R .om{animation:0.4s cubic-bezier(0.2, 1.3, 0.4, 1) 0s 1 normal both running th-r-r-o-in, 0.32s ease 1.14s 1 normal both running th-r-r-o-shut}
+.cw-r [data-slot][data-slot] .op-R .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-r [data-slot][data-slot] .op-R .rlid{animation:1.42s cubic-bezier(0.4, 0, 0.3, 1) 0s 1 normal both running th-r-r-o-lid}
+.cw-r [data-slot][data-slot] .op-R .pc{opacity:0;animation:0.44s cubic-bezier(0.5, 0, 0.9, 0.6) 0s 1 normal both running th-r-r-o-drop}
+.cw-r [data-slot][data-slot] .op-R .pc1{--x:-17px;animation-delay:0.3s}
+.cw-r [data-slot][data-slot] .op-R .pc1 > .v > .bg{fill:var(--th-fy)}
+.cw-r [data-slot][data-slot] .op-R .pc2{--x:0px;animation-delay:0.52s}
+.cw-r [data-slot][data-slot] .op-R .pc2 > .v > .bg{fill:var(--th-fg)}
+.cw-r [data-slot][data-slot] .op-R .pc3{--x:17px;animation-delay:0.74s}
+.cw-r [data-slot][data-slot] .op-R .pc3 > .v > .bg{fill:var(--th-fr)}
+.cw-r [data-slot][data-slot] .op-R .l{animation:th-r-o-pop .45s cubic-bezier(.2, 1.6, .4, 1) calc(1.22s + var(--i) * 65ms) both}
+.cw-r [data-slot][data-slot] .op-R .ot{animation-delay:1.75s}
 .cw-r [data-slot] .cr-v0{--i:0}
 .cw-r [data-slot] .cr-v1{--i:1}
 .cw-r [data-slot] .cr-v2{--i:2}
@@ -1996,16 +1997,16 @@ footer a { color: var(--ink-2); }
 .cw-s [data-slot] .op .ow{color:var(--text)}
 .cw-s [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-s-o-fade}
 .cw-s [data-slot] .wm{color:var(--text)}
-.cw-s [data-slot].cw-s [data-slot] .masc .ptail{transform-box:fill-box;transform-origin:0% 100%;animation:2.8s ease-in-out 0s infinite normal none running th-s-s-wag}
-.cw-s [data-slot].cw-s [data-slot] .st-happy .ptail{animation-duration:0.5s}
-.cw-s [data-slot].cw-s [data-slot] .st-think .ptail{animation-duration:4.4s}
-.cw-s [data-slot].cw-s [data-slot] .st-warn .mbody{transform-origin:50% 100%;animation:2.8s ease-in-out 0s infinite normal none running th-s-s-rock}
-.cw-s [data-slot].cw-s [data-slot] .st-warn .eye{animation:4.2s ease 0s infinite normal none running th-s-m-blink}
-.cw-s [data-slot].cw-s [data-slot] .op-S .pb{opacity:0;animation:1.05s cubic-bezier(0.3, 0.6, 0.3, 1) 0s 1 normal both running th-s-s-o-roll}
-.cw-s [data-slot].cw-s [data-slot] .op-S .pb .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-s [data-slot].cw-s [data-slot] .op-S .om:not(.pb){animation:0.5s cubic-bezier(0.2, 1.5, 0.4, 1) 0.95s 1 normal both running th-s-s-o-open}
-.cw-s [data-slot].cw-s [data-slot] .op-S .l{animation:th-s-o-pop .45s cubic-bezier(.2, 1.5, .4, 1) calc(1.2s + var(--i) * 65ms) both}
-.cw-s [data-slot].cw-s [data-slot] .op-S .ot{animation-delay:1.75s}
+.cw-s [data-slot][data-slot] .masc .ptail{transform-box:fill-box;transform-origin:0% 100%;animation:2.8s ease-in-out 0s infinite normal none running th-s-s-wag}
+.cw-s [data-slot][data-slot] .st-happy .ptail{animation-duration:0.5s}
+.cw-s [data-slot][data-slot] .st-think .ptail{animation-duration:4.4s}
+.cw-s [data-slot][data-slot] .st-warn .mbody{transform-origin:50% 100%;animation:2.8s ease-in-out 0s infinite normal none running th-s-s-rock}
+.cw-s [data-slot][data-slot] .st-warn .eye{animation:4.2s ease 0s infinite normal none running th-s-m-blink}
+.cw-s [data-slot][data-slot] .op-S .pb{opacity:0;animation:1.05s cubic-bezier(0.3, 0.6, 0.3, 1) 0s 1 normal both running th-s-s-o-roll}
+.cw-s [data-slot][data-slot] .op-S .pb .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-s [data-slot][data-slot] .op-S .om:not(.pb){animation:0.5s cubic-bezier(0.2, 1.5, 0.4, 1) 0.95s 1 normal both running th-s-s-o-open}
+.cw-s [data-slot][data-slot] .op-S .l{animation:th-s-o-pop .45s cubic-bezier(.2, 1.5, .4, 1) calc(1.2s + var(--i) * 65ms) both}
+.cw-s [data-slot][data-slot] .op-S .ot{animation-delay:1.75s}
 .cw-s [data-slot] .cs-v0{--i:0}
 .cw-s [data-slot] .cs-v1{--i:1}
 .cw-s [data-slot] .cs-v2{--i:2}
@@ -2084,31 +2085,31 @@ footer a { color: var(--ink-2); }
 .cw-t [data-slot] .op .hi > .v > .bg{fill:var(--surface)}
 .cw-t [data-slot] .op .hi > .v > .bd{stroke:var(--line)}
 .cw-t [data-slot] .wm{color:var(--text)}
-.cw-t [data-slot].cw-t [data-slot] .masc .bwing{transform-box:fill-box}
-.cw-t [data-slot].cw-t [data-slot] .masc .btail{transform-box:fill-box}
-.cw-t [data-slot].cw-t [data-slot] .masc .bhead{transform-box:fill-box}
-.cw-t [data-slot].cw-t [data-slot] .masc .bwing{transform-origin:50% 4%}
-.cw-t [data-slot].cw-t [data-slot] .masc .btail{transform-origin:0% 0%;animation:3s ease-in-out 0s infinite normal none running th-t-t-tail}
-.cw-t [data-slot].cw-t [data-slot] .masc .bhead{transform-origin:50% 100%}
-.cw-t [data-slot].cw-t [data-slot] .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-t [data-slot].cw-t [data-slot] .st-idle .bhead{animation:5.5s ease-in-out 0s infinite normal none running th-t-t-peek}
-.cw-t [data-slot].cw-t [data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-t [data-slot].cw-t [data-slot] .st-think .bhead{animation:3s ease-in-out 0s infinite normal none running th-t-t-tilt}
-.cw-t [data-slot].cw-t [data-slot] .st-happy .bwing.bl{animation:0.3s ease-in-out 0s infinite alternate none running th-t-t-flapl}
-.cw-t [data-slot].cw-t [data-slot] .st-happy .bwing.br{animation:0.3s ease-in-out 0s infinite alternate none running th-t-t-flapr}
-.cw-t [data-slot].cw-t [data-slot] .st-happy .btail{animation-duration:0.6s}
-.cw-t [data-slot].cw-t [data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-t [data-slot].cw-t [data-slot] .st-warn .bwing.bl{transform:rotate(66deg);animation:1.8s ease-in-out 0s infinite normal none running th-t-t-guardl}
-.cw-t [data-slot].cw-t [data-slot] .st-warn .bwing.br{transform:rotate(-66deg);animation:1.8s ease-in-out 0s infinite normal none running th-t-t-guardr}
-.cw-t [data-slot].cw-t [data-slot] .st-warn .btail{animation:auto ease 0s 1 normal none running none}
-.cw-t [data-slot].cw-t [data-slot] .op-T .om{animation:0.8s cubic-bezier(0.3, 0.7, 0.3, 1) 0s 1 normal both running th-t-t-o-fly}
-.cw-t [data-slot].cw-t [data-slot] .op-T .bwing.bl{animation:0.13s ease-in-out 0s 6 alternate both running th-t-t-flapl}
-.cw-t [data-slot].cw-t [data-slot] .op-T .bwing.br{animation:0.13s ease-in-out 0s 6 alternate both running th-t-t-flapr}
-.cw-t [data-slot].cw-t [data-slot] .op-T .st-idle .bhead{animation-delay:2.4s}
-.cw-t [data-slot].cw-t [data-slot] .op-T .bperch{animation:0.3s ease 0.62s 1 normal both running th-t-t-o-perch}
-.cw-t [data-slot].cw-t [data-slot] .op-T .l{animation:th-t-t-o-let .5s cubic-bezier(.3, 1.6, .5, 1) calc(.72s + var(--i) * 70ms) both}
-.cw-t [data-slot].cw-t [data-slot] .op-T .hi{animation:1.05s ease 1.4s 1 normal both running th-t-o-hi}
-.cw-t [data-slot].cw-t [data-slot] .op-T .ot{animation-delay:1.85s}
+.cw-t [data-slot][data-slot] .masc .bwing{transform-box:fill-box}
+.cw-t [data-slot][data-slot] .masc .btail{transform-box:fill-box}
+.cw-t [data-slot][data-slot] .masc .bhead{transform-box:fill-box}
+.cw-t [data-slot][data-slot] .masc .bwing{transform-origin:50% 4%}
+.cw-t [data-slot][data-slot] .masc .btail{transform-origin:0% 0%;animation:3s ease-in-out 0s infinite normal none running th-t-t-tail}
+.cw-t [data-slot][data-slot] .masc .bhead{transform-origin:50% 100%}
+.cw-t [data-slot][data-slot] .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-t [data-slot][data-slot] .st-idle .bhead{animation:5.5s ease-in-out 0s infinite normal none running th-t-t-peek}
+.cw-t [data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-t [data-slot][data-slot] .st-think .bhead{animation:3s ease-in-out 0s infinite normal none running th-t-t-tilt}
+.cw-t [data-slot][data-slot] .st-happy .bwing.bl{animation:0.3s ease-in-out 0s infinite alternate none running th-t-t-flapl}
+.cw-t [data-slot][data-slot] .st-happy .bwing.br{animation:0.3s ease-in-out 0s infinite alternate none running th-t-t-flapr}
+.cw-t [data-slot][data-slot] .st-happy .btail{animation-duration:0.6s}
+.cw-t [data-slot][data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-t [data-slot][data-slot] .st-warn .bwing.bl{transform:rotate(66deg);animation:1.8s ease-in-out 0s infinite normal none running th-t-t-guardl}
+.cw-t [data-slot][data-slot] .st-warn .bwing.br{transform:rotate(-66deg);animation:1.8s ease-in-out 0s infinite normal none running th-t-t-guardr}
+.cw-t [data-slot][data-slot] .st-warn .btail{animation:auto ease 0s 1 normal none running none}
+.cw-t [data-slot][data-slot] .op-T .om{animation:0.8s cubic-bezier(0.3, 0.7, 0.3, 1) 0s 1 normal both running th-t-t-o-fly}
+.cw-t [data-slot][data-slot] .op-T .bwing.bl{animation:0.13s ease-in-out 0s 6 alternate both running th-t-t-flapl}
+.cw-t [data-slot][data-slot] .op-T .bwing.br{animation:0.13s ease-in-out 0s 6 alternate both running th-t-t-flapr}
+.cw-t [data-slot][data-slot] .op-T .st-idle .bhead{animation-delay:2.4s}
+.cw-t [data-slot][data-slot] .op-T .bperch{animation:0.3s ease 0.62s 1 normal both running th-t-t-o-perch}
+.cw-t [data-slot][data-slot] .op-T .l{animation:th-t-t-o-let .5s cubic-bezier(.3, 1.6, .5, 1) calc(.72s + var(--i) * 70ms) both}
+.cw-t [data-slot][data-slot] .op-T .hi{animation:1.05s ease 1.4s 1 normal both running th-t-o-hi}
+.cw-t [data-slot][data-slot] .op-T .ot{animation-delay:1.85s}
 .cw-t [data-slot] .ct-v0{--i:0}
 .cw-t [data-slot] .ct-v1{--i:1}
 .cw-t [data-slot] .ct-v2{--i:2}
@@ -2215,23 +2216,23 @@ footer a { color: var(--ink-2); }
 .cw-u [data-slot] .op .ow{color:var(--text)}
 .cw-u [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-u-o-fade}
 .cw-u [data-slot] .wm{color:var(--text)}
-.cw-u [data-slot].cw-u [data-slot] .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-u [data-slot].cw-u [data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-u [data-slot].cw-u [data-slot] .st-happy .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-u [data-slot].cw-u [data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-u [data-slot].cw-u [data-slot] .masc .ucloud{transform-box:fill-box;transform-origin:50% 50%}
-.cw-u [data-slot].cw-u [data-slot] .masc .usun{transform-box:fill-box;transform-origin:50% 50%}
-.cw-u [data-slot].cw-u [data-slot] .masc .urays{transform-box:fill-box;transform-origin:50% 50%}
-.cw-u [data-slot].cw-u [data-slot] .st-idle .ucloud{animation:6s ease-in-out 0s infinite alternate none running th-u-u-drift}
-.cw-u [data-slot].cw-u [data-slot] .st-think .ucloud{animation:2.6s ease-in-out 0s infinite normal none running th-u-u-puff}
-.cw-u [data-slot].cw-u [data-slot] .st-warn .ucloud{animation:2.4s linear 0s infinite normal none running th-u-u-rumble}
-.cw-u [data-slot].cw-u [data-slot] .st-happy .urays{animation:12s linear 0s infinite normal none running th-u-u-spin}
-.cw-u [data-slot].cw-u [data-slot] .st-happy .usun{animation:2.6s ease-in-out 0s infinite normal none running th-u-u-glow}
-.cw-u [data-slot].cw-u [data-slot] .op-U .om{animation:0.8s cubic-bezier(0.2, 0.8, 0.3, 1) 0s 1 normal both running th-u-u-o-rise}
-.cw-u [data-slot].cw-u [data-slot] .op-U .usun{animation:1.2s cubic-bezier(0.3, 0.7, 0.3, 1) 0.45s 1 normal both running th-u-u-o-sun}
-.cw-u [data-slot].cw-u [data-slot] .op-U .st-idle .ucloud{animation:1.3s ease-out 0.5s 1 normal both running th-u-u-o-cloud, 6s ease-in-out 1.8s infinite alternate none running th-u-u-drift}
-.cw-u [data-slot].cw-u [data-slot] .op-U .l{animation:th-u-u-o-let .7s ease calc(.95s + var(--i) * 80ms) both}
-.cw-u [data-slot].cw-u [data-slot] .op-U .ot{animation-delay:1.8s}
+.cw-u [data-slot][data-slot] .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-u [data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-u [data-slot][data-slot] .st-happy .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-u [data-slot][data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-u [data-slot][data-slot] .masc .ucloud{transform-box:fill-box;transform-origin:50% 50%}
+.cw-u [data-slot][data-slot] .masc .usun{transform-box:fill-box;transform-origin:50% 50%}
+.cw-u [data-slot][data-slot] .masc .urays{transform-box:fill-box;transform-origin:50% 50%}
+.cw-u [data-slot][data-slot] .st-idle .ucloud{animation:6s ease-in-out 0s infinite alternate none running th-u-u-drift}
+.cw-u [data-slot][data-slot] .st-think .ucloud{animation:2.6s ease-in-out 0s infinite normal none running th-u-u-puff}
+.cw-u [data-slot][data-slot] .st-warn .ucloud{animation:2.4s linear 0s infinite normal none running th-u-u-rumble}
+.cw-u [data-slot][data-slot] .st-happy .urays{animation:12s linear 0s infinite normal none running th-u-u-spin}
+.cw-u [data-slot][data-slot] .st-happy .usun{animation:2.6s ease-in-out 0s infinite normal none running th-u-u-glow}
+.cw-u [data-slot][data-slot] .op-U .om{animation:0.8s cubic-bezier(0.2, 0.8, 0.3, 1) 0s 1 normal both running th-u-u-o-rise}
+.cw-u [data-slot][data-slot] .op-U .usun{animation:1.2s cubic-bezier(0.3, 0.7, 0.3, 1) 0.45s 1 normal both running th-u-u-o-sun}
+.cw-u [data-slot][data-slot] .op-U .st-idle .ucloud{animation:1.3s ease-out 0.5s 1 normal both running th-u-u-o-cloud, 6s ease-in-out 1.8s infinite alternate none running th-u-u-drift}
+.cw-u [data-slot][data-slot] .op-U .l{animation:th-u-u-o-let .7s ease calc(.95s + var(--i) * 80ms) both}
+.cw-u [data-slot][data-slot] .op-U .ot{animation-delay:1.8s}
 .cw-u [data-slot] .cu-v0{--i:0}
 .cw-u [data-slot] .cu-v1{--i:1}
 .cw-u [data-slot] .cu-v2{--i:2}
@@ -2313,154 +2314,154 @@ footer a { color: var(--ink-2); }
 .cw-v [data-slot] .op .ow{color:var(--text)}
 .cw-v [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-v-o-fade}
 .cw-v [data-slot] .wm{color:var(--text)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvall{transform-box:view-box;transform-origin:0px 0px}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvhalf{transform-box:view-box;transform-origin:0px 0px}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvh{transform-box:view-box;transform-origin:0px 0px}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvspin{transform-box:view-box;transform-origin:0px 0px}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvfi{transform-box:view-box;transform-origin:0px 0px}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvth{transform-box:view-box;transform-origin:0px 0px}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvpalm{transform-box:view-box;transform-origin:0px 0px}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvp{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvv{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvgem{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvcrest{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvsh{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvring{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvring2{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvglow{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvglow2{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nveline{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvseed{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvclick{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvspark{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvseam{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvscan{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvheadi{transform-box:fill-box;transform-origin:50% 50%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvcard{transform-box:fill-box;transform-origin:40% 100%}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvclick{opacity:0}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvspark{opacity:0}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvseed{opacity:0}
-.cw-v [data-slot].cw-v [data-slot] .nvm{--f0:translate(0px, 0px) rotate(0deg) scaleY(1);--o1:translate(-1.3px, .6px) rotate(-24deg) scaleY(1);--o2:translate(0px, -1.3px) rotate(0deg) scaleY(1);--o3:translate(1.3px, .6px) rotate(24deg) scaleY(1);--v1:translate(-.5px, 0px) rotate(-21deg) scaleY(1.06);--v2:translate(.5px, -.4px) rotate(13deg) scaleY(1.08);--v3:translate(.3px, .8px) rotate(0deg) scaleY(.13);--t0:rotate(0deg);--to:rotate(-64deg)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvh{--a1:var(--f0);--a2:var(--f0);--a3:var(--f0);--at:var(--t0);--ap:scaleX(1)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .po-open{--a1:var(--o1);--a2:var(--o2);--a3:var(--o3);--at:var(--to);--ap:scaleX(1.24)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .po-vee{--a1:var(--v1);--a2:var(--v2);--a3:var(--v3);--at:var(--t0);--ap:scaleX(1.14)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvspin{transform:rotate(var(--r)) scale(1, 1)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvfi1{transform:var(--a1)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvfi2{transform:var(--a2)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvfi3{transform:var(--a3)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvth{transform:var(--at)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvpalm{transform:var(--ap)}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvring{animation:3.6s ease-in-out 0s infinite normal none running th-v-nv-ring}
-.cw-v [data-slot].cw-v [data-slot] .nvm .nvring2{animation:3.6s ease-in-out -1.8s infinite normal none running th-v-nv-ring}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvall{animation:3.6s ease-in-out 0s infinite normal none running th-v-nv-bob}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvsh{animation:3.6s ease-in-out 0s infinite normal none running th-v-nv-sh}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvh-r{--fx:9px;--fy:-9px;--fr:16deg;animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-go}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvh-r .nvspin{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-spin}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvh-r .nvfi1{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-f1}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvh-r .nvfi2{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-f2}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvh-r .nvfi3{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-f3}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvh-r .nvth{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-th}
-.cw-v [data-slot].cw-v [data-slot] .st-idle .nvh-r .nvpalm{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-pm}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvall{animation:2.6s ease-in-out 0s infinite normal none running th-v-nv-bob}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvsh{animation:2.6s ease-in-out 0s infinite normal none running th-v-nv-sh}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-lf{transform:translate(11px, 0px)}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-lf .nvspin{transform:translateY(6px) rotate(var(--r)) scale(1.1, 1.1)}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rb{transform:translate(60px, 0px)}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rb .nvspin{transform:translateY(-7px) rotate(var(--r)) scale(.84, .84)}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-lb{opacity:0}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rf{opacity:0}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo .nvspin{animation:4.8s linear 0s infinite normal none running th-v-nv-orb-y}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-lf{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x, 4.8s steps(1) 0s infinite normal none running th-v-nv-orb-front}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rf{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x, 4.8s steps(1) 0s infinite normal none running th-v-nv-orb-front}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-lb{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x, 4.8s steps(1) 0s infinite normal none running th-v-nv-orb-back}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rb{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x, 4.8s steps(1) 0s infinite normal none running th-v-nv-orb-back}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rf{animation-delay:-2.4s}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rb{animation-delay:-2.4s}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rf .nvspin{animation-delay:-2.4s}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvo-rb .nvspin{animation-delay:-2.4s}
-.cw-v [data-slot].cw-v [data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvscan{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-scan}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvcrest{animation:1.6s linear 0s infinite normal none running th-v-nv-coin}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvgem{animation:1.2s ease-in-out 0s infinite alternate none running th-v-nv-gemt}
-.cw-v [data-slot].cw-v [data-slot] .st-think .nvseam{animation:1.2s ease-in-out 0s infinite alternate none running th-v-nv-seamt}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvh{animation:5s ease-in-out 0s infinite normal none running th-v-nv-c-go}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvspin{animation:5s ease-in-out 0s infinite normal none running th-v-nv-c-spin}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvfi1{animation:5s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f1}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvfi2{animation:5s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f2}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvfi3{animation:5s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f3}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvth{animation:5s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-th}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvpalm{animation:5s ease-in-out 0s infinite normal none running th-v-nv-c-pm}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvall{animation:5s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-h-hop}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvsh{animation:5s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-h-sh}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvseam{animation:5s ease-in-out 0s infinite normal none running th-v-nv-h-seam}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvgem{animation:5s ease-in-out 0s infinite normal none running th-v-nv-h-gem}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .nvcrest{animation:5s ease-in-out 0s infinite normal none running th-v-nv-h-crest}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .eye{animation:auto ease 0s 1 normal none running none}
-.cw-v [data-slot].cw-v [data-slot] .st-happy .pop{animation:5s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-v-nv-h-pop}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvhalf-l{transform:rotate(-9deg)}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvhalf-r{transform:rotate(9deg)}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvgem{transform:scale(1.55)}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .eye{animation:6s ease 0s infinite normal none running th-v-m-blink}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvhalf-l{animation:6s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-w-l}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvhalf-r{animation:6s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-w-r}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvgem{animation:6s ease-in-out 0s infinite normal none running th-v-nv-w-gem}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvglow{animation:6s ease-in-out 0s infinite normal none running th-v-nv-w-glow}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvglow2{animation:1.5s ease-in-out 0s infinite alternate none running th-v-nv-w-glow2}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvh-r{animation:6s ease-in-out 0s infinite normal none running th-v-nv-c-go}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvh-r .nvspin{animation:6s ease-in-out 0s infinite normal none running th-v-nv-c-spin}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvh-r .nvfi1{animation:6s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f1}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvh-r .nvfi2{animation:6s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f2}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvh-r .nvfi3{animation:6s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f3}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvh-r .nvth{animation:6s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-th}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvh-r .nvpalm{animation:6s ease-in-out 0s infinite normal none running th-v-nv-c-pm}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvcard{animation:6s cubic-bezier(0.2, 1.4, 0.4, 1) 0s infinite normal none running th-v-nv-w-card}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvcard .pop{animation:auto ease 0s 1 normal none running none}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvheadi{animation:6s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-w-head}
-.cw-v [data-slot].cw-v [data-slot] .st-warn .nvcrest{animation:6s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-w-head}
-.cw-v [data-slot].cw-v [data-slot] .nvrule{animation:0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 1.55s 1 normal both running th-v-nv-o-rule}
-.cw-v [data-slot].cw-v [data-slot] .nvrule .t-i{transform:rotate(45deg);animation:0.5s cubic-bezier(0.2, 1.6, 0.4, 1) 1.5s 1 normal both running th-v-nv-o-dia}
-.cw-v [data-slot].cw-v [data-slot] .nvrule .t-i > .v > .bg{fill:var(--th-gold)}
-.cw-v [data-slot].cw-v [data-slot] .nvrule .t-i > .v > .sh{fill:var(--bg)}
-.cw-v [data-slot].cw-v [data-slot] .op .l{animation:th-v-nv-o-let .7s cubic-bezier(.2, .8, .2, 1) calc(1.65s + var(--i) * 70ms) both}
-.cw-v [data-slot].cw-v [data-slot] .op .ot{animation:0.6s ease 2.15s 1 normal both running th-v-nv-o-fade}
-.cw-v [data-slot].cw-v [data-slot] .op .nvall{animation:0.5s cubic-bezier(0.3, 0.9, 0.4, 1) 0.9s 1 normal both running th-v-nv-o-thud, 3.6s ease-in-out 3s infinite normal none running th-v-nv-bob}
-.cw-v [data-slot].cw-v [data-slot] .op .nvsh{animation:0.8s ease 0.25s 1 normal both running th-v-nv-o-sh, 3.6s ease-in-out 3s infinite normal none running th-v-nv-sh}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp{animation:0.6s cubic-bezier(0.25, 1.25, 0.45, 1) 0s 1 normal both running th-v-nv-o-in}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-ring{--ix:0px;--iy:60px;--ir:0deg;animation-delay:0.1s}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-tl{--ix:-120px;--iy:34px;--ir:-150deg;animation-delay:0.16s}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-tr{--ix:124px;--iy:-6px;--ir:170deg;animation-delay:0.26s}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-neck{--ix:20px;--iy:-90px;--ir:180deg;animation-delay:0.36s}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-head{--ix:-70px;--iy:-92px;--ir:-110deg;animation-delay:0.34s}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-hl{--ix:-130px;--iy:-40px;--ir:-260deg;animation-delay:0.42s}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-hr{--ix:126px;--iy:56px;--ir:240deg;animation-delay:0.48s}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-crest{--ix:60px;--iy:-70px;--ir:300deg;animation-delay:0.56s}
-.cw-v [data-slot].cw-v [data-slot] .op .nvp-gem{animation:auto ease 0s 1 normal none running none}
-.cw-v [data-slot].cw-v [data-slot] .op .nvseed{animation:1.6s ease-in-out 0s 1 normal both running th-v-nv-o-seed}
-.cw-v [data-slot].cw-v [data-slot] .op .nvgem{animation:0.5s cubic-bezier(0.2, 1.7, 0.4, 1) 1.5s 1 normal both running th-v-nv-o-gem}
-.cw-v [data-slot].cw-v [data-slot] .op .nvseam{animation:0.35s ease-out 0.78s 1 normal both running th-v-nv-o-seam}
-.cw-v [data-slot].cw-v [data-slot] .op .nvv-l{animation:0.4s cubic-bezier(0.5, 0, 0.3, 1.3) 1.1s 1 normal both running th-v-nv-o-vl}
-.cw-v [data-slot].cw-v [data-slot] .op .nvv-r{animation:0.4s cubic-bezier(0.5, 0, 0.3, 1.3) 1.2s 1 normal both running th-v-nv-o-vr}
-.cw-v [data-slot].cw-v [data-slot] .op .nveline{animation:0.3s ease-out 1s 1 normal both running th-v-nv-o-line}
-.cw-v [data-slot].cw-v [data-slot] .op .eye{animation:0.26s cubic-bezier(0.2, 1.6, 0.4, 1) 1.12s 1 normal both running th-v-nv-o-wake, 4.2s ease 2.6s infinite normal none running th-v-m-blink}
-.cw-v [data-slot].cw-v [data-slot] .op .nvclick{animation:0.6s ease-out 0.9s 1 normal both running th-v-nv-o-click}
-.cw-v [data-slot].cw-v [data-slot] .op .nvspark{animation:th-v-nv-o-spark .6s ease-out calc(.9s + var(--i) * 12ms) both}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-l{--fx:-9px;--fy:-9px;--fr:-16deg}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-r{--fx:9px;--fy:-9px;--fr:16deg}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-go}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh .nvspin{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-spin}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh .nvfi1{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f1}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh .nvfi2{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f2}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh .nvfi3{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f3}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh .nvth{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-th}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh .nvpalm{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-pm}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-r{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-go, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-go}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-r .nvspin{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-spin, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-spin}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-r .nvfi1{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f1, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-f1}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-r .nvfi2{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f2, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-f2}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-r .nvfi3{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f3, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-f3}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-r .nvth{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-th, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-th}
-.cw-v [data-slot].cw-v [data-slot] .op .nvh-r .nvpalm{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-pm, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-pm}
+.cw-v [data-slot][data-slot] .nvm .nvall{transform-box:view-box;transform-origin:0px 0px}
+.cw-v [data-slot][data-slot] .nvm .nvhalf{transform-box:view-box;transform-origin:0px 0px}
+.cw-v [data-slot][data-slot] .nvm .nvh{transform-box:view-box;transform-origin:0px 0px}
+.cw-v [data-slot][data-slot] .nvm .nvspin{transform-box:view-box;transform-origin:0px 0px}
+.cw-v [data-slot][data-slot] .nvm .nvfi{transform-box:view-box;transform-origin:0px 0px}
+.cw-v [data-slot][data-slot] .nvm .nvth{transform-box:view-box;transform-origin:0px 0px}
+.cw-v [data-slot][data-slot] .nvm .nvpalm{transform-box:view-box;transform-origin:0px 0px}
+.cw-v [data-slot][data-slot] .nvm .nvp{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvv{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvgem{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvcrest{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvsh{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvring{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvring2{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvglow{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvglow2{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nveline{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvseed{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvclick{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvspark{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvseam{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvscan{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvheadi{transform-box:fill-box;transform-origin:50% 50%}
+.cw-v [data-slot][data-slot] .nvm .nvcard{transform-box:fill-box;transform-origin:40% 100%}
+.cw-v [data-slot][data-slot] .nvm .nvclick{opacity:0}
+.cw-v [data-slot][data-slot] .nvm .nvspark{opacity:0}
+.cw-v [data-slot][data-slot] .nvm .nvseed{opacity:0}
+.cw-v [data-slot][data-slot] .nvm{--f0:translate(0px, 0px) rotate(0deg) scaleY(1);--o1:translate(-1.3px, .6px) rotate(-24deg) scaleY(1);--o2:translate(0px, -1.3px) rotate(0deg) scaleY(1);--o3:translate(1.3px, .6px) rotate(24deg) scaleY(1);--v1:translate(-.5px, 0px) rotate(-21deg) scaleY(1.06);--v2:translate(.5px, -.4px) rotate(13deg) scaleY(1.08);--v3:translate(.3px, .8px) rotate(0deg) scaleY(.13);--t0:rotate(0deg);--to:rotate(-64deg)}
+.cw-v [data-slot][data-slot] .nvm .nvh{--a1:var(--f0);--a2:var(--f0);--a3:var(--f0);--at:var(--t0);--ap:scaleX(1)}
+.cw-v [data-slot][data-slot] .nvm .po-open{--a1:var(--o1);--a2:var(--o2);--a3:var(--o3);--at:var(--to);--ap:scaleX(1.24)}
+.cw-v [data-slot][data-slot] .nvm .po-vee{--a1:var(--v1);--a2:var(--v2);--a3:var(--v3);--at:var(--t0);--ap:scaleX(1.14)}
+.cw-v [data-slot][data-slot] .nvm .nvspin{transform:rotate(var(--r)) scale(1, 1)}
+.cw-v [data-slot][data-slot] .nvm .nvfi1{transform:var(--a1)}
+.cw-v [data-slot][data-slot] .nvm .nvfi2{transform:var(--a2)}
+.cw-v [data-slot][data-slot] .nvm .nvfi3{transform:var(--a3)}
+.cw-v [data-slot][data-slot] .nvm .nvth{transform:var(--at)}
+.cw-v [data-slot][data-slot] .nvm .nvpalm{transform:var(--ap)}
+.cw-v [data-slot][data-slot] .nvm .nvring{animation:3.6s ease-in-out 0s infinite normal none running th-v-nv-ring}
+.cw-v [data-slot][data-slot] .nvm .nvring2{animation:3.6s ease-in-out -1.8s infinite normal none running th-v-nv-ring}
+.cw-v [data-slot][data-slot] .st-idle .nvall{animation:3.6s ease-in-out 0s infinite normal none running th-v-nv-bob}
+.cw-v [data-slot][data-slot] .st-idle .nvsh{animation:3.6s ease-in-out 0s infinite normal none running th-v-nv-sh}
+.cw-v [data-slot][data-slot] .st-idle .nvh-r{--fx:9px;--fy:-9px;--fr:16deg;animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-go}
+.cw-v [data-slot][data-slot] .st-idle .nvh-r .nvspin{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-spin}
+.cw-v [data-slot][data-slot] .st-idle .nvh-r .nvfi1{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-f1}
+.cw-v [data-slot][data-slot] .st-idle .nvh-r .nvfi2{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-f2}
+.cw-v [data-slot][data-slot] .st-idle .nvh-r .nvfi3{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-f3}
+.cw-v [data-slot][data-slot] .st-idle .nvh-r .nvth{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-th}
+.cw-v [data-slot][data-slot] .st-idle .nvh-r .nvpalm{animation:9s ease-in-out 0s infinite normal none running th-v-nv-fl-pm}
+.cw-v [data-slot][data-slot] .st-think .nvall{animation:2.6s ease-in-out 0s infinite normal none running th-v-nv-bob}
+.cw-v [data-slot][data-slot] .st-think .nvsh{animation:2.6s ease-in-out 0s infinite normal none running th-v-nv-sh}
+.cw-v [data-slot][data-slot] .st-think .nvo-lf{transform:translate(11px, 0px)}
+.cw-v [data-slot][data-slot] .st-think .nvo-lf .nvspin{transform:translateY(6px) rotate(var(--r)) scale(1.1, 1.1)}
+.cw-v [data-slot][data-slot] .st-think .nvo-rb{transform:translate(60px, 0px)}
+.cw-v [data-slot][data-slot] .st-think .nvo-rb .nvspin{transform:translateY(-7px) rotate(var(--r)) scale(.84, .84)}
+.cw-v [data-slot][data-slot] .st-think .nvo-lb{opacity:0}
+.cw-v [data-slot][data-slot] .st-think .nvo-rf{opacity:0}
+.cw-v [data-slot][data-slot] .st-think .nvo{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x}
+.cw-v [data-slot][data-slot] .st-think .nvo .nvspin{animation:4.8s linear 0s infinite normal none running th-v-nv-orb-y}
+.cw-v [data-slot][data-slot] .st-think .nvo-lf{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x, 4.8s steps(1) 0s infinite normal none running th-v-nv-orb-front}
+.cw-v [data-slot][data-slot] .st-think .nvo-rf{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x, 4.8s steps(1) 0s infinite normal none running th-v-nv-orb-front}
+.cw-v [data-slot][data-slot] .st-think .nvo-lb{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x, 4.8s steps(1) 0s infinite normal none running th-v-nv-orb-back}
+.cw-v [data-slot][data-slot] .st-think .nvo-rb{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-orb-x, 4.8s steps(1) 0s infinite normal none running th-v-nv-orb-back}
+.cw-v [data-slot][data-slot] .st-think .nvo-rf{animation-delay:-2.4s}
+.cw-v [data-slot][data-slot] .st-think .nvo-rb{animation-delay:-2.4s}
+.cw-v [data-slot][data-slot] .st-think .nvo-rf .nvspin{animation-delay:-2.4s}
+.cw-v [data-slot][data-slot] .st-think .nvo-rb .nvspin{animation-delay:-2.4s}
+.cw-v [data-slot][data-slot] .st-think .eye{animation:auto ease 0s 1 normal none running none}
+.cw-v [data-slot][data-slot] .st-think .nvscan{animation:2.4s cubic-bezier(0.37, 0, 0.63, 1) 0s infinite alternate none running th-v-nv-scan}
+.cw-v [data-slot][data-slot] .st-think .nvcrest{animation:1.6s linear 0s infinite normal none running th-v-nv-coin}
+.cw-v [data-slot][data-slot] .st-think .nvgem{animation:1.2s ease-in-out 0s infinite alternate none running th-v-nv-gemt}
+.cw-v [data-slot][data-slot] .st-think .nvseam{animation:1.2s ease-in-out 0s infinite alternate none running th-v-nv-seamt}
+.cw-v [data-slot][data-slot] .st-happy .nvh{animation:5s ease-in-out 0s infinite normal none running th-v-nv-c-go}
+.cw-v [data-slot][data-slot] .st-happy .nvspin{animation:5s ease-in-out 0s infinite normal none running th-v-nv-c-spin}
+.cw-v [data-slot][data-slot] .st-happy .nvfi1{animation:5s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f1}
+.cw-v [data-slot][data-slot] .st-happy .nvfi2{animation:5s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f2}
+.cw-v [data-slot][data-slot] .st-happy .nvfi3{animation:5s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f3}
+.cw-v [data-slot][data-slot] .st-happy .nvth{animation:5s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-th}
+.cw-v [data-slot][data-slot] .st-happy .nvpalm{animation:5s ease-in-out 0s infinite normal none running th-v-nv-c-pm}
+.cw-v [data-slot][data-slot] .st-happy .nvall{animation:5s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-h-hop}
+.cw-v [data-slot][data-slot] .st-happy .nvsh{animation:5s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-h-sh}
+.cw-v [data-slot][data-slot] .st-happy .nvseam{animation:5s ease-in-out 0s infinite normal none running th-v-nv-h-seam}
+.cw-v [data-slot][data-slot] .st-happy .nvgem{animation:5s ease-in-out 0s infinite normal none running th-v-nv-h-gem}
+.cw-v [data-slot][data-slot] .st-happy .nvcrest{animation:5s ease-in-out 0s infinite normal none running th-v-nv-h-crest}
+.cw-v [data-slot][data-slot] .st-happy .eye{animation:auto ease 0s 1 normal none running none}
+.cw-v [data-slot][data-slot] .st-happy .pop{animation:5s cubic-bezier(0.2, 1.5, 0.4, 1) 0s infinite normal none running th-v-nv-h-pop}
+.cw-v [data-slot][data-slot] .st-warn .nvhalf-l{transform:rotate(-9deg)}
+.cw-v [data-slot][data-slot] .st-warn .nvhalf-r{transform:rotate(9deg)}
+.cw-v [data-slot][data-slot] .st-warn .nvgem{transform:scale(1.55)}
+.cw-v [data-slot][data-slot] .st-warn .eye{animation:6s ease 0s infinite normal none running th-v-m-blink}
+.cw-v [data-slot][data-slot] .st-warn .nvhalf-l{animation:6s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-w-l}
+.cw-v [data-slot][data-slot] .st-warn .nvhalf-r{animation:6s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-w-r}
+.cw-v [data-slot][data-slot] .st-warn .nvgem{animation:6s ease-in-out 0s infinite normal none running th-v-nv-w-gem}
+.cw-v [data-slot][data-slot] .st-warn .nvglow{animation:6s ease-in-out 0s infinite normal none running th-v-nv-w-glow}
+.cw-v [data-slot][data-slot] .st-warn .nvglow2{animation:1.5s ease-in-out 0s infinite alternate none running th-v-nv-w-glow2}
+.cw-v [data-slot][data-slot] .st-warn .nvh-r{animation:6s ease-in-out 0s infinite normal none running th-v-nv-c-go}
+.cw-v [data-slot][data-slot] .st-warn .nvh-r .nvspin{animation:6s ease-in-out 0s infinite normal none running th-v-nv-c-spin}
+.cw-v [data-slot][data-slot] .st-warn .nvh-r .nvfi1{animation:6s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f1}
+.cw-v [data-slot][data-slot] .st-warn .nvh-r .nvfi2{animation:6s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f2}
+.cw-v [data-slot][data-slot] .st-warn .nvh-r .nvfi3{animation:6s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-f3}
+.cw-v [data-slot][data-slot] .st-warn .nvh-r .nvth{animation:6s cubic-bezier(0.3, 1.4, 0.5, 1) 0s infinite normal none running th-v-nv-c-th}
+.cw-v [data-slot][data-slot] .st-warn .nvh-r .nvpalm{animation:6s ease-in-out 0s infinite normal none running th-v-nv-c-pm}
+.cw-v [data-slot][data-slot] .st-warn .nvcard{animation:6s cubic-bezier(0.2, 1.4, 0.4, 1) 0s infinite normal none running th-v-nv-w-card}
+.cw-v [data-slot][data-slot] .st-warn .nvcard .pop{animation:auto ease 0s 1 normal none running none}
+.cw-v [data-slot][data-slot] .st-warn .nvheadi{animation:6s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-w-head}
+.cw-v [data-slot][data-slot] .st-warn .nvcrest{animation:6s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-v-nv-w-head}
+.cw-v [data-slot][data-slot] .nvrule{animation:0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 1.55s 1 normal both running th-v-nv-o-rule}
+.cw-v [data-slot][data-slot] .nvrule .t-i{transform:rotate(45deg);animation:0.5s cubic-bezier(0.2, 1.6, 0.4, 1) 1.5s 1 normal both running th-v-nv-o-dia}
+.cw-v [data-slot][data-slot] .nvrule .t-i > .v > .bg{fill:var(--th-gold)}
+.cw-v [data-slot][data-slot] .nvrule .t-i > .v > .sh{fill:var(--bg)}
+.cw-v [data-slot][data-slot] .op .l{animation:th-v-nv-o-let .7s cubic-bezier(.2, .8, .2, 1) calc(1.65s + var(--i) * 70ms) both}
+.cw-v [data-slot][data-slot] .op .ot{animation:0.6s ease 2.15s 1 normal both running th-v-nv-o-fade}
+.cw-v [data-slot][data-slot] .op .nvall{animation:0.5s cubic-bezier(0.3, 0.9, 0.4, 1) 0.9s 1 normal both running th-v-nv-o-thud, 3.6s ease-in-out 3s infinite normal none running th-v-nv-bob}
+.cw-v [data-slot][data-slot] .op .nvsh{animation:0.8s ease 0.25s 1 normal both running th-v-nv-o-sh, 3.6s ease-in-out 3s infinite normal none running th-v-nv-sh}
+.cw-v [data-slot][data-slot] .op .nvp{animation:0.6s cubic-bezier(0.25, 1.25, 0.45, 1) 0s 1 normal both running th-v-nv-o-in}
+.cw-v [data-slot][data-slot] .op .nvp-ring{--ix:0px;--iy:60px;--ir:0deg;animation-delay:0.1s}
+.cw-v [data-slot][data-slot] .op .nvp-tl{--ix:-120px;--iy:34px;--ir:-150deg;animation-delay:0.16s}
+.cw-v [data-slot][data-slot] .op .nvp-tr{--ix:124px;--iy:-6px;--ir:170deg;animation-delay:0.26s}
+.cw-v [data-slot][data-slot] .op .nvp-neck{--ix:20px;--iy:-90px;--ir:180deg;animation-delay:0.36s}
+.cw-v [data-slot][data-slot] .op .nvp-head{--ix:-70px;--iy:-92px;--ir:-110deg;animation-delay:0.34s}
+.cw-v [data-slot][data-slot] .op .nvp-hl{--ix:-130px;--iy:-40px;--ir:-260deg;animation-delay:0.42s}
+.cw-v [data-slot][data-slot] .op .nvp-hr{--ix:126px;--iy:56px;--ir:240deg;animation-delay:0.48s}
+.cw-v [data-slot][data-slot] .op .nvp-crest{--ix:60px;--iy:-70px;--ir:300deg;animation-delay:0.56s}
+.cw-v [data-slot][data-slot] .op .nvp-gem{animation:auto ease 0s 1 normal none running none}
+.cw-v [data-slot][data-slot] .op .nvseed{animation:1.6s ease-in-out 0s 1 normal both running th-v-nv-o-seed}
+.cw-v [data-slot][data-slot] .op .nvgem{animation:0.5s cubic-bezier(0.2, 1.7, 0.4, 1) 1.5s 1 normal both running th-v-nv-o-gem}
+.cw-v [data-slot][data-slot] .op .nvseam{animation:0.35s ease-out 0.78s 1 normal both running th-v-nv-o-seam}
+.cw-v [data-slot][data-slot] .op .nvv-l{animation:0.4s cubic-bezier(0.5, 0, 0.3, 1.3) 1.1s 1 normal both running th-v-nv-o-vl}
+.cw-v [data-slot][data-slot] .op .nvv-r{animation:0.4s cubic-bezier(0.5, 0, 0.3, 1.3) 1.2s 1 normal both running th-v-nv-o-vr}
+.cw-v [data-slot][data-slot] .op .nveline{animation:0.3s ease-out 1s 1 normal both running th-v-nv-o-line}
+.cw-v [data-slot][data-slot] .op .eye{animation:0.26s cubic-bezier(0.2, 1.6, 0.4, 1) 1.12s 1 normal both running th-v-nv-o-wake, 4.2s ease 2.6s infinite normal none running th-v-m-blink}
+.cw-v [data-slot][data-slot] .op .nvclick{animation:0.6s ease-out 0.9s 1 normal both running th-v-nv-o-click}
+.cw-v [data-slot][data-slot] .op .nvspark{animation:th-v-nv-o-spark .6s ease-out calc(.9s + var(--i) * 12ms) both}
+.cw-v [data-slot][data-slot] .op .nvh-l{--fx:-9px;--fy:-9px;--fr:-16deg}
+.cw-v [data-slot][data-slot] .op .nvh-r{--fx:9px;--fy:-9px;--fr:16deg}
+.cw-v [data-slot][data-slot] .op .nvh{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-go}
+.cw-v [data-slot][data-slot] .op .nvh .nvspin{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-spin}
+.cw-v [data-slot][data-slot] .op .nvh .nvfi1{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f1}
+.cw-v [data-slot][data-slot] .op .nvh .nvfi2{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f2}
+.cw-v [data-slot][data-slot] .op .nvh .nvfi3{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f3}
+.cw-v [data-slot][data-slot] .op .nvh .nvth{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-th}
+.cw-v [data-slot][data-slot] .op .nvh .nvpalm{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-pm}
+.cw-v [data-slot][data-slot] .op .nvh-r{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-go, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-go}
+.cw-v [data-slot][data-slot] .op .nvh-r .nvspin{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-spin, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-spin}
+.cw-v [data-slot][data-slot] .op .nvh-r .nvfi1{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f1, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-f1}
+.cw-v [data-slot][data-slot] .op .nvh-r .nvfi2{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f2, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-f2}
+.cw-v [data-slot][data-slot] .op .nvh-r .nvfi3{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-f3, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-f3}
+.cw-v [data-slot][data-slot] .op .nvh-r .nvth{animation:1.5s cubic-bezier(0.3, 1.4, 0.5, 1) 1.42s 1 normal both running th-v-nv-oh-th, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-th}
+.cw-v [data-slot][data-slot] .op .nvh-r .nvpalm{animation:1.5s ease-in-out 1.42s 1 normal both running th-v-nv-oh-pm, 9s ease-in-out 3.4s infinite normal none running th-v-nv-fl-pm}
 .cw-v [data-slot] .cv-v0{--dx:0px;--dy:0px;--r:-180deg;--r0:-180deg}
 .cw-v [data-slot] .cv-v1{--dx:0px;--dy:0px;--r:180deg;--r0:180deg}
 .cw-v [data-slot] .cv-v2{--dx:7.5px;--dy:7px;--r:-16deg;--r0:-180deg}
@@ -2805,29 +2806,29 @@ footer a { color: var(--ink-2); }
 .cw-w [data-slot] .op .ow{color:var(--text)}
 .cw-w [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-w-o-fade}
 .cw-w [data-slot] .wm{color:var(--text)}
-.cw-w [data-slot].cw-w [data-slot] .masc .wfoot{transform-box:fill-box}
-.cw-w [data-slot].cw-w [data-slot] .masc .weyes{transform-box:fill-box}
-.cw-w [data-slot].cw-w [data-slot] .st-idle .mbody{animation:1.4s steps(1) 0s infinite normal none running th-w-wp-bob}
-.cw-w [data-slot].cw-w [data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-w [data-slot].cw-w [data-slot] .st-think .weyes{animation:2.4s steps(1) 0s infinite normal none running th-w-wp-look}
-.cw-w [data-slot].cw-w [data-slot] .st-think .wfoot.fr{animation:0.5s steps(1) 0s infinite normal none running th-w-wp-tap}
-.cw-w [data-slot].cw-w [data-slot] .st-happy .mbody{animation:0.8s steps(1) 0s infinite normal none running th-w-wp-hop}
-.cw-w [data-slot].cw-w [data-slot] .st-warn .mbody{animation:2s steps(1) 0s infinite normal none running th-w-wp-shake}
-.cw-w [data-slot].cw-w [data-slot] .masc .pop{animation:2.6s steps(1) 0s infinite normal none running th-w-wp-pop}
-.cw-w [data-slot].cw-w [data-slot] .masc .wdots rect{animation:1.2s steps(1) 0s infinite normal none running th-w-m-dot}
-.cw-w [data-slot].cw-w [data-slot] .masc .wdots rect:nth-of-type(2){animation-delay:0.2s}
-.cw-w [data-slot].cw-w [data-slot] .masc .wdots rect:nth-of-type(3){animation-delay:0.4s}
-.cw-w [data-slot].cw-w [data-slot] .op > .v > .bg{fill:var(--th-lcd)}
-.cw-w [data-slot].cw-w [data-slot] .op .ow{color:var(--th-lcdink)}
-.cw-w [data-slot].cw-w [data-slot] .op .ot{color:var(--th-lcdink)}
-.cw-w [data-slot].cw-w [data-slot] .op .wboot{color:var(--th-lcdink);opacity:0}
-.cw-w [data-slot].cw-w [data-slot] .op-W .wboot{animation:0.78s steps(1) 0s 1 normal both running th-w-wp-o-boot}
-.cw-w [data-slot].cw-w [data-slot] .op-W .wboot .t-span{animation:1ms steps(1) 0s 1 normal both running th-w-wp-o-line}
-.cw-w [data-slot].cw-w [data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-delay:0.2s}
-.cw-w [data-slot].cw-w [data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-delay:0.4s}
-.cw-w [data-slot].cw-w [data-slot] .op-W .ow{animation:0.64s steps(8) 0.8s 1 normal both running th-w-wp-o-drop}
-.cw-w [data-slot].cw-w [data-slot] .op-W .om{animation:0.36s steps(4) 1.5s 1 normal both running th-w-wp-o-rise}
-.cw-w [data-slot].cw-w [data-slot] .op-W .ot{animation:0.8s steps(1) 1.9s 1 normal both running th-w-wp-o-blink}
+.cw-w [data-slot][data-slot] .masc .wfoot{transform-box:fill-box}
+.cw-w [data-slot][data-slot] .masc .weyes{transform-box:fill-box}
+.cw-w [data-slot][data-slot] .st-idle .mbody{animation:1.4s steps(1) 0s infinite normal none running th-w-wp-bob}
+.cw-w [data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-w [data-slot][data-slot] .st-think .weyes{animation:2.4s steps(1) 0s infinite normal none running th-w-wp-look}
+.cw-w [data-slot][data-slot] .st-think .wfoot.fr{animation:0.5s steps(1) 0s infinite normal none running th-w-wp-tap}
+.cw-w [data-slot][data-slot] .st-happy .mbody{animation:0.8s steps(1) 0s infinite normal none running th-w-wp-hop}
+.cw-w [data-slot][data-slot] .st-warn .mbody{animation:2s steps(1) 0s infinite normal none running th-w-wp-shake}
+.cw-w [data-slot][data-slot] .masc .pop{animation:2.6s steps(1) 0s infinite normal none running th-w-wp-pop}
+.cw-w [data-slot][data-slot] .masc .wdots rect{animation:1.2s steps(1) 0s infinite normal none running th-w-m-dot}
+.cw-w [data-slot][data-slot] .masc .wdots rect:nth-of-type(2){animation-delay:0.2s}
+.cw-w [data-slot][data-slot] .masc .wdots rect:nth-of-type(3){animation-delay:0.4s}
+.cw-w [data-slot][data-slot] .op > .v > .bg{fill:var(--th-lcd)}
+.cw-w [data-slot][data-slot] .op .ow{color:var(--th-lcdink)}
+.cw-w [data-slot][data-slot] .op .ot{color:var(--th-lcdink)}
+.cw-w [data-slot][data-slot] .op .wboot{color:var(--th-lcdink);opacity:0}
+.cw-w [data-slot][data-slot] .op-W .wboot{animation:0.78s steps(1) 0s 1 normal both running th-w-wp-o-boot}
+.cw-w [data-slot][data-slot] .op-W .wboot .t-span{animation:0s linear 0s 1 normal none running th-w-wp-o-line}
+.cw-w [data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(2){animation-duration:0.2s}
+.cw-w [data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-duration:0.4s}
+.cw-w [data-slot][data-slot] .op-W .ow{animation:0.64s steps(8) 0.8s 1 normal both running th-w-wp-o-drop}
+.cw-w [data-slot][data-slot] .op-W .om{animation:0.36s steps(4) 1.5s 1 normal both running th-w-wp-o-rise}
+.cw-w [data-slot][data-slot] .op-W .ot{animation:0.8s steps(1) 1.9s 1 normal both running th-w-wp-o-blink}
 .cw-w [data-slot] .cw-v0{--i:0}
 .cw-w [data-slot] .cw-v1{--i:1}
 .cw-w [data-slot] .cw-v2{--i:2}
@@ -2898,8 +2899,7 @@ footer a { color: var(--ink-2); }
   100% { opacity: 0; }
 }
 @keyframes th-w-wp-o-line{ 
-  0% { visibility: hidden; }
-  100% { visibility: visible; }
+  0%, 100% { visibility: hidden; }
 }
 @keyframes th-w-wp-o-drop{ 
   0% { transform: translateY(-192px); }
@@ -2924,27 +2924,27 @@ footer a { color: var(--ink-2); }
 .cw-x [data-slot] .op .ow{color:var(--text)}
 .cw-x [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-x-o-fade}
 .cw-x [data-slot] .wm{color:var(--text)}
-.cw-x [data-slot].cw-x [data-slot] .op > .v > .bg{fill:var(--bg)}
-.cw-x [data-slot].cw-x [data-slot] .masc .mbody{transform-origin:50% 50%}
-.cw-x [data-slot].cw-x [data-slot] .masc .xspin{transform-origin:60px 62px}
-.cw-x [data-slot].cw-x [data-slot] .masc .xdot{transform-box:fill-box;transform-origin:50% 50%}
-.cw-x [data-slot].cw-x [data-slot] .masc .xripple{transform-box:fill-box;transform-origin:50% 50%}
-.cw-x [data-slot].cw-x [data-slot] .st-idle .mbody{animation:5.6s ease-in-out 0s infinite normal none running th-x-xm-breathe}
-.cw-x [data-slot].cw-x [data-slot] .st-idle .xdot{animation:5.6s ease-in-out 0s infinite normal none running th-x-xm-hover}
-.cw-x [data-slot].cw-x [data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-x [data-slot].cw-x [data-slot] .st-happy .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-x [data-slot].cw-x [data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-x [data-slot].cw-x [data-slot] .st-think .xspin{animation:3.4s cubic-bezier(0.55, 0.1, 0.45, 0.9) 0s infinite normal none running th-x-xm-spin}
-.cw-x [data-slot].cw-x [data-slot] .st-happy .xring{animation:5s ease-in-out 0s infinite normal none running th-x-xm-close}
-.cw-x [data-slot].cw-x [data-slot] .st-happy .xdot{animation:5s ease-in-out 0s infinite normal none running th-x-xm-land}
-.cw-x [data-slot].cw-x [data-slot] .st-warn .xripple{animation:2.4s ease-out 0s infinite normal none running th-x-xm-ripple}
-.cw-x [data-slot].cw-x [data-slot] .st-warn .xdot{animation:2.4s ease-in-out 0s infinite normal none running th-x-xm-pulse}
-.cw-x [data-slot].cw-x [data-slot] .op-X .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-x [data-slot].cw-x [data-slot] .op-X .xring{animation:1.15s cubic-bezier(0.65, 0, 0.2, 1) 0s 1 normal both running th-x-xm-o-draw}
-.cw-x [data-slot].cw-x [data-slot] .op-X .xface{animation:0.7s ease 0.85s 1 normal both running th-x-xm-o-in}
-.cw-x [data-slot].cw-x [data-slot] .op-X .st-idle .xdot{animation:0.75s cubic-bezier(0.2, 0.8, 0.3, 1) 1.1s 1 normal both running th-x-xm-o-dot}
-.cw-x [data-slot].cw-x [data-slot] .op-X .l{animation:th-x-xm-o-in .9s ease calc(1.15s + var(--i) * 80ms) both}
-.cw-x [data-slot].cw-x [data-slot] .op-X .ot{animation:0.9s ease 1.9s 1 normal both running th-x-xm-o-in}
+.cw-x [data-slot][data-slot] .op > .v > .bg{fill:var(--bg)}
+.cw-x [data-slot][data-slot] .masc .mbody{transform-origin:50% 50%}
+.cw-x [data-slot][data-slot] .masc .xspin{transform-origin:60px 62px}
+.cw-x [data-slot][data-slot] .masc .xdot{transform-box:fill-box;transform-origin:50% 50%}
+.cw-x [data-slot][data-slot] .masc .xripple{transform-box:fill-box;transform-origin:50% 50%}
+.cw-x [data-slot][data-slot] .st-idle .mbody{animation:5.6s ease-in-out 0s infinite normal none running th-x-xm-breathe}
+.cw-x [data-slot][data-slot] .st-idle .xdot{animation:5.6s ease-in-out 0s infinite normal none running th-x-xm-hover}
+.cw-x [data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-x [data-slot][data-slot] .st-happy .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-x [data-slot][data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-x [data-slot][data-slot] .st-think .xspin{animation:3.4s cubic-bezier(0.55, 0.1, 0.45, 0.9) 0s infinite normal none running th-x-xm-spin}
+.cw-x [data-slot][data-slot] .st-happy .xring{animation:5s ease-in-out 0s infinite normal none running th-x-xm-close}
+.cw-x [data-slot][data-slot] .st-happy .xdot{animation:5s ease-in-out 0s infinite normal none running th-x-xm-land}
+.cw-x [data-slot][data-slot] .st-warn .xripple{animation:2.4s ease-out 0s infinite normal none running th-x-xm-ripple}
+.cw-x [data-slot][data-slot] .st-warn .xdot{animation:2.4s ease-in-out 0s infinite normal none running th-x-xm-pulse}
+.cw-x [data-slot][data-slot] .op-X .st-idle .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-x [data-slot][data-slot] .op-X .xring{animation:1.15s cubic-bezier(0.65, 0, 0.2, 1) 0s 1 normal both running th-x-xm-o-draw}
+.cw-x [data-slot][data-slot] .op-X .xface{animation:0.7s ease 0.85s 1 normal both running th-x-xm-o-in}
+.cw-x [data-slot][data-slot] .op-X .st-idle .xdot{animation:0.75s cubic-bezier(0.2, 0.8, 0.3, 1) 1.1s 1 normal both running th-x-xm-o-dot}
+.cw-x [data-slot][data-slot] .op-X .l{animation:th-x-xm-o-in .9s ease calc(1.15s + var(--i) * 80ms) both}
+.cw-x [data-slot][data-slot] .op-X .ot{animation:0.9s ease 1.9s 1 normal both running th-x-xm-o-in}
 .cw-x [data-slot] .cx-v0{--i:0}
 .cw-x [data-slot] .cx-v1{--i:1}
 .cw-x [data-slot] .cx-v2{--i:2}
@@ -3031,14 +3031,14 @@ footer a { color: var(--ink-2); }
 .cw-y [data-slot] .op .ow{color:var(--text)}
 .cw-y [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-y-o-fade}
 .cw-y [data-slot] .wm{color:var(--text)}
-.cw-y [data-slot].cw-y [data-slot] .wm{color:var(--accent);filter:drop-shadow(0 2px 0 var(--th-acd)) drop-shadow(0 6px 9px color-mix(in srgb, var(--th-acd) 32%, transparent))}
-.cw-y [data-slot].cw-y [data-slot] .masc .yshadow{transform-box:fill-box;transform-origin:50% 50%}
-.cw-y [data-slot].cw-y [data-slot] .st-happy .yshadow{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-y-yc-shadow}
-.cw-y [data-slot].cw-y [data-slot] .st-idle .squish{animation:auto ease 0s 1 normal none running none}
-.cw-y [data-slot].cw-y [data-slot] .op-Y .yball{opacity:0;animation:0.66s cubic-bezier(0.5, 0, 0.9, 0.6) 0s 1 normal both running th-y-yc-o-ball}
-.cw-y [data-slot].cw-y [data-slot] .op-Y .om{animation:0.7s cubic-bezier(0.3, 1.3, 0.5, 1) 0.6s 1 normal both running th-y-yc-o-rise, 0.46s ease 1.5s 1 normal none running th-y-yc-o-press}
-.cw-y [data-slot].cw-y [data-slot] .op-Y .l{animation:th-y-yc-o-let .42s cubic-bezier(.2, 1.6, .4, 1) calc(1.1s + var(--i) * 85ms) both}
-.cw-y [data-slot].cw-y [data-slot] .op-Y .ot{animation-delay:1.95s}
+.cw-y [data-slot][data-slot] .wm{color:var(--accent);filter:drop-shadow(0 2px 0 var(--th-acd)) drop-shadow(0 6px 9px color-mix(in srgb, var(--th-acd) 32%, transparent))}
+.cw-y [data-slot][data-slot] .masc .yshadow{transform-box:fill-box;transform-origin:50% 50%}
+.cw-y [data-slot][data-slot] .st-happy .yshadow{animation:1.3s cubic-bezier(0.3, 0.9, 0.4, 1) 0s infinite normal none running th-y-yc-shadow}
+.cw-y [data-slot][data-slot] .st-idle .squish{animation:auto ease 0s 1 normal none running none}
+.cw-y [data-slot][data-slot] .op-Y .yball{opacity:0;animation:0.66s cubic-bezier(0.5, 0, 0.9, 0.6) 0s 1 normal both running th-y-yc-o-ball}
+.cw-y [data-slot][data-slot] .op-Y .om{animation:0.7s cubic-bezier(0.3, 1.3, 0.5, 1) 0.6s 1 normal both running th-y-yc-o-rise, 0.46s ease 1.5s 1 normal none running th-y-yc-o-press}
+.cw-y [data-slot][data-slot] .op-Y .l{animation:th-y-yc-o-let .42s cubic-bezier(.2, 1.6, .4, 1) calc(1.1s + var(--i) * 85ms) both}
+.cw-y [data-slot][data-slot] .op-Y .ot{animation-delay:1.95s}
 .cw-y [data-slot] .cy-v0{--i:0}
 .cw-y [data-slot] .cy-v1{--i:1}
 .cw-y [data-slot] .cy-v2{--i:2}
@@ -3127,41 +3127,41 @@ footer a { color: var(--ink-2); }
 .cw-z [data-slot] .op .ow{color:var(--text)}
 .cw-z [data-slot] .op .ot{color:var(--muted);animation:0.5s ease 1.5s 1 normal both running th-z-o-fade}
 .cw-z [data-slot] .wm{color:var(--text)}
-.cw-z [data-slot].cw-z [data-slot] .masc .zhead{transform-box:fill-box}
-.cw-z [data-slot].cw-z [data-slot] .masc .zear{transform-box:fill-box}
-.cw-z [data-slot].cw-z [data-slot] .masc .ztail{transform-box:fill-box}
-.cw-z [data-slot].cw-z [data-slot] .masc .zpaw{transform-box:fill-box}
-.cw-z [data-slot].cw-z [data-slot] .masc .zzz path{transform-box:fill-box}
-.cw-z [data-slot].cw-z [data-slot] .masc .zhead{transform-origin:50% 100%}
-.cw-z [data-slot].cw-z [data-slot] .masc .zear.l{transform-origin:80% 100%}
-.cw-z [data-slot].cw-z [data-slot] .masc .zear.r{transform-origin:20% 100%}
-.cw-z [data-slot].cw-z [data-slot] .masc .ztail{transform-origin:0% 0%}
-.cw-z [data-slot].cw-z [data-slot] .masc .zpaw{transform-origin:100% 0%}
-.cw-z [data-slot].cw-z [data-slot] .masc .zpeek{opacity:0}
-.cw-z [data-slot].cw-z [data-slot] .st-idle .mbody{animation:4.2s ease-in-out 0s infinite normal none running th-z-z-breathe}
-.cw-z [data-slot].cw-z [data-slot] .st-idle .zear.r{animation:6.4s ease-in-out 0s infinite normal none running th-z-z-flick}
-.cw-z [data-slot].cw-z [data-slot] .st-idle .zpeek{animation:6.4s ease-in-out 0s infinite normal none running th-z-z-peek}
-.cw-z [data-slot].cw-z [data-slot] .st-idle .zshut{animation:6.4s ease-in-out 0s infinite normal none running th-z-z-shut}
-.cw-z [data-slot].cw-z [data-slot] .st-idle .zzz path{animation:3.6s ease-in-out 0s infinite normal none running th-z-z-zz}
-.cw-z [data-slot].cw-z [data-slot] .st-idle .zzz path:nth-of-type(2){animation-delay:0.5s}
-.cw-z [data-slot].cw-z [data-slot] .st-idle .zzz path:nth-of-type(3){animation-delay:1s}
-.cw-z [data-slot].cw-z [data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-z [data-slot].cw-z [data-slot] .st-think .zhead{animation:2.8s ease-in-out 0s infinite normal none running th-z-z-tilt}
-.cw-z [data-slot].cw-z [data-slot] .st-think .ztail{animation:1.4s ease-in-out 0s infinite normal none running th-z-z-swish}
-.cw-z [data-slot].cw-z [data-slot] .st-happy .ztail{transform-origin:0% 100%;animation:1.3s ease-in-out 0s infinite normal none running th-z-z-wave}
-.cw-z [data-slot].cw-z [data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
-.cw-z [data-slot].cw-z [data-slot] .st-warn .zear.l{animation:2.4s ease-in-out 0s infinite normal none running th-z-z-perk-l}
-.cw-z [data-slot].cw-z [data-slot] .st-warn .zear.r{animation:2.4s ease-in-out 0s infinite normal none running th-z-z-perk-r}
-.cw-z [data-slot].cw-z [data-slot] .st-warn .zpaw{animation:2.4s ease-in-out 0s infinite normal none running th-z-z-pat}
-.cw-z [data-slot].cw-z [data-slot] .op > .v > .bg{fill:var(--bg)}
-.cw-z [data-slot].cw-z [data-slot] .op .zsun{opacity:0.42}
-.cw-z [data-slot].cw-z [data-slot] .op-Z .zsun{animation:1.1s ease 0s 1 normal both running th-z-z-o-sun}
-.cw-z [data-slot].cw-z [data-slot] .op-Z .om{animation:0.5s ease 0.85s 1 normal none running th-z-z-o-wake}
-.cw-z [data-slot].cw-z [data-slot] .op-Z .st-idle .zear.r{animation:0.5s ease 0.8s 1 normal none running th-z-z-o-flick}
-.cw-z [data-slot].cw-z [data-slot] .op-Z .st-idle .zpeek{animation:1.5s ease 0.9s 1 normal both running th-z-z-o-peek}
-.cw-z [data-slot].cw-z [data-slot] .op-Z .st-idle .zshut{animation:1.5s ease 0.9s 1 normal both running th-z-z-o-shut}
-.cw-z [data-slot].cw-z [data-slot] .op-Z .l{animation:th-z-z-o-let .6s cubic-bezier(.2, .8, .3, 1) calc(1.05s + var(--i) * 90ms) both}
-.cw-z [data-slot].cw-z [data-slot] .op-Z .ot{animation-delay:1.75s}
+.cw-z [data-slot][data-slot] .masc .zhead{transform-box:fill-box}
+.cw-z [data-slot][data-slot] .masc .zear{transform-box:fill-box}
+.cw-z [data-slot][data-slot] .masc .ztail{transform-box:fill-box}
+.cw-z [data-slot][data-slot] .masc .zpaw{transform-box:fill-box}
+.cw-z [data-slot][data-slot] .masc .zzz path{transform-box:fill-box}
+.cw-z [data-slot][data-slot] .masc .zhead{transform-origin:50% 100%}
+.cw-z [data-slot][data-slot] .masc .zear.l{transform-origin:80% 100%}
+.cw-z [data-slot][data-slot] .masc .zear.r{transform-origin:20% 100%}
+.cw-z [data-slot][data-slot] .masc .ztail{transform-origin:0% 0%}
+.cw-z [data-slot][data-slot] .masc .zpaw{transform-origin:100% 0%}
+.cw-z [data-slot][data-slot] .masc .zpeek{opacity:0}
+.cw-z [data-slot][data-slot] .st-idle .mbody{animation:4.2s ease-in-out 0s infinite normal none running th-z-z-breathe}
+.cw-z [data-slot][data-slot] .st-idle .zear.r{animation:6.4s ease-in-out 0s infinite normal none running th-z-z-flick}
+.cw-z [data-slot][data-slot] .st-idle .zpeek{animation:6.4s ease-in-out 0s infinite normal none running th-z-z-peek}
+.cw-z [data-slot][data-slot] .st-idle .zshut{animation:6.4s ease-in-out 0s infinite normal none running th-z-z-shut}
+.cw-z [data-slot][data-slot] .st-idle .zzz path{animation:3.6s ease-in-out 0s infinite normal none running th-z-z-zz}
+.cw-z [data-slot][data-slot] .st-idle .zzz path:nth-of-type(2){animation-delay:0.5s}
+.cw-z [data-slot][data-slot] .st-idle .zzz path:nth-of-type(3){animation-delay:1s}
+.cw-z [data-slot][data-slot] .st-think .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-z [data-slot][data-slot] .st-think .zhead{animation:2.8s ease-in-out 0s infinite normal none running th-z-z-tilt}
+.cw-z [data-slot][data-slot] .st-think .ztail{animation:1.4s ease-in-out 0s infinite normal none running th-z-z-swish}
+.cw-z [data-slot][data-slot] .st-happy .ztail{transform-origin:0% 100%;animation:1.3s ease-in-out 0s infinite normal none running th-z-z-wave}
+.cw-z [data-slot][data-slot] .st-warn .mbody{animation:auto ease 0s 1 normal none running none}
+.cw-z [data-slot][data-slot] .st-warn .zear.l{animation:2.4s ease-in-out 0s infinite normal none running th-z-z-perk-l}
+.cw-z [data-slot][data-slot] .st-warn .zear.r{animation:2.4s ease-in-out 0s infinite normal none running th-z-z-perk-r}
+.cw-z [data-slot][data-slot] .st-warn .zpaw{animation:2.4s ease-in-out 0s infinite normal none running th-z-z-pat}
+.cw-z [data-slot][data-slot] .op > .v > .bg{fill:var(--bg)}
+.cw-z [data-slot][data-slot] .op .zsun{opacity:0.42}
+.cw-z [data-slot][data-slot] .op-Z .zsun{animation:1.1s ease 0s 1 normal both running th-z-z-o-sun}
+.cw-z [data-slot][data-slot] .op-Z .om{animation:0.5s ease 0.85s 1 normal none running th-z-z-o-wake}
+.cw-z [data-slot][data-slot] .op-Z .st-idle .zear.r{animation:0.5s ease 0.8s 1 normal none running th-z-z-o-flick}
+.cw-z [data-slot][data-slot] .op-Z .st-idle .zpeek{animation:1.5s ease 0.9s 1 normal both running th-z-z-o-peek}
+.cw-z [data-slot][data-slot] .op-Z .st-idle .zshut{animation:1.5s ease 0.9s 1 normal both running th-z-z-o-shut}
+.cw-z [data-slot][data-slot] .op-Z .l{animation:th-z-z-o-let .6s cubic-bezier(.2, .8, .3, 1) calc(1.05s + var(--i) * 90ms) both}
+.cw-z [data-slot][data-slot] .op-Z .ot{animation-delay:1.75s}
 .cw-z [data-slot] .cz-v0{--i:0}
 .cw-z [data-slot] .cz-v1{--i:1}
 .cw-z [data-slot] .cz-v2{--i:2}
@@ -3421,7 +3421,7 @@ footer a { color: var(--ink-2); }
   </div>
   <div class="cw-foot">
     <div class="cw-wm" data-slot="wordmark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 321.61 93.19" class="wordmark" role="img" aria-label="SYNOX"><svg class="v" overflow="visible"></svg><g class="wm ow t-span x" transform-origin="6px 2px"><svg class="v" overflow="visible"></svg><g class="l t-span x ce-v0" transform-origin="6px 2px"><svg class="v" overflow="visible"><path class="gl" d="M27.02 76.86Q20.54 76.86 15.97 74.63Q11.4 72.4 8.52 68.73L14.21 62.82Q17.02 66.06 20.29 67.61Q23.57 69.16 27.31 69.16Q31.63 69.16 33.94 67.22Q36.24 65.27 36.24 61.6Q36.24 58.58 34.51 57.03Q32.78 55.48 28.68 54.83L23.35 53.97Q16.37 52.74 13.42 48.89Q10.46 45.04 10.46 39.78Q10.46 32.58 15.14 28.73Q19.82 24.88 28.1 24.88Q34.01 24.88 38.29 26.75Q42.58 28.62 45.17 31.86L39.62 37.77Q37.61 35.39 34.8 33.99Q31.99 32.58 28.18 32.58Q19.97 32.58 19.97 39.35Q19.97 42.23 21.7 43.74Q23.42 45.26 27.6 45.98L32.86 46.91Q39.41 48.14 42.58 51.74Q45.74 55.34 45.74 60.95Q45.74 64.48 44.52 67.4Q43.3 70.31 40.92 72.44Q38.54 74.56 35.05 75.71Q31.56 76.86 27.02 76.86Z" fill="currentColor"/></svg></g><g class="l t-span x ce-v1" transform-origin="67.92px 2px"><svg class="v" overflow="visible"><path class="gl" d="M84.84 76V57.64L68.5 25.74H79.01L84.84 37.84L89.38 48.14H89.88L94.49 37.84L100.39 25.74H110.55L94.2 57.64V76Z" fill="currentColor"/></svg></g><g class="l t-span x ce-v2" transform-origin="129.84px 2px"><svg class="v" overflow="visible"><path class="gl" d="M143.45 39.93H142.73V76H134.67V25.74H146.26L159.44 61.82H160.16V25.74H168.22V76H156.63Z" fill="currentColor"/></svg></g><g class="l t-span x ce-v3" transform-origin="191.77px 2px"><svg class="v" overflow="visible"><path class="gl" d="M213.37 76.86Q208.47 76.86 204.87 75.1Q201.27 73.34 198.93 70.02Q196.59 66.71 195.47 61.89Q194.36 57.06 194.36 50.87Q194.36 44.75 195.47 39.89Q196.59 35.03 198.93 31.72Q201.27 28.41 204.87 26.64Q208.47 24.88 213.37 24.88Q223.16 24.88 227.77 31.72Q232.37 38.56 232.37 50.87Q232.37 63.18 227.77 70.02Q223.16 76.86 213.37 76.86ZM213.37 69.16Q215.89 69.16 217.61 68.19Q219.34 67.22 220.39 65.42Q221.43 63.62 221.9 60.99Q222.37 58.36 222.37 55.12V46.55Q222.37 40.07 220.39 36.33Q218.41 32.58 213.37 32.58Q208.33 32.58 206.35 36.33Q204.37 40.07 204.37 46.55V55.19Q204.37 61.67 206.35 65.42Q208.33 69.16 213.37 69.16Z" fill="currentColor"/></svg></g><g class="l t-span x ce-v4" transform-origin="253.69px 2px"><svg class="v" overflow="visible"><path class="gl" d="M295.88 76H285.22L279.75 65.99L275.36 57.21H274.78L270.25 65.99L264.63 76H254.7L269.46 50.08L255.63 25.74H266.36L270.97 34.24L275.36 42.95H275.86L280.33 34.24L285.15 25.74H295.09L281.19 50.22Z" fill="currentColor"/></svg></g></g></svg><span class="cw-sw"><i style="background:var(--bg)" title="--bg"></i><i style="background:var(--surface)" title="--surface"></i><i style="background:var(--accent)" title="--accent"></i><i style="background:var(--accent2)" title="--accent2"></i><i style="background:var(--soft)" title="--soft"></i><i style="background:var(--m1)" title="--m1"></i></span></div>
-    <a class="cw-dl" href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/download/v0.3.0/costume-e-cursor-1.0.0.synoxpack" target="_blank" rel="noopener">下載 .synoxpack</a>
+    <a class="cw-dl" href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/download/v0.3.0/costume-e-cursor-1.0.1.synoxpack" target="_blank" rel="noopener">下載 .synoxpack</a>
   </div>
   <details class="cw-note"><summary>要注意</summary><ul><li>對不寫程式的人偏冷、偏「工具」，少了可愛；等寬字的中文搭配要另外調，不然會顯得鬆。</li></ul></details>
 </section>
@@ -3582,7 +3582,7 @@ footer a { color: var(--ink-2); }
   </div>
   <div class="cw-foot">
     <div class="cw-wm" data-slot="wordmark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260.81 97.19" class="wordmark" role="img" aria-label="SYNOX"><svg class="v" overflow="visible"></svg><g class="wm ow t-span x" transform-origin="6px 10px"><svg class="v" overflow="visible"></svg><g class="l t-span x cl-v0" transform-origin="6px 10px"><svg class="v" overflow="visible"><path class="gl" d="M16.73 76.79V70.67H10.39V60.81H19.54V67H35.81V58.29H16.73V52.17H10.39V36.26H16.73V30.06H38.62V36.26H45.02V46.05H35.81V39.93H19.54V48.57H38.62V54.62H45.02V70.67H38.62V76.79Z" fill="currentColor"/></svg></g><g class="l t-span x cl-v1" transform-origin="54.47px 10px"><svg class="v" overflow="visible"><path class="gl" d="M71.53 76.79V52.17H65.2V46.05H58.86V30.06H68V42.38H74.34V48.57H77.94V42.38H84.28V30.06H93.49V46.05H87.08V52.17H80.75V76.79Z" fill="currentColor"/></svg></g><g class="l t-span x cl-v2" transform-origin="105.09px 10px"><svg class="v" overflow="visible"><path class="gl" d="M109.49 76.79V30.06H118.63V36.26H124.97V42.38H131.37V60.81H134.9V30.06H144.12V76.79H134.9V70.67H128.57V64.48H122.16V46.05H118.63V76.79Z" fill="currentColor"/></svg></g><g class="l t-span x cl-v3" transform-origin="155.72px 10px"><svg class="v" overflow="visible"><path class="gl" d="M166.45 76.79V70.67H160.11V36.26H166.45V30.06H188.33V36.26H194.74V70.67H188.33V76.79ZM169.25 67H185.53V39.93H169.25Z" fill="currentColor"/></svg></g><g class="l t-span x cl-v4" transform-origin="204.19px 10px"><svg class="v" overflow="visible"><path class="gl" d="M208.58 76.79V67H214.92V54.62H221.25V52.17H214.92V39.93H208.58V30.06H217.72V36.26H224.06V48.57H227.66V36.26H234V30.06H243.21V39.93H236.8V52.17H230.47V54.62H236.8V67H243.21V76.79H234V70.67H227.66V58.29H224.06V70.67H217.72V76.79Z" fill="currentColor"/></svg></g></g></svg><span class="cw-sw"><i style="background:var(--bg)" title="--bg"></i><i style="background:var(--surface)" title="--surface"></i><i style="background:var(--accent)" title="--accent"></i><i style="background:var(--accent2)" title="--accent2"></i><i style="background:var(--soft)" title="--soft"></i><i style="background:var(--m1)" title="--m1"></i></span></div>
-    <a class="cw-dl" href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/download/v0.3.0/costume-l-blocks-1.0.0.synoxpack" target="_blank" rel="noopener">下載 .synoxpack</a>
+    <a class="cw-dl" href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/download/v0.3.0/costume-l-blocks-1.0.1.synoxpack" target="_blank" rel="noopener">下載 .synoxpack</a>
   </div>
   <details class="cw-note"><summary>要注意</summary><ul><li>復古電玩味很重，有人會覺得像遊戲、不像助理；螢光萊姆綠在淺色底上不夠深，所以淺色介面的按鈕改用墨黑底配萊姆字。</li></ul></details>
 </section>
@@ -3835,7 +3835,7 @@ footer a { color: var(--ink-2); }
   </div>
   <div class="cw-foot">
     <div class="cw-wm" data-slot="wordmark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 372.08 93.8" class="wordmark" role="img" aria-label="SYNOX"><svg class="v" overflow="visible"></svg><g class="wm ow t-span x" transform-origin="6px 7px"><svg class="v" overflow="visible"></svg><g class="l t-span x cw-v0" transform-origin="6px 7px"><svg class="v" overflow="visible"><path class="gl" d="M15 70V61H6V52H24V61H51V43H15V34H6V16H15V7H60V16H69V25H51V16H24V34H60V43H69V61H60V70Z" fill="currentColor"/></svg></g><g class="l t-span x cw-v1" transform-origin="78.02px 7px"><svg class="v" overflow="visible"><path class="gl" d="M105.02 70V43H96.02V34H87.02V7H105.02V34H123.02V7H141.02V34H132.02V43H123.02V70Z" fill="currentColor"/></svg></g><g class="l t-span x cw-v2" transform-origin="150.03px 7px"><svg class="v" overflow="visible"><path class="gl" d="M150.03 70V7H168.03V16H177.03V25H186.03V34H195.03V7H213.03V70H195.03V52H186.03V43H177.03V34H168.03V70Z" fill="currentColor"/></svg></g><g class="l t-span x cw-v3" transform-origin="222.05px 7px"><svg class="v" overflow="visible"><path class="gl" d="M231.05 70V61H222.05V16H231.05V7H276.05V16H285.05V61H276.05V70ZM240.05 61H267.05V16H240.05Z" fill="currentColor"/></svg></g><g class="l t-span x cw-v4" transform-origin="294.06px 7px"><svg class="v" overflow="visible"><path class="gl" d="M294.06 70V52H303.06V43H312.06V34H303.06V25H294.06V7H312.06V25H321.06V34H330.06V25H339.06V7H357.06V25H348.06V34H339.06V43H348.06V52H357.06V70H339.06V52H330.06V43H321.06V52H312.06V70Z" fill="currentColor"/></svg></g></g></svg><span class="cw-sw"><i style="background:var(--bg)" title="--bg"></i><i style="background:var(--surface)" title="--surface"></i><i style="background:var(--accent)" title="--accent"></i><i style="background:var(--accent2)" title="--accent2"></i><i style="background:var(--soft)" title="--soft"></i><i style="background:var(--m1)" title="--m1"></i></span></div>
-    <a class="cw-dl" href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/download/v0.3.0/costume-w-pixel-1.0.0.synoxpack" target="_blank" rel="noopener">下載 .synoxpack</a>
+    <a class="cw-dl" href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/download/v0.3.0/costume-w-pixel-1.0.1.synoxpack" target="_blank" rel="noopener">下載 .synoxpack</a>
   </div>
   <details class="cw-note"><summary>要注意</summary><ul><li>很復古、很像遊戲，有人會覺得不夠正式，甚至以為這是遊戲軟體；像素英文字（Press Start 2P）很寬，而且沒有中文，中文只能配一般黑體，兩種字放一起有點不搭；跟第二輪的「I 小跑」同樣是格子感，這兩組不適合混搭。</li></ul></details>
 </section>
@@ -3915,7 +3915,7 @@ footer a { color: var(--ink-2); }
   <a href="https://github.com/ChouYangEn0401/SYNOX_Libs/releases/tag/v0.3.0" target="_blank" rel="noopener">發佈頁 v0.3.0</a>
   <a href="index.html">全部工具</a>
 </footer>
-<p class="stamp" data-online="https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR">線上版 <a href="https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR">https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR</a> · 本機版 docs/site/wardrobe.html · 頁面版本 <span data-stamp>17359d95e4 · 2026-11-19</span></p>
+<p class="stamp" data-online="https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR">線上版 <a href="https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR">https://claude.ai/artifact/USzGNERZ2477E7XzPaPCsR</a> · 本機版 docs/site/wardrobe.html · 頁面版本 <span data-stamp>3eced86848 · 2026-11-19</span></p>
 </div>
 
 <script>
@@ -3932,14 +3932,58 @@ footer a { color: var(--ink-2); }
     set(nx);
     try { localStorage.setItem("synox.wardrobe.theme", nx); } catch (e) { /* 沒關係 */ }
   });
-  /* 開場：捲到才播一次，按「重播」再播 */
+  /* 開場：捲到才播一次，按「重播」再播——兩條路都走同一個 replay()。
+     做法：加上 cw-rs（開場裡的動畫全部 none）→ 讀一次 offsetWidth 逼瀏覽器把樣式算完（動畫取消）→ 拿掉 cw-rs → 再算一次
+     （同樣的動畫重新開始、從 0 播）。不靠 cloneNode。拿掉 class 寫在 finally：中途出錯也不會卡在「動畫全關」。
+     播放中又被觸發（連按、捲動自動播放撞上按鈕）：舊的那一輪作廢（cwRun），乾淨地從頭重來，不會有半途跳終點。
+     保險（watch）只在「動畫真的卡住」時才介入：動畫自己的時鐘（currentTime）連續約 1.5 秒一動也不動
+     （分頁在背景、瀏覽器沒在畫畫面），才把沒播完的跳到終點，不會停在半途或空白。
+     不用「播到該結束的時間＋幾秒」這種牆上時鐘：機器卡一下、第一格畫面晚到時，動畫還在正常播就被截斷（V 最長、最容易碰到）。
+     動畫被暫停（開發者工具、測試）時不介入。
+     系統開了「減少動態效果」：上面的 CSS 已經把動畫全關，畫面就是終態；這裡什麼都不做。 */
+  var still = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  var STALL_MS = 1500, POLL_MS = 300, GIVE_UP_MS = 120000;
+  function oneShots(svg) {
+    if (!svg || !svg.getAnimations) return [];
+    return svg.getAnimations({ subtree: true }).filter(function (a) {
+      var t = a.effect && a.effect.getComputedTiming ? a.effect.getComputedTiming() : null;
+      return t && t.iterations !== Infinity && t.endTime !== Infinity;
+    });
+  }
+  function watch(screen, svg, run) {
+    var best = -1, stalled = 0, prev = performance.now(), born = prev;
+    (function tick() {
+      if (screen.cwRun !== run) return;                   /* 又觸發了一次：交給新的那一輪 */
+      var now = performance.now(), dt = Math.min(now - prev, POLL_MS + 200);   /* 主執行緒卡住的那一大段不算「卡住」 */
+      prev = now;
+      var left = oneShots(svg).filter(function (a) { return a.playState !== "finished"; });
+      if (!left.length || now - born > GIVE_UP_MS) return;
+      if (left.some(function (a) { return a.playState === "paused"; })) stalled = 0;      /* 有人暫停了它：不介入 */
+      else {
+        var cur = 0;
+        left.forEach(function (a) { cur = Math.max(cur, +a.currentTime || 0); });
+        if (cur > best) { best = cur; stalled = 0; } else stalled += dt;
+        if (stalled >= STALL_MS) {
+          left.forEach(function (a) { try { a.finish(); } catch (e) { /* 沒關係 */ } });
+          return;
+        }
+      }
+      setTimeout(tick, POLL_MS);
+    })();
+  }
   function replay(screen) {
+    if (!screen || (still && still.matches)) return;
     var svg = screen.querySelector("svg");
-    if (svg) svg.replaceWith(svg.cloneNode(true));
+    if (!svg) return;
+    screen.classList.add("cw-rs");
+    try { void screen.offsetWidth; } finally { screen.classList.remove("cw-rs"); }
+    void screen.offsetWidth;
+    screen.cwRun = (screen.cwRun || 0) + 1;
+    watch(screen, svg, screen.cwRun);
   }
   document.addEventListener("click", function (ev) {
-    var b = ev.target.closest("[data-replay]");
-    if (b) replay(b.parentElement.querySelector(".cw-screen"));
+    var b = ev.target.closest && ev.target.closest("[data-replay]");
+    if (b) replay(b.closest(".cw-open").querySelector(".cw-screen"));
   });
   if ("IntersectionObserver" in window) {
     var io = new IntersectionObserver(function (es) {
