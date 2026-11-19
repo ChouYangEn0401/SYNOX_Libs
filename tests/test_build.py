@@ -26,7 +26,9 @@ SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "�
          # 接外面服務的：還沒連接時回「要先設定」，不連網
          "notion": ("/notion 會議", "還沒設定 Notion"), "todoist": ("/todoist_list", "還沒接上 Todoist"),
          "google-calendar": ("/gcal_today", "還沒連上 Google 日曆"), "google-sheets": ("/gsheet_list", "還沒連上 Google 試算表"),
-         "apple-reminders": ("/applerem_status", "還沒設定帳號")}
+         "apple-reminders": ("/applerem_status", "還沒設定帳號"),
+         # 叫這台電腦上另外裝的 Video Notes：還沒有工作時回一句，不開任何程式
+         "video-notes": ("/v2n_status", "還沒有工作")}
 
 
 @pytest.fixture(scope="module")

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<script src="/_synox/kit.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>影片筆記</title>
+<link rel="stylesheet" href="/_synox/kit.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main id="app" class="page" aria-live="polite">
+  <h1>🎬 影片筆記</h1>
+  <p id="hint" class="card hint" hidden></p>
+
+  <section>
+    <h2>做筆記</h2>
+    <p class="muted">貼影片網址（好幾支用空白隔開），其他都可以不填。做完 SYNOX 會通知你。</p>
+    <div id="addForm"></div>
+  </section>
+
+  <section>
+    <div class="row">
+      <h2>工作</h2>
+      <button type="button" class="btn ghost" id="reload">重新整理</button>
+    </div>
+    <div id="jobs"><p class="muted">載入中…</p></div>
+  </section>
+
+  <section id="noteBox" hidden>
+    <div class="row">
+      <h2 id="noteTitle">筆記</h2>
+      <button type="button" class="btn primary" id="copy">複製 Markdown</button>
+    </div>
+    <pre id="note" class="card note"></pre>
+  </section>
+
+  <section>
+    <div class="row">
+      <h2>筆記庫</h2>
+      <input type="text" id="keyword" placeholder="標題關鍵字（可以不填）" aria-label="標題關鍵字">
+      <button type="button" class="btn ghost" id="listLib">列出來</button>
+    </div>
+    <div id="library"><p class="muted">按「列出來」看整理過的影片與合併。</p></div>
+    <details>
+      <summary>合併好幾支</summary>
+      <p class="muted">填筆記庫的編號（至少兩個，逗號隔開）。會用到 AI；規模很大時要在最後一格選「是」。</p>
+      <div id="combineForm"></div>
+    </details>
+  </section>
+</main>
+<script src="app.js"></script>
+</body>
+</html>

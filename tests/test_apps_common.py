@@ -22,7 +22,7 @@ ALLOWED_JS = {"money": ("/api/",)}
 
 def app_tools():
     out = []
-    for folder in _synox.pack_folders():
+    for folder in _synox.pack_folders(private=False):        # 私人工具不在工具庫的公開規矩裡（自己的測試另外管）
         with open(os.path.join(folder, "pack.json"), encoding="utf-8") as f:
             raw = json.load(f)
         app = (raw.get("web") or {}).get("app")
@@ -35,7 +35,7 @@ TOOLS = app_tools()
 
 
 def test_there_is_at_least_one_app():
-    assert [t[0] for t in TOOLS] == ["money"]
+    assert [t[0] for t in TOOLS] == ["money", "video-notes"]
 
 
 @pytest.mark.parametrize("name,folder,raw,app", TOOLS, ids=[t[0] for t in TOOLS])

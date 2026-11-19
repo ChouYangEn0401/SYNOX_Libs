@@ -14,6 +14,14 @@
 - **網頁面板改成 SYNOX 現在的網址寫法：`todo`、`calendar`、`bullet` 0.1.2 → 0.1.3-alpha.1，`money` 0.5.0-alpha.1 → 0.5.0-alpha.2，`guitar` 0.2.0-alpha.1 → 0.2.0-alpha.2**（**alpha，尚未實機驗證**）：SYNOX 從 ADR 0028 §5 起把工具的 `panel.html` 隔開（`<iframe sandbox="allow-scripts">`，面板沒有 cookie），舊的 `fetch("/api/packs/<name>/<route>", {credentials: …})` 從面板打會 401，5 個面板都讀不到資料。改成相對網址 `fetch("api/<route>")`（每個面板只改這一行）。`tests/test_gates.py` 的 M5（`panel_problems`）反過來：只收相對網址，抓 `/api/packs/`、`credentials`、`fetch` 的第二個參數、`document.cookie`、`window.open` 這類隔開之後本來就做不到的；`tests/test_synox_integration.py` 用真的 SYNOX 走一次「拿票 → 開面板 → 相對網址讀得到 JSON、舊網址讀不到」。HANDOFF.md 多一節 3.6（面板的寫法與範例），拿掉「新工具先不要做面板」。
 
 ### Added
+- **私人工具（`"publish": false`）**：pack.json 寫 `"publish": false` 的工具只在自己電腦打包（`scripts/build.py <名字>` → `dist/private/`），
+  不進 `index.json`、`tools.zip`、`SHA256SUMS`、下載連結、公開頁，`catalog.json` 也不能列它；工具庫的公開規矩（`tests/test_gates.py` 等）
+  只管公開的工具，私人工具由自己的測試管。寫錯型別（`"no"`、`0`）一律當私人並報錯。說明在 docs/CONTRIBUTING-TOOLS.md「私人工具」，
+  測試 `tests/test_private_packs.py`。
+- **`video-notes` 0.1.0-alpha.1（新工具，🔧 test，尚未實機驗證）**：`/v2n <網址>` 把影片交給使用者電腦上另外裝好的 Video Notes
+  （它的命令列 `--json`）做筆記；`/v2n_status`、`/v2n_get`、`/v2n_list`、`/v2n_combine`（AI 叫的一律先送確認卡）、`/v2n_cancel`、
+  `/v2n_check`、`/v2n_setup`（只有本人）；附工具畫面。不附 Whisper／yt-dlp／AI 套件；只給擁有者；宣告 `subprocess`、`filesystem:any`。
+  工作結果只存保管箱，執行中的輸出讀完就刪。建議群組「影片筆記」。只對假的 Video Notes 測過（`tests/test_video_notes.py`）。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；

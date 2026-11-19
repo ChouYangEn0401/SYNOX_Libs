@@ -77,11 +77,33 @@ def ensure() -> str:
     return root
 
 
-def pack_folders(packs_dir: str = PACKS) -> list:
-    """packs/ 底下每個有 pack.json 的資料夾（_ 開頭的是共用程式，例如 _shared，跳過）。"""
+PUBLISH_KEY = "publish"
+
+
+def publish_value(folder: str):
+    """pack.json 的 "publish"（沒寫＝True）。讀不到 pack.json 也當 True（壞掉的 pack.json 由第 1 關報）。"""
+    import json
+    try:
+        with open(os.path.join(folder, "pack.json"), encoding="utf-8") as f:
+            raw = json.load(f)
+    except (OSError, ValueError):
+        return True
+    return raw.get(PUBLISH_KEY, True) if isinstance(raw, dict) else True
+
+
+def is_published(folder: str) -> bool:
+    """私人工具（pack.json "publish": false）＝只在自己電腦打包、不進任何公開輸出（docs/CONTRIBUTING-TOOLS.md「私人工具」）。
+    只有沒寫或明寫 true 才算公開；寫錯型別（"no"、0）一律當私人——寧可漏發，不要誤發（build.py 另外報型別不對）。"""
+    return publish_value(folder) is True
+
+
+def pack_folders(packs_dir: str = PACKS, private: bool = True) -> list:
+    """packs/ 底下每個有 pack.json 的資料夾（_ 開頭的是共用程式，例如 _shared，跳過）。
+    private=False：不含私人工具（"publish": false）——index.json、tools.zip、公開頁、工具庫的公開規矩都用這個。"""
     out = []
     for name in sorted(os.listdir(packs_dir)):
         folder = os.path.join(packs_dir, name)
         if not name.startswith("_") and os.path.isfile(os.path.join(folder, "pack.json")):
-            out.append(folder)
+            if private or is_published(folder):
+                out.append(folder)
     return out

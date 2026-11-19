@@ -20,6 +20,9 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _synox  # noqa: E402  （只用標準函式庫；這裡只拿 is_published，不 import SYNOX）
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE = os.path.join(ROOT, "docs", "site")
 REPO_URL = "https://github.com/ChouYangEn0401/SYNOX_Libs"
@@ -45,10 +48,12 @@ def release_tag(root: str = ROOT) -> str:
 
 
 def _folders(parent: str) -> list:
+    """有 pack.json 的資料夾，不含私人工具（"publish": false：沒有下載連結、不在任何公開頁；scripts/_synox.is_published）。"""
     if not os.path.isdir(parent):
         return []
     return [os.path.join(parent, n) for n in sorted(os.listdir(parent))
-            if not n.startswith("_") and os.path.isfile(os.path.join(parent, n, "pack.json"))]
+            if not n.startswith("_") and os.path.isfile(os.path.join(parent, n, "pack.json"))
+            and _synox.is_published(os.path.join(parent, n))]
 
 
 def current_versions(root: str = ROOT) -> dict:
