@@ -25,6 +25,11 @@
       "summary": "行事曆、待辦、子彈筆記",
       "packs": ["calendar", "todo", "bullet"]
     },
+    "usb-keys": {
+      "title": "USB 鑰匙",
+      "summary": "把隨身碟登記成鑰匙，選一把鎖訊息或檔案；要另外裝 usbtether 函式庫（見工具說明）",
+      "packs": ["usb-keys"]
+    },
     "connect": {
       "title": "接外面的服務",
       "summary": "Notion、Todoist、Google 日曆、Google 試算表（只加列）、Apple 提醒事項（CalDAV）。要連網、要你自己的帳號或 token",
