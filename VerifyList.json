@@ -8,7 +8,7 @@
       "run": ["python", "-m", "pytest", "-q"],
       "cwd": ".", "env": {"SYNOX_SRC": "../SYNOX/src", "PYTHONDONTWRITEBYTECODE": "1"}, "expect": "exit 0",
       "needs": ["heavy"], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "Windows, SYNOX dev: 1600 passed, 1 skipped (15 min)"
     },
     {
       "id": "build-check",
@@ -16,7 +16,7 @@
       "run": ["python", "scripts/build.py", "--check"],
       "cwd": ".", "env": {}, "expect": "exit 0",
       "needs": [], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "all checks passed"
     },
     {
       "id": "public-check",
@@ -24,7 +24,7 @@
       "run": ["python", "scripts/public_check.py"],
       "cwd": ".", "env": {}, "expect": "exit 0",
       "needs": [], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "clean"
     },
     {
       "id": "gates",
@@ -32,7 +32,7 @@
       "run": ["python", "-m", "pytest", "-q", "tests/test_gates.py"],
       "cwd": ".", "env": {"PYTHONDONTWRITEBYTECODE": "1"}, "expect": "exit 0",
       "needs": [], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "118 passed"
     },
     {
       "id": "sdk-check-todo",
@@ -40,7 +40,7 @@
       "run": ["python", "-m", "synox.sdk", "check", "packs/todo"],
       "cwd": ".", "env": {}, "expect": "exit 0",
       "needs": [], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "exit 0, can install"
     },
     {
       "id": "sdk-check-calendar",
@@ -48,7 +48,7 @@
       "run": ["python", "-m", "synox.sdk", "check", "packs/calendar"],
       "cwd": ".", "env": {}, "expect": "exit 0",
       "needs": [], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "exit 0, can install"
     },
     {
       "id": "sdk-check-bullet",
@@ -56,7 +56,7 @@
       "run": ["python", "-m", "synox.sdk", "check", "packs/bullet"],
       "cwd": ".", "env": {}, "expect": "exit 0",
       "needs": [], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "exit 0, can install"
     },
     {
       "id": "sdk-check-money",
@@ -64,7 +64,7 @@
       "run": ["python", "-m", "synox.sdk", "check", "packs/money"],
       "cwd": ".", "env": {}, "expect": "exit 0",
       "needs": [], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "exit 0, can install"
     },
     {
       "id": "sdk-check-guitar",
@@ -72,7 +72,7 @@
       "run": ["python", "-m", "synox.sdk", "check", "packs/guitar"],
       "cwd": ".", "env": {}, "expect": "exit 0",
       "needs": [], "since": "2026-11-19",
-      "status": "pending", "last_run": null, "last_result": null
+      "status": "pass", "last_run": "2026-11-19", "last_result": "exit 0, can install"
     }
   ]
 }
