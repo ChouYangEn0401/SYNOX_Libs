@@ -3,11 +3,10 @@
 為什麼是一個空的掛勾：SYNOX 的工具彼此隔離（不能互相 import、也沒有讀別的工具資料的 API），所以行事曆不能自己去「找」
 習慣、旅程、專案、待辦。如果之後 SYNOX 提供了這種機制，只要讓 `pack.link_sources` 是一串函式就會接上：
 
-    pack.link_sources = [fn, …]
+    pack.link_sources = [("習慣", fn), …]          # (畫面上標出來源的名字, 函式)
     fn(user, first_day: date, last_day: date) -> [{"date": "YYYY-MM-DD", "text": "…", "done": False, "at": "HH:MM", "id": "…"}, …]
 
 每個來源的錯一律吞掉（月曆照樣畫、只是少那一種）；回來的每一列都會被檢查，格式不對的丟掉。
-來源的名字取函式的 __name__（畫面上小字標出來源），沒有名字就寫「外部」。
 """
 
 from __future__ import annotations
@@ -19,14 +18,15 @@ MAX_TEXT = 80
 
 
 def collect(sources, user, first: date, last: date) -> list:
-    """sources＝pack.link_sources（可以是 None）。回 [{date, text, done, at, id, source}…]，已經檢查過、依日期排好。"""
+    """sources＝pack.link_sources（[(名字, 函式)…]，可以是 None）。回 [{date, text, done, at, id, source}…]，已經檢查過、依日期排好。"""
     out = []
-    for fn in sources or ():
+    for source in sources or ():
         try:
+            name, fn = source
             rows = list(fn(user, first, last) or [])
-        except Exception:                                  # 外部來源壞了不能拖垮月曆
+        except Exception:                                  # 外部來源壞了（或寫法不對）不能拖垮月曆
             continue
-        name = str(getattr(fn, "__name__", "") or "外部")[:24]
+        name = str(name or "外部")[:24]
         for r in rows[:MAX_ROWS]:
             try:
                 d = date.fromisoformat(str(r["date"])[:10])

@@ -31,6 +31,9 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0006 P1）
 LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",)}
+PACKAGE_LOCAL = ("calendar",)                      # 本機工具裡的多檔工具（pack.py 的相對 import 不看；其餘檔見 test_calendar_package_files）
+# calendar 的 bridge/、engine/：純標準函式庫的邏輯（日期、正規表示式、雜湊、型別），不碰檔案、不連網、不開程式
+CALENDAR_IMPORTS = ("re", "datetime", "calendar", "hashlib", "typing", "__future__", "dataclasses")
 # 接外面服務的多准：requests、urllib.parse、編碼／雜湊／亂數、XML（CalDAV）、時區、型別、log
 CONNECT_IMPORTS = ALLOWED_IMPORTS + ("requests", "urllib", "base64", "hashlib", "secrets", "uuid", "xml", "zoneinfo",
                                      "typing", "logging", "__future__")
@@ -144,6 +147,9 @@ def test_no_network_subprocess_exec_or_stray_files(name):
         if isinstance(node, ast.Import):
             mods = [a.name for a in node.names]
         elif isinstance(node, ast.ImportFrom):
+            if node.level:                          # 相對 import（多檔工具自己的 bridge/、engine/）：那些檔另外檢查
+                assert name in PACKAGE_LOCAL, f"{name}: 相對 import 只給多檔工具"
+                continue
             mods = [node.module or ""]
         else:
             continue
@@ -181,6 +187,30 @@ def test_no_network_subprocess_exec_or_stray_files(name):
     else:
         assert not opens and not os_calls, f"{name} must not touch files"
         assert "import os" not in text
+
+
+def test_calendar_package_files():
+    """行事曆是多檔工具：bridge/、engine/ 只准標準函式庫的純邏輯（不碰檔案、不連網、不開程式、不動態執行）；
+    碰檔案只在 pack.py（上面的 test_no_network_subprocess_exec_or_stray_files 管）。"""
+    sources = {rel: text for rel, text in python_sources("calendar").items() if rel != "pack.py"}
+    assert sources, "找不到 bridge/、engine/"
+    for rel, text in sources.items():
+        tree = ast.parse(text)
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                mods = [a.name for a in node.names]
+            elif isinstance(node, ast.ImportFrom):
+                mods = [] if node.level else [node.module or ""]
+            else:
+                continue
+            for mod in mods:
+                assert mod.split(".")[0] in CALENDAR_IMPORTS, f"calendar/{rel}: unexpected import {mod}"
+        for pattern in FORBIDDEN_TEXT:
+            assert not re.search(pattern, text), f"calendar/{rel}: {pattern}"
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Call):
+                assert _call_name(n) not in ("open", "os.remove", "os.listdir", "eval", "exec", "compile", "__import__"), \
+                    f"calendar/{rel}:{n.lineno}"
 
 
 def money_sources():
@@ -429,6 +459,8 @@ def panel_problems(name: str, html: str) -> list:
                                       "WebSocket", "EventSource", "sendBeacon") if word in html]
     calls = re.findall(r"\bfetch\s*\(\s*([^,)]*)", html)
     for arg in calls:
+        if re.fullmatch(r"""\s*(["'`])api/[a-z0-9_-]+\1\s*""", arg):      # 隔開的面板：只能打相對網址 api/<route>（SYNOX docs/sdk.md）
+            continue
         found = re.fullmatch(r"""\s*(["'`])(/api/packs/([^/"'`]+)/[^"'`$]*)\1\s*""", arg)
         if not found:
             out.append(f"fetch({arg.strip()}) 的網址不是寫死的 /api/packs/{name}/…")
@@ -477,7 +509,7 @@ def test_m5_panel_only_talks_to_its_own_api(name):
     m = synox_manifest.read(folder(name), strict=True)
     assert panel_problems(name, html) == []
     assert "fetch(" in html and "textContent" in html
-    routes = set(re.findall(r"""fetch\(\s*["'`]/api/packs/[^/]+/([^"'`?]+)""", html))
+    routes = set(re.findall(r"""fetch\(\s*["'`](?:/api/packs/[^/]+/|api/)([^"'`?]+)""", html))
     assert routes and routes <= set(m.web.get("api", [])), routes      # 只打自己在 pack.json 宣告的 route
 
 

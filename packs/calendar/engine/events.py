@@ -36,7 +36,6 @@ STATUSES = (("planned", "🗓", "排著"), ("done", "✔", "完成了"), ("not_d
 STATUS_IDS = tuple(s[0] for s in STATUSES)
 STATUS_LABEL = {s[0]: f"{s[1]} {s[2]}" for s in STATUSES}
 
-_MISSING = object()
 _CLEAR = ("", "-")
 
 
@@ -104,7 +103,6 @@ def is_series(ev: dict) -> bool:
 def _rule_of(p: dict, base: dict, start_day: date):
     """這一筆的重複規則：payload 有講就照 payload，沒講就沿用 base 的（skip 一律沿用）。"""
     old = base.get("repeat") or None
-    until_raw = p["until"] if "until" in p else _MISSING
     if "repeat" in p:
         wd = parse_weekdays(p["repeat"])
         rule = None if not wd else {"weekdays": wd, "until": (old or {}).get("until") or "",
@@ -114,8 +112,8 @@ def _rule_of(p: dict, base: dict, start_day: date):
                 "skip": list(old.get("skip") or [])}
     else:
         rule = None
-    if until_raw is not _MISSING:
-        u = parse_until(until_raw, start_day)
+    if "until" in p:
+        u = parse_until(p["until"], start_day)
         if rule is None:
             if u is None:
                 return None

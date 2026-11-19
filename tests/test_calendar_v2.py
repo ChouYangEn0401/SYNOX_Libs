@@ -207,10 +207,10 @@ def test_optional_link_sources_missing_or_broken_never_error(make_bot, owner):
     def broken(user, first, last):
         raise RuntimeError("來源壞了")
 
-    pack.link_sources = [habits, broken]
+    pack.link_sources = [("習慣", habits), ("壞的", broken), "寫法不對"]
     m = read(bot, "month", {"month": "2026-11"})
     links = [x for d in m["days"] for x in d["items"] if x["kind"] == "link"]
-    assert [(x["text"], x["source"], x["done"]) for x in links] == [("喝水", "habits", True)]
+    assert [(x["text"], x["source"], x["done"]) for x in links] == [("喝水", "習慣", True)]
     assert m["counts"]["links"] == 1
 
 
@@ -305,3 +305,47 @@ def test_app_js_parses(tmp_path):
         copy.write_text(open(path, encoding="utf-8").read(), encoding="utf-8")
         out = subprocess.run(["node", "--check", str(copy)], capture_output=True, text=True, encoding="utf-8", timeout=60)
         assert out.returncode == 0, f"{path}: {out.stderr}"
+
+
+# ── 真的 SYNOX（伺服器版）＋ AppClient：畫面的讀與動作走得通、兩個成員互相看不到 ──────────
+
+def test_real_synox_screen_and_members(synox_bot):
+    import sys
+
+    from isdtelekit.users.roles import BasicRoles as R
+    from synox.web import apps
+    from synox.web.apps.testing import AppClient, FakeListen
+
+    bot = synox_bot("calendar", mode="server")
+    sys.modules["synox_pack_calendar"].now = lambda: MONDAY
+    for who in (77, 78):
+        bot.make(who, R.MEMBER, f"u{who}")
+    manager = apps.of(bot.app)
+    manager.listen = FakeListen()
+    manager.start("calendar", by=OWNER_ID, via="web")
+
+    def opened(who):
+        client = AppClient(manager, "calendar")
+        client.enter(client.open_from_console(who))
+        return client
+
+    def ok(resp):
+        status, data = resp
+        assert status == 200 and data.get("ok"), (status, data)
+        return data["data"]
+
+    mine, other = opened(77), opened(78)
+    added = ok(mine.do("add", {"text": "看牙醫", "date": "2026-11-10", "time": "14:00-15:00"}))
+    assert added["event"]["id"] == "1"
+    bot.say(77, "/cal_today", chat_id=77)                         # 打字的路跟畫面的路用同一份資料
+    ok(mine.do("task", {"text": "買牛奶"}))
+    assert ok(mine.read("day", date="2026-11-09"))["tasks"]["total"] == 1
+    month = ok(mine.read("month", month="2026-11"))
+    assert month["counts"]["events"] == 1 and month["today"] == "2026-11-09"
+    assert ok(other.read("agenda", **{"from": "2026-11-09", "days": "30"}))["count"] == 0
+    assert ok(other.read("day", date="2026-11-09"))["tasks"]["total"] == 0
+    status, data = other.do("rm", {"n": "1"})                      # 別人的編號不存在：白話錯誤、不是 500
+    assert status != 200
+    status, data = mine.do("add", {"text": "x", "date": "2026-02-30"})
+    assert status != 200
+    assert ok(mine.do("rm", {"n": "1"}))["event"]["title"] == "看牙醫"

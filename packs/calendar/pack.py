@@ -29,7 +29,6 @@ from isdtelekit.core.registry import WRITE, Field
 from synox.packs import kit
 
 from .bridge import service, text
-from .engine import events as ev_mod
 from .engine import ics as ics_mod
 from .engine.errors import CalError
 
@@ -337,34 +336,37 @@ def _check_yes_no(value: str):
     return None if value.strip().lower() in ("yes", "no") else "要是 yes 或 no"
 
 
-_N = Field("n", "編號（3，或重複行程的某一次 3@2026-11-12）", required=True, check=service.check_eid)
-_TASK_N = Field("n", "卡片編號", required=True, check=kit.positive_int)
-EVENT_FIELDS = (
-    Field("date", "日期 YYYY-MM-DD（AI／畫面用；人直接寫在句子裡）", check=check_ymd),
-    Field("time", "時間 HH:MM 或 HH:MM-HH:MM（沒有＝整天）", check=service.check_time),
-    Field("end_date", "跨日行程的結束那天 YYYY-MM-DD", check=check_ymd),
-    Field("location", "地點"),
-    Field("note", "備註"),
-    Field("repeat", "每週重複哪幾天（二四、週末、一到五；none＝不重複）"),
-    Field("until", "重複到哪天 YYYY-MM-DD"),
-)
-FIELDS = {
-    "add": (Field("text", "時間和標題（AI 給了 date 就只放標題）", required=True), *EVENT_FIELDS),
-    "edit": (_N, Field("title", "新標題"), *EVENT_FIELDS),
-    "status": (_N, Field("state", "狀態（planned、done、not_done、cancelled；後面可接原因）", required=True),
-               Field("note", "沒做的原因")),
-    "keep": (Field("a", "編號", required=True, check=service.check_eid),
-             Field("b", "另一個編號", required=True, check=service.check_eid)),
-    "rm": (_N,),
-    "task": (Field("text", "要做的事", required=True), Field("date", "排在哪天 YYYY-MM-DD（預設今天）", check=check_ymd),
-             Field("detail", "細節"), Field("priority", "重要程度 0–3", check=_check_priority)),
-    "task_edit": (_TASK_N, Field("title", "新標題"), Field("detail", "細節（- ＝清掉）"),
-                  Field("priority", "重要程度 0–3", check=_check_priority),
-                  Field("date", "改排到哪天 YYYY-MM-DD", check=check_ymd)),
-    "done": (_TASK_N, Field("done", "yes／no（不給＝反過來）", check=_check_yes_no)),
-    "task_rm": (_TASK_N,),
-    "focus": (Field("n", "卡片編號（- ＝清掉）", required=True), Field("date", "哪一天（預設今天）", check=check_ymd)),
-}
+def _fields() -> dict:
+    """指令與畫面動作共用的欄位表（函式：每次都是新的，模組層級不放物件）。"""
+    _N = Field("n", "編號（3，或重複行程的某一次 3@2026-11-12）", required=True, check=service.check_eid)
+    _TASK_N = Field("n", "卡片編號", required=True, check=kit.positive_int)
+    EVENT_FIELDS = (
+        Field("date", "日期 YYYY-MM-DD（AI／畫面用；人直接寫在句子裡）", check=check_ymd),
+        Field("time", "時間 HH:MM 或 HH:MM-HH:MM（沒有＝整天）", check=service.check_time),
+        Field("end_date", "跨日行程的結束那天 YYYY-MM-DD", check=check_ymd),
+        Field("location", "地點"),
+        Field("note", "備註"),
+        Field("repeat", "每週重複哪幾天（二四、週末、一到五；none＝不重複）"),
+        Field("until", "重複到哪天 YYYY-MM-DD"),
+    )
+    FIELDS = {
+        "add": (Field("text", "時間和標題（AI 給了 date 就只放標題）", required=True), *EVENT_FIELDS),
+        "edit": (_N, Field("title", "新標題"), *EVENT_FIELDS),
+        "status": (_N, Field("state", "狀態（planned、done、not_done、cancelled；後面可接原因）", required=True),
+                   Field("note", "沒做的原因")),
+        "keep": (Field("a", "編號", required=True, check=service.check_eid),
+                 Field("b", "另一個編號", required=True, check=service.check_eid)),
+        "rm": (_N,),
+        "task": (Field("text", "要做的事", required=True), Field("date", "排在哪天 YYYY-MM-DD（預設今天）", check=check_ymd),
+                 Field("detail", "細節"), Field("priority", "重要程度 0–3", check=_check_priority)),
+        "task_edit": (_TASK_N, Field("title", "新標題"), Field("detail", "細節（- ＝清掉）"),
+                      Field("priority", "重要程度 0–3", check=_check_priority),
+                      Field("date", "改排到哪天 YYYY-MM-DD", check=check_ymd)),
+        "done": (_TASK_N, Field("done", "yes／no（不給＝反過來）", check=_check_yes_no)),
+        "task_rm": (_TASK_N,),
+        "focus": (Field("n", "卡片編號（- ＝清掉）", required=True), Field("date", "哪一天（預設今天）", check=check_ymd)),
+    }
+    return FIELDS
 
 
 def _minus30(hhmm: str) -> str:
@@ -375,6 +377,7 @@ def _minus30(hhmm: str) -> str:
 
 def install(app, pack):
     g = pack.group
+    FIELDS = _fields()
 
     def cal(user):
         return service.Cal(pack, user, lambda: now())
