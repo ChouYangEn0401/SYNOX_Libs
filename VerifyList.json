@@ -1,0 +1,78 @@
+{
+  "schema": "verifylist/1",
+  "note": "Run from the repository root with SYNOX's Python (pip install -e of SYNOX dev, see docs/HANDOFF.md section 5.2). SYNOX_SRC assumes SYNOX is cloned next to this repo; point it elsewhere if not. Human checks live in HumanTestList.md.",
+  "items": [
+    {
+      "id": "full-suite",
+      "what": "全套測試（對 SYNOX dev 要全綠；skipped 只能是 docs/HANDOFF.md 第 7 節列的那幾種）",
+      "run": ["python", "-m", "pytest", "-q"],
+      "cwd": ".", "env": {"SYNOX_SRC": "../SYNOX/src", "PYTHONDONTWRITEBYTECODE": "1"}, "expect": "exit 0",
+      "needs": ["heavy"], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    },
+    {
+      "id": "build-check",
+      "what": "repo 規定：requires.sdk、stage、入口欄位、catalog、公開頁是不是最新（不改任何檔）",
+      "run": ["python", "scripts/build.py", "--check"],
+      "cwd": ".", "env": {}, "expect": "exit 0",
+      "needs": [], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    },
+    {
+      "id": "public-check",
+      "what": "隱私檢查：公開的檔案裡沒有私人字詞、本機路徑、密鑰",
+      "run": ["python", "scripts/public_check.py"],
+      "cwd": ".", "env": {}, "expect": "exit 0",
+      "needs": [], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    },
+    {
+      "id": "gates",
+      "what": "每個工具都過 SYNOX 的安裝關卡；面板只用相對的 api/<route>（舊的 /api/packs/ 會被擋）",
+      "run": ["python", "-m", "pytest", "-q", "tests/test_gates.py"],
+      "cwd": ".", "env": {"PYTHONDONTWRITEBYTECODE": "1"}, "expect": "exit 0",
+      "needs": [], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    },
+    {
+      "id": "sdk-check-todo",
+      "what": "todo（有面板）過 SYNOX 安裝時的第 1、2 關，最後一行「可以裝」",
+      "run": ["python", "-m", "synox.sdk", "check", "packs/todo"],
+      "cwd": ".", "env": {}, "expect": "exit 0",
+      "needs": [], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    },
+    {
+      "id": "sdk-check-calendar",
+      "what": "calendar（有面板）過 SYNOX 安裝時的第 1、2 關",
+      "run": ["python", "-m", "synox.sdk", "check", "packs/calendar"],
+      "cwd": ".", "env": {}, "expect": "exit 0",
+      "needs": [], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    },
+    {
+      "id": "sdk-check-bullet",
+      "what": "bullet（有面板）過 SYNOX 安裝時的第 1、2 關",
+      "run": ["python", "-m", "synox.sdk", "check", "packs/bullet"],
+      "cwd": ".", "env": {}, "expect": "exit 0",
+      "needs": [], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    },
+    {
+      "id": "sdk-check-money",
+      "what": "money（有面板與工具畫面）過 SYNOX 安裝時的第 1、2 關",
+      "run": ["python", "-m", "synox.sdk", "check", "packs/money"],
+      "cwd": ".", "env": {}, "expect": "exit 0",
+      "needs": [], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    },
+    {
+      "id": "sdk-check-guitar",
+      "what": "guitar（有面板）過 SYNOX 安裝時的第 1、2 關",
+      "run": ["python", "-m", "synox.sdk", "check", "packs/guitar"],
+      "cwd": ".", "env": {}, "expect": "exit 0",
+      "needs": [], "since": "2026-11-19",
+      "status": "pending", "last_run": null, "last_result": null
+    }
+  ]
+}
