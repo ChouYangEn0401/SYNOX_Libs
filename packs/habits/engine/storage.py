@@ -7,6 +7,7 @@
 沒綁定就用 RuntimeError 擋下來——引擎不會自己退回任何共用位置。
 """
 import contextvars
+import json
 from contextlib import contextmanager
 
 _backend = contextvars.ContextVar("habits_backend", default=None)
@@ -44,14 +45,12 @@ class MemoryBackend:
     """測試與預設的假資料：一個 dict，每次存都真的轉一次 JSON（存不了的東西會出錯）。"""
 
     def __init__(self):
-        import json
-        self._json = json
         self.docs = {}
 
     def load(self, name, default=None):
         raw = self.docs.get(name)
-        return default if raw is None else self._json.loads(raw)
+        return default if raw is None else json.loads(raw)
 
     def save(self, name, data):
-        self.docs[name] = self._json.dumps(data, ensure_ascii=False)
+        self.docs[name] = json.dumps(data, ensure_ascii=False)
 
