@@ -36,6 +36,14 @@ def to_ics(events, stamp: datetime) -> str:
     dtstamp = stamp.strftime("%Y%m%dT%H%M%S")
     for e in sorted((x for x in events if x.get("status") != "cancelled"), key=sort_key):
         start, end = _dt(e["start"]), _dt(e.get("end") or e["start"])
+        weekdays = (e.get("repeat") or {}).get("weekdays")
+        if weekdays:
+            # RFC 5545：DTSTART 本身一定算一次。開始那天不是重複的星期幾時，挪到第一個是的那天（跟畫面一樣不多出一次）
+            shift = next(n for n in range(7) if (start + timedelta(days=n)).isoweekday() in weekdays)
+            start, end = start + timedelta(days=shift), end + timedelta(days=shift)
+            until = (e["repeat"] or {}).get("until")
+            if until and start.date() > _dt(until).date():
+                continue                                     # 這一串一次都沒有
         lines += ["BEGIN:VEVENT", f"UID:synox-cal-{e['id']}-{e.get('at', 0)}@synox.local", f"DTSTAMP:{dtstamp}"]
         if e.get("all_day"):
             lines.append(f"DTSTART;VALUE=DATE:{start:%Y%m%d}")

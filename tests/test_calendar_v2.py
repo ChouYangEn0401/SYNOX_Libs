@@ -363,3 +363,11 @@ def test_unfinished_past_card_is_not_shown_twice_before_a_write(make_bot, owner)
     assert [t["title"] for t in old["tasks"]] == ["買牛奶"]
     today = read(bot, "day", {"date": "2026-11-11"})["tasks"]
     assert [t["title"] for t in today["tasks"]] == ["寫報告"]
+
+
+def test_ics_repeat_starting_off_its_weekdays_has_no_extra_first_day(make_bot, owner):
+    """2026-11-09 是星期一、重複「二四」：DTSTART 挪到 11-10（星期二），匯入別的日曆不會多出 11-09 那一次。"""
+    bot = make_bot("calendar")
+    do(bot, "add", {"text": "吉他", "date": "2026-11-09", "time": "20:00-21:00", "repeat": "二四"})
+    text = bot.packs["calendar"].app_exports["ics"](OWNER_ID, {}).data.decode("utf-8")
+    assert "DTSTART:20261110T200000" in text and "DTEND:20261110T210000" in text and "20261109T2000" not in text
