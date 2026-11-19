@@ -57,6 +57,14 @@ def test_checker_catches_stale_links():
     assert "沒更新" in problems
 
 
+def test_release_labels_follow_the_tag():
+    """看得到的發佈頁字樣（入口頁「發佈頁 vX」、衣櫃頁「GitHub Release vX」）也跟著 VERSION 換。"""
+    tag = links.release_tag()
+    page = "<a>發佈頁 v0.0.1</a><a>GitHub Release v0.0.1</a>"
+    assert links.render(page, mode="tag") == f"<a>發佈頁 {tag}</a><a>GitHub Release {tag}</a>"
+    assert "沒更新" in "\n".join(links.problems_in("x", page, mode="tag"))
+
+
 def test_render_round_trips_between_modes():
     for path in links.public_pages():
         with open(path, encoding="utf-8") as f:

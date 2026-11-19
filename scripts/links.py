@@ -132,7 +132,7 @@ ANY_ASSET_URL = re.compile(_REPO + r"/(?:releases/(?:download/(v" + VER + r")|la
 URL_SUMS = re.compile(_REPO + r"/releases/(?:download/v" + VER + r"|latest/download)/SHA256SUMS(?![\w.-])", re.I)
 TEXT_PACK_FILE = re.compile(r"(?<![\w/.-])" + _PACK_IN + "-(" + VER + r")\.synoxpack")
 TEXT_TOOLS_ZIP = re.compile(r"(?<![\w/.-])tools-(" + VER + r")\.zip")
-TEXT_RELEASE_LABEL = re.compile(r"(發佈頁 )v" + VER)
+TEXT_RELEASE_LABEL = re.compile(r"(發佈頁 |GitHub Release )v" + VER)     # 衣櫃頁寫「GitHub Release v0.3.1」
 TEXT_LIBRARY_LABEL = re.compile(r"(SYNOX 工具庫 )v" + VER)
 
 
