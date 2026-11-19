@@ -292,6 +292,10 @@ def release_extras(index: dict, out_dir: str, root: str = ROOT) -> list:
 
 
 def main(argv=None) -> int:
+    try:                                   # 訊息有 ✅／❌：cp950 之類的主控台也印得出來（不然 --check 印最後一行時當掉）
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
     parser = argparse.ArgumentParser(description="工具 → .synoxpack ＋ index.json")
     parser.add_argument("names", nargs="*", help="只打這幾個（預設全部）")
     parser.add_argument("--out", default=None, help="寫到哪（預設 dist/；指名打包私人工具時 dist/private/）")
