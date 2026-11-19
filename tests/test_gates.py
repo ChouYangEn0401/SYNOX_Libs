@@ -330,6 +330,9 @@ M4_EXTRA_CALLS = {
         "_Undefined": "範本引擎的「沒有值」記號：類別沒有任何欄位，大家共用同一個記號才比得出 `is UNDEF`",
         "timedelta": "不可變的時間長度（6 小時）",
     },
+    "projects": {
+        "Field": "指令欄位的說明（名稱、說明文字、檢查函式），建好之後不改，沒有放任何人的資料",
+    },
     "money": {
         "frozen": "bridge/table.py 的 frozen() 回 MappingProxyType（唯讀的指令表）",
         "MappingProxyType": "唯讀的對照表",
