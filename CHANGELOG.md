@@ -51,6 +51,7 @@
   會**只讀**使用者自己填的資料夾（修改時間、`.git/logs/HEAD` 最後一行的時間；不呼叫 git），所以宣告 `filesystem:any`、`access: owner`。
   沒搬：用檔案總管／VS Code／終端機開專案（要開別的程式）、`${VAR}` 路徑變數、資料夾挑選視窗、批次修搬家路徑、方向（人生目標）欄位與週檢的串接。
   完全獨立；跨工具的連結 SYNOX 目前沒有選用機制，只留一個出口 `due_back`（`provides: projects.due_back`）。`tests/test_projects.py`；`tests/test_gates.py` 多認 `OWNER_LOCAL`。
+- **`habits` 0.1.0-alpha.1（新，alpha，尚未實機驗證）**：里程碑與習慣，移植自較早的一套個人工具。習慣（每天、每週、每月、每 N 天、一期幾次、一期幾分鐘；打卡、跳過、加碼、暫停、這期夠了、釘選、承諾期三道確認）與有期限的旅程（錯過插一格休息、後面順延；心情與筆記）；附完整網頁畫面，資料存保管箱。跟其他工具的連動只留空的掛鉤（`engine/links.py`），沒裝別的工具也完整可用。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；

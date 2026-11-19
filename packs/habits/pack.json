@@ -1,0 +1,59 @@
+{
+  "name": "habits",
+  "title": "🎯 里程碑與習慣",
+  "summary": "養成習慣（每天、每週、一期幾次、一期幾分鐘；打卡、暫停、這期夠了）和有期限的里程碑旅程（錯過不算失敗，後面順延）；附完整畫面（存在你自己的保管箱，加密）",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "habit",
+  "access": "member",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 32,
+  "capabilities": [],
+  "python": { "module": "pack", "package": true },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3" },
+  "skill": "SKILL.md",
+  "storage": "vault",
+  "help": {
+    "featured": ["add", "today", "check", "ms_new"],
+    "commands": {
+      "add": {"plain": "加一個習慣，預設撐 30 天",
+              "examples": [{"text": "讀書", "note": "每天一次，晚上九點提醒"},
+                           {"text": "運動 repeat=quota times=3 period=week", "note": "每週做 3 次，哪天都行"},
+                           {"text": "練琴 minutes=90", "note": "每週練 90 分鐘"}],
+              "alias_suggest": ["習慣"]},
+        "today": {"plain": "今天還有什麼沒做"},
+        "check": {"plain": "打卡", "examples": ["讀書", {"text": "讀書 cancel", "note": "今天跳過"}]},
+        "ms_new": {"plain": "開一個有期限的旅程", "examples": [{"text": "做小遊戲 steps=畫角色;寫關卡;上架", "note": "三步的旅程"}]}
+    }
+  },
+  "agent": {
+    "index": "養成習慣、每天打卡、有期限的里程碑旅程",
+    "triggers": ["習慣", "打卡", "里程碑", "旅程", "養成", "今天做了"],
+    "load": "on_trigger",
+    "skill": { "file": "SKILL.md" },
+    "provides": ["habits.checkin", "habits.journey"]
+  },
+  "web": {
+    "panel": "panel.html",
+    "api": ["GET /summary"],
+    "app": {
+      "entry": "app/index.html",
+      "root": "app",
+      "title": "習慣與旅程",
+      "kit": 1,
+      "reads": ["meta", "routines", "milestones", "milestone"],
+      "actions": {
+        "save": "WRITE", "check": "WRITE", "log": "WRITE", "pause": "WRITE", "enough": "WRITE", "pin": "WRITE",
+        "rm": "DANGER", "display": "WRITE",
+        "ms_save": "WRITE", "ms_complete": "WRITE", "ms_insert": "WRITE", "ms_edit": "WRITE", "ms_remove": "WRITE",
+        "ms_rm": "DANGER"
+      },
+      "remote": true
+    }
+  },
+  "site": {
+    "line": "養成習慣，也陪你走完一段有期限的旅程——錯過只是記錄，不是失敗"
+  }
+}
