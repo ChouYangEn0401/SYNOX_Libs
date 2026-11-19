@@ -48,8 +48,8 @@ COLLECTION = {"id": "wardrobe", "title": "SYNOX 衣櫃", "category": "衣櫃／�
               "summary": "26 套外觀：整個聊天介面的顏色、吉祥物、開場一起換。不帶任何程式，換回預設隨時可以。"}
 VERSION = "1.0.0"
 # 個別升過版的套（extract 重新產生時照這裡寫，不要退回 VERSION）：
-# 1.0.1 = 開場動畫改成穩定的寫法（CSS_FIXUPS；E 的 X 不見、W 開機字同一種寫法）
-VERSIONS = {"E": "1.0.1", "W": "1.0.1"}
+# 1.0.1 = 開場動畫改成穩定的寫法（CSS_FIXUPS；E 的 X 不見、W 開機字同一種寫法；L 的載入條置中、走滿）
+VERSIONS = {"E": "1.0.1", "L": "1.0.1", "W": "1.0.1"}
 SLOTS =("mascot.idle", "mascot.think", "mascot.happy", "mascot.warn", "opening", "wordmark", "appicon")
 SLOT_FILES = {"mascot.idle": "slots/idle.svg", "mascot.think": "slots/think.svg", "mascot.happy": "slots/happy.svg",
               "mascot.warn": "slots/warn.svg", "opening": "slots/opening.svg", "wordmark": "slots/wordmark.svg",
@@ -198,6 +198,26 @@ def css_problems(name: str, css: str, letter: str) -> list:
         if "prefers-color-scheme" not in m and "prefers-reduced-motion" not in m:
             out.append(f"{name}: @media {m.strip()} 不准（只收深淺色、減少動態）")
     out += [f"{name}: {p}" for p in fragile_animations(css)]
+    out += [f"{name}: {p}" for p in percent_translates(css)]
+    return out
+
+
+PERCENT_TRANSLATE = re.compile(r"translate(?:X|Y|3d)?\([^)]*\d%")
+
+
+def percent_translates(css: str) -> list:
+    """SVG 裡用百分比的 translate 定位：品牌頁 HTML 的 translateX(-50%) 是「自己寬度的一半」，SVG 的元素沒有 CSS 的方框，
+    百分比改成照整張 viewBox 算（480 寬的開場＝240px），東西整個被推走（L 的載入條跑到最左邊就是這樣）。
+    只看一般規則裡寫死的 transform（@keyframes 裡的進場位移不算）；同一條規則有寫 transform-box 的放行。"""
+    out = []
+    for head, body in _css_blocks(css):
+        if head.startswith("@"):
+            continue
+        decls = dict(decls_of(body))
+        v = decls.get("transform", "")
+        if PERCENT_TRANSLATE.search(v) and "transform-box" not in decls:
+            out.append(f"規則 {head.strip()[:60]} 的 transform「{v}」用百分比位移：在 SVG 裡是照整張畫面算，"
+                       "改成 px（見 percent_translates）")
     return out
 
 
@@ -1007,6 +1027,18 @@ CSS_FIXUPS = {
          "[data-slot][data-slot] .op-W .wboot .t-span:nth-of-type(3){animation-duration:0.4s}"),
         ("@keyframes th-w-wp-o-line { \n  0% { visibility: hidden; }\n  100% { visibility: visible; }\n}",
          "@keyframes th-w-wp-o-line { \n  0%, 100% { visibility: hidden; }\n}"),
+    ],
+    # L（格格）的載入條：品牌頁的 translateX(-50%) 是「自己寬度的一半」（置中在吉祥物底下）；搬到 SVG 的 <g> 之後
+    # 百分比改成照整張 viewBox 算（480 的一半＝240px），整條被推到畫面最左邊。改成實際的半寬（6 格、寬 57 → 28.5px）。
+    # 時間：原本第 6 格 0.9s 才亮、0.95s 整條就收掉，滿格只露 40ms 左右（看起來像沒走完）。每格提早一格（120ms）開始，
+    # 0.78s 走滿，吉祥物 0.85s 長完，滿格一直留到字標開始掉下來（1.05s）前才收。
+    "L": [
+        ("[data-slot][data-slot] .op-L .l-bar{transform:translateX(-50%)}",
+         "[data-slot][data-slot] .op-L .l-bar{transform:translateX(-28.5px)}"),
+        ("[data-slot][data-slot] .op-L .l-bar .t-i{animation:th-l-l-o-blink .3s steps(1) calc(var(--n) * 120ms) both, th-l-l-o-out .01s linear .95s forwards}",
+         "[data-slot][data-slot] .op-L .l-bar .t-i{animation:th-l-l-o-blink .3s steps(1) calc((var(--n) - 1) * 120ms) both, th-l-l-o-out .01s linear 1.04s forwards}"),
+        ("[data-slot][data-slot] .op-L .l-bar{opacity:0;animation:1s steps(1) 0s 1 normal both running th-l-l-o-bar}",
+         "[data-slot][data-slot] .op-L .l-bar{opacity:0;animation:1.1s steps(1) 0s 1 normal both running th-l-l-o-bar}"),
     ],
 }
 
