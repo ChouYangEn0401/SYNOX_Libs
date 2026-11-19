@@ -13,6 +13,13 @@
   `/gcal_status` 改成 `ai=False`（跟另外三個外部工具一樣，SKILL 改成請使用者自己打）。測試加一條 S6（log 裡沒有那些值）。
 
 ### Added
+- **`projects` 0.1.0-alpha.1（新工具，`stage` alpha；**尚未實機驗證**，試過之後才發 0.1.0）**：專案追蹤——每個專案「停在哪、為什麼停、回來先做什麼」。
+  從一個本機使用的個人管家的專案管理搬來並通用化（不帶任何個人資料）。指令 `/proj`、`/proj_list`、`/proj_show`、`/proj_update`、`/proj_pause`、`/proj_resume`、
+  `/proj_scan`、`/proj_rm`（危險，先進回收區、`/proj_restore` 可復原）、`/proj_reorder`、`/proj_reason_add`、`/proj_reason_retire`；另附完整網頁畫面（清單、依狀態與原因篩選、
+  🧊 冷掉的（程式掃資料夾量的）、🔖 說好回來看的、一鍵暫停／回來、自訂暫停原因、編輯）。資料存保管箱（每人一份）。
+  會**只讀**使用者自己填的資料夾（修改時間、`.git/logs/HEAD` 最後一行的時間；不呼叫 git），所以宣告 `filesystem:any`、`access: owner`。
+  沒搬：用檔案總管／VS Code／終端機開專案（要開別的程式）、`${VAR}` 路徑變數、資料夾挑選視窗、批次修搬家路徑、方向（人生目標）欄位與週檢的串接。
+  完全獨立；跨工具的連結 SYNOX 目前沒有選用機制，只留一個出口 `due_back`（`provides: projects.due_back`）。`tests/test_projects.py`；`tests/test_gates.py` 多認 `OWNER_LOCAL`。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；

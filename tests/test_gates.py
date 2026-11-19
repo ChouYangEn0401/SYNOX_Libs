@@ -22,11 +22,17 @@ from synox.sdk import author
 
 from conftest import PACK_NAMES, PACKS, PLANNER
 
+# 本機工具但只給擁有者：projects 會讀使用者自己填的資料夾（只讀，filesystem:any），不開給伺服器版的成員
+OWNER_LOCAL = ("projects",)
+# 靜態掃描看不出「路徑是使用者填的資料夾」（變數路徑它只算 filesystem:own），所以 projects 宣告的 filesystem:any 比掃出來的寬——
+# 這是照實宣告（讀 pack 以外的資料夾），不是漏掃；多寫的保險由 tests/test_projects.py 的靜態規則守（只讀、只在 engine/scan.py）
+SCAN_SEES = {"projects": ["filesystem:own"]}
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
 # pack 名稱 → 宣告的 capabilities（其他一律不准；每個都要明寫，沒有就寫 []——ADR-0006 C5）
 ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": ["filesystem:own"], "notes": [],
                 "diary": ["filesystem:own"],
                 "guitar": [],
+                "projects": ["filesystem:any"],
                 **{name: ["network"] for name in CONNECT}}
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0006 P1）
@@ -89,7 +95,7 @@ def test_every_tool_is_listed():
 @pytest.mark.parametrize("name", PACK_NAMES)
 def test_gate1_manifest_strict(name):
     m = synox_manifest.read(folder(name), strict=True)
-    assert m.kind == "python" and m.access == ("owner" if name in CONNECT else "member") and m.name == name
+    assert m.kind == "python" and m.access == ("owner" if name in CONNECT + OWNER_LOCAL else "member") and m.name == name
     assert os.path.isfile(m.skill_path) and os.path.isfile(os.path.join(folder(name), "README.md"))
     assert m.capabilities_declared and m.capabilities == ALLOWED_CAPS[name]
     if name in PLANNER:
@@ -128,10 +134,10 @@ def test_gate2_static_scan_passes(name):
     m = synox_manifest.read(folder(name), strict=True)
     report = synox_scan.scan(m)
     assert report.problems(m) == [], report.format(m)
-    assert report.required_capabilities == ALLOWED_CAPS[name], report.format(m)
+    assert report.required_capabilities == SCAN_SEES.get(name, ALLOWED_CAPS[name]), report.format(m)
 
 
-@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n != "money"])
+@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n not in ("money", "projects")])    # projects：tests/test_projects.py 自己的靜態規則
 def test_no_network_subprocess_exec_or_stray_files(name):
     text = source(name)
     tree = ast.parse(text)
