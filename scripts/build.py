@@ -263,7 +263,7 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
     if collections:
         index["collections"] = collections
     with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8", newline="\n") as f:
-        f.write(json.dumps(index, ensure_ascii=False, indent=2) + "\n")
+        f.write(index_text(index))
     if full:
         release_extras(index, out_dir, root)
     return {"index": index, "problems": [], "notices": notices}
@@ -295,22 +295,36 @@ def release_extras(index: dict, out_dir: str, root: str = ROOT) -> list:
         alias = links.alias_file(e["name"])
         shutil.copyfile(os.path.join(out_dir, e["file"]), os.path.join(out_dir, alias))
         written.append(alias)
+    written += write_tools_zips(index, out_dir, links.tools_zip(root))
+    write_sums(out_dir, {e["file"] for e in index["packs"]} | set(written) | {links.INDEX_FILE})
+    return written + [links.SUMS_FILE]
+
+
+def index_text(index: dict) -> str:
+    """index.json（與 tools zip 裡的 tools/index.json）的寫法：只寫在這裡，scripts/sign_dist.py 重算時也用這份。"""
+    return json.dumps(index, ensure_ascii=False, indent=2) + "\n"
+
+
+def write_tools_zips(index: dict, out_dir: str, zip_name: str) -> list:
+    """tools-<VERSION>.zip（tools/ 底下每個工具的 .synoxpack＋只列工具的 tools/index.json）與別名 tools.zip。
+    .synoxpack 讀 out_dir 裡現在的檔（簽章之後重包也走這裡：scripts/sign_dist.py）。回 [zip_name, tools.zip]。"""
     tools = [e for e in index["packs"] if e.get("kind") != "theme"]
     tools_index = {k: v for k, v in index.items() if k != "collections"}
     tools_index["packs"] = tools
-    zip_name = links.tools_zip(root)
     with zipfile.ZipFile(os.path.join(out_dir, zip_name), "w", zipfile.ZIP_DEFLATED) as z:
         for e in tools:
             with open(os.path.join(out_dir, e["file"]), "rb") as f:
                 _zip_put(z, "tools/" + e["file"], f.read())
-        _zip_put(z, "tools/index.json", (json.dumps(tools_index, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+        _zip_put(z, "tools/index.json", index_text(tools_index).encode("utf-8"))
     shutil.copyfile(os.path.join(out_dir, zip_name), os.path.join(out_dir, links.TOOLS_ALIAS))
-    written += [zip_name, links.TOOLS_ALIAS]
-    files = sorted({e["file"] for e in index["packs"]} | set(written) | {links.INDEX_FILE})
+    return [zip_name, links.TOOLS_ALIAS]
+
+
+def write_sums(out_dir: str, files) -> None:
+    """SHA256SUMS：每個檔一行「sha256␣␣檔名」（照檔名排序；sha256sum -c 的格式）。"""
     with open(os.path.join(out_dir, links.SUMS_FILE), "w", encoding="utf-8", newline="\n") as f:
-        for n in files:
+        for n in sorted(files):
             f.write(f"{sha256_of(os.path.join(out_dir, n))}  {n}\n")
-    return written + [links.SUMS_FILE]
 
 
 def main(argv=None) -> int:

@@ -5,6 +5,10 @@
 ## [Unreleased]
 
 ### Added
+- **發佈 `v0.3.1`（`VERSION` 0.3.0 → 0.3.1）與 `scripts/sign_dist.py`**：簽 `dist/` 裡每個 `.synoxpack`（`synox-sdk sign`，別名＝簽過那一份的複本）、
+  每個都 `verify` 要是 official，再用**簽過的檔**重算 `index.json` 每筆 `sha256`／`size`、`SHA256SUMS`、`tools-<VERSION>.zip`／`tools.zip`，最後做一致性檢查；
+  全有或全無（先在暫存資料夾做、全過才換進 `dist/`）；密語只從 `SYNOX_PACK_KEY_PASSWORD` 拿。`--check` 上傳前再驗一次。發佈順序見 `docs/RELEASING.md`。
+  入口頁、每個工具頁、衣櫃頁、README 的下載連結改指 v0.3.1（衣櫃頁的「GitHub Release vX」字樣也由 `links.py` 跟著換了）。
 - **`guitar` 0.2.0-alpha.1 → 0.3.0-alpha.1（和弦圖；仍是 alpha、尚未實機驗證；要 SYNOX SDK 0.2.5 以上，`requires.sdk` `>=0.2.5,<0.3`、`requires.synox` `>=0.2.1`）**：
   **先給圖**：`/chord` 預設回和弦圖（圖片，經 `kit.send_image`）＋名稱＋一行按法；每根手指、組成音、提醒改成按「📖 說明」、最後加 `說明`、或 `/chord_info`。
   一個和弦可以用 `‹ 上一個`／`下一個 ›` 在同一則訊息裡翻其他按法（`kit.edit_image`；Telegram 改送新的一張）；好幾個（`D/F# Bb F Gm Cm`）排成同一張圖、每個有「換按法」。
