@@ -25,6 +25,8 @@ SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "�
          "guitar": ("/chord Am", "x 0 2 2 1 0"),
          "projects": ("/proj 範例專案", "開始追蹤"),
          "habits": ("/habit_today", "今天"),
+         # 工作區：還沒設定時只說怎麼設（不會自己去碰任何資料夾）
+         "workspace": ("/ws_status", "還沒設定工作區"),
          # 接外面服務的：還沒連接時回「要先設定」，不連網
          "notion": ("/notion 會議", "還沒設定 Notion"), "todoist": ("/todoist_list", "還沒接上 Todoist"),
          "google-calendar": ("/gcal_today", "還沒連上 Google 日曆"), "google-sheets": ("/gsheet_list", "還沒連上 Google 試算表"),
