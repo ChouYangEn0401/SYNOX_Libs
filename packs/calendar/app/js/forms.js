@@ -49,7 +49,7 @@ export function eventForm(app, init) {
     v.time = inputs.allDay.checked ? "-" : inputs.start.value + (inputs.end.value ? `-${inputs.end.value}` : "");
     if (!occurrence) {
       const rule = inputs.repeat.value === "custom" ? inputs.repeatText.value.trim() : inputs.repeat.value;
-      if (rule) { v.repeat = rule; v.until = inputs.until.value; } else if (ev && ev.repeat) { v.repeat = "none"; }
+      if (rule) { v.repeat = rule; v.until = inputs.until.value || (ev ? "-" : ""); }   // 修改時清空＝「-」（一直重複），空字串會被 api.js 丟掉 else if (ev && ev.repeat) { v.repeat = "none"; }
     }
     if (ev) {                                            // 修改：空白 ＝ 清掉（-）
       await act("edit", { n: ev.id, title, ...v, location: v.location || "-", note: v.note || "-",

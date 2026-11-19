@@ -371,3 +371,36 @@ def test_ics_repeat_starting_off_its_weekdays_has_no_extra_first_day(make_bot, o
     do(bot, "add", {"text": "吉他", "date": "2026-11-09", "time": "20:00-21:00", "repeat": "二四"})
     text = bot.packs["calendar"].app_exports["ics"](OWNER_ID, {}).data.decode("utf-8")
     assert "DTSTART:20261110T200000" in text and "DTEND:20261110T210000" in text and "20261109T2000" not in text
+
+
+def test_screen_reads_refuse_bad_input_politely(make_bot, owner):
+    """畫面送來看不懂的月份或天數：回給人看的一句（CalError），不是伺服器錯誤。"""
+    from synox.packs import kit
+    bot = make_bot("calendar")
+    for name, params in (("month", {"month": "2026-13"}), ("clashes", {"days": "abc"}), ("agenda", {"days": "x"})):
+        reader = bot.packs["calendar"].app_reads.get(name)
+        if reader is None:
+            continue
+        with pytest.raises((kit.AppError, ValueError)) as caught:
+            reader(OWNER_ID, params)
+        assert "要" in str(getattr(caught.value, "message", caught.value))
+
+
+def test_bad_legacy_time_does_not_break_the_calendar(make_bot, owner):
+    """舊版資料裡壞掉的時間（25:00）當整天，整本照常讀得到。"""
+    bot = make_bot("calendar")
+    store(bot).save({"events": [{"id": 1, "title": "壞時間", "day": "2026-11-10", "start": "25:00", "end": "", "all_day": False,
+                                 "location": "", "note": "", "at": 1}], "next_id": 2})
+    day = read(bot, "day", {"date": "2026-11-10"})
+    assert [e["title"] for e in day["events"]] == ["壞時間"] and day["events"][0]["all_day"]
+
+
+def test_upcoming_skips_events_that_already_ended_today(make_bot, owner):
+    from datetime import datetime
+    bot = make_bot("calendar")
+    bot.say(owner, "/cal 2026-11-09 08:00-09:00 早會")
+    bot.say(owner, "/cal 2026-11-09 18:00-19:00 晚餐")
+    bot.set_now(datetime(2026, 11, 9, 12, 0))
+    bot.say(owner, "/cal_list")
+    out = bot.last(owner)
+    assert "晚餐" in out and "早會" not in out

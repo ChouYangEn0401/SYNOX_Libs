@@ -25,15 +25,26 @@ def empty() -> dict:
     return {"v": VERSION, "events": [], "next_id": 1, "tasks": [], "next_task": 1, "focus": {}}
 
 
-def _old_event(e: dict) -> dict:
+def _old_event(e: dict, today: date = None) -> dict:
+    """舊版的一筆 → v2。日期壞掉用 today（呼叫端給的時鐘）；時間壞掉（例如 "25:00"）當整天，不讓一筆壞資料擋住整本。"""
     day = str(e.get("day") or "")
     try:
         d = date.fromisoformat(day)
     except ValueError:
-        d = date.today()
+        d = today or date.today()
     start, end = str(e.get("start") or ""), str(e.get("end") or "")
     out = {k: v for k, v in e.items() if k not in ("day", "start", "end")}
     all_day = bool(e.get("all_day")) or not start
+    if not all_day:
+        try:
+            datetime.fromisoformat(f"{d.isoformat()}T{start}")
+        except ValueError:
+            all_day = True
+    if end and not all_day:
+        try:
+            datetime.fromisoformat(f"{d.isoformat()}T{end}")
+        except ValueError:
+            end = ""
     if all_day:
         out["start"] = out["end"] = d.isoformat()
         out["all_day"] = True
@@ -51,7 +62,7 @@ def _old_event(e: dict) -> dict:
     return out
 
 
-def migrate(data) -> dict:
+def migrate(data, today: date = None) -> dict:
     """舊版或空的資料 → v2（原地補欄位並回傳同一個 dict）。"""
     if not isinstance(data, dict):
         return empty()
@@ -59,7 +70,7 @@ def migrate(data) -> dict:
     for key, value in empty().items():
         data.setdefault(key, value)
     if not isinstance(old, int) or old < VERSION:
-        data["events"] = [_old_event(e) if "day" in e else e for e in data["events"]]
+        data["events"] = [_old_event(e, today) if "day" in e else e for e in data["events"]]
         data["v"] = VERSION
     top = max([e["id"] for e in data["events"] if isinstance(e.get("id"), int)] or [0]) + 1
     data["next_id"] = max(int(data.get("next_id") or 1), top)

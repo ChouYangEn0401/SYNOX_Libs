@@ -625,7 +625,8 @@ def agenda(data: dict, from_day, days: int = 21, include_cancelled: bool = False
 
 
 def month_cards(data: dict, first: date, last: date) -> dict:
-    """給月曆：這段日期範圍裡每一天該畫哪幾筆。取消的也畫（打橫線；月曆是唯一能把它改回來的畫面）。
+    """給月曆：這段日期範圍裡每一天該畫哪幾筆。取消的也畫（打橫線，可以在這天改回來）。
+    例外：重複行程只取消某一次＝把那天加進 skip（跳過），月曆與這一天都不再畫它，目前畫面上沒有復原的按鈕。
     每一張多帶 clash（還沒處理、跟誰撞）與 clash_ok（說過兩個都留的）。"""
     items = between(data, first, last, include_cancelled=True)
     marks = {}
