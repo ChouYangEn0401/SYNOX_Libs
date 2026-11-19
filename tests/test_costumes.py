@@ -340,3 +340,38 @@ def test_every_costume_installs_in_real_synox(tmp_path):
             src = f.read()
         kept = set(re.findall(r"@keyframes\s+([\w-]+)", bundle.stylesheet()))
         assert set(re.findall(r"@keyframes\s+([\w-]+)", src)) <= kept, e["name"]
+
+
+# ── 顏色變數清單（docs/costume-token-usage.md；給 SYNOX 套用前的缺漏檢查）───────────────────
+
+def test_token_usage_doc_is_current():
+    """docs/costume-token-usage.md 是 build_costumes.py tokens --write 的輸出（改了外觀要重跑）。"""
+    with open(bc.TOKEN_DOC, encoding="utf-8") as f:
+        assert f.read() == bc.token_report(), "重跑 python scripts/build_costumes.py tokens --write"
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_costume_only_uses_variables_synox_or_itself_provides(name):
+    """每個 var(--x) 不是核心 token、就是 pack.json 給了的吉祥物／進階 token、這一套 :root 宣告的 --th-，或規則裡設的區域變數。"""
+    r = bc.token_usage(os.path.join(bc.COSTUMES, name))
+    assert r["groups"]["unknown"] == [] and r["not_in_pack"] == [], (r["groups"]["unknown"], r["not_in_pack"])
+    assert all(n.startswith("--th-") for n in r["groups"]["own"])
+
+
+def test_token_usage_finds_hardcoded_colors_but_not_var_fallbacks():
+    assert bc._strip_var_fallbacks("color-mix(in srgb, var(--m1, #a3d91a) 76%, #1a2400)") == \
+        "color-mix(in srgb, var(--m1) 76%, #1a2400)"
+    r = bc.token_usage(os.path.join(bc.COSTUMES, "costume-l-blocks"))
+    colors = {(h["file"], h["color"]) for h in r["hardcoded"]}
+    assert ("mascot.idle", "#1a2400") in colors and ("mascot.idle", "#fff") in colors
+    assert not any(c == "#a3d91a" for _f, c in colors)                    # 只出現在 var(--m1, #a3d91a) 的後備值
+
+
+@pytest.mark.skipif(_synox_src() is None, reason="沒有 SYNOX 的原始碼（設 SYNOX_SRC 或放在 ../SYNOX）")
+def test_token_lists_match_synox_contract():
+    """build_costumes.py 抄的 token 名字跟 SYNOX 的合約一樣（SYNOX 加了名字，這裡要跟著加，報告才不會把它當成不認得）。"""
+    sys.path.insert(0, _synox_src())
+    from synox.theme import contract
+    assert [t[2:] for t in bc.TOKENS] == list(contract.TOKENS)
+    assert [t[2:] for t in bc.OPTIONAL_TOKENS] == list(contract.MASCOT_TOKENS)
+    assert [t[2:] for t in bc.ADVANCED_TOKENS] == list(contract.ADVANCED_TOKENS)

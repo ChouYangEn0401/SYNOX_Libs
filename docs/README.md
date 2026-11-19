@@ -21,4 +21,5 @@
 | `build_site.py` | `docs/site/index.html`（入口頁）＋沒有手寫頁的工具的 `docs/site/<名字>.html`；`--list-republish` 列出本機檔 → 線上網址 | `build_site.py --check` |
 | `links.py` | 改寫 README 與 `docs/site/*.html` 的下載連結與版本字樣 | `links.py --check` |
 | `build_costumes.py page` | `docs/site/wardrobe.html`（衣櫃頁） | `build_costumes.py check`（外觀包本身） |
+| `build_costumes.py tokens --write` | [costume-token-usage.md](costume-token-usage.md)（每套用到的顏色變數、寫死的顏色；給 SYNOX 套用前的缺漏檢查；`--json` 給程式讀） | `tests/test_costumes.py` |
 | `site_stamp.py [檔名]` | 頁尾的頁面版本 | `tests/test_site_pages.py` |

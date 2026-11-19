@@ -79,6 +79,10 @@
   安裝時仍由簽過的 pack.json 重新檢查、逐條確認。寫壞的不讓打包失敗，換成 `malformed_warning` 並印「⚠️ 注意」。入口頁卡片與產生的工具頁
   用紅框顯示；帶警告的工具標題、徽章不准有「官方」。沒寫 `warnings` 的工具，`index.json` 與頁面一字不差。
   真機驗證清單：`docs/testing/wardrobe-and-index-checklist.md`（衣櫃頁開場、重播、下載；工具庫列表的警告；全部勾完才算過關）。
+- **衣櫃的顏色變數清單 [`docs/costume-token-usage.md`](docs/costume-token-usage.md)**（`python scripts/build_costumes.py tokens --write`；`--json` 給程式讀）：
+  每一套 theme.css 與 slot SVG 用到哪些 `var(--…)`（核心 token、吉祥物 token、進階 token、自己在 `:root` 宣告的 `--th-`、規則裡的區域變數），
+  哪裡不經變數寫死顏色（吉祥物與 App 圖示的刻意配色另外標出）。給 SYNOX 核心做「套用前缺漏檢查」用；26 套都沒有用到核心沒有的變數。
+  測試守住：清單是最新的、每一套只用核心或自己提供的變數、抄的 token 名字跟 SYNOX 的合約一樣。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；

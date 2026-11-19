@@ -6,6 +6,7 @@
     python scripts/build_costumes.py pack [--out dist]                  costumes/<id>/ → <out>/<id>-<版本>.synoxpack（只用標準函式庫）
     python scripts/build_costumes.py page                               costumes/ → docs/site/wardrobe.html（之後跑 site_stamp.py）
     python scripts/build_costumes.py check                              只檢查（不寫檔）：每一套都過「不帶程式」的規則
+    python scripts/build_costumes.py tokens [--write | --json]          每一套用到的顏色變數、寫死的顏色 → docs/costume-token-usage.md
 
 - extract 要 Playwright（Chromium）和 fontTools，而且要連網一次（Google Fonts 的字型，只拿來把字標轉成向量路徑，
   字型檔不進 repo、不進 pack）。品牌提案頁本身不進 repo；它是一頁自己帶全部東西的 HTML，每個系列是陣列 S 的一個物件，
@@ -515,6 +516,177 @@ def page_html() -> str:
     for k, v in repl.items():
         page = page.replace(k, v)
     return page
+
+
+# ── tokens：每一套用到哪些顏色變數、哪裡寫死顏色（給 SYNOX「套用前缺漏檢查」）────────────────
+
+TOKEN_DOC = os.path.join(ROOT, "docs", "costume-token-usage.md")
+MASCOT_SLOTS = ("mascot.idle", "mascot.think", "mascot.happy", "mascot.warn", "appicon")
+COLOR_ATTRS = ("fill", "stroke", "stop-color", "flood-color", "lighting-color", "color")
+COLOR_PROPS = ("fill", "stroke", "stop-color", "flood-color", "color", "background", "background-color", "border",
+               "border-color", "outline-color", "box-shadow", "text-shadow", "filter", "caret-color")
+LITERAL_COLOR = re.compile(r"#[0-9a-fA-F]{3,8}\b|\b(?:rgba?|hsla?)\([^()]*\)")
+VAR_USE = re.compile(r"var\(\s*(--[\w-]+)")
+
+
+def _strip_var_fallbacks(value: str) -> str:
+    """var(--x, 後備) → var(--x)：後備值不算「寫死」（SYNOX 有給那個 token 就不會用到）。"""
+    out, i = [], 0
+    while True:
+        j = value.find("var(", i)
+        if j < 0:
+            out.append(value[i:])
+            return "".join(out)
+        out.append(value[i:j])
+        depth, k = 1, j + 4
+        while k < len(value) and depth:
+            depth += {"(": 1, ")": -1}.get(value[k], 0)
+            k += 1
+        m = re.match(r"var\(\s*(--[\w-]+)", value[j:k])
+        out.append(f"var({m.group(1)})" if m else value[j:k])
+        i = k
+
+
+# SYNOX 合約的進階 token（synox/theme/contract.py 的 ADVANCED_TOKENS；外觀包不給時 SYNOX 從核心色算）。
+# 跟 TOKENS、OPTIONAL_TOKENS 一樣是抄過來的一份：tests/test_costumes.py 有 SYNOX 原始碼時會比對，SYNOX 改了這裡要跟著改。
+ADVANCED_TOKENS = ("--bg-glow", "--surface-2", "--sunken", "--line-strong", "--text-2", "--accent-hover", "--accent-line",
+                   "--ok-soft", "--warn-soft", "--bad-soft", "--me", "--me-ink", "--m-hi", "--scrim", "--shadow-up")
+
+
+def synox_token_names() -> dict:
+    """核心認得的 token 名字（不帶 --）：照這支腳本抄的那份（不 import SYNOX，產生的報告在哪台電腦跑都一樣）。"""
+    return {"core": [t[2:] for t in TOKENS], "mascot": [t[2:] for t in OPTIONAL_TOKENS],
+            "advanced": [t[2:] for t in ADVANCED_TOKENS], "source": "SYNOX 外觀合約第 1 版（synox/theme/contract.py）"}
+
+
+def token_usage(folder: str, known: dict = None) -> dict:
+    """一套外觀：用到的變數（分成核心 token／吉祥物 token／這一套自己的 --th-／規則裡自己設的區域變數／不認得的）、
+    pack.json 給了哪些、哪裡寫死顏色（SVG 屬性、theme.css 的規則；var() 的後備值不算）。"""
+    known = known or synox_token_names()
+    with open(os.path.join(folder, "pack.json"), encoding="utf-8") as f:
+        raw = json.load(f)
+    with open(os.path.join(folder, "theme.css"), encoding="utf-8") as f:
+        css = f.read()
+    files = {"theme.css": re.sub(r"/\*.*?\*/", "", css, flags=re.S)}
+    for slot, rel in raw["theme"]["slots"].items():
+        with open(os.path.join(folder, *rel.split("/")), encoding="utf-8") as f:
+            files[slot] = f.read()
+    used = {}
+    for where, text in files.items():
+        for name in VAR_USE.findall(text):
+            used.setdefault(name, set()).add(where)
+    own, local = set(), set()
+    for head, body in _css_blocks(files["theme.css"]):
+        sels = [" ".join(s.split()) for s in head.split(",")]
+        for k, _v in decls_of(body):
+            if k.startswith("--"):
+                (own if all(s in ROOT_SELECTORS for s in sels) else local).add(k)
+    provided = {mode: sorted(raw["theme"]["tokens"].get(mode, {})) for mode in ("light", "dark")}
+    contract = set(known["core"]) | set(known["mascot"]) | set(known["advanced"])
+    groups = {"core": [], "mascot": [], "advanced": [], "own": [], "local": [], "unknown": []}
+    for name in sorted(used):
+        bare = name[2:]
+        if bare in known["core"]:
+            groups["core"].append(name)
+        elif bare in known["mascot"]:
+            groups["mascot"].append(name)
+        elif bare in known["advanced"]:
+            groups["advanced"].append(name)
+        elif name.startswith("--th-") and name in own:
+            groups["own"].append(name)
+        elif name in local:
+            groups["local"].append(name)
+        else:
+            groups["unknown"].append(name)
+    not_in_pack = [n for n in groups["core"] + groups["mascot"] + groups["advanced"]
+                   if not all(n in provided[m] for m in ("light", "dark"))]
+    hard = []
+    for where, text in files.items():
+        if where == "theme.css":
+            for head, body in _css_blocks(text):
+                if head.startswith("@keyframes"):
+                    for kf_head, kf_body in _css_blocks(body):
+                        for k, v in decls_of(kf_body):
+                            for c in LITERAL_COLOR.findall(_strip_var_fallbacks(v)):
+                                hard.append((where, f"@keyframes {head.split()[1]} {k}", c))
+                    continue
+                sels = [" ".join(s.split()) for s in head.split(",")]
+                if all(s in ROOT_SELECTORS for s in sels):
+                    continue                                     # :root 的 --th- 顏色就是「宣告」本身
+                for k, v in decls_of(body):
+                    if k in COLOR_PROPS or k.startswith("--"):
+                        for c in LITERAL_COLOR.findall(_strip_var_fallbacks(v)):
+                            hard.append((where, f"{head.strip()[:50]} {{{k}}}", c))
+            continue
+        for attr, v in re.findall(r'\s(' + "|".join(COLOR_ATTRS) + r')="([^"]*)"', text):
+            for c in LITERAL_COLOR.findall(_strip_var_fallbacks(v)):
+                hard.append((where, attr, c))
+    counted = {}
+    for where, what, c in hard:
+        key = (where, what, c.lower().replace(" ", ""))
+        counted[key] = counted.get(key, 0) + 1
+    return {"name": raw["name"], "version": raw["version"], "title": raw["title"],
+            "provided": provided, "used": {k: sorted(v) for k, v in sorted(used.items())}, "groups": groups,
+            "not_in_pack": not_in_pack, "own_defined": sorted(own),
+            "hardcoded": [{"file": w, "where": what, "color": c, "count": n, "mascot": w in MASCOT_SLOTS}
+                          for (w, what, c), n in sorted(counted.items())]}
+
+
+def token_report_md(rows: list, known: dict) -> str:
+    L = ["# 衣櫃外觀用到的顏色變數（token）", "",
+         "由 `python scripts/build_costumes.py tokens --write` 產生，**不要手改**（`tests/test_costumes.py` 會比對是不是最新的）。",
+         "給 SYNOX 核心做「套用前缺漏檢查」：一套外觀的 theme.css 與 slot SVG 用到的 `var(--…)`，在套用時都要有值。", "",
+         f"核心認得的 token 來源：{known['source']}。", "",
+         "## 怎麼讀", "",
+         "- **核心 token**：合約上的 12 色＋`--radius`、`--font-ui`、`--font-brand`。每一套的 pack.json 淺色／深色都給齊（`check` 會擋）。",
+         "- **吉祥物 token**：`--m1`、`--m2`、`--mi`、`--mb`（選用）；pack.json 有給就用，沒給 SYNOX 從核心色算（`DERIVED`）。",
+         "- **進階 token**：合約的進階名字（`--m-hi`、`--surface-2`…）；外觀包通常不給，SYNOX 從核心色算。",
+         "- **自己的 `--th-`**：這一套在 theme.css 的 `:root` 自己宣告（淺色、深色各一份），不需要核心提供。",
+         "- **區域變數**：規則裡自己設的（`--i`、`--n` 這種排第幾個的數字），不是顏色。",
+         "- **寫死的顏色**：不經變數、直接寫在 SVG 屬性或 theme.css 規則裡的顏色（`var(--x, #後備)` 的後備值不算）。",
+         "  吉祥物與 App 圖示（`mascot.*`、`appicon`）裡的多半是刻意的配色（高光、腮紅、陰影），換深淺色也不變；",
+         "  開場、字標裡的要特別看。", ""]
+    flagged = [r for r in rows if r["groups"]["unknown"] or r["not_in_pack"]]
+    L += ["## 要注意的", ""]
+    if not flagged:
+        L.append("- 沒有：每一套用到的變數都是核心 token、pack.json 有給的吉祥物 token、自己宣告的 `--th-`，或規則裡的區域變數。")
+    for r in flagged:
+        if r["groups"]["unknown"]:
+            L.append(f"- `{r['name']}`：用了核心可能沒有的變數 {' '.join(f'`{n}`' for n in r['groups']['unknown'])}")
+        if r["not_in_pack"]:
+            L.append(f"- `{r['name']}`：用了 pack.json 沒給的 token {' '.join(f'`{n}`' for n in r['not_in_pack'])}（要靠核心算出來）")
+    L += ["", "## 總表", "",
+          "| 外觀 | 版本 | 核心 token | 吉祥物 token | 進階 | 自己的 `--th-` | 區域變數 | 不認得 | 寫死的顏色（吉祥物／開場與字標） |",
+          "|---|---|---|---|---|---|---|---|---|"]
+
+    def names(lst):
+        return " ".join(f"`{n}`" for n in lst) or "—"
+    for r in rows:
+        g = r["groups"]
+        m = sum(h["count"] for h in r["hardcoded"] if h["mascot"])
+        o = sum(h["count"] for h in r["hardcoded"] if not h["mascot"])
+        L.append(f"| `{r['name']}` {r['title']} | {r['version']} | {names(g['core'])} | {names(g['mascot'])} | {names(g['advanced'])} | "
+                 f"{names(g['own'])} | {names(g['local'])} | {names(g['unknown'])} | {m}／{o} |")
+    L += ["", "## 寫死的顏色（逐套）", "",
+          "同一個地方、同一個顏色只列一次（後面是出現幾次）。★＝吉祥物或 App 圖示（多半是刻意的配色）。", ""]
+    for r in rows:
+        if not r["hardcoded"]:
+            continue
+        L.append(f"### `{r['name']}` {r['title']}")
+        L.append("")
+        for h in r["hardcoded"]:
+            star = "★ " if h["mascot"] else ""
+            L.append(f"- {star}`{h['file']}` {h['where']}：`{h['color']}`" + (f" ×{h['count']}" if h["count"] > 1 else ""))
+        L.append("")
+    return "\n".join(L).rstrip() + "\n"
+
+
+def token_report(as_json: bool = False):
+    known = synox_token_names()
+    rows = [token_usage(f, known) for f in costume_folders()]
+    if as_json:
+        return json.dumps({"source": known["source"], "costumes": rows}, ensure_ascii=False, indent=2) + "\n"
+    return token_report_md(rows, known)
 
 
 # ── extract：品牌提案頁 → costumes/<id>/（要 Playwright、fontTools、連網一次）─────────────
@@ -1266,7 +1438,19 @@ def main(argv=None) -> int:
     pk.add_argument("--out", default=os.path.join(ROOT, "dist"))
     sub.add_parser("page", help="costumes/ → docs/site/wardrobe.html")
     sub.add_parser("check", help="只檢查")
+    tk = sub.add_parser("tokens", help="每一套用到的顏色變數與寫死的顏色（給 SYNOX 套用前缺漏檢查）")
+    tk.add_argument("--json", action="store_true", help="印 JSON（給程式讀）")
+    tk.add_argument("--write", action="store_true", help="寫到 docs/costume-token-usage.md")
     args = ap.parse_args(argv)
+    if args.cmd == "tokens":
+        text = token_report(as_json=args.json)
+        if args.write and not args.json:
+            with open(TOKEN_DOC, "w", encoding="utf-8", newline="\n") as f:
+                f.write(text)
+            print(TOKEN_DOC)
+        else:
+            sys.stdout.write(text)
+        return 0
     if args.cmd == "extract":
         extract(args.brand, args.fonts_cache, set(args.only or []) or None)
         return 0
