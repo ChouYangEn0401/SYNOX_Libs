@@ -11,6 +11,9 @@
 - docs/site-tools.json：同樣的欄位，優先於 pack.json 的 site（不打包進 .synoxpack，改它不用升版）＋卡片順序 order；
 - docs/artifacts.json：每一頁的線上網址（Artifact）；工具卡片連到它，沒有就連到 GitHub 上的 README；
 - catalog.json（建議群組）、VERSION（發佈 tag）、costumes/（衣櫃幾套）。
+pack.json 寫了 `warnings`（作者標的警告，SYNOX ADR 0041；整理規則在 scripts/pack_warnings.py）：入口頁卡片、產生的工具頁
+在標題下面用紅色框列出每一條（字＋建議）；這種工具的標題、徽章不准有「官方」兩個字（不能看起來像官方背書；有就不產生、報錯）。
+手寫的工具頁要自己把每一條警告的字寫進頁面，--check 會查。沒有工具帶警告時，頁面跟以前逐位元組相同（警告的 CSS 也只在有警告時才印）。
 樣板（給設計的人改）：scripts/site_index_template.html、scripts/site_tool_template.html。
   {{名字}}＝跳脫過的字，{{{名字}}}＝組好的 HTML；<!-- BEGIN:x -->…<!-- END:x --> 是重複用的片段；<!--# … --> 是只在樣板裡的註解。
 docs/site/<名字>.html 已經有手寫的（沒有 GENERATED 那行註解）就不動；只有沒有頁、或頁是這支產生的，才（重新）產生。
@@ -29,6 +32,7 @@ import sys
 SCRIPTS = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, SCRIPTS)
 import links  # noqa: E402
+import pack_warnings  # noqa: E402
 import site_stamp  # noqa: E402
 
 ROOT = links.ROOT
@@ -153,6 +157,13 @@ def tools(root: str = ROOT) -> list:
         if unknown:
             raise ValueError(f"{name}：site 不認得 {'、'.join(unknown)}（只能是 {'、'.join(SITE_KEYS)}）")
         emoji, title = split_title(raw.get("title", ""))
+        warnings, warning_problems = pack_warnings.of_pack(raw)
+        if warnings:
+            shown = {"pack.json 的 title": raw.get("title"), "site.name": site.get("name"), "site.status": site.get("status")}
+            official = [k for k, v in shown.items() if isinstance(v, str) and pack_warnings.OFFICIAL_WORD in v]
+            if official:
+                raise ValueError(f"{name}：帶警告（warnings）的工具，{'、'.join(official)} 不能有「{pack_warnings.OFFICIAL_WORD}」"
+                                 "（標題、徽章不能看起來像官方背書；ADR 0041）")
         caps = raw.get("capabilities") or []
         network = bool(site["network"]) if "network" in site else "network" in caps
         local = f"docs/site/{name}.html"
@@ -169,6 +180,7 @@ def tools(root: str = ROOT) -> list:
             "help": raw.get("help") or {}, "group": raw.get("group") or name, "raw": raw,
             "local": local, "hand_written": hand, "online_url": urls.get(local, ""),
             "order": raw.get("order", 1000),
+            "warnings": warnings, "warning_problems": warning_problems,
         })
     order = list(over.get("order") or [])
     out.sort(key=lambda t: (order.index(t["name"]) if t["name"] in order else len(order), t["order"], t["name"]))
@@ -185,6 +197,33 @@ def page_note(t: dict) -> str:
     return "" if t["online_url"] else NOT_ONLINE
 
 
+# ── 作者標的警告（pack.json 的 warnings）────────────────────────────────
+
+def warnings_html(t: dict, blocks: dict) -> str:
+    """有警告 → 樣板的 warn 片段（每條一個 warn_item：字＋建議＋代號）；沒有 → ""（頁面不多任何字）。"""
+    if not t.get("warnings"):
+        return ""
+    items = []
+    for w in t["warnings"]:
+        advice = fill(blocks["warn_advice"], {"advice": w["advice"]}, "warn_advice") if w.get("advice") else ""
+        items.append(fill(blocks["warn_item"], {"text": w["text"], "advice": advice, "code": w["code"]}, "warn_item"))
+    return fill(blocks["warn"], {"items": "".join(items).rstrip("\n"), "count": len(t["warnings"])}, "warn")
+
+
+def warn_css(all_tools: list, blocks: dict) -> str:
+    return blocks["warn_css"] if any(t.get("warnings") for t in all_tools) else ""
+
+
+def hand_written_warning_problems(t: dict, root: str = ROOT) -> list:
+    """手寫的工具頁沒有把每一條警告的字寫進去 → 問題（產生的頁一定有；手寫的要作者自己加）。"""
+    if not t.get("warnings") or not t["hand_written"]:
+        return []
+    with open(os.path.join(root, t["local"]), encoding="utf-8") as f:
+        page = html.unescape(f.read())
+    return [f"{t['local']}: 手寫頁沒有寫出作者標的警告「{w['text']}」（pack.json 的 warnings；用紅色、放在標題附近）"
+            for w in t["warnings"] if w["text"] not in page]
+
+
 # ── 入口頁 ────────────────────────────────────────────────────────────
 
 def _pill(blocks, text, tone="", hint=""):
@@ -198,7 +237,7 @@ def card_data(t: dict, blocks: dict, root: str = ROOT) -> dict:
     stage = f"{STAGE_WORD.get(t['stage'], '')} {t['stage']}".strip()
     note = page_note(t)
     return {"href": t["online_url"] or readme_url(t["name"]), "emoji": t["emoji"], "title": t["title"],
-            "name": t["name"], "version": t["version"], "line": t["line"],
+            "name": t["name"], "version": t["version"], "line": t["line"], "warnings": warnings_html(t, blocks),
             "example": fill(blocks["example"], {"text": t["example"]}, "example") if t["example"] else "",
             "who": _pill(blocks, label, "", hint),
             "net": _pill(blocks, NET_WORD[t["network"]], "" if t["network"] else "ok"),
@@ -234,6 +273,7 @@ def index_data(all_tools: list, blocks: dict, root: str = ROOT) -> dict:
         "release_url": links.release_page_url(root=root), "tag": links.release_tag(root),
         "wardrobe_url": urls.get(WARDROBE_PAGE, "wardrobe.html"),
         "online_url": urls.get(INDEX_PAGE, ""),
+        "warn_css": warn_css(all_tools, blocks),
     }
     for stage in STAGES:
         data[f"now_{stage}"] = ' class="now"' if stage in present else ""
@@ -275,6 +315,7 @@ def tool_page_data(t: dict, blocks: dict, root: str = ROOT) -> dict:
         "title": t["title"], "full_title": t["full_title"], "emoji": t["emoji"], "name": t["name"], "version": version,
         "bundle_meta": f" · 群組：{'、'.join(t['bundles'])}" if t["bundles"] else "",
         "summary": t["summary"], "badges": "\n      ".join(badges),
+        "warnings": warnings_html(t, blocks), "warn_css": warn_css([t], blocks),
         "commands": fill(blocks["cmds"], {"items": "".join(items).rstrip("\n")}, "cmds") if items else "",
         "pack_file": links.pack_file(t["name"], version), "pack_url": links.pack_url(t["name"], root=root),
         "tools_url": links.tools_url(root=root), "tools_zip": links.tools_zip(root), "tag": links.release_tag(root),
@@ -328,6 +369,7 @@ def check(root: str = ROOT) -> list:
             if _blank(f.read()) != _blank(want):
                 problems.append(f"{rel}: 不是產生器現在的輸出（跑 python scripts/build_site.py；要改版面就改樣板，不要改這一頁）")
     problems += [f"{rel}: 工具已經不在了，這一頁是產生的（跑 python scripts/build_site.py 會刪掉）" for rel in orphans(root)]
+    problems += [p for t in tools(root) for p in hand_written_warning_problems(t, root)]
     return problems
 
 

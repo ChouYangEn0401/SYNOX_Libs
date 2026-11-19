@@ -121,7 +121,7 @@ footer a { color: var(--muted); display: inline-block; padding-block: 8px; }
 /* 給開發者對版本：線上版和本機版的「頁面版本」一樣＝同一份 */
 .stamp { font-family: var(--mono); font-size: 10px; color: var(--faint); opacity: .55; padding-bottom: 28px; word-break: break-all; }
 .stamp a { color: inherit; }
-</style>
+{{{warn_css}}}</style>
 </head>
 <body>
 <!--#
@@ -142,7 +142,7 @@ footer a { color: var(--muted); display: inline-block; padding-block: 8px; }
         <div><b class="t-title">{{title}}</b>
           <span class="t-line">{{line}}</span></div>
       </div>
-      {{{example}}}
+      {{{warnings}}}{{{example}}}
       <dl class="t-facts">
         <div><dt>誰能用</dt><dd>{{{who}}}</dd></div>
         <div><dt>上網</dt><dd>{{{net}}}</dd></div>
@@ -159,6 +159,28 @@ footer a { color: var(--muted); display: inline-block; padding-block: 8px; }
 <!-- BEGIN:example --><p class="t-try">打這句試試 <code class="t-ex">{{text}}</code></p><!-- END:example -->
 <!-- BEGIN:pill --><i class="pill{{tone}}"{{{title_attr}}}>{{text}}</i><!-- END:pill -->
 <!-- BEGIN:all_here -->（現在全部工具都是這一級）<!-- END:all_here -->
+<!--#
+  作者標的警告（pack.json 的 warnings，SYNOX ADR 0041）：只有帶警告的工具卡片才有 warn 片段，緊接在標題下面、紅色；
+  warn_css 也只在有工具帶警告時才印進 style（沒有警告時整頁跟以前逐位元組相同）。這種卡片的標題、標籤不准寫「官方」。
+  卡片上的警告只是預告：真正擋人的是安裝時 SYNOX 用簽過的 pack.json 重新檢查、要你逐條確認的那一份。
+-->
+<!-- BEGIN:warn --><div class="t-warn" role="note" aria-label="作者標的警告（{{count}} 條）"><b>⚠️ 作者標的警告</b>
+        <ul>
+{{{items}}}
+        </ul>
+        <p class="w-note">裝之前先看；安裝時 SYNOX 會再列一次，要你逐條確認才會啟用。</p></div>
+      <!-- END:warn -->
+<!-- BEGIN:warn_item -->          <li><span class="w-text">{{text}}</span>{{{advice}}}</li>
+<!-- END:warn_item -->
+<!-- BEGIN:warn_advice --><span class="w-advice">{{advice}}</span><!-- END:warn_advice -->
+<!-- BEGIN:warn_css -->/* 作者標的警告（只有工具帶 warnings 時才印這一段） */
+.t-warn { margin-top: 12px; border: 1.5px solid var(--bad); background: var(--bad-soft); color: var(--bad); border-radius: 10px; padding: 8px 12px; font-size: 14px; line-height: 1.55; }
+.t-warn b { display: block; font-weight: 700; }
+.t-warn ul { margin: 4px 0 0; padding-left: 1.2em; }
+.t-warn .w-text { font-weight: 600; }
+.t-warn .w-advice { display: block; color: var(--ink); font-size: 13.5px; }
+.t-warn .w-note { margin-top: 4px; color: var(--muted); font-size: 12.5px; }
+<!-- END:warn_css -->
 <div class="wrap">
 
 <div class="hero">
