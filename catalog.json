@@ -15,6 +15,11 @@
       "summary": "每日日記：隨手記一則，或挑一個題組（靈修、心情、反思、工作）寫一篇，做成一頁 HTML 或一張卡片",
       "packs": ["diary"]
     },
+    "habits": {
+      "title": "習慣與旅程",
+      "summary": "養成習慣、每天打卡，和有期限的里程碑旅程（錯過不算失敗，後面順延）",
+      "packs": ["habits"]
+    },
     "music": {
       "title": "音樂",
       "summary": "吉他和弦：查按法、貼譜直接移調、Capo 建議、分散和弦 TAB（不用上網）",
@@ -25,10 +30,25 @@
       "summary": "行事曆、待辦、子彈筆記",
       "packs": ["calendar", "todo", "bullet"]
     },
+    "usb-keys": {
+      "title": "USB 鑰匙",
+      "summary": "把隨身碟登記成鑰匙，選一把鎖訊息或檔案；要另外裝 usbtether 函式庫（見工具說明）",
+      "packs": ["usb-keys"]
+    },
     "connect": {
       "title": "接外面的服務",
       "summary": "Notion、Todoist、Google 日曆、Google 試算表（只加列）、Apple 提醒事項（CalDAV）。要連網、要你自己的帳號或 token",
       "packs": ["notion", "todoist", "google-calendar", "google-sheets", "apple-reminders"]
+    },
+    "video": {
+      "title": "影片筆記",
+      "summary": "把影片網址交給你電腦上裝好的 Video Notes 整理成筆記（要先另外裝 Video Notes）",
+      "packs": ["video-notes"]
+    },
+    "projects": {
+      "title": "專案",
+      "summary": "追蹤每個專案停在哪、為什麼停、回來先做什麼；可掃你指定的資料夾（只讀）",
+      "packs": ["projects"]
     }
   }
 }

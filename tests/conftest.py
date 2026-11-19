@@ -30,7 +30,10 @@ from isdtelekit.testing import OWNER_ID, BotHarness, FakeChannel  # noqa: E402
 
 from synox.packs import manifest as synox_manifest  # noqa: E402
 
-PACK_NAMES = tuple(os.path.basename(f) for f in _synox.pack_folders())     # 全部工具
+# 公開的工具（工具庫的公開規矩、index.json、公開頁都只看這些）。私人工具（pack.json "publish": false，
+# docs/CONTRIBUTING-TOOLS.md「私人工具」）不在這裡：它們只在自己電腦打包，由自己的 tests/test_<名字>.py 測。
+PACK_NAMES = tuple(os.path.basename(f) for f in _synox.pack_folders(private=False))
+ALL_PACK_NAMES = tuple(os.path.basename(f) for f in _synox.pack_folders())  # 連私人工具
 PLANNER = ("calendar", "todo", "bullet")                                     # make_bot（假 store）測得了的
 OTHER_ID = 555
 # 2026-11-09 是星期一；測試的「現在」固定在這一刻
@@ -74,6 +77,25 @@ class FakePack:
         self.store = store
         self.data_dir = data_dir
         self.web_routes = {}
+        self.app_reads, self.app_actions, self.app_exports = {}, {}, {}
+
+    def _declared(self, kind):
+        return list(((self.manifest.web or {}).get("app") or {}).get(kind) or [])
+
+    def app_read(self, name, fn):
+        if name not in self._declared("reads"):
+            raise ValueError(f"app read {name!r} is not declared")
+        self.app_reads[name] = fn
+
+    def app_action(self, name, fn, *, describe=None):
+        if name not in self._declared("actions"):
+            raise ValueError(f"app action {name!r} is not declared")
+        self.app_actions[name] = fn
+
+    def app_export(self, name, fn):
+        if name not in self._declared("exports"):
+            raise ValueError(f"app export {name!r} is not declared")
+        self.app_exports[name] = fn
 
     @property
     def name(self):
@@ -111,14 +133,26 @@ class FakePack:
 
 
 def load_module(name):
-    """照 SYNOX loader 的方式把 packs/<name>/pack.py 載成模組。"""
+    """照 SYNOX loader 的方式把 packs/<name>/pack.py 載成模組；python.package 的工具（有 engine/、bridge/）載成套件。"""
     path = os.path.join(PACKS, name, "pack.py")
     with open(path, "rb") as f:
         source = f.read()
-    spec = importlib.util.spec_from_file_location(f"synoxlibs_test_{name}", path)
+    package = bool((synox_manifest.read(os.path.join(PACKS, name), strict=True).python or {}).get("package"))
+    mod_name = f"synoxlibs_test_{name}"
+    if package:
+        spec = importlib.util.spec_from_file_location(mod_name, path, submodule_search_locations=[os.path.dirname(path)])
+        for stale in [n for n in sys.modules if n == mod_name or n.startswith(mod_name + ".")]:
+            del sys.modules[stale]                                  # 每個測試重新載入（模組層級的 now 不能互相影響）
+    else:
+        spec = importlib.util.spec_from_file_location(mod_name, path)
     module = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = module
-    exec(compile(source, path, "exec"), module.__dict__)
+    before = sys.dont_write_bytecode
+    sys.dont_write_bytecode = True
+    try:
+        exec(compile(source, path, "exec"), module.__dict__)
+    finally:
+        sys.dont_write_bytecode = before
     return module
 
 

@@ -23,10 +23,16 @@ from synox.sdk import author
 SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "記下了"),
          "calendar": ("/cal 明天 14:00 看牙醫", "加好了"), "diary": ("/diary 今天很好", "記進「一則一則記下來」"), "todo": ("/todo 買牛奶", "加好了"), "bullet": ("/bj • 買牛奶", "記到今天"),
          "guitar": ("/chord Am", "x 0 2 2 1 0"),
+         "projects": ("/proj 範例專案", "開始追蹤"),
+         "habits": ("/habit_today", "今天"),
          # 接外面服務的：還沒連接時回「要先設定」，不連網
          "notion": ("/notion 會議", "還沒設定 Notion"), "todoist": ("/todoist_list", "還沒接上 Todoist"),
          "google-calendar": ("/gcal_today", "還沒連上 Google 日曆"), "google-sheets": ("/gsheet_list", "還沒連上 Google 試算表"),
-         "apple-reminders": ("/applerem_status", "還沒設定帳號")}
+         "apple-reminders": ("/applerem_status", "還沒設定帳號"),
+         # 叫這台電腦上另外裝的 Video Notes：還沒有工作時回一句，不開任何程式
+         "video-notes": ("/v2n_status", "還沒有工作"),
+         # 還沒登記鑰匙時不讀隨身碟；沒裝 usbtether 時回「usbtether 函式庫還沒裝」——兩種都有「USB 鑰匙」
+         "usb-keys": ("/usb_keys", "USB 鑰匙")}
 
 
 @pytest.fixture(scope="module")
@@ -53,6 +59,7 @@ def _empty_host(tmp_path, packs_dir):
 def _say(app, api, text):
     from isdtelekit.core.channel import Inbound
     app.dispatcher.handle(api, Inbound("test", OWNER_ID, OWNER_ID, text, username="owner"), "typed")
+    assert app.tasks.wait(10)          # 丟到背景做的指令（usb-keys 讀隨身碟）要等它回
     return api.last(OWNER_ID)
 
 

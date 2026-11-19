@@ -1,0 +1,56 @@
+/* 習慣與旅程：在 SYNOX 共用樣式（kit.css）上加一點。顏色都是變數，深色模式自動換。 */
+:root { --ok: #2f8a4e; --miss: #c0392b; --neutral: #9aa3b2; --rest: #8f9bb3; --line: #d9dde5; }
+@media (prefers-color-scheme: dark) { :root { --ok: #4cbb72; --miss: #e5675a; --neutral: #6d7686; --line: #2b313c; } }
+body { margin: 0; }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.brand { font-weight: 700; font-size: 17px; }
+.tabs { display: flex; gap: 6px; }
+.tab { border: 0; background: transparent; padding: 8px 12px; border-radius: 10px; cursor: pointer; font: inherit; color: inherit; }
+.tab[aria-current="page"] { background: rgba(127, 127, 127, 0.18); font-weight: 600; }
+.page { max-width: 760px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+h1 { font-size: 20px; margin: 0; }
+h1 small { font-weight: 400; color: var(--neutral); }
+.muted { color: var(--neutral); font-size: 13px; }
+.card { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+.card.rest { opacity: 0.7; }
+.journey { cursor: pointer; }
+.acts { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.acts.more .btn { font-size: 12px; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn.ok { color: var(--ok); }
+.why { font-size: 13px; }
+.nudge { font-size: 13px; color: var(--ok); }
+.mins { width: 150px; }
+.badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+.meter { height: 10px; background: var(--line); border-radius: 6px; overflow: hidden; }
+.meter i { display: block; height: 100%; width: 0; background: #7aa8e0; }
+.meter i.met { background: var(--ok); }
+.pct { display: flex; align-items: center; gap: 8px; }
+.pct .meter { flex: 1; }
+.opt { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; }
+.grp > summary { cursor: pointer; padding: 6px 0; }
+.scroll { overflow-x: auto; }
+.matrix { border-collapse: separate; border-spacing: 2px; font-size: 11px; }
+.matrix th { font-weight: 400; color: var(--neutral); padding: 0 2px; white-space: nowrap; }
+.matrix .rowname { text-align: left; padding-right: 8px; font-size: 13px; color: inherit; position: sticky; left: 0; background: var(--bg, canvas); }
+.cell { width: 20px; height: 20px; border-radius: 4px; }
+td.done, .sw.done { background: var(--ok); }
+td.missed, .sw.missed { background: var(--miss); }
+td.neutral, .sw.neutral { background: var(--neutral); }
+td.pending, .sw.pending { border: 2px solid var(--neutral); box-sizing: border-box; }
+td.na, td.future, .sw.na { background: repeating-linear-gradient(45deg, transparent 0 3px, var(--line) 3px 5px); }
+.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: middle; margin-right: 4px; }
+.cells { display: flex; flex-direction: column; gap: 4px; }
+div.cell { width: auto; height: auto; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 8px; }
+div.cell.current { border-color: var(--ok); }
+div.cell.done .ttl { text-decoration: line-through; color: var(--neutral); }
+div.cell.rest { background: rgba(127, 127, 127, 0.1); color: var(--rest); justify-content: space-between; }
+.chk, .ttl { border: 0; background: transparent; cursor: pointer; font: inherit; color: inherit; text-align: left; }
+.ttl { flex: 1; }
+.open { display: flex; flex-direction: column; gap: 6px; padding-left: 12px; }
+.note { margin: 0; font-size: 13px; }
+@media (max-width: 480px) { .btn.small { min-height: 40px; } .cell { width: 16px; height: 16px; } }

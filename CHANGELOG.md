@@ -4,7 +4,21 @@
 
 ## [Unreleased]
 
+### Added
+- **`guitar` 0.2.0-alpha.1 → 0.3.0-alpha.1（和弦圖；仍是 alpha、尚未實機驗證；要 SYNOX SDK 0.2.5 以上，`requires.sdk` `>=0.2.5,<0.3`、`requires.synox` `>=0.2.1`）**：
+  **先給圖**：`/chord` 預設回和弦圖（圖片，經 `kit.send_image`）＋名稱＋一行按法；每根手指、組成音、提醒改成按「📖 說明」、最後加 `說明`、或 `/chord_info`。
+  一個和弦可以用 `‹ 上一個`／`下一個 ›` 在同一則訊息裡翻其他按法（`kit.edit_image`；Telegram 改送新的一張）；好幾個（`D/F# Bb F Gm Cm`）排成同一張圖、每個有「換按法」。
+  經 AI 呼叫的一律不出按鈕（預設按法的圖＋文字）。圖是自己畫的 SVG＋PNG（不靠外部套件，同一個和弦每次一模一樣；SVG 過得了 SYNOX 的白名單）。
+  新指令：`/chord_info`、`/chord_alt`、`/chord_easy`（最好按的按法）、`/chord_tones`（組成音與音程、每條弦的音）、`/chord_all`（一個根音的常用和弦）、
+  `/chord_basic`（入門 8 個）、`/chord_change`（換和弦每根手指怎麼動）、`/chord_strum`（節奏刷法）、`/chord_prog`（調的常見進行＋圖）。
+  分散和弦 TAB 放等寬區塊（純文字時包 ```），說明一行一個記號，弦標 `e(1)`…`E(6)`。
+
 ### Fixed
+- **`guitar` 0.3.0-alpha.1**：`/chord_arp F major 7` 以前回 F 大三和弦——拼出來的名稱（`F major 7`、`Fmajor7`、`FM7`、`Fmaj 7`、`Δ7`、minor／min、dominant、
+  diminished、augmented、suspended、全形字、`♯`／`♭`／`＃`）都認得了；看不懂的會說哪個字看不懂、列出相近的名字，不再默默改成別的和弦。
+  資料對照「吉他和弦全書」：補簡易 Bm `x x 0 4 3 2`、一指 G `x x 0 0 0 3`（都標「低音 D」）；簡易 B／Bb／Cm 的提醒寫明最低音不是根音；
+  A 型 add9／madd9（要跨 5 格）拿掉；A 型 dim7 改成常見的 `x 3 4 2 4 x`（2-3-1-4）、m7b5 1-3-2-4；自動排的手指照格數給（差 3 格用小指），
+  滑到第 0 格的手型不再把橫按的手指放在空弦上，還是要撐開 4 格的會標「要撐開」。
 - **`money` 0.3.0 → 0.3.1**（SYNOX 獨立安全審查第 1 輪）：金額欄位改用 SYNOX 的 `kit.amount`（大於 0、最多兩位小數、不超過十億；預算與上限另外收 0＝拿掉）；`nan`、`inf` 這類不是一般數字的值一律擋下（以前會讓記一筆出錯、讓預算存成 NaN 之後每筆都壞）。
 - **`calendar` 0.1.2**（ADR-0006 T5、P1）：`/cal_ics` 的檔名改成每次不同（`export-<時間>-<亂數>.ics`），同一個人同時匯出兩次
   不會互相蓋、互相刪；匯出前先清掉這個人資料夾裡留下的舊匯出檔（舊版的 `export.ics`、10 分鐘以前的）。
@@ -14,6 +28,38 @@
 - **網頁面板改成 SYNOX 現在的網址寫法：`todo`、`calendar`、`bullet` 0.1.2 → 0.1.3-alpha.1，`money` 0.5.0-alpha.1 → 0.5.0-alpha.2，`guitar` 0.2.0-alpha.1 → 0.2.0-alpha.2**（**alpha，尚未實機驗證**）：SYNOX 從 ADR 0028 §5 起把工具的 `panel.html` 隔開（`<iframe sandbox="allow-scripts">`，面板沒有 cookie），舊的 `fetch("/api/packs/<name>/<route>", {credentials: …})` 從面板打會 401，5 個面板都讀不到資料。改成相對網址 `fetch("api/<route>")`（每個面板只改這一行）。`tests/test_gates.py` 的 M5（`panel_problems`）反過來：只收相對網址，抓 `/api/packs/`、`credentials`、`fetch` 的第二個參數、`document.cookie`、`window.open` 這類隔開之後本來就做不到的；`tests/test_synox_integration.py` 用真的 SYNOX 走一次「拿票 → 開面板 → 相對網址讀得到 JSON、舊網址讀不到」。HANDOFF.md 多一節 3.6（面板的寫法與範例），拿掉「新工具先不要做面板」。
 
 ### Added
+- **私人工具（`"publish": false`）**：pack.json 寫 `"publish": false` 的工具只在自己電腦打包（`scripts/build.py <名字>` → `dist/private/`），
+  不進 `index.json`、`tools.zip`、`SHA256SUMS`、下載連結、公開頁，`catalog.json` 也不能列它；工具庫的公開規矩（`tests/test_gates.py` 等）
+  只管公開的工具，私人工具由自己的測試管。寫錯型別（`"no"`、`0`）一律當私人並報錯。說明在 docs/CONTRIBUTING-TOOLS.md「私人工具」，
+  測試 `tests/test_private_packs.py`。
+- **`video-notes` 0.1.0-alpha.1（新工具，🔧 test，尚未實機驗證）**：`/v2n <網址>` 把影片交給使用者電腦上另外裝好的 Video Notes
+  （它的命令列 `--json`）做筆記；`/v2n_status`、`/v2n_get`、`/v2n_list`、`/v2n_combine`（AI 叫的一律先送確認卡）、`/v2n_cancel`、
+  `/v2n_check`、`/v2n_setup`（只有本人）；附工具畫面。不附 Whisper／yt-dlp／AI 套件；只給擁有者；宣告 `subprocess`、`filesystem:any`。
+  工作結果只存保管箱，執行中的輸出讀完就刪。建議群組「影片筆記」。只對假的 Video Notes 測過（`tests/test_video_notes.py`）。
+- **`usb-keys` 0.1.0-alpha.1（新工具，`stage` alpha；**尚未實機驗證**，只用假隨身碟測過）**：把很多支隨身碟登記成鑰匙、選一把鎖訊息或檔案。
+  加密與驗證隨身碟全部交給 usbtether 0.3.0（`requires.pip` 釘版本＋sha256；
+  SYNOX 不替 kind=python 的工具裝套件，README 寫怎麼自己裝；沒裝時每個指令都說怎麼裝，不會壞）。AI 只能 `/usb_keys`、`/usb_drives`、
+  `/usb_lock`、`/usb_unlock_check`；解開、登記、重新登記、撤銷、密碼上鎖、資料夾設定都是 `ai=False`＋`callers: human`。
+  密碼只收工具畫面（`web.app`）來的，聊天裡打的一律拒、那幾個指令不進 log；撤銷／重新登記要再打一次名字或「覆蓋」，而且一定要先用手機驗證器解鎖（`stepup`），畫面另有危險確認。
+  解開的訊息只在工具畫面上顯示；聊天裡的 `/usb_unlock` 只解開檔案、只回「資料夾編號/檔名」。
+  檔案只限擁有者設定的資料夾、不刪原檔、不覆蓋已有的檔。聊天裡打的指令丟 `app.tasks`（讀隨身碟要 2 秒左右）。
+  `tests/test_usb_keys.py`（usbtether 的 `InMemoryProbe`＋暫存資料夾；沒裝 usbtether 時那幾條跳過）；`catalog.json` 多一個建議群組「USB 鑰匙」。
+- **`projects` 0.1.0-alpha.1（新工具，`stage` alpha；**尚未實機驗證**，試過之後才發 0.1.0）**：專案追蹤——每個專案「停在哪、為什麼停、回來先做什麼」。
+  從一個本機使用的個人管家的專案管理搬來並通用化（不帶任何個人資料）。指令 `/proj`、`/proj_list`、`/proj_show`、`/proj_update`、`/proj_pause`、`/proj_resume`、
+  `/proj_scan`、`/proj_rm`（危險，先進回收區、`/proj_restore` 可復原）、`/proj_reorder`、`/proj_reason_add`、`/proj_reason_retire`；另附完整網頁畫面（清單、依狀態與原因篩選、
+  🧊 冷掉的（程式掃資料夾量的）、🔖 說好回來看的、一鍵暫停／回來、自訂暫停原因、編輯）。資料存保管箱（每人一份）。
+  會**只讀**使用者自己填的資料夾（修改時間、`.git/logs/HEAD` 最後一行的時間；不呼叫 git），所以宣告 `filesystem:any`、`access: owner`。
+  沒搬：用檔案總管／VS Code／終端機開專案（要開別的程式）、`${VAR}` 路徑變數、資料夾挑選視窗、批次修搬家路徑、方向（人生目標）欄位與週檢的串接。
+  完全獨立；跨工具的連結 SYNOX 目前沒有選用機制，只留一個出口 `due_back`（`provides: projects.due_back`）。`tests/test_projects.py`；`tests/test_gates.py` 多認 `OWNER_LOCAL`。
+- **`habits` 0.1.0-alpha.1（新，alpha，尚未實機驗證）**：里程碑與習慣，移植自較早的一套個人工具。習慣（每天、每週、每月、每 N 天、一期幾次、一期幾分鐘；打卡、跳過、加碼、暫停、這期夠了、釘選、承諾期三道確認）與有期限的旅程（錯過插一格休息、後面順延；心情與筆記）；附完整網頁畫面，資料存保管箱。跟其他工具的連動只留空的掛鉤（`engine/links.py`），沒裝別的工具也完整可用。
+- **`calendar` 0.1.2 → 0.2.0-alpha.1**（**alpha，尚未實機驗證**）：行事曆擴充，從一個本機使用多年的行事曆程式通用化而來（只留通用的部分：沒有提醒排程、伴侶班表、放假日曆、習慣／旅程／專案）。
+  行程有開始與結束、可以跨日、每週重複（只動某一次＝拆出一筆）、撞時間會報告（可說「兩個都留」）、狀態（完成了／這次沒做／取消了）；唯讀的月曆總覽；
+  簡化的今日清單（卡片、重要程度、沒做完的過了午夜順延到今天）與「今天最重要的一件事」；新指令 `/cal_edit`、`/cal_status`、`/cal_keep`、`/cal_clash`、`/cal_month`、
+  `/cal_task`、`/cal_tasks`、`/cal_done`、`/cal_task_edit`、`/cal_task_rm`、`/cal_focus`；`.ics` 匯出多了重複規則。
+  **附完整網頁畫面**（`web.app`：月曆、這一天、接下來；`python.package`，要有支援多檔工具與工具服務的 SYNOX）。**0.1.2 的資料自動升級**（編號不變，下一次寫入才存成新格式）。
+  月曆上顯示別的工具的項目只留一個空的掛勾（`pack.link_sources`），沒有來源也不會出錯。
+- **`calendar` 面板修正（同版）**：舊面板顯示「讀不到（Failed to fetch）」——它用 `fetch("/api/packs/calendar/today", {credentials: …})`，
+  但 SYNOX 的面板在沒有 `allow-same-origin` 的隔開 iframe 裡跑（沒有 cookie、碰不到 `/api/`），只准相對網址；改成 `fetch("api/today")`，面板也多了今天的清單。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；

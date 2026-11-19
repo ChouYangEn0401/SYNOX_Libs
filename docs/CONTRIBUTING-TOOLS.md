@@ -111,6 +111,23 @@ tests/test_<名字>.py          測試（第 4 節）
 卡片連到哪：`docs/artifacts.json` 有這個工具的線上說明頁 → 連過去；沒有 → 連到 GitHub 上的 `packs/<名字>/README.md`，
 並多一個「說明頁還沒寫」（只有產生的簡單頁）或「說明頁還沒上線」（有手寫頁、還沒登記網址）的標籤。
 
+### 2c. 私人工具：`"publish": false`
+
+還不想公開（或只給自己用）的工具，在 pack.json 寫 `"publish": false`（沒寫＝`true`＝公開；只收布林，寫錯型別一律當私人並報錯）。
+
+| 地方 | 私人工具 |
+|---|---|
+| `scripts/build.py`（全部打包）、`dist/index.json`、`tools.zip`、`SHA256SUMS` | 跳過，不打包 |
+| `scripts/build.py <名字>`（指名打包） | 照樣打包（同樣過 SYNOX 第 1、2 關），預設寫到 `dist/private/`——發佈步驟只上傳 `dist/` 最上層的檔，不會帶到它 |
+| 入口頁、工具頁（`scripts/build_site.py`）、下載連結（`scripts/links.py`） | 沒有 |
+| `catalog.json` 的建議群組 | 不能列（`build.py` 擋） |
+| 工具庫的公開規矩（`tests/test_gates.py`、`tests/test_apps_common.py` 的 `PACK_NAMES`） | 不套用；在自己的 `tests/test_<名字>.py` 測（`conftest.ALL_PACK_NAMES` 含私人工具） |
+
+自己裝：`scripts/build.py <名字>` 打出 `dist/private/<名字>-<版本>.synoxpack`，用 SYNOX 的任何一種安裝方法裝（點兩下、拖進網頁、
+`python -m synox install <檔>`；SYNOX 的 docs/install-packs.md）。SYNOX 安裝時不看 `publish`（不認得的上層欄位不影響安裝）。
+**`publish: false` 只管這個工具庫的打包與公開頁，不會讓檔案變成機密**：私人工具的程式要是不能進公開的 repo，
+就放在不推送的分支（例如 `local/…`），不要合併到 `main`。保證在 `tests/test_private_packs.py`。
+
 ## 3. 說明頁
 
 - **不寫也可以**：`scripts/build_site.py` 會用 `scripts/site_tool_template.html` 產生 `docs/site/<名字>.html`

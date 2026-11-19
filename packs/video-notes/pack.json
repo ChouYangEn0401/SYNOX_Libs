@@ -1,0 +1,43 @@
+{
+  "name": "video-notes",
+  "title": "🎬 影片筆記",
+  "summary": "把影片網址交給你電腦上已經裝好的 Video Notes 整理成筆記：看進度、拿 Markdown、列筆記庫、合併好幾支（要先另外裝 Video Notes）",
+  "version": "0.1.0-alpha.1",
+  "stage": "test",
+  "kind": "python",
+  "group": "v2n",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "storage": "vault",
+  "order": 90,
+  "capabilities": ["subprocess", "filesystem:any"],
+  "python": { "module": "pack" },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3" },
+  "skill": "SKILL.md",
+  "callers": { "setup": ["human"] },
+  "health": { "check": "check" },
+  "web": {
+    "app": {
+      "entry": "app/index.html",
+      "root": "app",
+      "title": "影片筆記",
+      "kit": 1,
+      "reads": ["jobs", "job", "library", "note"],
+      "actions": { "add": "WRITE", "cancel": "WRITE", "combine": "DANGER" }
+    }
+  },
+  "help": {
+    "featured": ["add", "status", "get", "list"],
+    "commands": {
+      "add": { "plain": "把一支或好幾支影片整理成筆記，做完通知你", "alias_suggest": ["影片筆記"] },
+      "status": { "plain": "看工作做到哪裡了", "examples": [{ "text": "2", "note": "第 2 個工作的細節" }] },
+      "get": { "plain": "拿一份做好的筆記", "examples": [{ "text": "2", "note": "第 2 個工作的筆記" }, { "text": "item=3", "note": "筆記庫第 3 項" }] },
+      "list": { "plain": "列出已經整理過的影片與合併", "examples": [{ "text": "台積電", "note": "只列標題有這個字的" }] },
+      "combine": { "plain": "把筆記庫裡好幾支合併成一份", "examples": [{ "text": "1,2,3 title=今天的新聞", "note": "合併前三項" }] },
+      "cancel": { "plain": "停掉一個還在做的工作", "examples": ["2"] },
+      "setup": { "plain": "告訴我 Video Notes 裝在哪裡" },
+      "check": { "plain": "檢查 Video Notes 能不能用" }
+    }
+  }
+}

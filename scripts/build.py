@@ -21,6 +21,9 @@
 與 scripts/links.py（README 與 docs/site/*.html 的下載連結改成現在的版本；版本只看 pack.json）；--check 也檢查這兩樣。
 index.json 每個工具多帶一行 `line`（卡片上的一句話，跟入口頁同一份；SYNOX 的「工具庫（官方）」卡片會用）。
 SYNOX 在哪：scripts/_synox.py（SYNOX_HOME → 跑這支的 Python 裝的那份 → 後備並排的 ../SYNOX）。
+私人工具（pack.json "publish": false；docs/CONTRIBUTING-TOOLS.md「私人工具」）：全部打包時跳過（不進 index.json、tools.zip、
+SHA256SUMS、公開頁），catalog.json 也不能列它；只能指名打包（build.py <名字>），預設寫到 dist/private/
+（發佈步驟只上傳 dist/ 最上層的檔，不會帶到它）。
 """
 
 from __future__ import annotations
@@ -41,6 +44,7 @@ import links  # noqa: E402
 
 ROOT = _synox.LIBS_ROOT
 SDK_FILE = "synox_sdk.py"
+PRIVATE_DIST = "private"          # 私人工具指名打包的預設位置：dist/private/
 SDK_VERSION_RE = re.compile(r'^SDK_VERSION\s*=\s*"([0-9][0-9A-Za-z.\-]*)"', re.M)
 
 
@@ -92,7 +96,31 @@ def problems_of(folder: str) -> list:
         out.append(f"{name}: 資料夾名跟 pack.json 的 name（{m.name}）不一樣")
     out += stage_problems(name, m.raw)
     out += scope_problems(name, m.raw)
+    out += publish_problems(name, m.raw)
     return out
+
+
+def publish_problems(name: str, raw: dict) -> list:
+    """"publish" 只能是 true／false（沒寫＝true＝公開）。寫錯型別的已經被當成私人（_synox.is_published），這裡把它報出來。"""
+    if _synox.PUBLISH_KEY in raw and not isinstance(raw[_synox.PUBLISH_KEY], bool):
+        return [f"{name}: pack.json 的 publish 只能是 true 或 false（現在是 {raw[_synox.PUBLISH_KEY]!r}；"
+                f"false＝私人工具，只在自己電腦打包）"]
+    return []
+
+
+def private_names(root: str = ROOT) -> set:
+    """packs/ 裡的私人工具（"publish": false）。"""
+    packs = os.path.join(root, "packs")
+    every = {os.path.basename(f) for f in _synox.pack_folders(packs)}
+    public = {os.path.basename(f) for f in _synox.pack_folders(packs, private=False)}
+    return every - public
+
+
+def default_out(names=None, root: str = ROOT) -> str:
+    """沒給 --out 時寫到哪：指名打包、裡面有私人工具 → dist/private/（不會被發佈步驟的 dist/*.synoxpack 帶走）；其他 → dist/。"""
+    if names and set(names) & private_names(root):
+        return os.path.join(root, "dist", PRIVATE_DIST)
+    return os.path.join(root, "dist")
 
 
 def stage_problems(name: str, raw: dict) -> list:
@@ -149,7 +177,7 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
     from synox.packs.manifest import read
     from synox.sdk import author, zip_pack
 
-    folders = _synox.pack_folders(os.path.join(root, "packs"))
+    folders = _synox.pack_folders(os.path.join(root, "packs"), private=bool(names))   # 全部打包＝只有公開的
     if names:
         known = {os.path.basename(f): f for f in folders}
         unknown = [n for n in names if n not in known]
@@ -161,8 +189,15 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
     all_names = {os.path.basename(f) for f in _synox.pack_folders(os.path.join(root, "packs"))}
     problems = [f"catalog.json 的 {key} 列了不存在的工具 {n}" for key, b in bundles.items()
                 for n in b.get("packs", []) if n not in all_names]
+    hidden = private_names(root)
+    problems += [f"catalog.json 的 {key} 列了私人工具 {n}（publish: false 的工具不能放進建議群組）"
+                 for key, b in bundles.items() for n in b.get("packs", []) if n in hidden]
     for folder in folders:
         problems += problems_of(folder)
+    if not names:                                    # 私人工具不打包、不擋發佈；只報 publish 寫錯型別（被當成私人了）
+        for n in sorted(hidden):
+            with open(os.path.join(root, "packs", n, "pack.json"), encoding="utf-8") as f:
+                problems += publish_problems(n, json.load(f))
     if not names and costumes and root == ROOT:
         import build_costumes
         problems += [p for f in build_costumes.costume_folders() for p in build_costumes.pack_problems(f)]
@@ -173,7 +208,7 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
         problems.append(f"公開頁資料：{e}")
     if problems or check_only:
         return {"index": None, "problems": problems}
-    out_dir = out_dir or os.path.join(root, "dist")
+    out_dir = out_dir or default_out(names, root)
     full = not names and costumes and root == ROOT
     if full:
         clean_dist(out_dir)
@@ -196,6 +231,8 @@ def build(names=None, out_dir: str = None, check_only: bool = False, root: str =
             info = build_costumes.COLLECTION
             collections[info["id"]] = {"title": info["title"], "category": info["category"], "summary": info["summary"],
                                        "packs": [e["name"] for e in wardrobe["entries"]]}
+    if not names:                                    # 多一道保險：全部打包的目錄裡不可能有私人工具
+        problems += [f"{e['name']}: 私人工具不能進 index.json" for e in entries if e["name"] in hidden]
     if problems:
         return {"index": None, "problems": problems}
     index = {"library": "SYNOX_Libs", "library_version": library_version(root),
@@ -255,12 +292,17 @@ def release_extras(index: dict, out_dir: str, root: str = ROOT) -> list:
 
 
 def main(argv=None) -> int:
+    try:                                   # 訊息有 ✅／❌：cp950 之類的主控台也印得出來（不然 --check 印最後一行時當掉）
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
     parser = argparse.ArgumentParser(description="工具 → .synoxpack ＋ index.json")
     parser.add_argument("names", nargs="*", help="只打這幾個（預設全部）")
-    parser.add_argument("--out", default=os.path.join(ROOT, "dist"))
+    parser.add_argument("--out", default=None, help="寫到哪（預設 dist/；指名打包私人工具時 dist/private/）")
     parser.add_argument("--check", action="store_true", help="只檢查，不寫檔")
     parser.add_argument("--no-costumes", action="store_true", help="不打包衣櫃的外觀（costumes/）")
     args = parser.parse_args(argv)
+    args.out = args.out or default_out(args.names or None)
     result = build(args.names or None, args.out, args.check, costumes=not args.no_costumes)
     if result["problems"]:
         print("❌ 沒有打包：")

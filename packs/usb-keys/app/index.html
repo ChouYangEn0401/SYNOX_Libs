@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>USB 鑰匙</title>
+<link rel="stylesheet" href="/_synox/kit.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main class="page" id="app">
+  <h1>🔑 USB 鑰匙</h1>
+  <p class="muted">把隨身碟登記成鑰匙，選一把來鎖訊息或檔案。解開時，那支隨身碟一定要插著。</p>
+  <p class="card warn" id="notReady" hidden></p>
+
+  <section class="card" aria-labelledby="hKeys">
+    <div class="row head">
+      <h2 id="hKeys">鑰匙</h2>
+      <button type="button" class="btn ghost" id="reloadKeys">重新看一次</button>
+    </div>
+    <p class="muted small">讀隨身碟要幾秒鐘。🟢＝現在插著。</p>
+    <div id="keys"><p class="muted">載入中…</p></div>
+  </section>
+
+  <section class="card" aria-labelledby="hReg">
+    <div class="row head">
+      <h2 id="hReg">登記新的鑰匙</h2>
+      <button type="button" class="btn ghost" id="loadDrives">列出插著的隨身碟</button>
+    </div>
+    <ul class="notes small">
+      <li><b>記住在這台</b>：在這台電腦打開不用密碼；換電腦就打不開。</li>
+      <li><b>要密碼</b>：每次用都要輸入密碼；密碼忘了，用它鎖的東西就打不開。</li>
+      <li><b>不保護</b>：撿到這支隨身碟的人也能解開。不建議。</li>
+      <li>登記會在隨身碟上寫一個小資料夾 <code>.usbtether</code>：不要刪它，刪了這把鑰匙就不能用。</li>
+    </ul>
+    <div id="drives"></div>
+    <div id="regForm" hidden></div>
+  </section>
+
+  <section class="card" aria-labelledby="hMsg">
+    <h2 id="hMsg">鎖／解開一段訊息</h2>
+    <label class="field">鑰匙
+      <select id="msgKey"></select>
+    </label>
+    <label class="field">訊息（要鎖的字，或 <code>utmsg1:</code> 開頭的鎖好的訊息）
+      <textarea id="msgText" rows="4" maxlength="2000"></textarea>
+    </label>
+    <label class="field">密碼（只有「要密碼」的鑰匙才填）
+      <input type="password" id="msgPw" autocomplete="off">
+    </label>
+    <div class="row">
+      <button type="button" class="btn primary" id="msgLock">鎖上</button>
+      <button type="button" class="btn" id="msgCheck">看要哪把鑰匙</button>
+      <button type="button" class="btn" id="msgUnlock">解開</button>
+    </div>
+    <div id="msgOut" class="out" hidden>
+      <p class="small muted" id="msgOutHint"></p>
+      <pre id="msgOutText"></pre>
+      <div class="row">
+        <button type="button" class="btn ghost" id="msgOutClear">清掉這個畫面上的結果</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="hFiles">
+    <h2 id="hFiles">鎖／解開檔案</h2>
+    <p class="muted small">只能用下面這些資料夾裡的檔。鎖好的檔叫 <code>原檔名.utenc</code>，放在原檔旁邊；原檔不會被刪，確認解得開之後再自己決定要不要刪。</p>
+    <div id="folders"></div>
+    <div class="row">
+      <input type="text" id="folderPath" placeholder="完整的資料夾路徑" aria-label="完整的資料夾路徑">
+      <button type="button" class="btn" id="folderAdd">加這個資料夾</button>
+    </div>
+    <div id="browser" class="browser"></div>
+    <p class="small">選到的檔：<b id="picked">（還沒選）</b></p>
+    <label class="field">鑰匙（上鎖時要選；解開時可以不選）
+      <select id="fileKey"></select>
+    </label>
+    <label class="field">密碼（只有「要密碼」的鑰匙才填）
+      <input type="password" id="filePw" autocomplete="off">
+    </label>
+    <div class="row">
+      <button type="button" class="btn primary" id="fileLock">鎖上這個檔</button>
+      <button type="button" class="btn" id="fileCheck">看要哪把鑰匙</button>
+      <button type="button" class="btn" id="fileUnlock">解開這個檔</button>
+    </div>
+  </section>
+</main>
+<script src="/_synox/kit.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
