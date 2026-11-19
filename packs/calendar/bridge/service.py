@@ -55,14 +55,14 @@ class Cal:
 
     def read(self) -> dict:
         """讀（舊版資料先升級成 v2；只在記憶體裡，下一次寫入才存）。"""
-        return migrate(self.pack.store.of(self.user).load(None))
+        return migrate(self.pack.store.of(self.user).load(None), self.today())
 
     def write(self, fn):
         """fn(data) 改 data 並回結果；順便把沒做完的卡片順延到今天。"""
         today = self.today()
 
         def run(data):
-            migrate(data)
+            migrate(data, today)
             tasks.carry_over(data, today)
             return fn(data)
         return self.pack.store.of(self.user).update(run, empty())
@@ -197,10 +197,9 @@ def read_month(cal: Cal, params: dict) -> dict:
     today = cal.today()
     year, mon = today.year, today.month
     if params.get("month"):
-        try:
-            year, mon = (int(x) for x in params["month"].split("-"))
-        except ValueError:
-            raise CalError("月份要是 YYYY-MM") from None
+        if check_month(str(params["month"])):
+            raise CalError("月份要是 YYYY-MM（例如 2026-11）")
+        year, mon = (int(x) for x in str(params["month"]).strip().split("-"))
     first = date(year, mon, 1)
     start, end = monthview.grid_range(first, date(year + (mon == 12), mon % 12 + 1, 1) - timedelta(days=1))
     extra = links.collect(getattr(cal.pack, "link_sources", None), cal.user, start, end)
@@ -228,13 +227,26 @@ def read_today(cal: Cal, params: dict = None) -> dict:
 
 
 def read_clashes(cal: Cal, params: dict) -> dict:
-    days = int(params.get("days") or 60)
+    days = _parse_days(params.get("days"), 60)
     return {"clashes": events.clashes(cal.read(), cal.today(), days, include_ok=bool(params.get("all")))}
 
 
 def read_agenda(cal: Cal, params: dict) -> dict:
     today = cal.today()
-    return events.agenda(cal.read(), _parse_day(params.get("from"), today), int(params.get("days") or 21))
+    return events.agenda(cal.read(), _parse_day(params.get("from"), today), _parse_days(params.get("days"), 21))
+
+
+def _parse_days(value, default: int) -> int:
+    """畫面送來的「幾天」：沒給用預設；不是 1～366 的整數就說不行（不讓 int() 的錯變成伺服器錯誤）。"""
+    if value in (None, ""):
+        return default
+    try:
+        n = int(str(value).strip())
+    except ValueError:
+        raise CalError(f"天數要是整數：{value!r}") from None
+    if not 1 <= n <= 366:
+        raise CalError("天數要在 1～366 之間")
+    return n
 
 
 def _parse_day(value, today: date) -> date:
@@ -249,7 +261,9 @@ def _parse_day(value, today: date) -> date:
 def read_upcoming(cal: Cal, n: int = 10, horizon: int = 366) -> list:
     """今天起（還沒結束的）最近 n 個行程的卡片，依開始時間排；重複行程每一次各算一個。取消的不列。"""
     today = cal.today()
-    rows = events.between(cal.read(), today, today + timedelta(days=horizon))
+    now = cal.now()
+    rows = [e for e in events.between(cal.read(), today, today + timedelta(days=horizon))
+            if events._span(e)[1] > now]                           # 今天早上已經結束的不算「接下來」
     rows.sort(key=events.sort_key)
     return [events.card(e) for e in rows[:max(1, min(int(n), 100))]]
 
