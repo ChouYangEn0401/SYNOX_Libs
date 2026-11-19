@@ -356,7 +356,8 @@ NEXT_STEPS = """下一步（docs/RELEASING.md「上傳到發佈頁」；index.js
   2. 備份發佈頁上現在的 index.json（本機 release-backup/ 一份、發佈頁上 index-backup-<時間>.json 一份）
   3. 上傳 *.synoxpack、tools-<VERSION>.zip、tools.zip、SHA256SUMS（--clobber）
   4. 最後才上傳 index.json（--clobber）
-  5. 每個連結 HEAD 都 200；之後重新發佈改到的線上頁"""
+  5. 新 tag：這時才把草稿發佈頁發出去（pre-release），確認 tag 指到產生這批檔的發佈 commit
+  6. 每個連結 HEAD 都 200；之後重新發佈改到的線上頁"""
 
 
 def main(argv=None) -> int:
