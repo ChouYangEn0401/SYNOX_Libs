@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>專案</title>
+<link rel="stylesheet" href="/_synox/kit.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="top-row">
+    <span class="brand">📁 專案 <span class="muted small" id="count"></span></span>
+    <div class="top-actions">
+      <button type="button" class="btn primary" id="addBtn" title="追蹤一個新專案">＋ 專案</button>
+      <button type="button" class="btn" id="scanBtn" title="重新掃描資料夾，算出真正多久沒動（看 git 最後一次紀錄與檔案最後修改時間；只讀）">⟳ 更新</button>
+    </div>
+  </div>
+  <div class="top-row"><input type="search" id="filter" class="filter" placeholder="搜尋專案…" aria-label="搜尋專案"></div>
+  <div class="chips" id="chips" aria-label="篩選"></div>
+</header>
+<main id="list" class="page" aria-live="polite"><p class="muted">載入中…</p></main>
+<div class="toast" id="toast" hidden></div>
+<div class="modal-wrap" id="modal" hidden></div>
+<noscript><p class="page">這個畫面需要開啟 JavaScript。</p></noscript>
+<script src="/_synox/kit.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
