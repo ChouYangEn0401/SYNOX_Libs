@@ -21,7 +21,7 @@ def test_add_natural_language_and_views(make_bot, owner):
     bot.say(owner, "/cal 11/20 整天 員工旅遊")
     e = events(bot)
     assert [x["title"] for x in e] == ["看牙醫", "開會", "員工旅遊"]
-    assert e[0]["location"] == "仁愛診所" and e[2]["all_day"] and e[1]["end"] == "16:30"
+    assert e[0]["location"] == "仁愛診所" and e[2]["all_day"] and e[1]["end"] == "2026-11-09T16:30"
 
     bot.say(owner, "/cal_today")
     assert "開會" in bot.last(owner) and "看牙醫" not in bot.last(owner)
@@ -37,7 +37,7 @@ def test_structured_fields_for_ai(make_bot, owner):
     bot = make_bot("calendar")
     bot.say(owner, "/cal 家長會 date=2026-11-21 time=19:00-20:30 note=帶聯絡簿")
     e = events(bot)[0]
-    assert (e["day"], e["start"], e["end"], e["title"], e["note"]) == ("2026-11-21", "19:00", "20:30", "家長會", "帶聯絡簿")
+    assert (e["start"], e["end"], e["title"], e["note"]) == ("2026-11-21T19:00", "2026-11-21T20:30", "家長會", "帶聯絡簿")
     bot.say(owner, "/cal x date=2026-02-30")
     assert "❌" in bot.last(owner) and len(events(bot)) == 1
 
@@ -57,7 +57,7 @@ def test_errors_and_rm(make_bot, owner):
     bot.say(owner, "/cal_rm 1")
     assert "刪掉了" in bot.last(owner) and [x["id"] for x in events(bot)] == [2]   # 編號固定，不會往前遞補
     bot.say(owner, "/cal_rm 1")
-    assert "沒有 [1]" in bot.last(owner)
+    assert "找不到這筆行程：1" in bot.last(owner)
 
 
 def test_effects(make_bot):
@@ -98,7 +98,7 @@ def test_ics_export_is_valid_and_leaves_no_plaintext(make_bot, owner, tmp_path):
 
 def test_ics_folding_keeps_characters_whole(make_bot):
     bot = make_bot("calendar")
-    m = bot.modules["calendar"]
+    m = bot.modules["calendar"].ics_mod
     folded = m.ics_fold("SUMMARY:" + "很長的標題" * 20)
     parts = folded.split("\r\n ")
     assert len(parts) > 1 and all(len(p.encode("utf-8")) <= 75 for p in parts)
