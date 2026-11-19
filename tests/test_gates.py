@@ -47,7 +47,9 @@ DECLARED_BEYOND_SCAN = {
 }
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0006 P1）
-LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",)}
+LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",),
+                       # guitar：和弦圖的 PNG（zlib 壓縮、struct 打包；只在記憶體，不寫檔）、全形字正規化、「是不是要找…」
+                       "guitar": ("zlib", "struct", "unicodedata", "difflib")}
 # usb-keys 多准的 import：base64（解 utmsg1: 訊息的開頭，只讀出鑰匙 id，不解密）、usbtether（requires.pip 宣告的函式庫；
 # 加密與驗證隨身碟全部在它裡面，工具不自己寫加密）。os 只准 os.path.* 與列出使用者設定的資料夾（os.listdir，在 browse 裡）
 USB_KEYS_IMPORTS = ALLOWED_IMPORTS + ("base64", "usbtether")

@@ -4,7 +4,21 @@
 
 ## [Unreleased]
 
+### Added
+- **`guitar` 0.2.0-alpha.1 → 0.3.0-alpha.1（和弦圖；仍是 alpha、尚未實機驗證；要 SYNOX SDK 0.2.5 以上，`requires.sdk` `>=0.2.5,<0.3`、`requires.synox` `>=0.2.1`）**：
+  **先給圖**：`/chord` 預設回和弦圖（圖片，經 `kit.send_image`）＋名稱＋一行按法；每根手指、組成音、提醒改成按「📖 說明」、最後加 `說明`、或 `/chord_info`。
+  一個和弦可以用 `‹ 上一個`／`下一個 ›` 在同一則訊息裡翻其他按法（`kit.edit_image`；Telegram 改送新的一張）；好幾個（`D/F# Bb F Gm Cm`）排成同一張圖、每個有「換按法」。
+  經 AI 呼叫的一律不出按鈕（預設按法的圖＋文字）。圖是自己畫的 SVG＋PNG（不靠外部套件，同一個和弦每次一模一樣；SVG 過得了 SYNOX 的白名單）。
+  新指令：`/chord_info`、`/chord_alt`、`/chord_easy`（最好按的按法）、`/chord_tones`（組成音與音程、每條弦的音）、`/chord_all`（一個根音的常用和弦）、
+  `/chord_basic`（入門 8 個）、`/chord_change`（換和弦每根手指怎麼動）、`/chord_strum`（節奏刷法）、`/chord_prog`（調的常見進行＋圖）。
+  分散和弦 TAB 放等寬區塊（純文字時包 ```），說明一行一個記號，弦標 `e(1)`…`E(6)`。
+
 ### Fixed
+- **`guitar` 0.3.0-alpha.1**：`/chord_arp F major 7` 以前回 F 大三和弦——拼出來的名稱（`F major 7`、`Fmajor7`、`FM7`、`Fmaj 7`、`Δ7`、minor／min、dominant、
+  diminished、augmented、suspended、全形字、`♯`／`♭`／`＃`）都認得了；看不懂的會說哪個字看不懂、列出相近的名字，不再默默改成別的和弦。
+  資料對照「吉他和弦全書」：補簡易 Bm `x x 0 4 3 2`、一指 G `x x 0 0 0 3`（都標「低音 D」）；簡易 B／Bb／Cm 的提醒寫明最低音不是根音；
+  A 型 add9／madd9（要跨 5 格）拿掉；A 型 dim7 改成常見的 `x 3 4 2 4 x`（2-3-1-4）、m7b5 1-3-2-4；自動排的手指照格數給（差 3 格用小指），
+  滑到第 0 格的手型不再把橫按的手指放在空弦上，還是要撐開 4 格的會標「要撐開」。
 - **`money` 0.3.0 → 0.3.1**（SYNOX 獨立安全審查第 1 輪）：金額欄位改用 SYNOX 的 `kit.amount`（大於 0、最多兩位小數、不超過十億；預算與上限另外收 0＝拿掉）；`nan`、`inf` 這類不是一般數字的值一律擋下（以前會讓記一筆出錯、讓預算存成 NaN 之後每筆都壞）。
 - **`calendar` 0.1.2**（ADR-0006 T5、P1）：`/cal_ics` 的檔名改成每次不同（`export-<時間>-<亂數>.ics`），同一個人同時匯出兩次
   不會互相蓋、互相刪；匯出前先清掉這個人資料夾裡留下的舊匯出檔（舊版的 `export.ics`、10 分鐘以前的）。
