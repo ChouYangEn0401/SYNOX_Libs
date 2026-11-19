@@ -349,7 +349,8 @@ def sha256_bytes(blob: bytes) -> str:
 
 def zip_costume(folder: str, out_dir: str) -> str:
     """跟 SYNOX 的 zip_pack 同一個格式：pack.json 在最上層、多一段 integrity.sha256（每個檔的雜湊）。
-    只放 PACKED 列的檔（about.json 是給公開頁用的，不進 pack）。zip 的時間固定，同樣的內容打出一樣的檔。"""
+    只放 PACKED 列的檔（about.json 是給公開頁用的，不進 pack）。zip 的時間、權限、「哪個系統做的」都固定：
+    同樣的內容在哪台電腦（Windows、Linux、雲端）打都是同一個檔、同一個 sha256。"""
     with open(os.path.join(folder, "pack.json"), encoding="utf-8") as f:
         raw = json.load(f)
     hashes = {}
@@ -364,6 +365,7 @@ def zip_costume(folder: str, out_dir: str) -> str:
         def put(name, data):
             info = zipfile.ZipInfo(name, date_time=(2026, 1, 1, 0, 0, 0))
             info.compress_type = zipfile.ZIP_DEFLATED
+            info.create_system = 3                 # 「哪個系統做的」固定寫 Unix：預設照執行的電腦（Windows＝0），同內容在不同電腦會打出不同 sha256
             info.external_attr = 0o644 << 16
             z.writestr(info, data)
         put("pack.json", json.dumps(raw, ensure_ascii=False, indent=2) + "\n")

@@ -84,6 +84,8 @@ def test_pack_writes_synoxpack_with_integrity(tmp_path):
                 assert bc.code_problems(rel, data.decode("utf-8")) == []
     again = bc.pack_all(str(tmp_path / "again"))                                # 同樣的內容打出一樣的檔
     assert [e["sha256"] for e in again["entries"]] == [e["sha256"] for e in result["entries"]]
+    with zipfile.ZipFile(tmp_path / result["entries"][0]["file"]) as z:         # 在哪台電腦打都一樣（Windows 預設會寫 0）
+        assert {(i.create_system, i.date_time, i.external_attr >> 16) for i in z.infolist()} == {(3, (2026, 1, 1, 0, 0, 0), 0o644)}
 
 
 # ── 檢查本身真的擋得住（拿一套複製出來改壞）──────────────────────────────
