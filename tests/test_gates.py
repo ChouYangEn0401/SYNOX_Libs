@@ -600,21 +600,6 @@ def panel_problems(name: str, html: str) -> list:
             out.append(f'fetch({arg.strip()}) 的網址不是寫死的相對網址 "api/<route>"（{name} 的面板）')
         if m.group(2):
             out.append(f"fetch({arg.strip()}, …) 帶了第二個參數（面板只能 GET、不用帶登入資料）")
-
-
-    """M5：panel.html 不用 innerHTML、localStorage、sessionStorage、外部網址；fetch 只打 /api/packs/<自己的名字>/。"""
-    out = [f"用了 {word}" for word in ("innerHTML", "outerHTML", "insertAdjacentHTML", "document.write", "localStorage",
-                                      "sessionStorage", "indexedDB", "http://", "https://", "XMLHttpRequest",
-                                      "WebSocket", "EventSource", "sendBeacon") if word in html]
-    calls = re.findall(r"\bfetch\s*\(\s*([^,)]*)", html)
-    for arg in calls:
-        if re.fullmatch(r"""\s*(["'`])api/[a-z0-9_-]+\1\s*""", arg):      # 隔開的面板：只能打相對網址 api/<route>（SYNOX docs/sdk.md）
-            continue
-        found = re.fullmatch(r"""\s*(["'`])(/api/packs/([^/"'`]+)/[^"'`$]*)\1\s*""", arg)
-        if not found:
-            out.append(f"fetch({arg.strip()}) 的網址不是寫死的 /api/packs/{name}/…")
-        elif found.group(3) != name:
-            out.append(f"fetch 打到別的工具：{found.group(2)}")
     return out
 
 
