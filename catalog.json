@@ -39,6 +39,11 @@
       "title": "影片筆記",
       "summary": "把影片網址交給你電腦上裝好的 Video Notes 整理成筆記（要先另外裝 Video Notes）",
       "packs": ["video-notes"]
+    },
+    "projects": {
+      "title": "專案",
+      "summary": "追蹤每個專案停在哪、為什麼停、回來先做什麼；可掃你指定的資料夾（只讀）",
+      "packs": ["projects"]
     }
   }
 }

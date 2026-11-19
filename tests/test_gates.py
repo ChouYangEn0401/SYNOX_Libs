@@ -23,6 +23,11 @@ from synox.sdk import author
 
 from conftest import PACK_NAMES, PACKS, PLANNER
 
+# 本機工具但只給擁有者：projects 會讀使用者自己填的資料夾（只讀，filesystem:any），不開給伺服器版的成員
+OWNER_LOCAL = ("projects",)
+# 靜態掃描看不出「路徑是使用者填的資料夾」（變數路徑它只算 filesystem:own），所以 projects 宣告的 filesystem:any 比掃出來的寬——
+# 這是照實宣告（讀 pack 以外的資料夾），不是漏掃；多寫的保險由 tests/test_projects.py 的靜態規則守（只讀、只在 engine/scan.py）
+SCAN_SEES = {"projects": ["filesystem:own"]}
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
 # 叫這台電腦上另外裝好的程式（video-notes：使用者自己裝的 Video Notes）：只給擁有者、只經 SYNOX 的 JobRunner（app.jobs）開程式，
 # 自己不連網、不動態執行；讀檔只讀那支程式產生的筆記。規則在 test_local_program_tools_only_use_app_jobs。
@@ -31,6 +36,7 @@ LOCAL_PROGRAM = ("video-notes",)
 ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": ["filesystem:own"], "notes": [],
                 "diary": ["filesystem:own"],
                 "guitar": [],
+                "projects": ["filesystem:any"],
                 **{name: ["network"] for name in CONNECT},
                 "video-notes": ["subprocess", "filesystem:any"],
                 # usb-keys：自己的程式不開檔、不開程式，但它叫的 usbtether 會（讀寫使用者選的檔、在隨身碟寫 .usbtether；
@@ -40,7 +46,7 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
 SCAN_CAPS = {"video-notes": (["filesystem:own", "subprocess"],
                              "讀的筆記在 Video Notes 自己的輸出資料夾（SYNOX 外面），路徑是執行時才知道的變數，掃描只看得出 filesystem:own")}
 # 只給擁有者（access: owner）的本機工具：接外面服務的以外，碰到硬體或使用者電腦上任意檔案的
-OWNER_LOCAL = ("usb-keys",)
+OWNER_LOCAL = ("usb-keys",) + OWNER_LOCAL
 # 宣告了、但第 2 關在工具自己的 .py 裡掃不到的能力：{工具: 理由}（能力是第三方函式庫用的；照實宣告比掃描結果多）
 DECLARED_BEYOND_SCAN = {
     "usb-keys": "usbtether（requires.pip，釘版本＋雜湊）讀寫使用者選的檔、在隨身碟寫 .usbtether、用 PowerShell 讀隨身碟資訊",
@@ -155,7 +161,7 @@ def test_gate2_static_scan_passes(name):
     elif name in DECLARED_BEYOND_SCAN:
         assert set(report.required_capabilities) <= set(ALLOWED_CAPS[name]), report.format(m)
     else:
-        assert report.required_capabilities == ALLOWED_CAPS[name], report.format(m)
+        assert report.required_capabilities == SCAN_SEES.get(name, ALLOWED_CAPS[name]), report.format(m)
 
 
 LOCAL_PROGRAM_IMPORTS = ("json", "os", "re", "threading", "time", "isdtelekit", "synox")
@@ -190,7 +196,7 @@ def test_local_program_tools_only_use_app_jobs(name):
     assert sorted(owners.get(id(n)) for n in opens) == ["launch", "read_note"]
 
 
-@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n != "money" and n not in LOCAL_PROGRAM])
+@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n not in ("money", "projects") and n not in LOCAL_PROGRAM])    # projects：tests/test_projects.py 自己的靜態規則
 def test_no_network_subprocess_exec_or_stray_files(name):
     text = source(name)
     tree = ast.parse(text)
@@ -395,6 +401,9 @@ M4_EXTRA_CALLS = {
     "diary": {
         "_Undefined": "範本引擎的「沒有值」記號：類別沒有任何欄位，大家共用同一個記號才比得出 `is UNDEF`",
         "timedelta": "不可變的時間長度（6 小時）",
+    },
+    "projects": {
+        "Field": "指令欄位的說明（名稱、說明文字、檢查函式），建好之後不改，沒有放任何人的資料",
     },
     "money": {
         "frozen": "bridge/table.py 的 frozen() 回 MappingProxyType（唯讀的指令表）",

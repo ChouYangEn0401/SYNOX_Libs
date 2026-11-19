@@ -1,0 +1,42 @@
+{
+  "name": "projects",
+  "title": "📁 專案",
+  "summary": "追蹤每個專案停在哪、為什麼停、回來先做什麼；可以掃資料夾看真的多久沒動（只讀）；附完整的網頁畫面（加密存在這台電腦）",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "proj",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 40,
+  "capabilities": ["filesystem:any"],
+  "python": { "module": "pack", "package": true },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3" },
+  "skill": "SKILL.md",
+  "storage": "vault",
+  "provides": ["projects.due_back"],
+  "help": {
+    "featured": ["add", "list", "pause", "resume"],
+    "commands": {
+      "add": {"plain": "追蹤一個新專案", "examples": ["範例專案", {"text": "範例專案 path=~/work/sample", "note": "順便記下資料夾位置"}]},
+      "list": {"plain": "看專案，也能只看冷掉的或說好要回來看的", "examples": ["cold", "paused"]},
+      "pause": {"plain": "先停一個專案，記為什麼停、什麼時候回來看", "examples": ["ab12cd34 reason=block resume_at=2026-12-01"]},
+      "resume": {"plain": "回來做：從暫停改回進行中", "examples": ["ab12cd34"]}
+    }
+  },
+  "web": {
+    "app": {
+      "entry": "app/index.html",
+      "root": "app",
+      "title": "專案",
+      "kit": 1,
+      "reads": ["projects", "path_check", "due_back"],
+      "actions": {
+        "add": "WRITE", "update": "WRITE", "pause": "WRITE", "resume": "WRITE", "scan": "WRITE",
+        "rm": "DANGER", "restore": "WRITE", "reorder": "WRITE", "reason_add": "WRITE", "reason_retire": "WRITE"
+      }
+    }
+  },
+  "site": { "emoji": "📁", "name": "專案", "example": "/proj 範例專案", "status": "alpha（尚未實機驗證）；會讀你填的資料夾（只讀）" }
+}
