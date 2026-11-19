@@ -1,6 +1,6 @@
 // 行事曆的進入點：三個分頁（月曆、這一天、接下來）、前後切換、提示、對話框。
 // 等 SYNOX 的共用元件進門（SynoxApp.ready）才開始；不輪詢（回到這個分頁時才看一次有沒有變）。
-import { errorText, read } from "./api.js";
+import { download, errorText, read } from "./api.js";
 import { addDays, fill, h, pad } from "./dom.js";
 import { eventForm } from "./forms.js";
 import * as month from "./views/month.js";
@@ -123,6 +123,13 @@ async function refreshIfChanged() {
 $("prev").addEventListener("click", () => step(-1));
 $("next").addEventListener("click", () => step(1));
 $("todayBtn").addEventListener("click", () => { app.month = app.today.slice(0, 7); app.date = app.today; render(); });
+// 匯出 .ics：檔案沒有加密，先問一次再交給 SYNOX 下載（SYNOX 自己也會再確認一次）
+$("exportBtn").addEventListener("click", async () => {
+  const yes = await app.confirm("匯出 .ics？",
+    "匯出的 .ics 檔沒有加密：存到哪裡、誰拿到都看得到你所有的行程。要匯出嗎？", "匯出");
+  if (!yes) return;
+  try { await download("ics"); } catch (e) { toast(errorText(e)); }
+});
 $("addBtn").addEventListener("click", () => eventForm(app, { date: app.tab === "day" ? app.date : app.today }));
 
 async function boot() {
