@@ -11,3 +11,7 @@ public_check.local.txt
 .cache/
 # docs/RELEASING.md：上傳前備份的發佈頁 index.json
 release-backup/
+
+# MVP inbox: work orders live here but are never committed (only the folder placeholder is)
+/_inbox/*
+!/_inbox/.gitkeep
