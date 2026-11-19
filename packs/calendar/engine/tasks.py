@@ -133,10 +133,15 @@ def set_focus(data: dict, ref, day: str) -> int:
 
 
 def on_day(data: dict, day: date, today: date) -> list:
-    """這一天該看到的卡片：排在這天的；今天還加上沒做完、排在更早的（順延）。依建立順序，沒做完的在前。"""
+    """這一天該看到的卡片：排在這天的；今天還加上沒做完、排在更早的（順延）。依建立順序，沒做完的在前。
+
+    只讀的時候不會先跑 carry_over，所以過去某天沒做完的卡片只算在今天（順延），不在原來那天再出現一次。"""
     iso, t0 = day.isoformat(), today.isoformat()
-    rows = [t for t in data["tasks"]
-            if t.get("date") == iso or (iso == t0 and not t.get("done") and t.get("date", t0) < t0)]
+    if iso < t0:
+        rows = [t for t in data["tasks"] if t.get("date") == iso and t.get("done")]
+    else:
+        rows = [t for t in data["tasks"]
+                if t.get("date") == iso or (iso == t0 and not t.get("done") and t.get("date", t0) < t0)]
     return sorted(rows, key=lambda t: (bool(t.get("done")), t["id"]))
 
 

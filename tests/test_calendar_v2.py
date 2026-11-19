@@ -349,3 +349,17 @@ def test_real_synox_screen_and_members(synox_bot):
     status, data = mine.do("add", {"text": "x", "date": "2026-02-30"})
     assert status != 200
     assert ok(mine.do("rm", {"n": "1"}))["event"]["title"] == "看牙醫"
+
+
+def test_unfinished_past_card_is_not_shown_twice_before_a_write(make_bot, owner):
+    """只讀（還沒有寫入、沒跑 carry_over）時，過去沒做完的卡片只出現在今天（順延），不在原來那天再出現一次；做完的留在原來那天。"""
+    from datetime import datetime
+    bot = make_bot("calendar")
+    bot.say(owner, "/cal_task 買牛奶")
+    bot.say(owner, "/cal_task 寫報告")
+    bot.say(owner, "/cal_done 1")
+    bot.set_now(datetime(2026, 11, 11, 8, 0))
+    old = read(bot, "day", {"date": "2026-11-09"})["tasks"]
+    assert [t["title"] for t in old["tasks"]] == ["買牛奶"]
+    today = read(bot, "day", {"date": "2026-11-11"})["tasks"]
+    assert [t["title"] for t in today["tasks"]] == ["寫報告"]
