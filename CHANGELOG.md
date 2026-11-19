@@ -69,6 +69,11 @@
   月曆上顯示別的工具的項目只留一個空的掛勾（`pack.link_sources`），沒有來源也不會出錯。
 - **`calendar` 面板修正（同版）**：舊面板顯示「讀不到（Failed to fetch）」——它用 `fetch("/api/packs/calendar/today", {credentials: …})`，
   但 SYNOX 的面板在沒有 `allow-same-origin` 的隔開 iframe 裡跑（沒有 cookie、碰不到 `/api/`），只准相對網址；改成 `fetch("api/today")`，面板也多了今天的清單。
+- **`index.json` 與公開頁帶作者標的警告（pack.json 的 `warnings`，SYNOX ADR 0041）**：`build.py` 把整理過的警告抄進 `index.json` 那一筆
+  （`line` 後面；規則跟 SYNOX 的 `packwarn` 一樣，`scripts/pack_warnings.py`），SYNOX 工具庫清單在安裝前就看得到；清單上的只是預告，
+  安裝時仍由簽過的 pack.json 重新檢查、逐條確認。寫壞的不讓打包失敗，換成 `malformed_warning` 並印「⚠️ 注意」。入口頁卡片與產生的工具頁
+  用紅框顯示；帶警告的工具標題、徽章不准有「官方」。沒寫 `warnings` 的工具，`index.json` 與頁面一字不差。
+  真機驗證清單：`docs/testing/wardrobe-and-index-checklist.md`（衣櫃頁開場、重播、下載；工具庫列表的警告；全部勾完才算過關）。
 - **`money` 0.4.0-alpha.1 → 0.5.0-alpha.1**（**alpha，尚未實機驗證**；[ADR-0008](docs/adr/0008-money-statements-and-review-writer.md)）：補上原本那套記帳程式還沒搬的功能。
   **對帳單匯入** `/money_import_statement`（成交明細、期貨選擇權日報表、已實現損益；網頁存的 html 或 CSV）：照寫的數字記、全部核對、重匯不會多；
   格式全部寫在「格式描述檔」（JSON），程式只是通用的讀取器＋三個 adapter，內建幾份範例描述檔（不帶任何券商名），使用者可以在自己的 `formats/` 放自己的；
