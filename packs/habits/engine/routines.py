@@ -245,6 +245,9 @@ def _migrate(r: dict) -> None:
     r.setdefault("last_notified", "")
     r.setdefault("at", "")                  # "HH:MM"，空＝整天都算數
     r.setdefault("catch_up", True)
+    # 原本那套程式的「底線跟著某個行程的長度」（basis／floor_x／target_x）沒有搬：舊資料裡有就丟掉，照 floor_min／target_min 算
+    for gone in ("basis", "floor_x", "target_x"):
+        r.pop(gone, None)
     # ---- 意義／重要度／型態。沒有＝core＋build＝原本的樣子 ----
     r.setdefault("why", "")
     if r.get("importance") not in IMPORTANCE_IDS:

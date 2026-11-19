@@ -241,3 +241,14 @@ def test_migrate_old_record(R, mem):
                                         "direction": "y", "alarm": True}]})
     v = R.list_routines()[0]
     assert v["done_dates"] == [iso(-2)] and v["repeat"] == "days"
+
+
+def test_old_basis_data_is_ignored_without_error(R):
+    """原本那套程式的 basis（底線跟著行事曆行程的長度）沒有搬：舊資料裡有也照常讀，欄位丟掉、照 floor_min 算。"""
+    v = add(R, repeat="quota", unit="minutes", floor_min=60, period="week")
+    data = R.storage.load(R.DOC, None)
+    rec = next(r for r in data["routines"] if r["id"] == v["id"])
+    rec.update({"basis": {"event": "7", "title": "吉他課", "floor_x": 1, "target_x": 2}, "floor_x": 1, "target_x": 2})
+    R.storage.save(R.DOC, data)
+    got = next(r for r in R.list_routines() if r["id"] == v["id"])
+    assert got["floor_min"] == 60 and not {"basis", "floor_x", "target_x"} & set(got)
