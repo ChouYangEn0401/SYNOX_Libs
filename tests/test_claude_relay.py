@@ -531,6 +531,26 @@ def test_refund_goes_only_to_the_same_authorization(rig):
     assert rig.data()["armed"][SID]["uses"] == 2
 
 
+@pytest.mark.parametrize("stop", ["/relay_freeze", f"/relay_disarm {SID}"])
+def test_freeze_or_disarm_during_an_inflight_continue_cancels_it(rig, stop):
+    """資安審查 1：continue 已經在叫 resetter（假的 resume 睡 2 秒），這時凍結或撤回授權：那一筆一定被取消、不扣次數。"""
+    armed(rig, uses=3)
+    rig.behave(resume_sleep=2)
+    rig.bot.say(OWNER_ID, f"/relay_continue {SID} at=+30")
+    time.sleep(0.8)
+    rig.bot.say(OWNER_ID, stop)
+    assert rig.bot.app.tasks.wait(20)
+    assert [v["status"] for v in rig.jobs().values()] == ["cancelled"]
+    d = rig.data()
+    assert "revoked:" in [a["result"] for a in d["audit"] if a["act"] == "continue"][-1]
+    assert d["sent"] == [] and [j["status"] for j in d["jobs"]] == ["cancelled"]
+    if stop == "/relay_freeze":
+        assert d["frozen"] and d["armed"][SID]["uses"] == 3
+    else:
+        assert SID not in d["armed"]
+    assert "送出的同時被" in "\n".join(rig.bot.texts(OWNER_ID))
+
+
 def test_job_reported_failed_counts_toward_freeze(rig):
     armed(rig, uses=5)
     rig.say(f"/relay_continue {SID}")

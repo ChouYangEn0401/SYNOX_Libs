@@ -535,7 +535,30 @@ def install(app, pack):
                   "status": status if status in STATUS_TEXT else "sent", "cost": 0.0, "error": "", "counted": False,
                   "auth": entry.get("auth", "")}
         if code == EXIT_OK and job_id:
-            settle("ok:" + job_id, record=record)
+            def keep_or_revoke(d):
+                """記下這一筆，同時再看一次：送出去的那幾秒裡被凍結、撤回或換了授權，就當場取消、不扣次數。"""
+                d["jobs"].append(record)
+                del d["jobs"][:-KEEP_JOBS]
+                same = d["armed"].get(sid)
+                still = same is not None and same.get("auth") == entry.get("auth") and same["until"] > now()
+                if still and not d["frozen"]:
+                    audit(d, "continue", src, sid, "ok:" + job_id)
+                    return ""
+                if still:
+                    same["uses"] += 1
+                if stamp in d["sent"]:
+                    d["sent"].remove(stamp)
+                why = "frozen" if d["frozen"] else "disarmed"
+                audit(d, "continue", src, sid, f"revoked:{why}")
+                return why
+            revoked = change(user, keep_or_revoke)
+            if revoked:
+                done, problems = cancel_pending(user, "system", {sid})
+                what = "凍結了" if revoked == "frozen" else "撤回（或換了）授權"
+                line = (f"⛔ 送出的同時被{what}：剛建立的工作 {job_id} "
+                        + ("已經取消" if job_id in done else "取消不了（" + "；".join(problems or ["可能已經送出"]) + "）")
+                        + "，沒有扣次數。")
+                return "\n".join(x for x in (notice, line) if x)
             left = f"這個對話還剩 {entry['uses']} 次、授權到 {when_text(entry['until'])}。"
             if at:
                 head = (f"⏰ 排好了：{at_text(at)} 由 ClaudeTimerResetter 送 continue（SYNOX 關著也會送；"
