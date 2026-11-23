@@ -1,0 +1,53 @@
+{
+  "name": "claude-relay",
+  "title": "🔁 對話接力",
+  "summary": "讓因為額度停住的 Claude Code 對話，在你事先授權之後自動被送一句固定的 continue 接著做（要先另外裝 ClaudeTimerResetter）",
+  "version": "0.1.0-alpha.1",
+  "stage": "test",
+  "publish": false,
+  "kind": "python",
+  "group": "relay",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "storage": "vault",
+  "order": 92,
+  "capabilities": ["filesystem:own", "subprocess"],
+  "python": { "module": "pack" },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3" },
+  "skill": "SKILL.md",
+  "callers": {
+    "sessions": ["human", "ai"],
+    "show": ["human", "ai"],
+    "check": ["human", "ai"],
+    "armed": ["human", "ai"],
+    "jobs": ["human", "ai"],
+    "job": ["human", "ai"],
+    "freeze": ["human", "ai"],
+    "arm": ["human"],
+    "disarm": ["human"],
+    "cancel": ["human"],
+    "thaw": ["human"],
+    "setup": ["human"],
+    "continue": ["human", "schedule"]
+  },
+  "stepup": ["arm", "thaw", "setup"],
+  "help": {
+    "featured": ["sessions", "arm", "continue", "armed", "freeze"],
+    "commands": {
+      "sessions": { "plain": "列出這台電腦上的 Claude Code 對話", "examples": [{ "text": "limit=10", "note": "只列最近 10 個" }] },
+      "show": { "plain": "看一個對話做到哪裡", "examples": [{ "text": "0123abcd-0000-4000-8000-00000000abcd turns=2", "note": "多看最近兩輪" }] },
+      "check": { "plain": "檢查環境，或一個對話現在能不能送" },
+      "arm": { "plain": "授權一個對話可以被自動接著做", "examples": [{ "text": "0123abcd-0000-4000-8000-00000000abcd hours=8 uses=2", "note": "8 小時內最多兩次" }] },
+      "disarm": { "plain": "取消授權", "examples": [{ "text": "all", "note": "全部取消" }] },
+      "armed": { "plain": "看哪些對話授權了、還剩幾次、最近做了什麼" },
+      "continue": { "plain": "對授權過的對話送一句固定的繼續", "examples": [{ "text": "0123abcd-0000-4000-8000-00000000abcd at=06:05", "note": "早上六點五分送" }] },
+      "jobs": { "plain": "看這個工具送出過的工作" },
+      "job": { "plain": "看一筆工作的結果", "examples": ["a1b2c3d4"] },
+      "cancel": { "plain": "取消一筆還沒送的工作", "examples": ["a1b2c3d4"] },
+      "freeze": { "plain": "緊急停止所有自動接著做" },
+      "thaw": { "plain": "解除緊急停止" },
+      "setup": { "plain": "設定程式在哪裡與每筆花費上限", "examples": [{ "text": "budget=1.5", "note": "每筆最多 1.5 美元" }] }
+    }
+  }
+}

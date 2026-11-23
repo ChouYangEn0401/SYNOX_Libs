@@ -15,7 +15,7 @@ from synox.config import SynoxConfig
 from synox.llm.fake import FakeAdapter
 from synox.vault import Vault
 
-from conftest import PACK_NAMES, PACKS, ROOT, approve_all
+from conftest import ALL_PACK_NAMES, PACK_NAMES, PACKS, ROOT, approve_all
 
 
 def make_app(tmp_path, mode="personal"):
@@ -40,7 +40,8 @@ def test_synox_loads_every_pack_encrypted(tmp_path):
     app, api, data = make_app(tmp_path)
     report = app.extras["synox_pack_report"]
     status = {i.name: i.status for i in report.items}
-    assert status == {n: "loaded" for n in PACK_NAMES}, [(i.name, i.status, i.detail) for i in report.items]
+    # 私人工具（publish: false）也在 packs/ 裡、一樣被載入：比全部（ALL_PACK_NAMES），不只公開的
+    assert status == {n: "loaded" for n in ALL_PACK_NAMES}, [(i.name, i.status, i.detail) for i in report.items]
     assert "加好了" in say(app, api, OWNER_ID, "/cal 明天 14:00 看牙醫")
     assert "加好了" in say(app, api, OWNER_ID, "/todo !! 繳電費 明天")
     assert "記到今天" in say(app, api, OWNER_ID, "/bj • 買牛奶")
@@ -114,9 +115,9 @@ def test_every_tool_loads_together(tmp_path):
     api = FakeChannel()
     app = build(config, home=api, adapter=FakeAdapter(None), vault=Vault(b"k" * 32, str(data)), pack_dirs=[PACKS])
     status = {i.name: i.status for i in app.extras["synox_pack_report"].items}
-    assert all(status[n] == "loaded" for n in PACK_NAMES), status
+    assert all(status[n] == "loaded" for n in ALL_PACK_NAMES), status
     groups = [p.manifest.group for p in app.extras["synox_packs"]]
-    assert len(groups) == len(set(groups)) == len(PACK_NAMES)
+    assert len(groups) == len(set(groups)) == len(ALL_PACK_NAMES)     # 私人工具的群組也不能撞
     assert "加好了" in say(app, api, OWNER_ID, "/todo 買牛奶")
     assert "記下了" in say(app, api, OWNER_ID, "/note 買牛奶")
 

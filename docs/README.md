@@ -7,7 +7,7 @@
 | 發佈：打包 → 測試 → 合併 → 上傳 GitHub 發佈頁 → 重新發佈線上頁 → 之後切 Latest | [RELEASING.md](RELEASING.md)（最上面有流程圖與檢查清單） |
 | 線上頁（claude.ai Artifact）：每一頁的本機檔與網址、怎麼更新、頁尾的頁面版本、為什麼 `.synoxpack` 不能放那裡 | [ARTIFACTS.md](ARTIFACTS.md)（網址的正本：[artifacts.json](artifacts.json)） |
 | 改入口頁的版面或文案（給設計的人） | 樣板 [`scripts/site_index_template.html`](../scripts/site_index_template.html)；卡片的字 [site-tools.json](site-tools.json)；改完 `python scripts/build_site.py` |
-| 為什麼這樣設計 | [adr/](adr/)（0001 工具庫與 SDK 依賴、0002 記帳通用版、0003 工具畫面、0004 記帳重做、0005 Google 試算表只加列、0006 個人版與伺服器版、0007 吉他一首歌的流程、0008 記帳對帳單與寫檢討） |
+| 為什麼這樣設計 | [adr/](adr/)（0001 工具庫與 SDK 依賴、0002 記帳通用版、0003 工具畫面、0004 記帳重做、0005 Google 試算表只加列、0006 個人版與伺服器版、0007 吉他一首歌的流程、0008 記帳對帳單與寫檢討、0009 工作區工具、0010 對話接力只送 continue） |
 | 真機人工驗證（衣櫃頁在各瀏覽器的開場動畫、下載；工具庫列表顯示警告）：全部勾完才算過關 | [testing/wardrobe-and-index-checklist.md](testing/wardrobe-and-index-checklist.md) |
 | 每個檔從哪裡搬來 | [sources.md](sources.md) |
 | MCP 工具的審查紀錄 | [mcp-audit-2026-11.md](mcp-audit-2026-11.md) |
