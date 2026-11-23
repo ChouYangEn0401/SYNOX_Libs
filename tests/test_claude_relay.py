@@ -731,3 +731,67 @@ def test_not_configured_says_how(synox_bot):
     bot.say(OWNER_ID, "/relay_sessions")
     assert bot.app.tasks.wait(10)
     assert "/relay_setup home=" in bot.last(OWNER_ID)
+
+
+# ── 用 resetter 真的 argparse 解析 relay_argv 的輸出 ───────────────────────────
+
+def _resetter_home():
+    """找一份 ClaudeTimerResetter 的原始碼（只 import 它的 cli 來解析參數，不執行任何子指令）：
+    環境變數 CLAUDE_TIMER_RESETTER_HOME → 這個 repo 旁邊 → SYNOX 旁邊。找不到就跳過。"""
+    from conftest import ROOT, SYNOX_HOME
+    candidates = [os.environ.get("CLAUDE_TIMER_RESETTER_HOME") or "",
+                  os.path.join(os.path.dirname(ROOT), "ClaudeTimerResetter"),
+                  os.path.join(os.path.dirname(str(SYNOX_HOME or "")), "ClaudeTimerResetter")]
+    for home in candidates:
+        if home and os.path.isfile(os.path.join(home, "claude_timer", "cli.py")):
+            return home
+    return None
+
+
+@pytest.fixture
+def real_cli():
+    home = _resetter_home()
+    if home is None:
+        pytest.skip("找不到 ClaudeTimerResetter 的原始碼（設 CLAUDE_TIMER_RESETTER_HOME，或放在這個 repo／SYNOX 旁邊）")
+    import importlib
+    import warnings
+    saved = {k: v for k, v in sys.modules.items() if k == "claude_timer" or k.startswith("claude_timer.")}
+    for k in saved:
+        del sys.modules[k]
+    sys.path.insert(0, home)
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            try:
+                cli = importlib.import_module("claude_timer.cli")
+            except ImportError as e:
+                pytest.skip(f"ClaudeTimerResetter 的相依套件沒裝在測試用的 Python：{e}")
+        yield cli
+    finally:
+        sys.path.remove(home)
+        for k in [k for k in sys.modules if k == "claude_timer" or k.startswith("claude_timer.")]:
+            del sys.modules[k]
+        sys.modules.update(saved)
+
+
+def test_real_resetter_argparse_reads_relay_argv_as_continue_only(real_cli):
+    from datetime import datetime
+    m = load_module(NAME)
+    parser = real_cli._parser(parser_class=real_cli._QuietParser)
+    for at in ("", "2026-11-24 06:05"):
+        a = parser.parse_args(m.relay_argv("continue", session=SID, budget="1.5", at=at))
+        assert a.cmd == "resume" and a.session == SID and a.json
+        assert a.prompt == "continue" and a.permission_mode == "inherit"
+        assert a.take_over is False and a.fork is False and a.notify is False and a.dry_run is False
+        assert a.allowed_tools == "" and a.disallowed_tools == "" and a.max_budget_usd == 1.5
+        assert a.at == at
+    assert real_cli.parse_at("2026-11-24 06:05") == datetime(2026, 11, 24, 6, 5)
+    for kind, kw, field, value in (("show", {"session": SID, "turns": 3}, "session", SID),
+                                   ("check", {"session": SID}, "session", SID),
+                                   ("job", {"job": "a1b2c3d4"}, "id", "a1b2c3d4"),
+                                   ("cancel", {"job": "a1b2c3d4"}, "id", "a1b2c3d4"),
+                                   ("sessions", {"cwd": "--take-over", "limit": 5}, "cwd", "--take-over"),
+                                   ("jobs", {}, "limit", 200)):
+        a = parser.parse_args(m.relay_argv(kind, **kw))
+        assert getattr(a, field) == value and a.json, kind
+    assert parser.parse_args(m.relay_argv("cancel", job="a1b2c3d4")).all is False
