@@ -10,7 +10,8 @@ description: 使用者想看這台電腦上的 Claude Code 對話、看哪些對
 
 ## 你可以做的
 - 使用者問「我電腦上有哪些 Claude 對話」「哪個停住了」→ `relay__sessions`（可以給 `cwd`、`limit`）。
-- 使用者問某個對話做到哪裡 → `relay__show`，`session` 放完整的對話 id；要看最近幾輪就給 `turns`。
+- 使用者問某個對話做到哪裡 → `relay__show`，`session` 放完整的對話 id。你只會拿到標題、時間、輪數；
+  對話內容只給使用者本人，要看請他自己打 `/relay_show <對話> turns=2`。
 - 使用者問「能不能送」「環境好不好」→ `relay__check`（給 `session` 就看那個對話現在有沒有被開著）。
 - 使用者問「哪些對話授權了、還剩幾次」→ `relay__armed`（也會列最近的紀錄）。
 - 使用者問接力的結果、花了多少 → `relay__jobs`，看單一筆用 `relay__job`。

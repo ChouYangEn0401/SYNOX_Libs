@@ -54,10 +54,13 @@ def main(argv):
     target = argv[argv.index("--") + 1] if "--" in argv else ""
     code, out = 0, {}
     if cmd == "sessions":
-        out = {"sessions": b.get("sessions", []), "total": len(b.get("sessions", []))}
+        rows = [r for r in b.get("sessions", []) if "--all" in argv or r.get("origin") not in ("app", "temp")]
+        out = {"sessions": rows, "total": len(rows)}
     elif cmd == "show":
         out = {"session_id": target, "cwd": "/projects/demo", "title": "假的對話", "turns": 5,
                "last_human": "請繼續", "last_assistant": "做到一半", "started": "", "ended": ""}
+        if any(a.startswith("--turns=") for a in argv):
+            out["last_turns"] = [{"n": 5, "when": "", "prompt": "第五輪的提問", "reply": "第五輪的回答"}]
     elif cmd == "check":
         code = b.get("check_exit", 0)
         out = {"session_id": target, "ok": code == 0, "problems": [], "busy": code == 3, "holder": "VSCode 開著"}
@@ -686,6 +689,41 @@ def test_read_only_commands_and_check(rig):
     rig.behave(check_exit=3)
     assert "正被開著" in rig.say(f"/relay_check {SID}")
     assert "剩 3 次" in rig.say("/relay_armed")
+
+
+def test_ai_reads_summaries_not_conversation_content(host_bot, tmp_path):
+    """資安審查 4：AI 叫 show 只拿到標題、時間、輪數（不帶 --turns、不給最後一句與回覆）；sessions 不給最後一句；
+    job 的結果原文不給 AI、改動壓成一行。本人看得到全部。"""
+    home = make_resetter(tmp_path)
+    jobs = {"a1b2c3d4": {"id": "a1b2c3d4", "kind": "resume", "session_id": SID, "status": "done", "result": "它最後的回答",
+                         "error": "", "cost_usd": 0.1, "prompt": "continue", "at": ""}}
+    (home / "jobs.json").write_text(json.dumps(jobs), encoding="utf-8")
+    bot = host_bot([{"tool": "relay__show", "args": {"session": SID, "turns": "3"}}, "好",
+                    {"tool": "relay__sessions", "args": {}}, "好",
+                    {"tool": "relay__job", "args": {"job": "a1b2c3d4"}}, "好"])
+    store = next(p for p in bot.app.extras["synox_packs"] if p.name == NAME).store.of(bot.app.users.get_or_create(OWNER_ID))
+    store.save({"settings": {"home": str(home), "python": sys.executable},
+                "jobs": [{"id": "a1b2c3d4", "sid": SID, "at": "", "created": 0, "src": "human", "status": "sent",
+                          "cost": 0.0, "error": "", "counted": False, "auth": ""}]})
+    adapter = None
+    for prompt in ("看一下那個對話", "列對話", "看結果"):
+        bot.talk(OWNER_ID, prompt)
+        adapter = bot.app.extras["synox_agent"].adapter
+    shown, listed, job = (adapter.calls[i][0][-1].content for i in (1, 3, 5))
+    assert "假的對話" in shown and "5 輪" in shown and "只給使用者本人看" in shown
+    assert "請繼續" not in shown and "做到一半" not in shown and "第五輪" not in shown
+    calls = [json.loads(x) for x in (home / "argv.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert ["show", "--json", "--", SID] in calls and not [c for c in calls if c[0] == "show" and "--turns=3" in c]
+    assert SID in listed and "請繼續" not in listed
+    assert "它最後的回答" not in job and "a.py | 2 +-" in job and "\n    a.py" not in job
+
+
+def test_show_only_for_listed_sessions_and_owner_sees_turns(rig):
+    assert "不在一般的對話清單" in rig.say(f"/relay_show {APP_SID}")
+    assert not [c for c in rig.calls() if c[0] == "show"]
+    reply = rig.say(f"/relay_show {SID} turns=2")
+    assert "第五輪的回答" in reply and "做到一半" in reply
+    assert "請繼續" in rig.say("/relay_sessions")
 
 
 def test_not_configured_says_how(synox_bot):

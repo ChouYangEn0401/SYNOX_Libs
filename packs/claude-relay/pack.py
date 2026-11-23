@@ -736,7 +736,7 @@ def install(app, pack):
                 lines.append(f"    {r['error']}")
         return "\n".join(lines)
 
-    def core_job(user, job_id):
+    def core_job(user, job_id, src):
         job_id = check_job((job_id or "").strip())
         if ours(load(user), job_id) is None:
             raise BridgeProblem("🔁 這不是這個工具送出的工作（/relay_jobs 看清單）。")
@@ -759,9 +759,9 @@ def install(app, pack):
         if data.get("error"):
             lines.append(f"  說明：{short(data.get('error'), 300)}")
         if data.get("result"):
-            lines.append(f"  它最後說：{short(data.get('result'), 400)}")
+            lines.append(f"  它最後說：{short(data.get('result'), 400)}" if src == "human" else "  它最後說：（只給使用者本人看）")
         if data.get("changes"):
-            lines.append("  改動：\n" + str(data.get("changes"))[:800])
+            lines.append(f"  改動：{short(data.get('changes'), 200)}")
         return "\n".join(lines)
 
     def core_cancel(user, job_id, src):
@@ -869,7 +869,7 @@ def install(app, pack):
             lines.extend(f"  ❌ {short(p, 200)}" for p in problems[:5])
         return "\n".join(lines)
 
-    def core_sessions(user, values):
+    def core_sessions(user, values, src):
         cwd = (values.get("cwd") or "").strip().strip('"')
         limit = int_in(values["limit"].strip(), 1, 200, "limit") if values.get("limit") else 30
         _code, data = call(user, "sessions", cwd=cwd, limit=limit)
@@ -885,20 +885,30 @@ def install(app, pack):
             busy = " ● 開著" if r.get("busy") else ""
             lines.append(f"{mark} {sid}  {short(r.get('relative'), 12)}  {short(r.get('label'), 24)}"
                          f"（{short(r.get('branch'), 20) or '-'}）{busy}")
-            lines.append(f"    {short(r.get('title'), 40)}｜{short(r.get('last_prompt'), 40)}")
+            last = f"｜{short(r.get('last_prompt'), 40)}" if src == "human" else ""     # 你最後說的話只給你本人
+            lines.append(f"    {short(r.get('title'), 40)}{last}")
         return "\n".join(lines)
 
-    def core_show(user, sid, turns):
+    def core_show(user, sid, turns, src):
+        """只看 resetter 一般清單（不含暫存、程式開的）列得到的對話。對話內容（最後一句、它回的、最近幾輪）只給你本人；
+        AI 叫的只拿到標題、資料夾、時間、輪數。"""
         sid = check_session(sid)
         turns = int_in(turns, 1, 20, "turns") if turns else 0
-        code, data = call(user, "show", session=sid, turns=turns)
+        _code, listed = call(user, "sessions", limit=SESSIONS_SCAN)
+        if not [r for r in listed.get("sessions") or [] if isinstance(r, dict) and r.get("session_id") == sid]:
+            raise BridgeProblem("🔁 這個對話不在一般的對話清單裡（暫存、程式開的、或太舊），不顯示。/relay_sessions 看清單。")
+        person = src == "human"
+        code, data = call(user, "show", session=sid, turns=turns if person else 0)
         if code != EXIT_OK:
             raise BridgeProblem(f"🔁 看不到這個對話：{short(data.get('error'), 200)}")
         lines = [f"🔁 {short(data.get('title'), 80)}",
                  f"  資料夾：{short(data.get('cwd'), 200)}",
-                 f"  {short(data.get('started'), 20)} → {short(data.get('ended'), 20)}，{data.get('turns', '?')} 輪",
-                 f"  最後你說：{short(data.get('last_human'), 300)}",
-                 f"  它回：{short(data.get('last_assistant'), 400)}"]
+                 f"  {short(data.get('started'), 20)} → {short(data.get('ended'), 20)}，{data.get('turns', '?')} 輪"]
+        if not person:
+            lines.append("  （對話內容只給使用者本人看：請他自己打 /relay_show。）")
+            return "\n".join(lines)
+        lines += [f"  最後你說：{short(data.get('last_human'), 300)}",
+                  f"  它回：{short(data.get('last_assistant'), 400)}"]
         for t in data.get("last_turns") or []:
             if isinstance(t, dict):
                 lines.append(f"── 第 {t.get('n')} 輪 {short(t.get('when'), 20)}")
@@ -933,10 +943,10 @@ def install(app, pack):
         return run
 
     session_field = Field("session", "對話 id（/relay_sessions 看）", required=True)
-    kit.command(g, "sessions", command(lambda u, v, s: core_sessions(u, v)),
+    kit.command(g, "sessions", command(lambda u, v, s: core_sessions(u, v, s)),
                 "列出這台電腦上的 Claude Code 對話（標出授權過的）",
                 fields=[Field("cwd", "只列這個資料夾的"), Field("limit", "最多幾個（預設 30）")], positional=0)
-    kit.command(g, "show", command(lambda u, v, s: core_show(u, v["session"], (v.get("turns") or "").strip())),
+    kit.command(g, "show", command(lambda u, v, s: core_show(u, v["session"], (v.get("turns") or "").strip(), s)),
                 "看一個對話做到哪裡（期間、最後一句、最近幾輪）",
                 fields=[session_field, Field("turns", "多看最近幾輪（1–20）")], positional=1)
     kit.command(g, "check", command(lambda u, v, s: core_check(u, (v.get("session") or "").strip())),
@@ -958,7 +968,7 @@ def install(app, pack):
                 effect=DANGER, ai=False, positional=1,
                 fields=[session_field, Field("at", "什麼時候送：+30、06:05 或 2026-11-24 06:05（不給＝現在）")])
     kit.command(g, "jobs", command(lambda u, v, s: core_jobs(u)), "看這個工具送出過的工作與狀態")
-    kit.command(g, "job", command(lambda u, v, s: core_job(u, v["job"])), "看一筆工作的結果（它最後說什麼、花多少）",
+    kit.command(g, "job", command(lambda u, v, s: core_job(u, v["job"], s)), "看一筆工作的結果（它最後說什麼、花多少）",
                 fields=[Field("job", "工作編號（/relay_jobs 看）", required=True)], positional=1)
     kit.command(g, "cancel", command(lambda u, v, s: core_cancel(u, v["job"], s)), "取消這個工具排的、還沒送的工作",
                 effect=WRITE, ai=False, positional=1, fields=[Field("job", "工作編號（/relay_jobs 看）", required=True)])

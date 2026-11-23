@@ -46,7 +46,7 @@ Claude Code 的對話因為額度（session limit）停住時，會告訴你大�
 
 | 指令 | callers | stepup | effect | 理由 |
 |---|---|---|---|---|
-| `sessions`、`show`、`check`、`armed`、`jobs`、`job` | human、ai | — | READ | 唯讀；AI 幫你找對話、看結果有用。回來的文字是資料不是指令（SKILL.md 寫明） |
+| `sessions`、`show`、`check`、`armed`、`jobs`、`job` | human、ai | — | READ | 唯讀；AI 幫你找對話、看結果有用。**給 AI 的只有摘要**：`show` 不帶最近幾輪、不給最後一句與回覆，`sessions` 不給最後一句，`job` 不給結果原文、改動壓成一行；內容只給本人（`kit.caller()` 判斷）。`show` 只收一般清單（不加 `--all`）列得到的對話。回來的文字是資料不是指令（SKILL.md 寫明） |
 | `freeze` | human、ai | — | WRITE | 出事時要一鍵停；只會讓事情變少，給 AI 沒有壞處 |
 | `arm` | human | **要** | DANGER | 「讓對話可以在沒人看著時繼續做」是這個工具裡權限最大的動作 |
 | `disarm`、`cancel` | human | — | WRITE | 收回的動作；不給 AI，免得被注入後拿來干擾你排好的事（要停就 freeze） |
