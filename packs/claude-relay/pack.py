@@ -139,6 +139,8 @@ SESSIONS_SCAN = 500                # 授權時在 resetter 的對話清單找多
 SYNC_TIMEOUT = 90                  # 看清單、看結果、取消這種很快的呼叫
 SEND_TIMEOUT = 240                 # 現在就送：resetter 會盯 claude 60 秒確認沒有馬上失敗
 CHUNK = 3500
+REFUNDABLE = (2, 3, 4)             # 只有這三個結束碼證明 claude 沒被叫起來（找不到、被佔用、參數不對）：才退次數
+UNKNOWN_KEEP = 86400               # 結果不明的那一次，最多等多久去 resetter 的清單補記
 EXIT_OK, EXIT_FAILED, EXIT_NOT_FOUND, EXIT_WAIT, EXIT_BAD = 0, 1, 2, 3, 4
 FINAL = ("done", "failed", "cancelled")
 STATUS_TEXT = {"scheduled": "⏰ 排好了", "waiting": "⏳ 對話正被開著，resetter 每 2 分鐘補試（最多 1 小時）",
@@ -284,7 +286,7 @@ def short(value, n):
 
 def blank():
     return {"settings": {}, "armed": {}, "frozen": False, "frozen_why": "", "frozen_at": 0, "fails": 0,
-            "sent": [], "jobs": [], "audit": []}
+            "sent": [], "jobs": [], "audit": [], "unknown": []}
 
 
 def fill(d):
@@ -398,15 +400,49 @@ def install(app, pack):
             change(user, mark)
         return done, problems
 
+    def created_ts(row):
+        try:
+            return datetime.fromisoformat(str(row.get("created") or "")).timestamp()
+        except ValueError:
+            return None
+
+    def adopt_unknown(d, rows):
+        """逾時或看不懂輸出的那幾次：resetter 可能已經建了工作。照「同一個對話、resume、continue、那段時間建的」
+        從它的清單找出來補記（之後照常追狀態、可以取消、凍結時一起收）；找不到的等到 UNKNOWN_KEEP 就放棄。"""
+        mine = {r["id"] for r in d["jobs"]}
+        stamp = now()
+        keep = []
+        for marker in d["unknown"]:
+            found = [r for jid, r in rows.items()
+                     if jid not in mine and JOB_RE.fullmatch(jid) and r.get("session_id") == marker["sid"]
+                     and r.get("kind") == "resume" and r.get("prompt") == PROMPT
+                     and created_ts(r) is not None and marker["since"] - 120 <= created_ts(r) <= marker["since"] + SEND_TIMEOUT + 120]
+            for row in found:
+                status = str(row.get("status") or "")
+                d["jobs"].append({"id": str(row["id"]), "sid": marker["sid"], "at": short(row.get("at"), 16).replace("T", " "),
+                                  "created": int(marker["since"]), "src": marker.get("src", "unknown"),
+                                  "status": status if status in STATUS_TEXT else "sent", "cost": 0.0, "error": "",
+                                  "counted": False, "auth": marker.get("auth", "")})
+                mine.add(str(row["id"]))
+                audit(d, "adopt", "system", marker["sid"], "ok:" + str(row["id"]))
+            if not found and marker["since"] > stamp - UNKNOWN_KEEP:
+                keep.append(marker)
+            elif not found:
+                audit(d, "adopt", "system", marker["sid"], "gave_up")
+        d["unknown"] = keep
+        del d["jobs"][:-KEEP_JOBS]
+
     def refresh(user):
         """用 resetter 的 jobs --json 更新這個工具自己送出的工作；失敗的算進連續失敗。回要告訴使用者的話（可能是空的）。"""
-        if not [r for r in load(user)["jobs"] if r["status"] not in FINAL]:
+        current = load(user)
+        if not [r for r in current["jobs"] if r["status"] not in FINAL] and not current["unknown"]:
             return ""
         _code, data = call(user, "jobs")
         rows = {str(r.get("id")): r for r in data.get("jobs") or [] if isinstance(r, dict)}
 
         def update(d):
             tripped = False
+            adopt_unknown(d, rows)
             for rec in d["jobs"]:
                 row = rows.get(rec["id"])
                 if row is None or rec["status"] in FINAL:
@@ -468,10 +504,13 @@ def install(app, pack):
         if entry is None:
             raise BridgeProblem("\n".join(x for x in (notice, refusal) if x))
 
-        def settle(result, refund=False, keep_stamp=True, record=None, failure=None):
+        def settle(result, refund=False, keep_stamp=True, record=None, failure=None, unknown=False):
             def fn(d):
-                if refund and sid in d["armed"]:
-                    d["armed"][sid]["uses"] += 1
+                same = d["armed"].get(sid)
+                if refund and same is not None and same.get("auth") == entry.get("auth"):   # 退到同一筆授權，不是後來重新授權的
+                    same["uses"] += 1
+                if unknown:
+                    d["unknown"].append({"sid": sid, "since": stamp, "src": src, "auth": entry.get("auth", "")})
                 if not keep_stamp and stamp in d["sent"]:
                     d["sent"].remove(stamp)
                 if record:
@@ -485,14 +524,16 @@ def install(app, pack):
             code, data = call(user, "continue", timeout=SEND_TIMEOUT, session=sid, budget=budget_of(user),
                               at=at_text(at) if at else "")
         except BridgeProblem as p:
-            kind = getattr(p, "kind", "call_error")
-            tripped = settle(kind, refund=True, failure=kind)
-            return "\n".join(x for x in (notice, p.text, freeze_line(user, tripped)) if x)
+            kind = getattr(p, "kind", "call_error")         # 逾時、看不懂、叫不起：不知道 claude 有沒有被叫起來，不退次數
+            tripped = settle("unknown:" + kind, failure=kind, unknown=kind != "call_error")
+            return "\n".join(x for x in (notice, p.text, "（結果不明：這次的次數不退；resetter 那邊要是建了工作，"
+                                                    "下次 /relay_jobs 會補記進來。）", freeze_line(user, tripped)) if x)
         job_id = str(data.get("id") or "")
         job_id = job_id if JOB_RE.fullmatch(job_id) else ""
         status = str(data.get("status") or "")
         record = {"id": job_id, "sid": sid, "at": at_text(at) if at else "", "created": int(stamp), "src": src,
-                  "status": status if status in STATUS_TEXT else "sent", "cost": 0.0, "error": "", "counted": False}
+                  "status": status if status in STATUS_TEXT else "sent", "cost": 0.0, "error": "", "counted": False,
+                  "auth": entry.get("auth", "")}
         if code == EXIT_OK and job_id:
             settle("ok:" + job_id, record=record)
             left = f"這個對話還剩 {entry['uses']} 次、授權到 {when_text(entry['until'])}。"
@@ -518,9 +559,11 @@ def install(app, pack):
         if job_id:
             record.update(status="failed", error=why, counted=True)
         kind = f"failed:exit{code}" if job_id or code != EXIT_OK else "failed:noid"
-        tripped = settle(kind, refund=True, keep_stamp=(code == EXIT_FAILED),
-                         record=record if job_id else None, failure=kind)
-        return "\n".join(x for x in (notice, f"❌ 沒送成：{why}（沒有扣次數）", freeze_line(user, tripped)) if x)
+        refund = code in REFUNDABLE                 # 結束碼 1（claude 可能起來過又失敗）不退
+        tripped = settle(kind, refund=refund, keep_stamp=not refund, record=record if job_id else None, failure=kind,
+                         unknown=kind == "failed:noid")
+        used = "沒有扣次數" if refund else "這次的次數不退（claude 可能已經被叫起來過）"
+        return "\n".join(x for x in (notice, f"❌ 沒送成：{why}（{used}）", freeze_line(user, tripped)) if x)
 
     def freeze_line(user, tripped):
         if not tripped:
@@ -541,7 +584,7 @@ def install(app, pack):
         stamp = now()
         entry = {"cwd": short(row.get("cwd"), 300), "label": short(row.get("label") or row.get("project"), 60),
                  "branch": short(row.get("branch"), 60), "until": int(stamp + hours * 3600), "uses": uses,
-                 "armed_at": int(stamp)}
+                 "armed_at": int(stamp), "auth": f"{int(stamp)}.{time.monotonic_ns() % 1000000:06d}"}
 
         def put(d):
             for old in [k for k, v in d["armed"].items() if v["until"] <= stamp]:

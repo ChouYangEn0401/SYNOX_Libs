@@ -78,6 +78,9 @@ def main(argv):
                             "result": "", "cost_usd": 0.0, "prompt": "continue",
                             "created": __import__("datetime").datetime.now().isoformat(timespec="seconds")}
             save("jobs.json", jobs)
+            if b.get("garble"):                       # 建了工作、但輸出看不懂（例如被別的東西印壞）
+                print("Traceback: boom")
+                return 1
             out = jobs[job_id]
     elif cmd == "jobs":
         out = {"jobs": list(jobs.values()) + b.get("foreign_jobs", [])}
@@ -474,8 +477,58 @@ def test_two_failures_in_a_row_freeze_and_cancel(rig):
     assert "自動凍結" in reply and "取消了 1 筆" in reply, reply
     assert rig.jobs()[scheduled]["status"] == "cancelled"
     data = rig.data()
-    assert data["frozen"] and data["armed"][SID]["uses"] == 4          # 只有排好的那一次扣了
+    assert data["frozen"] and data["armed"][SID]["uses"] == 2          # 結束碼 1 與看不懂的輸出都不退次數
     assert "凍結的" in rig.say(f"/relay_continue {SID}")
+
+
+def test_refund_only_when_claude_was_provably_not_started(rig):
+    """只有結束碼 2、3、4 退次數；1 不退；逾時、看不懂的輸出不退，稽核標 unknown。"""
+    armed(rig, uses=9)
+    for code, refunded in ((2, True), (3, True), (4, True), (1, False)):
+        before = rig.data()["armed"][SID]["uses"]
+        rig.behave(resume_exit=code)
+        reply = rig.say(f"/relay_continue {SID}")
+        assert rig.data()["armed"][SID]["uses"] == (before if refunded else before - 1), (code, reply)
+        rig.say("/relay_thaw")
+    rig.behave(resume_exit=99)
+    rig.say(f"/relay_continue {SID}")
+    assert rig.data()["armed"][SID]["uses"] == 7 and rig.data()["audit"][-1]["result"] == "unknown:unparseable"
+
+
+def test_timeout_does_not_refund(rig, monkeypatch):
+    armed(rig, uses=3)
+    monkeypatch.setattr(rig.module, "SEND_TIMEOUT", 1)
+    rig.behave(resume_sleep=5)
+    reply = rig.say(f"/relay_continue {SID}")
+    assert "沒有回應" in reply and "結果不明" in reply, reply
+    assert rig.data()["armed"][SID]["uses"] == 2 and rig.data()["audit"][-1]["result"] == "unknown:timeout"
+
+
+def test_unknown_outcome_is_adopted_from_the_resetter_list(rig):
+    armed(rig, uses=3)
+    rig.behave(garble=True)
+    reply = rig.say(f"/relay_continue {SID} at=+30")
+    assert "結果不明" in reply and rig.data()["jobs"] == [] and len(rig.data()["unknown"]) == 1
+    job_id = list(rig.jobs())[0]
+    rig.behave(garble=False)
+    assert job_id in rig.say("/relay_jobs")                      # 補記進來了
+    d = rig.data()
+    assert d["unknown"] == [] and [j["id"] for j in d["jobs"]] == [job_id]
+    assert any(a["act"] == "adopt" and a["result"] == "ok:" + job_id for a in d["audit"])
+    rig.say("/relay_freeze")                                      # 補記的那筆，凍結時一樣取消
+    assert rig.jobs()[job_id]["status"] == "cancelled"
+
+
+def test_refund_goes_only_to_the_same_authorization(rig):
+    """送出去的那幾秒裡被撤回又重新授權：被佔用退回的那一次不能加到新的授權上。"""
+    armed(rig, uses=2)
+    rig.behave(resume_exit=3, resume_sleep=2)
+    rig.bot.say(OWNER_ID, f"/relay_continue {SID}")
+    time.sleep(0.7)
+    rig.say(f"/relay_disarm {SID}")
+    armed(rig, uses=2)
+    assert rig.bot.app.tasks.wait(20)
+    assert rig.data()["armed"][SID]["uses"] == 2
 
 
 def test_job_reported_failed_counts_toward_freeze(rig):
@@ -507,7 +560,7 @@ def test_freeze_reason_and_audit_keep_only_categories(rig):
     rig.say("/relay_thaw")
     rig.behave(resume_exit=99)
     rig.say(f"/relay_continue {SID}")
-    assert rig.data()["audit"][-1]["result"] == "unparseable"
+    assert rig.data()["audit"][-1]["result"] == "unknown:unparseable"
 
 
 def test_audit_keeps_200_and_has_no_content_or_codes(rig):
