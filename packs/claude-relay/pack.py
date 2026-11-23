@@ -109,6 +109,15 @@ def last_json(text):
     return None
 # <<< resetterbridge
 
+
+class CallProblem(BridgeProblem):
+    """叫 resetter 沒有得到看得懂的結果。kind＝分類（call_error／timeout／unparseable），稽核與凍結原因只放分類，
+    不放錯誤原文（原文可能帶路徑或 resetter 印的任何字）。"""
+
+    def __init__(self, text, kind):
+        super().__init__(text)
+        self.kind = kind
+
 # ── 常數（邊界） ──────────────────────────────────────────────────────
 
 PROMPT = "continue"                # 送出去的永遠是這一句
@@ -332,15 +341,15 @@ def install(app, pack):
             job = app.jobs.run(f"claude-relay-{kind}", argv, cwd=home, timeout=timeout, env=clean_env(), log_path=log)
         except OSError as e:
             remove(log)
-            raise BridgeProblem(f"🔁 叫不起 ClaudeTimerResetter：{type(e).__name__}（{SETUP} 看設定）") from None
+            raise CallProblem(f"🔁 叫不起 ClaudeTimerResetter：{type(e).__name__}（{SETUP} 看設定）", "call_error") from None
         text = read_log(job.log_path)
         remove(job.log_path)                      # 明文的輸出不留
         if job.state == TIMED_OUT:
-            raise BridgeProblem(f"🔁 ClaudeTimerResetter 超過 {timeout} 秒沒有回應，先停掉了。")
+            raise CallProblem(f"🔁 ClaudeTimerResetter 超過 {timeout} 秒沒有回應，先停掉了。", "timeout")
         data = last_json(text)
         if data is None:
             tail = short("\n".join(text.strip().splitlines()[-3:]), 300)
-            raise BridgeProblem("🔁 ClaudeTimerResetter 沒有回傳看得懂的結果（版本太舊？）。最後幾行：" + tail)
+            raise CallProblem("🔁 ClaudeTimerResetter 沒有回傳看得懂的結果（版本太舊？）。最後幾行：" + tail, "unparseable")
         return job.returncode, data
 
     # ── 工作狀態、失敗計數、凍結 ──
@@ -356,10 +365,11 @@ def install(app, pack):
         audit(d, "freeze", src, "", why)
         return True
 
-    def note_failure(d, sid, why):
+    def note_failure(d, sid, kind):
+        """kind 只是分類（failed:exit1、timeout、unparseable、job_failed…），不是錯誤原文。"""
         d["fails"] += 1
         if d["fails"] >= FAIL_LIMIT:
-            return trip(d, "system", f"連續 {FAIL_LIMIT} 次失敗，自動凍結（最後一次：{why}）")
+            return trip(d, "system", f"連續 {FAIL_LIMIT} 次失敗，自動凍結（最後一次：{kind}）")
         return False
 
     def cancel_pending(user, src, sids=None):
@@ -412,7 +422,7 @@ def install(app, pack):
                     rec["counted"] = True
                     if rec["status"] == "failed":
                         audit(d, "job_failed", "system", rec["sid"], "failed")
-                        tripped = note_failure(d, rec["sid"], "resetter 回報工作失敗") or tripped
+                        tripped = note_failure(d, rec["sid"], "job_failed") or tripped
                     elif rec["status"] == "done":
                         d["fails"] = 0
             return tripped
@@ -475,7 +485,8 @@ def install(app, pack):
             code, data = call(user, "continue", timeout=SEND_TIMEOUT, session=sid, budget=budget_of(user),
                               at=at_text(at) if at else "")
         except BridgeProblem as p:
-            tripped = settle("failed:call", refund=True, failure="叫 resetter 失敗")
+            kind = getattr(p, "kind", "call_error")
+            tripped = settle(kind, refund=True, failure=kind)
             return "\n".join(x for x in (notice, p.text, freeze_line(user, tripped)) if x)
         job_id = str(data.get("id") or "")
         job_id = job_id if JOB_RE.fullmatch(job_id) else ""
@@ -506,8 +517,9 @@ def install(app, pack):
         why = short(data.get("error"), 200) or f"結束碼 {code}"
         if job_id:
             record.update(status="failed", error=why, counted=True)
-        tripped = settle(f"failed:{code}", refund=True, keep_stamp=(code == EXIT_FAILED),
-                         record=record if job_id else None, failure=why)
+        kind = f"failed:exit{code}" if job_id or code != EXIT_OK else "failed:noid"
+        tripped = settle(kind, refund=True, keep_stamp=(code == EXIT_FAILED),
+                         record=record if job_id else None, failure=kind)
         return "\n".join(x for x in (notice, f"❌ 沒送成：{why}（沒有扣次數）", freeze_line(user, tripped)) if x)
 
     def freeze_line(user, tripped):
@@ -650,7 +662,7 @@ def install(app, pack):
             raise BridgeProblem(f"🔁 工作 {job_id} 已經結束了（{STATUS_TEXT.get(rec['status'], rec['status'])}）。")
         code, data = call(user, "cancel", job=job_id)
         if code != EXIT_OK or job_id not in (data.get("cancelled") or []):
-            change(user, lambda d: audit(d, "cancel", src, rec["sid"], f"failed:{code}"))
+            change(user, lambda d: audit(d, "cancel", src, rec["sid"], f"failed:exit{code}"))
             raise BridgeProblem(f"🔁 取消不了工作 {job_id}（可能已經結束了；/relay_job {job_id} 看一下）。")
 
         def mark(d):

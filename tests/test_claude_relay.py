@@ -61,6 +61,8 @@ def main(argv):
         code = b.get("check_exit", 0)
         out = {"session_id": target, "ok": code == 0, "problems": [], "busy": code == 3, "holder": "VSCode 開著"}
     elif cmd == "resume":
+        import time
+        time.sleep(b.get("resume_sleep", 0))
         code = b.get("resume_exit", 0)
         if code == 99:
             print("Traceback: boom")
@@ -72,8 +74,9 @@ def main(argv):
             at = next((a[5:] for a in argv if a.startswith("--at=")), "")
             status = {0: "scheduled" if at else "sent", 1: "failed", 3: "waiting"}[code]
             jobs[job_id] = {"id": job_id, "kind": "resume", "session_id": target, "at": at, "status": status,
-                            "error": "VSCode 開著；關掉之後會自動補送" if code == 3 else ("claude 秒退" if code == 1 else ""),
-                            "result": "", "cost_usd": 0.0, "prompt": "continue"}
+                            "error": "VSCode 開著；關掉之後會自動補送" if code == 3 else (b.get("resume_error", "claude 秒退") if code == 1 else ""),
+                            "result": "", "cost_usd": 0.0, "prompt": "continue",
+                            "created": __import__("datetime").datetime.now().isoformat(timespec="seconds")}
             save("jobs.json", jobs)
             out = jobs[job_id]
     elif cmd == "jobs":
@@ -486,6 +489,25 @@ def test_job_reported_failed_counts_toward_freeze(rig):
     assert "自動凍結" in rig.say(f"/relay_job {second}")
     assert rig.data()["frozen"]
     assert "解除凍結" in rig.say("/relay_thaw") and rig.data()["fails"] == 0
+
+
+def test_freeze_reason_and_audit_keep_only_categories(rig):
+    """凍結原因與稽核只放分類；resetter 的錯誤原文只在那一筆工作的 error，而且截斷。"""
+    armed(rig, uses=5)
+    secret = "private-detail " + "x" * 1000
+    rig.behave(resume_exit=1, resume_error=secret)
+    rig.say(f"/relay_continue {SID}")
+    rig.say(f"/relay_continue {SID}")
+    d = rig.data()
+    assert d["frozen"] and d["frozen_why"].endswith("（最後一次：failed:exit1）"), d["frozen_why"]
+    blob = json.dumps(d["audit"], ensure_ascii=False) + d["frozen_why"]
+    assert "private" not in blob and "xxx" not in blob
+    assert [a["result"] for a in d["audit"] if a["act"] == "continue"] == ["failed:exit1", "failed:exit1"]
+    assert all(len(j["error"]) <= 200 and "private" in j["error"] for j in d["jobs"])
+    rig.say("/relay_thaw")
+    rig.behave(resume_exit=99)
+    rig.say(f"/relay_continue {SID}")
+    assert rig.data()["audit"][-1]["result"] == "unparseable"
 
 
 def test_audit_keeps_200_and_has_no_content_or_codes(rig):
