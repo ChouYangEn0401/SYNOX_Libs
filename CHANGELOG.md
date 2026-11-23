@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **`claude-resetter` 0.1.0-alpha.1（新工具；stage test、alpha，尚未實機驗證；`requires.sdk` `>=0.2.3,<0.3`）**：把另外裝好的 ClaudeTimerResetter 接進 SYNOX，群組 `/resetter`，只給擁有者、只能私訊。`/resetter_usage` 看額度（不花錢）、`/resetter_refresh` 該刷新才刷新（約 $0.00025，人、AI、排程都能叫；`force=是` 與 `/resetter_setup` 只有本人）、`/resetter_check`。只宣告 `subprocess`：經 SYNOX 的 JobRunner 叫 resetter 的 `usage`、`ping`（`--json`），自己不讀 `~/.claude`、不連網、不碰檔。共用橋接層 `packs/_shared/resetterbridge.py` 由 `scripts/sync_shared.py` 複製進 `pack.py`。定時刷新用 SYNOX 內建的 `/schedule_add 08:40 /resetter_refresh`。
 - **發佈 `v0.3.1`（`VERSION` 0.3.0 → 0.3.1）與 `scripts/sign_dist.py`**：簽 `dist/` 裡每個 `.synoxpack`（`synox-sdk sign`，別名＝簽過那一份的複本）、
   每個都 `verify` 要是 official，再用**簽過的檔**重算 `index.json` 每筆 `sha256`／`size`、`SHA256SUMS`、`tools-<VERSION>.zip`／`tools.zip`，最後做一致性檢查；
   全有或全無（先在暫存資料夾做、全過才換進 `dist/`）；密語只從 `SYNOX_PACK_KEY_PASSWORD` 拿。`--check` 上傳前再驗一次。發佈順序見 `docs/RELEASING.md`。

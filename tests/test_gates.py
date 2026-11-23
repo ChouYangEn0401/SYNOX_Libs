@@ -34,7 +34,9 @@ SCAN_SEES = {"projects": ["filesystem:own"],
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
 # 叫這台電腦上另外裝好的程式（video-notes：使用者自己裝的 Video Notes）：只給擁有者、只經 SYNOX 的 JobRunner（app.jobs）開程式，
 # 自己不連網、不動態執行；讀檔只讀那支程式產生的筆記。規則在 test_local_program_tools_only_use_app_jobs。
-LOCAL_PROGRAM = ("video-notes",)
+LOCAL_PROGRAM = ("video-notes", "claude-resetter")
+# 叫別的程式的工具各自准 open() 的地方（函式名單）：video-notes 讀筆記、寫網址清單；claude-resetter 一個檔都不開（log 由 JobRunner 寫、輸出用 job.output 讀）
+LOCAL_PROGRAM_OPENS = {"video-notes": ["launch", "read_note"], "claude-resetter": []}
 # pack 名稱 → 宣告的 capabilities（其他一律不准；每個都要明寫，沒有就寫 []——ADR-0006 C5）
 ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money": ["filesystem:own"], "notes": [], "habits": [],
                 "diary": ["filesystem:own"],
@@ -43,6 +45,8 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
                 "workspace": ["filesystem:any"],
                 **{name: ["network"] for name in CONNECT},
                 "video-notes": ["subprocess", "filesystem:any"],
+                # claude-resetter：只經 JobRunner 叫另外裝好的 ClaudeTimerResetter（用量查詢與探針都是它在本機做的）；自己不碰檔案、不連網
+                "claude-resetter": ["subprocess"],
                 # usb-keys：自己的程式不開檔、不開程式，但它叫的 usbtether 會（讀寫使用者選的檔、在隨身碟寫 .usbtether；
                 # Windows 用 PowerShell 讀隨身碟的硬體資訊）——照實宣告，掃描器看不到函式庫裡面（見 DECLARED_BEYOND_SCAN）
                 "usb-keys": ["filesystem:any", "subprocess"]}
@@ -203,7 +207,7 @@ def test_local_program_tools_only_use_app_jobs(name):
             for node in ast.walk(fn):
                 owners[id(node)] = fn.name
     opens = [n for n in ast.walk(tree) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "open"]
-    assert sorted(owners.get(id(n)) for n in opens) == ["launch", "read_note"]
+    assert sorted(owners.get(id(n)) for n in opens) == LOCAL_PROGRAM_OPENS[name]
 
 
 @pytest.mark.parametrize("name", [n for n in PACK_NAMES if n not in ("money", "projects", "habits") and n not in LOCAL_PROGRAM])    # projects：tests/test_projects.py 自己的靜態規則；habits：test_habits_no_network_subprocess_exec_or_files
