@@ -54,6 +54,11 @@
       "title": "專案",
       "summary": "追蹤每個專案停在哪、為什麼停、回來先做什麼；可掃你指定的資料夾（只讀）",
       "packs": ["projects"]
+    },
+    "claude-quota": {
+      "title": "Claude 額度計時",
+      "summary": "開工前先打一次最便宜的探針，提早啟動 Claude 5 小時額度的重置時鐘，也能看額度（要先另外裝 ClaudeTimerResetter）",
+      "packs": ["claude-resetter"]
     }
   }
 }
