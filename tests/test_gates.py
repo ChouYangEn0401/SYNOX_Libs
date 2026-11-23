@@ -21,7 +21,7 @@ from synox.packs import manifest as synox_manifest
 from synox.packs import scan as synox_scan
 from synox.sdk import author
 
-from conftest import PACK_NAMES, PACKS, PLANNER
+from conftest import ALL_PACK_NAMES, PACK_NAMES, PACKS, PLANNER
 
 # 本機工具但只給擁有者：projects 會讀使用者自己填的資料夾（只讀，filesystem:any），不開給伺服器版的成員
 OWNER_LOCAL = ("projects",)
@@ -175,6 +175,57 @@ def test_gate2_static_scan_passes(name):
 
 
 LOCAL_PROGRAM_IMPORTS = ("json", "os", "re", "threading", "time", "isdtelekit", "synox")
+
+
+# 私人工具（pack.json "publish": false；CONTRIBUTING-TOOLS 2c）：不在 PACK_NAMES 裡，上面那些「工具庫的公開規矩」不套用
+# （test_every_tool_is_listed 只看公開的），但 SYNOX 安裝的第 1、2 關、能力照實宣告、叫別的程式只經 app.jobs 一樣要對。
+# 每個私人工具都要登記在這裡（test_every_private_tool_is_listed）；各自的細規則在自己的 tests/test_<名字>.py。
+PRIVATE_CAPS = {
+    # claude-relay：只經 app.jobs 叫使用者自己裝的 ClaudeTimerResetter（subprocess）；叫完就刪自己資料夾裡的輸出暫存檔
+    # （filesystem:own，pack.path_of 底下）。送出去的字、權限模式寫死，argv 只由 relay_argv 組（tests/test_claude_relay.py）
+    "claude-relay": ["filesystem:own", "subprocess"],
+}
+PRIVATE_LOCAL_PROGRAM = ("claude-relay",)
+# 私人的「叫別的程式」工具多准 datetime（at 時間的計算）
+PRIVATE_LOCAL_PROGRAM_IMPORTS = LOCAL_PROGRAM_IMPORTS + ("datetime",)
+
+
+def test_every_private_tool_is_listed():
+    assert set(ALL_PACK_NAMES) - set(PACK_NAMES) == set(PRIVATE_CAPS)
+
+
+@pytest.mark.parametrize("name", sorted(PRIVATE_CAPS))
+def test_private_tools_pass_synox_gates_and_declare_honestly(name):
+    m = synox_manifest.read(folder(name), strict=True)
+    assert m.raw.get("publish") is False and m.kind == "python" and m.name == name
+    assert m.access == ("owner" if name in PRIVATE_LOCAL_PROGRAM else "member")
+    assert m.capabilities_declared and m.capabilities == PRIVATE_CAPS[name]
+    assert m.surfaces == ["dm"] and m.data == "user" and m.storage == "vault"
+    assert all(key in m.raw for key in ("access", "surfaces", "data", "storage", "capabilities", "stage"))
+    assert m.requires.get("sdk") and synox_manifest.sdk_problem(m, author.SDK_VERSION) is None
+    assert os.path.isfile(m.skill_path) and os.path.isfile(os.path.join(folder(name), "README.md"))
+    report = synox_scan.scan(m)
+    assert report.problems(m) == [], report.format(m)
+    assert report.required_capabilities == PRIVATE_CAPS[name], report.format(m)
+
+
+@pytest.mark.parametrize("name", PRIVATE_LOCAL_PROGRAM)
+def test_private_local_program_tools_only_use_app_jobs(name):
+    text = source(name)
+    for node in ast.walk(ast.parse(text)):
+        if isinstance(node, ast.Import):
+            mods = [a.name for a in node.names]
+        elif isinstance(node, ast.ImportFrom):
+            assert not node.level, f"{name}: 相對 import"
+            mods = [node.module or ""]
+        else:
+            continue
+        for mod in mods:
+            assert mod.split(".")[0] in PRIVATE_LOCAL_PROGRAM_IMPORTS, f"{name}: unexpected import {mod}"
+    for pattern in FORBIDDEN_TEXT:
+        if pattern != r"app\.jobs":
+            assert not re.search(pattern, text), f"{name}: {pattern}"
+    assert "shell=True" not in text and "pack.path(" not in text
 
 
 @pytest.mark.parametrize("name", LOCAL_PROGRAM)
