@@ -135,6 +135,8 @@ MAX_AT_MINUTES = 48 * 60
 DAILY_LIMIT = 10                   # 24 小時內最多送出幾次（全部對話加起來）
 FAIL_LIMIT = 2                     # 連續幾次失敗就自動凍結
 KEEP_AUDIT, KEEP_JOBS, MAX_ARMED = 200, 50, 10
+INTERACTIVE = ("claude-vscode", "cli")          # resetter 的 sessions --json 的 entrypoint：VSCode 擴充、終端機
+ARMABLE_ORIGINS = ("project", "worktree")       # origin：專案、分身；app（程式用）、temp（暫存）、unknown 不收
 SESSIONS_SCAN = 500                # 授權時在 resetter 的對話清單找多少個
 SYNC_TIMEOUT = 90                  # 看清單、看結果、取消這種很快的呼叫
 SEND_TIMEOUT = 240                 # 現在就送：resetter 會盯 claude 60 秒確認沒有馬上失敗
@@ -631,6 +633,18 @@ def install(app, pack):
         if row is None:
             change(user, lambda d: audit(d, "arm", src, sid, "refused:not_found"))
             raise BridgeProblem(f"🔁 在這台電腦最近 {SESSIONS_SCAN} 個對話裡找不到 {sid}（/relay_sessions 看清單）。")
+        origin, entry_point = str(row.get("origin") or ""), str(row.get("entrypoint") or "")
+        if origin not in ARMABLE_ORIGINS or entry_point not in INTERACTIVE:
+            why = ("這是程式用 claude -p 開的對話（或來源看不出來）" if entry_point not in INTERACTIVE
+                   else "這個對話在暫存或程式自己的資料夾裡")
+            change(user, lambda d: audit(d, "arm", src, sid, f"refused:origin:{short(origin, 12)}/{short(entry_point, 16)}"))
+            raise BridgeProblem(f"🔁 不授權：{why}。只授權你自己在 VSCode 或終端機開、放在專案資料夾的對話——"
+                                "程式開的有自己的主人在管，而且沒有「你互動時的權限」可以沿用。")
+        code, checked = call(user, "check", session=sid)
+        if code not in (EXIT_OK, EXIT_WAIT):
+            problems = checked.get("problems") or [checked.get("error") or f"結束碼 {code}"]
+            change(user, lambda d: audit(d, "arm", src, sid, f"refused:check:exit{code}"))
+            raise BridgeProblem("🔁 不授權：resetter 檢查這個對話送不出去——" + "；".join(short(p, 160) for p in problems[:3]))
         stamp = now()
         entry = {"cwd": short(row.get("cwd"), 300), "label": short(row.get("label") or row.get("project"), 60),
                  "branch": short(row.get("branch"), 60), "until": int(stamp + hours * 3600), "uses": uses,
@@ -653,11 +667,14 @@ def install(app, pack):
         return "\n".join([
             f"✅ 授權了：{entry['label'] or sid[:8]}（{entry['branch'] or '沒有分支'}）",
             f"  資料夾：{entry['cwd']}",
-            f"  到 {when_text(entry['until'])} 為止、最多 {uses} 次，每次只送 continue、權限照它原本的。",
+            f"  到 {when_text(entry['until'])} 為止、最多 {uses} 次，每次只送 continue、權限模式 inherit（見下）。",
             f"  現在送：/relay_continue {sid}",
             f"  排時間：/schedule_add 06:05 /relay_continue {sid}　或　/relay_continue {sid} at=06:05",
             "⚠ continue 會讓它帶著原本的工具權限接著做停住前在做的事；背景沒有人能按核准，要核准的動作會停住。",
-        ] + (["⛔ 現在是凍結的：要先 /relay_thaw 才會真的送。"] if frozen else []))
+            "⚠ 權限是 resetter 從對話紀錄讀「你最後一次在 VSCode／終端機互動時」的模式：讀不到就退回「自動同意改檔」模式，"
+            "原本是「略過所有權限」的會降成 auto（分類器擋危險的）。這裡看不出它會讀到哪一個，不確定就先 /relay_show 看一下。",
+        ] + (["⏳ 這個對話現在正被開著：送的時候要先關掉它。"] if code == EXIT_WAIT else [])
+          + (["⛔ 現在是凍結的：要先 /relay_thaw 才會真的送。"] if frozen else []))
 
     def core_disarm(user, target, src):
         need_human(src)

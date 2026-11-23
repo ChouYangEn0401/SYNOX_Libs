@@ -6,7 +6,7 @@ description: 使用者想看這台電腦上的 Claude Code 對話、看哪些對
 # 對話接力
 
 這個工具讓「因為額度停住的 Claude Code 對話」在使用者**事先授權**之後，被送一句固定的 `continue` 接著做下去。
-送出去的字永遠是 `continue`，權限永遠照那個對話原本的，沒有任何參數能改。
+送出去的字永遠是 `continue`，權限模式永遠是 resetter 的 inherit（讀不到原本的就退回自動同意改檔），沒有任何參數能改。
 
 ## 你可以做的
 - 使用者問「我電腦上有哪些 Claude 對話」「哪個停住了」→ `relay__sessions`（可以給 `cwd`、`limit`）。

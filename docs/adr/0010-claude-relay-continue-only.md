@@ -18,7 +18,7 @@ Claude Code 的對話因為額度（session limit）停住時，會告訴你大�
 
 | 層 | 送什麼 | 風險 | 這一版 |
 |---|---|---|---|
-| **低風險層** | 固定的 `continue`，權限照對話原本的（`inherit`） | 對話照它停住前的計畫接著做；沒有新的指示可以被塞進去 | **做** |
+| **低風險層** | 固定的 `continue`，權限模式 `inherit`（resetter 讀互動時的模式；讀不到退回 `acceptEdits`，`bypassPermissions` 降成 `auto`） | 對話照它停住前的計畫接著做；沒有新的指示可以被塞進去 | **做** |
 | 高風險層 | `resume` 帶任意文字、`new` 開新對話 | 任意文字＝prompt injection 的入口：誰能把字送進一個有工具權限的對話，誰就拿到那些權限 | **不做**（第 6 節） |
 
 擁有者在猶豫之後選了保守版：先只做低風險層，高風險層等有更多保護再說。**不要偷偷加。**
@@ -32,6 +32,8 @@ Claude Code 的對話因為額度（session limit）停住時，會告訴你大�
 | 參數被當成旗標 | 對話 id 只收小寫 UUID（`fullmatch`），工作編號只收 8 個小寫 hex，都放在 `--` 後面；其他值一律 `--旗標=值` 一段；時間只收三種嚴格格式，送給 resetter 前換成絕對的 `YYYY-MM-DD HH:MM` | 已查證（`--` 在 Python 3.11／3.12／3.13 的 argparse 子指令都照預期，試過 resetter 的 `_parser()`） |
 | AI 被注入後自己去續跑 | `continue`、`arm` 的 `callers` 不含 `ai`（AI 的工具清單裡看不到）、`ai=False` | 已查證 |
 | 手機遠端入口被拿去用 | `callers` 不含 `remote` | 已查證 |
+| 授權到程式開的、暫存的對話（沒有「你互動時的權限」可沿用，或有別的主人） | `arm` 只收 resetter 清單上 `entrypoint` 是 `claude-vscode`／`cli`、`origin` 是 `project`／`worktree` 的；其他（含欄位缺）一律拒。授權前跑 `check`，送不出去就拒、被佔用只提醒 | 已查證（欄位名與值照 resetter 的 `sessions.py`／`cli._session_dict`） |
+| `inherit` 其實退回 `acceptEdits` | resetter 讀不到互動紀錄時退回 `acceptEdits`；CLI 的 `check` 不回報會用哪個模式，relay 看不出來，所以選「**每次授權都明確警告**」而不是拒絕 | 已查證（`inherit.py`）；選擇：警告 |
 | 有人拿到你的 Telegram 就授權對話 | `arm` 要 `stepup`（手機驗證器、只有本人）；沒設定驗證器的人根本不能用 | 已查證 |
 | 授權之後被一直續跑、花太多 | 授權有期限（1–48 小時）與次數（1–10）；全域每 24 小時最多 10 次；每次帶 `--max-budget-usd`；連續 2 次失敗自動凍結 | 已查證 |
 | 出事時停不下來 | `freeze`：本人或 AI 都能叫、不用碼，取消這個工具排的、還沒跑完的工作；`thaw` 要本人＋驗證器 | 已查證 |

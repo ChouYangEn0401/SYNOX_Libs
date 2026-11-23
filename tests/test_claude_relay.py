@@ -24,6 +24,7 @@ MODULE = "synox_pack_claude_relay"
 FOLDER = os.path.join(PACKS, NAME)
 SID = "0123abcd-0000-4000-8000-00000000abcd"
 SID2 = "0123abcd-1111-4000-8000-00000000abcd"
+APP_SID, TEMP_SID, PIPE_SID, OLD_SID = (f"0123abcd-{n}{n}{n}{n}-4000-8000-00000000abcd" for n in (5, 6, 7, 8))
 AI_OK = {"sessions", "show", "check", "armed", "jobs", "job", "freeze"}
 HUMAN_ONLY = {"arm", "disarm", "cancel", "thaw", "setup"}
 STEPUP = {"arm", "thaw", "setup"}
@@ -111,7 +112,12 @@ def make_resetter(tmp_path, sessions=(SID, SID2)):
     (home / "claude_timer" / "__init__.py").write_text("", encoding="utf-8")
     (home / "claude_timer" / "cli.py").write_text(FAKE_CLI, encoding="utf-8")
     rows = [{"session_id": s, "cwd": f"/projects/demo{i}", "label": f"demo{i}", "branch": "main", "relative": "3 小時前",
-             "title": "假的對話", "last_prompt": "請繼續", "busy": False} for i, s in enumerate(sessions)]
+             "title": "假的對話", "last_prompt": "請繼續", "busy": False, "origin": "project", "entrypoint": "claude-vscode"}
+            for i, s in enumerate(sessions)]
+    rows += [{"session_id": sid, "cwd": f"/tmp/x{n}", "label": f"x{n}", "branch": "", "relative": "1 天前", "title": "程式開的",
+              "last_prompt": "做事", "busy": False, "origin": origin, "entrypoint": entry}
+             for n, (sid, origin, entry) in enumerate(((APP_SID, "app", "sdk-cli"), (TEMP_SID, "temp", "cli"),
+                                                         (PIPE_SID, "project", "sdk-cli"), (OLD_SID, "project", "")))]
     (home / "behavior.json").write_text(json.dumps({"sessions": rows}), encoding="utf-8")
     return home
 
@@ -430,6 +436,24 @@ def test_continue_from_a_synox_schedule_runs_as_schedule(rig):
     assert rig.resumes() == [CONTINUE_ARGV]
     last = [a for a in rig.data()["audit"] if a["act"] == "continue"][-1]
     assert last["src"] == "schedule" and last["result"].startswith("ok:")
+
+
+@pytest.mark.parametrize("sid", [APP_SID, TEMP_SID, PIPE_SID, OLD_SID])
+def test_arm_refuses_program_temp_and_unknown_origin_sessions(rig, sid):
+    """資安審查 3：程式開的（entrypoint 不是 VSCode／終端機）、暫存或程式資料夾裡的、看不出來源的，都不授權。"""
+    reply = rig.say(f"/relay_arm {sid}")
+    assert "不授權" in reply and sid not in rig.data()["armed"], reply
+    assert rig.data()["audit"][-1]["result"].startswith("refused:origin")
+    assert not [c for c in rig.calls() if c[0] == "check"]
+
+
+def test_arm_runs_check_and_warns_about_permission_fallback(rig):
+    rig.behave(check_exit=1)
+    assert "送不出去" in rig.say(f"/relay_arm {SID}") and SID not in rig.data()["armed"]
+    rig.behave(check_exit=3)
+    reply = armed(rig)
+    assert "正被開著" in reply and "自動同意改檔" in reply and "auto" in reply
+    assert rig.calls()[-1] == ["check", "--json", "--", SID]
 
 
 def test_arm_needs_a_listed_session_and_disarm_cancels_pending(rig):
