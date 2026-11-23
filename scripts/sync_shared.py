@@ -18,7 +18,7 @@ SHARED = os.path.join(ROOT, "packs", "_shared")
 # 正本 → 用到它的 pack
 TARGETS = {"zhdate": ("calendar", "todo", "google-calendar", "todoist"),
            "googleauth": ("google-sheets",),
-           "resetterbridge": ("claude-relay",)}
+           "resetterbridge": ("claude-resetter", "claude-relay")}
 
 
 def block(text: str, name: str) -> str:

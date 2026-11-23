@@ -1,0 +1,28 @@
+{
+  "name": "claude-resetter",
+  "title": "⏱ Claude 重置計時",
+  "summary": "開工前先打一次最便宜的探針，提早啟動 Claude 5 小時額度的重置時鐘；也能看額度用了多少（要先另外裝 ClaudeTimerResetter）",
+  "version": "0.1.0-alpha.1",
+  "stage": "test",
+  "kind": "python",
+  "group": "resetter",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "storage": "vault",
+  "order": 95,
+  "capabilities": ["subprocess"],
+  "python": { "module": "pack" },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2.3,<0.3" },
+  "skill": "SKILL.md",
+  "callers": { "setup": ["human"], "refresh": ["human", "ai", "schedule"] },
+  "help": {
+    "featured": ["usage", "refresh"],
+    "commands": {
+      "usage": { "plain": "看額度用了多少，幾點重置", "alias_suggest": ["額度"] },
+      "refresh": { "plain": "該刷新就刷新，不該就不打", "examples": [{ "text": "wait=是", "note": "快重置時等它重置完再打" }], "alias_suggest": ["刷新額度"] },
+      "check": { "plain": "檢查重置工具能不能用" },
+      "setup": { "plain": "告訴我重置工具裝在哪個資料夾" }
+    }
+  }
+}
