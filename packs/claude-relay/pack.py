@@ -374,9 +374,10 @@ def install(app, pack):
             return trip(d, "system", f"連續 {FAIL_LIMIT} 次失敗，自動凍結（最後一次：{kind}）")
         return False
 
-    def cancel_pending(user, src, sids=None):
+    def cancel_pending(user, src, sids=None, ids=None):
         """取消這個工具排的、還沒跑完的工作（sids 給了就只取消那幾個對話的）。回 (取消了的, 取消不了的說明)。"""
-        pending = [r for r in load(user)["jobs"] if r["status"] not in FINAL and (sids is None or r["sid"] in sids)]
+        pending = [r for r in load(user)["jobs"] if r["status"] not in FINAL and (sids is None or r["sid"] in sids)
+                   and (ids is None or r["id"] in ids)]
         done, problems = [], []
         for rec in pending:
             try:
@@ -466,6 +467,32 @@ def install(app, pack):
             cancel_pending(user, "system")
             return f"⛔ 連續 {FAIL_LIMIT} 次失敗，已經自動凍結、取消還沒跑完的工作。看 /relay_jobs，確定沒問題再 /relay_thaw。"
         return ""
+
+    def stale(d, rec, stamp):
+        """還沒送（scheduled／waiting）、但授權已經不在、過期、或換成另一筆授權的工作。"""
+        if rec["status"] not in ("scheduled", "waiting"):
+            return False
+        entry = d["armed"].get(rec["sid"])
+        return entry is None or entry["until"] <= stamp or bool(rec.get("auth")) and entry.get("auth") != rec.get("auth")
+
+    def sweep(user):
+        """每個指令進來先做一次：授權過期或撤回、工作卻還沒送的，問過 resetter 的最新狀態後取消。
+        （resetter 的一次性工作錯過時間會在下次開機補跑、fire 不看遲到；這是 relay 這邊唯一收得回來的機會。）"""
+        if not any(stale(load(user), r, now()) for r in load(user)["jobs"]):
+            return ""
+        try:
+            notice = refresh(user)
+            d, stamp = load(user), now()
+            ids = {r["id"] for r in d["jobs"] if stale(d, r, stamp)}
+            done, problems = cancel_pending(user, "system", ids=ids) if ids else ([], [])
+        except BridgeProblem as p:
+            return "⚠ 有授權已過期、還沒送的工作，但現在問不到 ClaudeTimerResetter：" + p.text
+        lines = [notice] if notice else []
+        if done:
+            lines.append(f"🧹 授權已過期或撤回：取消了 {len(done)} 筆還沒送的工作（{'、'.join(done)}）。")
+        if problems:
+            lines.append("⚠ 有些取消不了：" + "；".join(problems))
+        return "\n".join(lines)
 
     # ── 核心 ──
 
@@ -615,6 +642,8 @@ def install(app, pack):
             if sid not in d["armed"] and len(d["armed"]) >= MAX_ARMED:
                 audit(d, "arm", src, sid, "refused:too_many")
                 return False
+            if sid in d["armed"]:                    # 還有效的授權重新設定＝延長／改次數：同一筆授權，排好的工作照舊
+                entry["auth"] = d["armed"][sid].get("auth") or entry["auth"]
             d["armed"][sid] = entry
             audit(d, "arm", src, sid, f"ok:{hours}h/{uses}")
             return True
@@ -638,20 +667,20 @@ def install(app, pack):
             sids = list(data["armed"])
         else:
             sids = [check_session(target)]
-            if sids[0] not in data["armed"]:
-                raise BridgeProblem("🔁 這個對話本來就沒有授權（/relay_armed 看名單）。")
-        if not sids:
-            return "🔁 現在沒有授權任何對話。"
+        pending = [r for r in data["jobs"] if r["status"] not in FINAL and (target == "all" or r["sid"] in sids)]
+        if not [x for x in sids if x in data["armed"]] and not pending:
+            return "🔁 現在沒有授權任何對話。" if target == "all" else "🔁 這個對話本來就沒有授權，也沒有還沒送的工作。"
         done, problems = [], []
-        if [r for r in data["jobs"] if r["status"] not in FINAL and r["sid"] in sids]:
-            done, problems = cancel_pending(user, src, set(sids))
+        if pending:                                  # 授權已經過期被清掉的對話，排好的工作也照樣收
+            done, problems = cancel_pending(user, src, None if target == "all" else set(sids))
+        sids = [x for x in sids if x in data["armed"]]
 
         def drop(d):
             for sid in sids:
                 d["armed"].pop(sid, None)
                 audit(d, "disarm", src, sid, "ok")
         change(user, drop)
-        lines = [f"✅ 取消了 {len(sids)} 個對話的授權。"]
+        lines = [f"✅ 取消了 {len(sids)} 個對話的授權。" if sids else "🔁 這個對話的授權本來就不在了。"]
         if done:
             lines.append(f"  連同還沒送的 {len(done)} 筆工作一起取消了。")
         if problems:
@@ -874,6 +903,9 @@ def install(app, pack):
 
             def work():
                 try:
+                    swept = sweep(user)
+                    if swept:
+                        say(api, chat_id, swept)
                     say(api, chat_id, fn(user, values, src))
                 except BridgeProblem as p:
                     api.send_message(chat_id, p.text)

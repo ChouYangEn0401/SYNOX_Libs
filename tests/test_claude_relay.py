@@ -551,6 +551,39 @@ def test_freeze_or_disarm_during_an_inflight_continue_cancels_it(rig, stop):
     assert "送出的同時被" in "\n".join(rig.bot.texts(OWNER_ID))
 
 
+def test_expired_authorization_jobs_are_swept_on_the_next_command(rig, monkeypatch):
+    """資安審查 2：授權過期（之後被 arm 清掉）時，排好、還沒送的工作在下一個指令進來時取消。"""
+    clock = {"t": time.time()}
+    monkeypatch.setattr(rig.module, "now", lambda: clock["t"])
+    armed(rig, hours=1, uses=1)
+    assert "排好了" in rig.say(f"/relay_continue {SID} at=+50")
+    job_id = list(rig.jobs())[0]
+    clock["t"] += 3601
+    armed(rig, SID2)                                   # 清掉過期的 SID；sweep 在這個指令進來時就收
+    assert SID not in rig.data()["armed"]
+    assert rig.jobs()[job_id]["status"] == "cancelled"
+    assert any("取消了 1 筆還沒送的工作" in t for t in rig.bot.texts(OWNER_ID))
+
+
+def test_disarm_without_authorization_still_cancels_pending(rig):
+    armed(rig)
+    rig.say(f"/relay_continue {SID} at=+30")
+    job_id = list(rig.jobs())[0]
+    rig.module_store().update(lambda d: d["armed"].clear(), {})      # 例如授權過期被清掉（sweep 或 disarm 自己，哪個先都要收掉）
+    reply = rig.say(f"/relay_disarm {SID}")
+    assert rig.jobs()[job_id]["status"] == "cancelled", reply
+    assert "本來就沒有授權，也沒有還沒送的工作" in rig.say(f"/relay_disarm {SID}")
+
+
+def test_rearm_keeps_scheduled_jobs(rig):
+    armed(rig, hours=2)
+    rig.say(f"/relay_continue {SID} at=+30")
+    job_id = list(rig.jobs())[0]
+    armed(rig, hours=12)                              # 延長：同一筆授權，排好的照舊
+    rig.say("/relay_armed")
+    assert rig.jobs()[job_id]["status"] == "scheduled"
+
+
 def test_job_reported_failed_counts_toward_freeze(rig):
     armed(rig, uses=5)
     rig.say(f"/relay_continue {SID}")
