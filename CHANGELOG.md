@@ -16,6 +16,7 @@
   新指令：`/chord_info`、`/chord_alt`、`/chord_easy`（最好按的按法）、`/chord_tones`（組成音與音程、每條弦的音）、`/chord_all`（一個根音的常用和弦）、
   `/chord_basic`（入門 8 個）、`/chord_change`（換和弦每根手指怎麼動）、`/chord_strum`（節奏刷法）、`/chord_prog`（調的常見進行＋圖）。
   分散和弦 TAB 放等寬區塊（純文字時包 ```），說明一行一個記號，弦標 `e(1)`…`E(6)`。
+- **`files` 0.1.0-alpha.1（新工具，`stage` alpha，alpha（尚未實機驗證））**（[ADR-0010](docs/adr/0010-files-tool.md)）：在擁有者白名單的幾個資料夾（每個只讀或讀寫，只有本人能加減）裡找、搜內容、分段讀（回版本號）、寫新檔、覆寫／附加／取代一段字（要對得上版本號、先備份、可 dry-run）、搬移與刪除（先送預覽卡、按確定才做，刪除進工具自己的垃圾桶）、`/fs_undo` 退回、`/fs_stop` 緊急停止、`/fs_settings`／`/fs_set` 設定；路徑先解開再判斷、禁區優先於白名單、不執行任何程式；`test_gates`、`test_build`、`test_access`、`catalog.json` 一起登記。
 
 ### Fixed
 - **`guitar` 0.3.0-alpha.1**：`/chord_arp F major 7` 以前回 F 大三和弦——拼出來的名稱（`F major 7`、`Fmajor7`、`FM7`、`Fmaj 7`、`Δ7`、minor／min、dominant、
