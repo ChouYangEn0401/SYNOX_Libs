@@ -1,0 +1,36 @@
+{
+  "name": "weather",
+  "title": "🌤️ 天氣與穿衣",
+  "summary": "現在天氣與未來幾天預報、穿衣建議、空氣品質與紫外線、颱風假停班停課（免金鑰，要上網）",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "wx",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "storage": "vault",
+  "order": 65,
+  "python": { "module": "pack" },
+  "publisher": "SYNOX_Libs",
+  "requires": { "pip": ["requests"], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
+  "capabilities": ["network"],
+  "skill": "SKILL.md",
+  "web": { "panel": "panel.html", "api": ["GET /settings"] },
+  "help": {
+    "featured": ["now", "wear", "typhoon", "settings"],
+    "commands": {
+      "now": {"plain": "現在天氣和未來幾天預報，不寫地點就用預設地點", "examples": [{"text": "台北", "note": "台北現在與未來三天"}, {"text": "高雄 5", "note": "高雄未來五天"}], "alias_suggest": ["天氣"]},
+      "wear": {"plain": "今天穿什麼、要帶什麼，可以加活動類型", "examples": [{"text": "運動 台北", "note": "要去運動"}, "上班", "旅遊 花蓮"], "alias_suggest": ["穿什麼"]},
+      "air": {"plain": "空氣品質和紫外線", "examples": ["台中"]},
+      "typhoon": {"plain": "颱風假：各縣市停班停課，不寫就看設定的縣市", "examples": ["台北", {"text": "全部", "note": "全部縣市"}], "alias_suggest": ["颱風假"]},
+      "settings": {"plain": "看目前設定"},
+      "set": {"plain": "改一項設定，地點、體感、活動、縣市或天數", "examples": [{"text": "地點 台北", "note": "預設查台北"}, {"text": "體感 怕冷", "note": "穿衣建議多穿一點"}, "縣市 高雄"]}
+    }
+  },
+  "site": {
+    "line": "現在天氣與預報、依體感與活動給穿衣建議、空氣品質與紫外線、颱風假停班停課（Open-Meteo 與人事總處公開資料，免金鑰）",
+    "example": "/wx 台北",
+    "status": "alpha：只用假資料測過，還沒在真的 SYNOX 上試過"
+  }
+}

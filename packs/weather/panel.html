@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>天氣設定</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1d2330; --muted: #5d6675; --line: #e3e6ec; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #171b22; --fg: #e7eaf0; --muted: #9aa3b2; --line: #2b313c; } }
+  body { margin: 0; padding: 12px; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+  .muted { color: var(--muted); font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+  td { padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td.k { color: var(--muted); white-space: nowrap; width: 4em; }
+  code { font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="muted" id="sub">讀取中…</div>
+<table><tbody id="rows"></tbody></table>
+<div class="muted">改設定：在對話打 <code>/wx_set 鍵 值</code>，例如 <code>/wx_set 地點 台北</code>、<code>/wx_set 體感 怕冷</code>；
+清掉一項寫「清除」。這格只能看（SYNOX 的面板是唯讀的）。</div>
+<script>
+(function () {
+  var NAMES = [["place", "地點"], ["feel", "體感"], ["activity", "活動"], ["county", "縣市"], ["days", "天數"]];
+  fetch("api/settings")
+    .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
+    .then(function (d) {
+      document.getElementById("sub").textContent = "🌤️ 天氣與穿衣：目前設定";
+      NAMES.forEach(function (pair) {
+        var tr = document.createElement("tr");
+        var k = document.createElement("td");
+        var v = document.createElement("td");
+        k.className = "k";
+        k.textContent = pair[1];
+        var value = d[pair[0]];
+        v.textContent = (value === "" || value === null || value === undefined) ? "（還沒設）" : String(value);
+        tr.appendChild(k);
+        tr.appendChild(v);
+        document.getElementById("rows").appendChild(tr);
+      });
+    })
+    .catch(function (e) { document.getElementById("sub").textContent = "讀不到（" + e.message + "）"; });
+})();
+</script>
+</body>
+</html>
