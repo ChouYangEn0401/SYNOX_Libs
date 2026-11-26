@@ -14,7 +14,7 @@ import pytest
 from isdtelekit.testing import OWNER_ID, FakeChannel
 
 import build as build_script
-from conftest import PACK_NAMES, PACKS, ROOT
+from conftest import PACK_NAMES, PACKS, ROOT, build_fake_envs
 
 from synox.packs.manifest import STAGES
 from synox.sdk import author
@@ -34,7 +34,9 @@ SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "�
          # 叫這台電腦上另外裝的 Video Notes：還沒有工作時回一句，不開任何程式
          "video-notes": ("/v2n_status", "還沒有工作"),
          # 還沒登記鑰匙時不讀隨身碟；沒裝 usbtether 時回「usbtether 函式庫還沒裝」——兩種都有「USB 鑰匙」
-         "usb-keys": ("/usb_keys", "USB 鑰匙")}
+         "usb-keys": ("/usb_keys", "USB 鑰匙"),
+         # kind=cli（ADR-0014）：測試裝的是只有標準函式庫的假環境（conftest.build_fake_envs），健康檢查照實說 playwright 沒裝，不開瀏覽器
+         "html-snap": ("/snap_status", "網頁轉長圖")}
 
 
 @pytest.fixture(scope="module")
@@ -150,7 +152,12 @@ def test_empty_host_then_install_every_synoxpack(built, tmp_path):
         with open(os.path.join(out, e["file"]), "rb") as f:
             token, summary = admin.stage(f.read(), data)
         assert summary["scan"]["ok"], (e["name"], summary["scan"]["problems"])
-        assert admin.install_staged(token, data, packs_dir, approved_by=OWNER_ID, via="test") == e["name"]
+        # T2（runtime.python auto 的 kind=cli 工具）：安裝頁要一字不差輸入 publisher（SYNOX packs/tier.py）
+        typed = summary["publisher"] if (summary.get("tier") or {}).get("tier") == "T2" else None
+        assert admin.install_staged(token, data, packs_dir, approved_by=OWNER_ID, via="test",
+                                    trust_publisher=typed) == e["name"]
+    # 裝好之後 SYNOX 會替 runtime.python auto 的工具建環境（要連網）；測試換成只有標準函式庫的假環境
+    build_fake_envs(data, [os.path.join(packs_dir, e["name"]) for e in _tools(index)])
     app, api, data = _empty_host(tmp_path, packs_dir)                           # 重開
     status = {i.name: (i.status, i.lock) for i in app.extras["synox_pack_report"].items}
     assert status == {n: ("loaded", "locked") for n in PACK_NAMES}, status

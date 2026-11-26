@@ -21,7 +21,7 @@ from synox.packs import manifest as synox_manifest
 from synox.packs import scan as synox_scan
 from synox.sdk import author
 
-from conftest import PACK_NAMES, PACKS, PLANNER
+from conftest import CLI_PACKS, PACK_NAMES, PACKS, PLANNER, PYTHON_PACKS
 
 # 本機工具但只給擁有者：projects 會讀使用者自己填的資料夾（只讀，filesystem:any），不開給伺服器版的成員
 OWNER_LOCAL = ("projects",)
@@ -45,7 +45,9 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
                 "video-notes": ["subprocess", "filesystem:any"],
                 # usb-keys：自己的程式不開檔、不開程式，但它叫的 usbtether 會（讀寫使用者選的檔、在隨身碟寫 .usbtether；
                 # Windows 用 PowerShell 讀隨身碟的硬體資訊）——照實宣告，掃描器看不到函式庫裡面（見 DECLARED_BEYOND_SCAN）
-                "usb-keys": ["filesystem:any", "subprocess"]}
+                "usb-keys": ["filesystem:any", "subprocess"],
+                # html-snap（kind=cli，ADR-0014）：開瀏覽器（Playwright 開別的程式）、連網截網頁、寫截圖到自己的資料夾
+                "html-snap": ["network", "subprocess", "filesystem:own"]}
 # 宣告得比掃描看到的多（誠實的超集合）：{工具: (掃描會看到的, 理由)}
 SCAN_CAPS = {"video-notes": (["filesystem:own", "subprocess"],
                              "讀的筆記在 Video Notes 自己的輸出資料夾（SYNOX 外面），路徑是執行時才知道的變數，掃描只看得出 filesystem:own")}
@@ -55,7 +57,10 @@ OWNER_LOCAL = ("usb-keys", "workspace") + OWNER_LOCAL
 # 宣告了、但第 2 關在工具自己的 .py 裡掃不到的能力：{工具: 理由}（能力是第三方函式庫用的；照實宣告比掃描結果多）
 DECLARED_BEYOND_SCAN = {
     "usb-keys": "usbtether（requires.pip，釘版本＋雜湊）讀寫使用者選的檔、在隨身碟寫 .usbtether、用 PowerShell 讀隨身碟資訊",
+    "html-snap": "playwright（requires.pip，釘版本）開瀏覽器、連網；掃描只看得到 urllib.parse 與寫自己資料夾的檔",
 }
+# kind=cli、只給擁有者的工具（會開瀏覽器、會連網；ADR-0014）
+OWNER_CLI = ("html-snap",)
 ALLOWED_IMPORTS = ("re", "time", "datetime", "dataclasses", "collections", "os", "isdtelekit", "synox")
 # 本機工具個別多准的（calendar：匯出檔名的亂數，ADR-0006 P1）
 LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",),
@@ -127,7 +132,8 @@ def test_every_tool_is_listed():
 @pytest.mark.parametrize("name", PACK_NAMES)
 def test_gate1_manifest_strict(name):
     m = synox_manifest.read(folder(name), strict=True)
-    assert m.kind == "python" and m.access == ("owner" if name in CONNECT + LOCAL_PROGRAM + OWNER_LOCAL else "member") and m.name == name
+    assert m.kind == ("cli" if name in CLI_PACKS else "python") and m.name == name
+    assert m.access == ("owner" if name in CONNECT + LOCAL_PROGRAM + OWNER_LOCAL + OWNER_CLI else "member")
     assert os.path.isfile(m.skill_path) and os.path.isfile(os.path.join(folder(name), "README.md"))
     assert m.capabilities_declared and m.capabilities == ALLOWED_CAPS[name]
     if name in PLANNER:
@@ -155,10 +161,12 @@ def test_declares_scope(name):
     """ADR-0006 入口標準：只能私訊、資料每人一份、落地是密文；access、surfaces、data、storage、capabilities 都明寫
     （SYNOX 有預設值的也寫，預設值改了不會悄悄變）。"""
     m = synox_manifest.read(folder(name), strict=True)
-    assert m.surfaces == ["dm"] and m.data == "user" and m.storage == "vault"
+    # kind=cli 沒有 pack.store：設定與檔案是子程序自己寫在 {user_data_dir}/<name>/ 的一般檔，照實寫 plain（ADR-0014）
+    storage = "plain" if name in CLI_PACKS else "vault"
+    assert m.surfaces == ["dm"] and m.data == "user" and m.storage == storage
     assert m.surfaces_declared and m.data_declared and m.capabilities_declared
     assert all(key in m.raw for key in ("access", "surfaces", "data", "storage", "capabilities"))
-    assert m.raw["surfaces"] == ["dm"] and m.raw["data"] == "user" and m.raw["storage"] == "vault"
+    assert m.raw["surfaces"] == ["dm"] and m.raw["data"] == "user" and m.raw["storage"] == storage
 
 
 @pytest.mark.parametrize("name", PACK_NAMES)
@@ -206,7 +214,7 @@ def test_local_program_tools_only_use_app_jobs(name):
     assert sorted(owners.get(id(n)) for n in opens) == ["launch", "read_note"]
 
 
-@pytest.mark.parametrize("name", [n for n in PACK_NAMES if n not in ("money", "projects", "habits") and n not in LOCAL_PROGRAM])    # projects：tests/test_projects.py 自己的靜態規則；habits：test_habits_no_network_subprocess_exec_or_files
+@pytest.mark.parametrize("name", [n for n in PYTHON_PACKS if n not in ("money", "projects", "habits") and n not in LOCAL_PROGRAM])    # projects：tests/test_projects.py 自己的靜態規則；habits：test_habits_no_network_subprocess_exec_or_files
 def test_no_network_subprocess_exec_or_stray_files(name):
     text = source(name)
     tree = ast.parse(text)
@@ -448,7 +456,8 @@ def test_synox_sdk_check_and_zip(name, tmp_path):
     path = sdk.zip_pack(folder(name), str(tmp_path))
     with zipfile.ZipFile(path) as z:
         names = set(z.namelist())
-    assert {"pack.json", "pack.py", "SKILL.md", "README.md"} <= names
+    entry = "pack.py" if name not in CLI_PACKS else synox_manifest.read(folder(name)).cli["argv"][1][2:]
+    assert {"pack.json", entry, "SKILL.md", "README.md"} <= names
     if os.path.isfile(os.path.join(folder(name), "panel.html")):
         assert "panel.html" in names
     assert not any("__pycache__" in n or n.endswith(".pyc") for n in names)
@@ -469,6 +478,7 @@ CONSTANT_CALLS = ("re.compile", "_re.compile", "_gre.compile", "tuple", "frozens
 M4_HOOKS = {
     "google-sheets": {"transport": "測試換成假的 Google（None＝requests）；只在測試裡被換、執行時不寫入，不放任何人的資料。"
                                    "跟 todoist、google-calendar 一樣改成 def new_session() 是 google-sheets 自己的下一步"},
+    "html-snap": {"RENDERER": "測試換成假的 renderer（None＝snapcore.playwright_render）；kind=cli 每次呼叫一個新程序，不會跨人共用"},
 }
 # M4 個別工具多准的模組層級呼叫，或「拿常數表做的複本」（寫成 set(FIXED) 的樣子）：
 # {工具: {呼叫: 為什麼不算「會變的共用狀態」}}。新增一條要寫理由。
@@ -626,7 +636,7 @@ def panel_problems(name: str, html: str) -> list:
 @pytest.mark.parametrize("name", PACK_NAMES)
 def test_m3_chat_id_is_never_a_per_person_key(name):
     """每個 .py 都看（money 是多檔工具：pack.py＋bridge/＋engine/）。"""
-    found = {rel: chat_id_problems(ast.parse(text)) for rel, text in python_sources(name).items()}
+    found = {rel: chat_id_problems(ast.parse(text)) for rel, text in own_sources(name).items()}
     assert {rel: p for rel, p in found.items() if p} == {}
 
 
@@ -636,8 +646,45 @@ def test_m4_no_mutable_module_state(name):
     extra = M4_EXTRA_CALLS.get(name, {})
     hooks = M4_HOOKS.get(name, {})
     found = {rel: module_state_problems(ast.parse(text), hooks=hooks, extra_calls=extra)
-             for rel, text in python_sources(name).items()}
+             for rel, text in own_sources(name).items()}
     assert {rel: p for rel, p in found.items() if p} == {}
+
+
+def own_sources(name):
+    """工具自己寫的 .py：kind=cli 附的 synox_sdk.py 是 SYNOX 的單檔 SDK 原樣複製（test_cli_tool_shape 比對一字不差），不算在內。"""
+    sources = python_sources(name)
+    if name in CLI_PACKS:
+        sources.pop(SDK_COPY, None)
+    return sources
+
+
+SDK_COPY = "synox_sdk.py"
+CLI_FORBIDDEN_TEXT = (r"\bsubprocess\b", r"\bos\.system\b", r"\bos\.popen\b", r"\beval\(", r"\bexec\(", r"__import__",
+                      r"\bimportlib\b", r"\bpickle\b", r"shell=True")
+
+
+@pytest.mark.parametrize("name", CLI_PACKS)
+def test_cli_tool_shape(name):
+    """kind=cli 的工具（ADR-0014）：SYNOX 開子程序跑 {python} ./<腳本>.py；
+    runtime.python 是 auto 時 requires.pip 每一項釘死版本（SYNOX 第 1 關也擋）、一定有唯讀的 health.check；
+    附的 synox_sdk.py 跟拿來測試的 SYNOX 的單檔 SDK 一字不差；工具自己的 .py 不開程式、不動態執行（開瀏覽器交給 requires.pip 的套件）。"""
+    from synox.packs import envs
+    m = synox_manifest.read(folder(name), strict=True)
+    argv = m.cli["argv"]
+    assert argv[0] == "{python}" and argv[1].startswith("./") and argv[1].endswith(".py") and len(argv) == 2
+    assert os.path.isfile(os.path.join(folder(name), argv[1][2:])) and not os.path.exists(os.path.join(folder(name), "pack.py"))
+    assert m.raw.get("publisher")                                       # T2 一定要寫，安裝時要一字不差輸入
+    if envs.needs_env(m):
+        assert envs.pin_problems(m.requires.get("pip")) == [] and m.requires.get("pip")
+    check = (m.raw.get("health") or {}).get("check")
+    cmd = next(c for c in m.commands if c["name"] == check)
+    assert str(cmd["effect"]).upper() == "READ" and not any(f.get("required") for f in cmd.get("fields") or [])
+    sdk_file = os.path.join(os.path.dirname(author.__file__), "..", "..", "..", "sdk", SDK_COPY)   # SYNOX 的 sdk/synox_sdk.py
+    with open(os.path.join(folder(name), SDK_COPY), "rb") as a, open(sdk_file, "rb") as b:
+        assert a.read().replace(b"\r\n", b"\n") == b.read().replace(b"\r\n", b"\n"), "synox_sdk.py 要重新複製一份"
+    for rel, text in own_sources(name).items():
+        for pattern in CLI_FORBIDDEN_TEXT:
+            assert not re.search(pattern, text), f"{name}/{rel}: {pattern}"
 
 
 def test_m4_extra_calls_are_still_used():

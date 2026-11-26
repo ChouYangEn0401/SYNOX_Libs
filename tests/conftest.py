@@ -34,6 +34,10 @@ from synox.packs import manifest as synox_manifest  # noqa: E402
 # docs/CONTRIBUTING-TOOLS.md「私人工具」）不在這裡：它們只在自己電腦打包，由自己的 tests/test_<名字>.py 測。
 PACK_NAMES = tuple(os.path.basename(f) for f in _synox.pack_folders(private=False))
 ALL_PACK_NAMES = tuple(os.path.basename(f) for f in _synox.pack_folders())  # 連私人工具
+# kind=cli 的工具（html-snap，ADR-0014）：子程序跑，沒有 pack.py；只對 kind=python 有意義的規則（pack.py 的 import、
+# 模組層級狀態…）看 PYTHON_PACKS，其餘的關卡照樣每個工具都跑
+CLI_PACKS = tuple(n for n in ALL_PACK_NAMES if synox_manifest.read(os.path.join(PACKS, n)).kind == "cli")
+PYTHON_PACKS = tuple(n for n in PACK_NAMES if n not in CLI_PACKS)
 PLANNER = ("calendar", "todo", "bullet")                                     # make_bot（假 store）測得了的
 OTHER_ID = 555
 # 2026-11-09 是星期一；測試的「現在」固定在這一刻
@@ -214,12 +218,45 @@ def trust_core(data_dir, *folders):
         lock.approve(str(data_dir), synox_manifest.read(folder), None, OWNER_ID, via="test", trust="core")
 
 
+_STDLIB_VENV = []          # 整個測試程序共用一份「只有標準函式庫」的 venv（第一次用才建；結束刪掉）
+
+
+def _stdlib_venv():
+    if not _STDLIB_VENV:
+        import atexit
+        import shutil
+        import tempfile
+        import venv
+        root = tempfile.mkdtemp(prefix="synoxlibs-venv-")
+        atexit.register(shutil.rmtree, root, True)
+        venv.EnvBuilder(with_pip=False, symlinks=os.name != "nt").create(os.path.join(root, "venv"))
+        _STDLIB_VENV.append(os.path.join(root, "venv"))
+    return _STDLIB_VENV[0]
+
+
+def build_fake_envs(data_dir, folders=None):
+    """runtime.python = "auto" 的工具（kind=cli，ADR-0014）：SYNOX 裝好之後會建 venv、照 requires.pip 裝套件（要連網）。
+    測試不連網、不裝套件：放一份只有標準函式庫的 venv 到 data/envs/<name>/venv，狀態檔用 SYNOX 自己的 envs.write_state
+    （spec 對得上 pack.json，SYNOX 就當作建好了）。工具要的第三方套件不在裡面：會用到的指令要自己說「沒裝」。"""
+    import shutil
+    from synox.packs import envs
+    for folder in folders if folders is not None else _synox.pack_folders():
+        m = synox_manifest.read(folder)
+        if not envs.needs_env(m):
+            continue
+        target = os.path.join(envs.env_dir(str(data_dir), m.name), "venv")
+        if not os.path.isdir(target):
+            shutil.copytree(_stdlib_venv(), target, symlinks=True)
+        envs.write_state(str(data_dir), m.name, state=envs.OK, spec=envs.spec_of(m), detail="test: stdlib-only venv")
+
+
 def approve_all(data_dir, mode):
     """把這個 repo 的每個工具寫進 data/packs.lock（＝擁有者在安裝頁按過確認）。
     SYNOX ADR 0028 S9（2026-11-16）起，pack_dirs 指過去、鎖裡沒有那一筆的工具一律不載入；
     個人版照安裝頁的預設鎖成 third-party，伺服器版鎖成 core（trust_core，成員才用得到）。"""
     from synox.packs import lock
     folders = _synox.pack_folders()
+    build_fake_envs(data_dir, folders)
     if mode == "server":
         trust_core(data_dir, *folders)
         return
