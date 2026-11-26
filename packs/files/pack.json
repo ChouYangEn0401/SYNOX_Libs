@@ -1,0 +1,50 @@
+{
+  "name": "files",
+  "title": "📁 檔案",
+  "summary": "在你允許的幾個資料夾裡找檔、搜內容、讀、改、搬、刪；每次改動都先備份、可以復原，刪除只搬進垃圾桶；不執行任何程式",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "fs",
+  "category": "電腦",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 91,
+  "python": { "module": "pack" },
+  "requires": { "pip": [], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
+  "capabilities": ["filesystem:any"],
+  "callers": { "allow": ["human"], "unallow": ["human"], "resume": ["human"], "set": ["human"], "confirm": ["human"] },
+  "skill": "SKILL.md",
+  "storage": "vault",
+  "help": {
+    "featured": ["find", "read", "edit", "undo", "settings"],
+    "commands": {
+      "status": {"plain": "看允許了哪些資料夾、停了沒、能做什麼"},
+      "allow": {"plain": "把一個資料夾加進白名單，可以只讀或讀寫", "examples": [{"text": "D:\\Projects\\demo can=write", "note": "允許讀寫這個資料夾"}]},
+      "unallow": {"plain": "把一個資料夾從白名單拿掉", "examples": ["demo"]},
+      "roots": {"plain": "列出允許的資料夾與代號"},
+      "find": {"plain": "用名字找檔案", "examples": [{"text": "*.md", "note": "找所有 Markdown 檔"}, "report"]},
+      "grep": {"plain": "在檔案內容裡找字", "examples": [{"text": "TODO glob=*.py", "note": "找 Python 檔裡的 TODO"}]},
+      "read": {"plain": "分段讀一個文字檔，回覆裡有版本號", "examples": ["demo:README.md"]},
+      "tree": {"plain": "看資料夾的樹狀圖", "examples": ["demo:src"]},
+      "stat": {"plain": "看一個檔案的大小與修改時間", "examples": ["demo:README.md"]},
+      "write": {"plain": "寫一個新檔", "examples": [{"text": "demo:notes/todo.md 買牛奶", "note": "建新檔"}]},
+      "edit": {"plain": "把檔案裡的一段字換掉，先看差異也可以", "examples": [{"text": "demo:README.md old=舊標題 new=新標題 version=v1:0123456789abcdef dry=yes", "note": "先預覽"}]},
+      "move": {"plain": "搬移或改名，先給你看再按確定", "examples": ["demo:draft.md demo:old/draft.md"]},
+      "delete": {"plain": "刪除，其實是搬進垃圾桶，可以還原", "examples": ["demo:old/draft.md"]},
+      "undo": {"plain": "退回一筆改動", "examples": ["3"]},
+      "log": {"plain": "看最近的改動紀錄"},
+      "trash": {"plain": "看垃圾桶裡有什麼"},
+      "stop": {"plain": "緊急停止，之後什麼都不做"},
+      "resume": {"plain": "解除緊急停止"},
+      "settings": {"plain": "看這個工具的設定"},
+      "set": {"plain": "改一個設定", "examples": [{"text": "trash_days 60", "note": "垃圾桶留 60 天"}, "dry_run on"]}
+    }
+  },
+  "site": {
+    "line": "在你允許的幾個資料夾裡找、讀、改檔案；改之前先備份、可以復原，刪除只搬進垃圾桶；不執行任何程式",
+    "example": "/fs_find *.md",
+    "status": "alpha（尚未實機驗證）：只在自動測試裡跑過"
+  }
+}
