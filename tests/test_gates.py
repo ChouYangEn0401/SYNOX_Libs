@@ -31,7 +31,7 @@ SCAN_SEES = {"projects": ["filesystem:own"],
              # workspace 也一樣：路徑全是變數（使用者設的工作區），掃描器只看得出 filesystem:own；宣告 filesystem:any 是因為它真的
              # 讀寫工具自己資料夾以外的地方，安裝報告要標紅給使用者看（ADR-0009 #7）
              "workspace": ["filesystem:own"]}
-CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
+CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders", "road")
 # 叫這台電腦上另外裝好的程式（video-notes：使用者自己裝的 Video Notes）：只給擁有者、只經 SYNOX 的 JobRunner（app.jobs）開程式，
 # 自己不連網、不動態執行；讀檔只讀那支程式產生的筆記。規則在 test_local_program_tools_only_use_app_jobs。
 LOCAL_PROGRAM = ("video-notes",)
@@ -77,6 +77,8 @@ FORBIDDEN_IMPORTS = ("requests", "urllib", "http", "socket", "ssl", "subprocess"
 # diary（每日日記的移植）多准：json、html（跳脫與 html.parser 清理 HTML）、xml.sax.saxutils（卡片 SVG 的跳脫）、
 # hashlib（匯入版型時比對內建的指紋）、typing、__future__——都是標準函式庫、不連網、不開程式
 DIARY_IMPORTS = ALLOWED_IMPORTS + ("json", "html", "xml", "hashlib", "typing", "__future__")
+# road 多准的（標準函式庫、不連網、不開程式）：zlib（解 gzip 壓縮的開放資料，限制解開後的大小）、json（壓縮過的 JSON 要自己解）
+CONNECT_EXTRA_IMPORTS = {"road": ("zlib", "json")}
 CONNECT_FORBIDDEN = tuple(m for m in FORBIDDEN_IMPORTS if m not in ("requests", "urllib"))
 # 記帳（0.4.0 起是多檔工具：pack.py＋bridge/＋engine/，帳本是自己資料夾裡的 SQLite）：多准資料庫、CSV、雜湊、
 # 小數、日期、型別這些標準庫；pathlib／shutil／tempfile／threading 准用，但只准在下面列的檔（見 MONEY_ONLY_IN）。
@@ -211,7 +213,7 @@ def test_no_network_subprocess_exec_or_stray_files(name):
     text = source(name)
     tree = ast.parse(text)
     if name in CONNECT:
-        forbidden, allowed = CONNECT_FORBIDDEN, CONNECT_IMPORTS
+        forbidden, allowed = CONNECT_FORBIDDEN, CONNECT_IMPORTS + CONNECT_EXTRA_IMPORTS.get(name, ())
     elif name == "usb-keys":
         forbidden, allowed = FORBIDDEN_IMPORTS, USB_KEYS_IMPORTS
     else:
