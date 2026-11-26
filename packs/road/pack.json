@@ -1,0 +1,50 @@
+{
+  "name": "road",
+  "title": "🚗 路況",
+  "summary": "台灣國道即時路況（速度、旅行時間、壅塞、事故施工），起點到終點的行車時間，常用路線一次查",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "road",
+  "category": "生活",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 70,
+  "publisher": "SYNOX_Libs",
+  "python": { "module": "pack" },
+  "requires": { "pip": ["requests"], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
+  "capabilities": ["network"],
+  "auth": {
+    "type": "token",
+    "fields": [
+      { "name": "tdx_client_id", "label": "TDX Client Id", "secret": false, "required": false,
+        "help": "TDX 會員中心 → 資料服務 → API 金鑰（Client Id）；用來查起點到終點的行車時間" },
+      { "name": "tdx_client_secret", "label": "TDX Client Secret", "secret": true, "required": false,
+        "help": "同一組 API 金鑰的 Client Secret" },
+      { "name": "google_api_key", "label": "Google Maps API key（Routes API）", "secret": true, "required": false,
+        "help": "Google Cloud Console → API 和服務 → 憑證；要先啟用 Routes API" }
+    ]
+  },
+  "web": { "panel": "panel.html", "api": ["GET /settings"] },
+  "skill": "SKILL.md",
+  "storage": "vault",
+  "help": {
+    "featured": ["now", "events", "routes", "eta", "settings"],
+    "commands": {
+      "now": {"plain": "看國道某一段現在的車速和要開多久", "examples": [{"text": "國1 北 林口 五股", "note": "國道一號北上林口到五股"}, "國3 南", "國5"], "alias_suggest": ["路況"]},
+      "events": {"plain": "看國道現在的事故、施工和管制", "examples": ["國1", {"text": "國3 南 施工", "note": "只看國道三號南向的施工"}]},
+      "eta": {"plain": "查起點到終點開車要多久", "examples": [{"text": "台北車站 到 桃園機場", "note": "要先設定地圖金鑰"}]},
+      "routes": {"plain": "一次查全部常用路線", "alias_suggest": ["上班路況"]},
+      "save": {"plain": "存一條常用路線", "examples": [{"text": "上班 國1 北 林口 五股", "note": "國道路段"}, "回家 公司 到 家"]},
+      "rm": {"plain": "刪掉一條常用路線", "examples": ["上班"]},
+      "settings": {"plain": "看路況的設定和常用路線"},
+      "set": {"plain": "改一項設定", "examples": [{"text": "road 國1", "note": "預設查國道一號"}, "provider google", "unit km"]}
+    }
+  },
+  "site": {
+    "line": "台灣國道即時路況、事故施工、起點到終點的行車時間；常用路線一次查",
+    "example": "/road 國1 北 林口 五股",
+    "status": "alpha（尚未實機驗證）：只用假資料試過"
+  }
+}

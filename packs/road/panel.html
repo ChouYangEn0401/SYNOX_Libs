@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>路況設定</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1d2330; --muted: #5d6675; --ok: #1f7a3a; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #171b22; --fg: #e7eaf0; --muted: #9aa3b2; --ok: #6fd08c; } }
+  body { margin: 0; padding: 12px; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+  h2 { font-size: 15px; margin: 12px 0 4px; }
+  ul { margin: 0; padding-left: 18px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .ok { color: var(--ok); }
+</style>
+</head>
+<body>
+<div class="muted" id="sub">讀取中…</div>
+<h2>設定</h2>
+<ul id="settings"></ul>
+<h2>地圖金鑰</h2>
+<ul id="keys"></ul>
+<h2>常用路線</h2>
+<ul id="routes"></ul>
+<p class="muted">改設定：在聊天打 /road_set 鍵 值；金鑰在這個工具頁的「連接」填。</p>
+<script>
+(function () {
+  function add(id, text, cls) {
+    var li = document.createElement("li");
+    li.textContent = text;
+    if (cls) { li.className = cls; }
+    document.getElementById(id).appendChild(li);
+  }
+  fetch("api/settings")
+    .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
+    .then(function (d) {
+      document.getElementById("sub").textContent = "唯讀；國道路況不用金鑰";
+      d.settings.forEach(function (s) { add("settings", s); });
+      add("keys", "TDX：" + (d.keys.tdx ? "已設定" : "沒設"), d.keys.tdx ? "ok" : "");
+      add("keys", "Google 地圖：" + (d.keys.google ? "已設定" : "沒設"), d.keys.google ? "ok" : "");
+      if (!d.routes.length) { add("routes", "還沒有（/road_save 上班 國1 北 林口 五股）"); }
+      d.routes.forEach(function (r) { add("routes", r.name + "：" + r.spec); });
+    })
+    .catch(function (e) { document.getElementById("sub").textContent = "讀不到（" + e.message + "）"; });
+})();
+</script>
+</body>
+</html>
