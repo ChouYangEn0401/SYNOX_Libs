@@ -1,0 +1,264 @@
+{
+  "name": "html-snap",
+  "title": "🖼️ 網頁轉長圖",
+  "summary": "把網址或你資料夾裡的網頁檔截成一整張不截斷的長圖（PNG／JPEG），存到你的資料夾",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "cli",
+  "group": "snap",
+  "category": "電腦",
+  "access": "owner",
+  "surfaces": [
+    "dm"
+  ],
+  "data": "user",
+  "storage": "plain",
+  "order": 95,
+  "publisher": "SYNOX_Libs",
+  "capabilities": [
+    "network",
+    "subprocess",
+    "filesystem:own"
+  ],
+  "runtime": {
+    "python": "auto",
+    "python_posix": "auto"
+  },
+  "requires": {
+    "pip": [
+      "playwright==1.65.2",
+      "greenlet==3.5.6",
+      "pillow==13.0.0"
+    ],
+    "config": [],
+    "env": {},
+    "synox": ">=0.2",
+    "sdk": ">=0.2,<0.3"
+  },
+  "skill": "SKILL.md",
+  "health": {
+    "check": "status"
+  },
+  "agent": {
+    "index": "把網頁或 html 檔截成一整張長圖、看或改截圖的預設值",
+    "triggers": [
+      "截圖",
+      "長圖",
+      "網頁截圖",
+      "整頁截圖"
+    ],
+    "load": "on_trigger"
+  },
+  "cli": {
+    "argv": [
+      "{python}",
+      "./tool.py"
+    ],
+    "cwd": ".",
+    "json_flag": "--json",
+    "timeout": 240,
+    "commands": [
+      {
+        "name": "snap",
+        "effect": "WRITE",
+        "summary": "把網頁截成一整張不截斷的長圖，存到你的資料夾。",
+        "argv": [
+          "snap",
+          "--url={url}",
+          "--file={file}",
+          "--width={width}",
+          "--scale={scale}",
+          "--wait={wait}",
+          "--selector={selector}",
+          "--dark={dark}",
+          "--format={format}",
+          "--quality={quality}"
+        ],
+        "default": true,
+        "ai": {
+          "scenario": "使用者想把一個網頁或 html 檔存成一整張長圖時"
+        },
+        "fields": [
+          {
+            "name": "url",
+            "ask": "網址（http 或 https）",
+            "help": "例如 https://example.com；也可以直接寫你資料夾裡的檔名 report.html"
+          },
+          {
+            "name": "file",
+            "ask": "你資料夾裡的 html 檔",
+            "kind": "path",
+            "help": "相對於你的資料夾，例如 pages/report.html"
+          },
+          {
+            "name": "width",
+            "ask": "視窗寬度 px",
+            "kind": "int"
+          },
+          {
+            "name": "scale",
+            "ask": "倍率，2 是高解析",
+            "kind": "number"
+          },
+          {
+            "name": "wait",
+            "ask": "載入後再等幾秒",
+            "kind": "number"
+          },
+          {
+            "name": "selector",
+            "ask": "只截這個 CSS selector 的元素",
+            "help": "例如 #main 或 .article；沒寫＝整頁"
+          },
+          {
+            "name": "dark",
+            "ask": "用深色模式",
+            "kind": "bool"
+          },
+          {
+            "name": "format",
+            "ask": "png 或 jpeg",
+            "kind": "choice",
+            "choices": [
+              "png",
+              "jpeg"
+            ]
+          },
+          {
+            "name": "quality",
+            "ask": "JPEG 品質 30 到 100",
+            "kind": "int"
+          }
+        ],
+        "positional": 1,
+        "timeout": 240
+      },
+      {
+        "name": "settings",
+        "effect": "READ",
+        "summary": "看現在的設定（預設寬度、倍率、格式…）。",
+        "argv": [
+          "settings"
+        ],
+        "ai": {
+          "scenario": "使用者想看網頁轉長圖的預設寬度、倍率、格式時"
+        }
+      },
+      {
+        "name": "set",
+        "effect": "WRITE",
+        "summary": "改一個設定",
+        "argv": [
+          "set",
+          "--key={key}",
+          "--value={value}"
+        ],
+        "ai": {
+          "scenario": "使用者想改網頁轉長圖的預設寬度、倍率、格式、等待秒數、最大高度或瀏覽器時"
+        },
+        "fields": [
+          {
+            "name": "key",
+            "ask": "設定名稱",
+            "kind": "choice",
+            "choices": [
+              "width",
+              "scale",
+              "format",
+              "quality",
+              "wait",
+              "max_height",
+              "browser",
+              "timeout",
+              "dark"
+            ],
+            "required": true
+          },
+          {
+            "name": "value",
+            "ask": "新的值，default 是回到預設",
+            "required": true,
+            "help": "例如 width 1024、format jpeg、dark yes、browser edge"
+          }
+        ]
+      },
+      {
+        "name": "status",
+        "effect": "READ",
+        "summary": "檢查能不能用：playwright、pillow 裝了沒、找得到哪個瀏覽器。",
+        "argv": [
+          "status"
+        ],
+        "ai": {
+          "scenario": "網頁轉長圖不能用、想知道缺什麼時"
+        }
+      },
+      {
+        "name": "list",
+        "effect": "READ",
+        "summary": "列出最近截的 10 張圖。",
+        "argv": [
+          "list"
+        ],
+        "ai": {
+          "scenario": "使用者想看最近截了哪些長圖時"
+        }
+      }
+    ]
+  },
+  "help": {
+    "featured": [
+      "snap",
+      "settings",
+      "status"
+    ],
+    "commands": {
+      "snap": {
+        "plain": "把網頁截成一整張長圖，存到你的資料夾",
+        "examples": [
+          {
+            "text": "file=report.html",
+            "note": "截你資料夾裡的網頁檔"
+          },
+          {
+            "text": "file=report.html width=800 dark=yes",
+            "note": "窄一點、深色模式"
+          },
+          {
+            "text": "file=report.html selector=#main format=jpeg",
+            "note": "只截一塊、存成 JPEG"
+          }
+        ],
+        "alias_suggest": [
+          "截圖"
+        ]
+      },
+      "settings": {
+        "plain": "看預設寬度、倍率、格式這些設定"
+      },
+      "set": {
+        "plain": "改一個預設值，寫 default 就回到預設",
+        "examples": [
+          {
+            "text": "width 1024",
+            "note": "預設寬度改成 1024"
+          },
+          "format jpeg",
+          "browser chrome"
+        ]
+      },
+      "status": {
+        "plain": "檢查需要的套件和瀏覽器在不在"
+      },
+      "list": {
+        "plain": "列出最近截的圖"
+      }
+    }
+  },
+  "site": {
+    "line": "把網址或你資料夾裡的網頁檔截成一整張不截斷的長圖，存在你的資料夾",
+    "example": "/snap file=report.html",
+    "status": "alpha（尚未在 SYNOX 實機驗證）：本機 Edge 直接跑過",
+    "network": true
+  }
+}
