@@ -32,6 +32,8 @@ SCAN_SEES = {"projects": ["filesystem:own"],
              # 讀寫工具自己資料夾以外的地方，安裝報告要標紅給使用者看（ADR-0009 #7）
              "workspace": ["filesystem:own"]}
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
+# speech（ADR-0011）：接 Azure／OpenAI／Google 的語音 API；另外讀寫自己的語音資料夾（音檔進出），所以多宣告 filesystem:own
+CONNECT = CONNECT + ("speech",)
 # 叫這台電腦上另外裝好的程式（video-notes：使用者自己裝的 Video Notes）：只給擁有者、只經 SYNOX 的 JobRunner（app.jobs）開程式，
 # 自己不連網、不動態執行；讀檔只讀那支程式產生的筆記。規則在 test_local_program_tools_only_use_app_jobs。
 LOCAL_PROGRAM = ("video-notes",)
@@ -42,6 +44,7 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
                 "projects": ["filesystem:any"],
                 "workspace": ["filesystem:any"],
                 **{name: ["network"] for name in CONNECT},
+                "speech": ["filesystem:own", "network"],
                 "video-notes": ["subprocess", "filesystem:any"],
                 # usb-keys：自己的程式不開檔、不開程式，但它叫的 usbtether 會（讀寫使用者選的檔、在隨身碟寫 .usbtether；
                 # Windows 用 PowerShell 讀隨身碟的硬體資訊）——照實宣告，掃描器看不到函式庫裡面（見 DECLARED_BEYOND_SCAN）
@@ -282,6 +285,20 @@ def test_no_network_subprocess_exec_or_stray_files(name):
         assert sorted(ast.literal_eval(n.args[1]) for n in opens) == ["rb", "x"]
         assert sorted({n.func.attr for n in os_calls}) == ["listdir", "lstat", "mkdir"]
         assert "pack.path(" not in text and "pack.path_of(" not in text
+    elif name == "speech":
+        # 接外面服務的工具裡唯一碰檔案的（ADR-0011）：open 只有兩個——_write_own（"wb"，寫做好的音檔／字幕）與
+        # _read_audio（"rb"，讀使用者放的音檔）；os.* 只有 makedirs（inbox/、out/）、listdir（列檔、清舊檔）、
+        # remove（out/ 只留最新的）；路徑一律來自 pack.path_of(user, …)，不用共用資料夾
+        owners = {}
+        for fn in ast.walk(tree):
+            if isinstance(fn, ast.FunctionDef):
+                for n in ast.walk(fn):
+                    owners[id(n)] = fn.name
+        assert sorted(owners.get(id(n)) for n in opens) == ["_read_audio", "_write_own"]
+        assert sorted(ast.literal_eval(n.args[1]) for n in opens) == ["rb", "wb"]
+        assert sorted({n.func.attr for n in os_calls}) == ["listdir", "makedirs", "remove"]
+        assert [ast.unparse(n.args[0]) for n in os_calls if n.func.attr == "remove"] == ["pack.path_of(user, 'out', n)"]
+        assert "pack.path(" not in text
     else:
         assert not opens and not os_calls, f"{name} must not touch files"
         assert "import os" not in text

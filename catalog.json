@@ -45,6 +45,11 @@
       "summary": "Notion、Todoist、Google 日曆、Google 試算表（只加列）、Apple 提醒事項（CalDAV）。要連網、要你自己的帳號或 token",
       "packs": ["notion", "todoist", "google-calendar", "google-sheets", "apple-reminders"]
     },
+    "speech": {
+      "title": "語音",
+      "summary": "文字唸成音檔、音檔轉成文字或字幕；Azure、OpenAI、Google 三家任選，要連網、要你自己的金鑰（只給擁有者）",
+      "packs": ["speech"]
+    },
     "video": {
       "title": "影片筆記",
       "summary": "把影片網址交給你電腦上裝好的 Video Notes 整理成筆記（要先另外裝 Video Notes）",

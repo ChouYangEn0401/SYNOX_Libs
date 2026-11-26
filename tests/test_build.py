@@ -35,6 +35,8 @@ SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "�
          "video-notes": ("/v2n_status", "還沒有工作"),
          # 還沒登記鑰匙時不讀隨身碟；沒裝 usbtether 時回「usbtether 函式庫還沒裝」——兩種都有「USB 鑰匙」
          "usb-keys": ("/usb_keys", "USB 鑰匙")}
+# 語音：還沒在網頁「連接」填任何金鑰時只說怎麼設，不連網（ADR-0011）
+SMOKE["speech"] = ("/speech_status", "還沒設定")
 
 
 @pytest.fixture(scope="module")
