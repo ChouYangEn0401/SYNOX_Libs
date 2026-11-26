@@ -1,0 +1,51 @@
+{
+  "name": "speech",
+  "title": "🎙️ 語音",
+  "summary": "文字轉語音、語音轉文字（Azure Speech、OpenAI、Google Cloud 三家任選，用你自己的金鑰）",
+  "version": "0.1.0-alpha.1",
+  "stage": "alpha",
+  "kind": "python",
+  "group": "speech",
+  "category": "語音",
+  "access": "owner",
+  "surfaces": ["dm"],
+  "data": "user",
+  "order": 75,
+  "python": { "module": "pack" },
+  "publisher": "SYNOX_Libs",
+  "capabilities": ["filesystem:own", "network"],
+  "auth": {
+    "type": "token",
+    "fields": [
+      { "name": "azure_key", "ask": "Azure Speech 金鑰（KEY 1）", "secret": true, "required": false,
+        "help": "Azure 入口網站 → 你的 Speech 資源 → 金鑰與端點" },
+      { "name": "azure_region", "ask": "Azure Speech 區域，例 eastasia", "required": false,
+        "help": "同一頁的「位置／區域」，英文小寫" },
+      { "name": "openai_key", "ask": "OpenAI API key", "secret": true, "required": false,
+        "help": "OpenAI 平台 → API keys" },
+      { "name": "google_key", "ask": "Google Cloud API 金鑰", "secret": true, "required": false,
+        "help": "Google Cloud 主控台 → API 和服務 → 憑證；要先啟用 Text-to-Speech 與 Speech-to-Text API" }
+    ]
+  },
+  "requires": { "pip": ["requests"], "config": [], "env": {}, "synox": ">=0.2", "sdk": ">=0.2,<0.3" },
+  "skill": "SKILL.md",
+  "storage": "vault",
+  "web": { "panel": "panel.html", "api": ["GET /settings"] },
+  "help": {
+    "featured": ["add", "stt", "settings", "set", "status"],
+    "commands": {
+      "add": {"plain": "把文字唸成音檔傳給你", "examples": [{"text": "今天天氣很好", "note": "用設定的那一家唸"}, {"text": "Good morning lang=en-US", "note": "這次用英文唸"}], "alias_suggest": ["唸"]},
+      "stt": {"plain": "把語音資料夾裡的音檔轉成文字或字幕", "examples": [{"text": "meeting.mp3", "note": "轉成文字"}, {"text": "meeting.mp3 format=srt", "note": "做成字幕檔"}]},
+      "voices": {"plain": "列出可以用的聲音", "examples": ["azure zh-TW", "openai"]},
+      "status": {"plain": "看哪幾家設好金鑰、現在用哪一家"},
+      "settings": {"plain": "看語音的設定"},
+      "set": {"plain": "改一個語音設定", "examples": [{"text": "tts openai", "note": "唸的改用 OpenAI"}, {"text": "rate 1.2", "note": "唸快一點"}, {"text": "text srt", "note": "轉文字預設做成字幕"}]},
+      "files": {"plain": "看語音資料夾裡有哪些檔"}
+    }
+  },
+  "site": {
+    "line": "文字唸成音檔、音檔轉成文字或字幕；Azure、OpenAI、Google 三家任選，用你自己的金鑰",
+    "example": "/speech 今天天氣很好",
+    "status": "alpha（尚未實機驗證）：還沒真的連上去測過，只用假資料試過"
+  }
+}

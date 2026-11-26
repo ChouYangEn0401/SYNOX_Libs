@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>語音設定</title>
+<style>
+  :root { --bg: #ffffff; --fg: #1d2330; --muted: #5d6675; --line: #e3e6ec; --ok: #1f7a3d; --no: #8a5a00; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #171b22; --fg: #e7eaf0; --muted: #9aa3b2; --line: #2a303b; --ok: #6fd08f; --no: #e0b45a; } }
+  body { margin: 0; padding: 12px; background: var(--bg); color: var(--fg); font: 15px/1.5 system-ui, sans-serif; }
+  .muted { color: var(--muted); font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 10px; }
+  td { padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td:first-child { color: var(--muted); white-space: nowrap; width: 40%; }
+  .ok { color: var(--ok); }
+  .no { color: var(--no); }
+  code { font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="muted" id="sub">讀取中…</div>
+<table id="keys"></table>
+<table id="settings"></table>
+<div class="muted">只能看。改設定：在對話打 <code>/speech_set 鍵 值</code>（例 <code>/speech_set rate 1.2</code>）；金鑰在工具頁的「連接」填。</div>
+<script>
+(function () {
+  var LABELS = { tts: "文字轉語音用", stt: "語音轉文字用", lang: "語言", rate: "語速（倍）", audio: "音檔格式", text: "轉文字輸出" };
+  function row(table, label, value, cls) {
+    var tr = document.createElement("tr");
+    var a = document.createElement("td");
+    var b = document.createElement("td");
+    a.textContent = label;
+    b.textContent = value;
+    if (cls) { b.className = cls; }
+    tr.appendChild(a);
+    tr.appendChild(b);
+    document.getElementById(table).appendChild(tr);
+  }
+  fetch("api/settings")
+    .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
+    .then(function (d) {
+      document.getElementById("sub").textContent = "🎙️ 語音：金鑰與設定";
+      Object.keys(d.keys).forEach(function (p) {
+        row("keys", d.names[p], d.keys[p] ? "已設定" : "還沒設定", d.keys[p] ? "ok" : "no");
+      });
+      Object.keys(LABELS).forEach(function (k) { row("settings", LABELS[k], String(d.settings[k])); });
+      Object.keys(d.voices).forEach(function (p) { row("settings", d.names[p] + " 的聲音", d.voices[p] || "依語言自動"); });
+    })
+    .catch(function (e) { document.getElementById("sub").textContent = "讀不到（" + e.message + "）"; });
+})();
+</script>
+</body>
+</html>
