@@ -54,7 +54,12 @@ MAX_ROUTES = 20
 NAME_MAX = 20
 SPEC_MAX = 120
 
-DEFAULTS = {"provider": "auto", "road": "", "dir": "", "unit": "km", "lines": 12, "events": True}
+
+def defaults() -> dict:
+    """設定的預設值（每次回新的，不拿模組層級的表淺拷貝）。"""
+    return {"provider": "auto", "road": "", "dir": "", "unit": "km", "lines": 12, "events": True}
+
+
 # 設定的鍵：英文或中文都收
 KEY_ALIASES = {"provider": "provider", "供應商": "provider", "地圖": "provider",
                "road": "road", "國道": "road", "預設國道": "road",
@@ -644,9 +649,9 @@ def parse_freeway(text: str, settings: dict):
 # ── 設定 ────────────────────────────────────────────────────────────────
 
 def clean_settings(raw) -> dict:
-    out = dict(DEFAULTS)
+    out = defaults()
     if isinstance(raw, dict):
-        for k in DEFAULTS:
+        for k in list(out):
             if k in raw:
                 out[k] = raw[k]
     return out
@@ -660,7 +665,7 @@ def set_value(key: str, value: str):
                         "unit（單位）、lines（行數）、events（事件）。")
     v = value.strip()
     if v in ("預設", "default", "reset"):
-        return k, DEFAULTS[k]
+        return k, defaults()[k]
     low = v.lower()
     if k == "provider":
         if low not in PROVIDERS:
