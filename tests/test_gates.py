@@ -32,6 +32,7 @@ SCAN_SEES = {"projects": ["filesystem:own"],
              # 讀寫工具自己資料夾以外的地方，安裝報告要標紅給使用者看（ADR-0009 #7）
              "workspace": ["filesystem:own"]}
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
+CONNECT += ("weather",)          # Open-Meteo、人事總處公開頁：免金鑰，但一樣連網，所以只給擁有者
 # 叫這台電腦上另外裝好的程式（video-notes：使用者自己裝的 Video Notes）：只給擁有者、只經 SYNOX 的 JobRunner（app.jobs）開程式，
 # 自己不連網、不動態執行；讀檔只讀那支程式產生的筆記。規則在 test_local_program_tools_only_use_app_jobs。
 LOCAL_PROGRAM = ("video-notes",)

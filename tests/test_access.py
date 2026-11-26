@@ -17,6 +17,7 @@ from synox.packs import manifest as synox_manifest
 from conftest import OTHER_ID, PACK_NAMES, PACKS
 
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
+CONNECT += ("weather",)          # 天氣（免金鑰的公開資料，一樣連網）
 # 只給擁有者的工具：接外面服務的（用擁有者的帳號）＋叫這台電腦上程式的（video-notes：設定的程式會被 SYNOX 執行）
 # 只給擁有者的本機工具（碰硬體、碰使用者電腦上任意檔案）：權限跟接外面服務的一樣
 # workspace：讀寫你電腦上工作區資料夾（ADR-0009：單人版專用）

@@ -31,6 +31,8 @@ SMOKE = {"money": ("/money 120 午餐", "120"), "notes": ("/note 買牛奶", "�
          "notion": ("/notion 會議", "還沒設定 Notion"), "todoist": ("/todoist_list", "還沒接上 Todoist"),
          "google-calendar": ("/gcal_today", "還沒連上 Google 日曆"), "google-sheets": ("/gsheet_list", "還沒連上 Google 試算表"),
          "apple-reminders": ("/applerem_status", "還沒設定帳號"),
+         # 天氣：看設定不連網
+         "weather": ("/wx_settings", "目前設定"),
          # 叫這台電腦上另外裝的 Video Notes：還沒有工作時回一句，不開任何程式
          "video-notes": ("/v2n_status", "還沒有工作"),
          # 還沒登記鑰匙時不讀隨身碟；沒裝 usbtether 時回「usbtether 函式庫還沒裝」——兩種都有「USB 鑰匙」

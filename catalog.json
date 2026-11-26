@@ -40,6 +40,11 @@
       "summary": "把隨身碟登記成鑰匙，選一把鎖訊息或檔案；要另外裝 usbtether 函式庫（見工具說明）",
       "packs": ["usb-keys"]
     },
+    "weather": {
+      "title": "天氣與穿衣",
+      "summary": "現在天氣與預報、穿衣建議、空氣品質與紫外線、颱風假停班停課（免金鑰，要上網；只給擁有者）",
+      "packs": ["weather"]
+    },
     "connect": {
       "title": "接外面的服務",
       "summary": "Notion、Todoist、Google 日曆、Google 試算表（只加列）、Apple 提醒事項（CalDAV）。要連網、要你自己的帳號或 token",
