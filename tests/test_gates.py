@@ -30,7 +30,9 @@ OWNER_LOCAL = ("projects",)
 SCAN_SEES = {"projects": ["filesystem:own"],
              # workspace 也一樣：路徑全是變數（使用者設的工作區），掃描器只看得出 filesystem:own；宣告 filesystem:any 是因為它真的
              # 讀寫工具自己資料夾以外的地方，安裝報告要標紅給使用者看（ADR-0009 #7）
-             "workspace": ["filesystem:own"]}
+             "workspace": ["filesystem:own"],
+             # files 也一樣：讀寫使用者白名單裡的資料夾（ADR-0010），路徑全是變數
+             "files": ["filesystem:own"]}
 CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-reminders")
 # 叫這台電腦上另外裝好的程式（video-notes：使用者自己裝的 Video Notes）：只給擁有者、只經 SYNOX 的 JobRunner（app.jobs）開程式，
 # 自己不連網、不動態執行；讀檔只讀那支程式產生的筆記。規則在 test_local_program_tools_only_use_app_jobs。
@@ -41,6 +43,7 @@ ALLOWED_CAPS = {"calendar": ["filesystem:own"], "todo": [], "bullet": [], "money
                 "guitar": [],
                 "projects": ["filesystem:any"],
                 "workspace": ["filesystem:any"],
+                "files": ["filesystem:any"],
                 **{name: ["network"] for name in CONNECT},
                 "video-notes": ["subprocess", "filesystem:any"],
                 # usb-keys：自己的程式不開檔、不開程式，但它叫的 usbtether 會（讀寫使用者選的檔、在隨身碟寫 .usbtether；
@@ -51,7 +54,8 @@ SCAN_CAPS = {"video-notes": (["filesystem:own", "subprocess"],
                              "讀的筆記在 Video Notes 自己的輸出資料夾（SYNOX 外面），路徑是執行時才知道的變數，掃描只看得出 filesystem:own")}
 # 只給擁有者（access: owner）的本機工具：接外面服務的以外，碰到硬體或使用者電腦上任意檔案的
 # workspace：讀寫使用者設的工作區資料夾（ADR-0009：單人版專用）
-OWNER_LOCAL = ("usb-keys", "workspace") + OWNER_LOCAL
+# files：讀寫使用者白名單裡的資料夾（ADR-0010：單人版專用）
+OWNER_LOCAL = ("usb-keys", "workspace", "files") + OWNER_LOCAL
 # 宣告了、但第 2 關在工具自己的 .py 裡掃不到的能力：{工具: 理由}（能力是第三方函式庫用的；照實宣告比掃描結果多）
 DECLARED_BEYOND_SCAN = {
     "usb-keys": "usbtether（requires.pip，釘版本＋雜湊）讀寫使用者選的檔、在隨身碟寫 .usbtether、用 PowerShell 讀隨身碟資訊",
@@ -66,6 +70,8 @@ LOCAL_EXTRA_IMPORTS = {"calendar": ("secrets",),
 USB_KEYS_IMPORTS = ALLOWED_IMPORTS + ("base64", "usbtether")
 # workspace 多准的 import（都是標準函式庫、不連網、不開程式）：權杖、檔案類型、Unicode 正規化、型別
 WORKSPACE_IMPORTS = ALLOWED_IMPORTS + ("secrets", "stat", "unicodedata", "typing", "__future__")
+# files 多准的（都是標準函式庫、不連網、不開程式）：上面那些＋內容的雜湊（版本號）、差異（dry-run）、檔名樣式（find）
+FILES_IMPORTS = WORKSPACE_IMPORTS + ("hashlib", "difflib", "fnmatch")
 PACKAGE_LOCAL = ("calendar",)                      # 本機工具裡的多檔工具（pack.py 的相對 import 不看；其餘檔見 test_calendar_package_files）
 # calendar 的 bridge/、engine/：純標準函式庫的邏輯（日期、正規表示式、雜湊、型別），不碰檔案、不連網、不開程式
 CALENDAR_IMPORTS = ("re", "datetime", "calendar", "hashlib", "typing", "__future__", "dataclasses")
@@ -216,7 +222,7 @@ def test_no_network_subprocess_exec_or_stray_files(name):
         forbidden, allowed = FORBIDDEN_IMPORTS, USB_KEYS_IMPORTS
     else:
         forbidden = FORBIDDEN_IMPORTS
-        allowed = ({"diary": DIARY_IMPORTS, "workspace": WORKSPACE_IMPORTS}.get(name, ALLOWED_IMPORTS)
+        allowed = ({"diary": DIARY_IMPORTS, "workspace": WORKSPACE_IMPORTS, "files": FILES_IMPORTS}.get(name, ALLOWED_IMPORTS)
                    + LOCAL_EXTRA_IMPORTS.get(name, ()))
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
@@ -282,6 +288,19 @@ def test_no_network_subprocess_exec_or_stray_files(name):
         assert sorted(ast.literal_eval(n.args[1]) for n in opens) == ["rb", "x"]
         assert sorted({n.func.attr for n in os_calls}) == ["listdir", "lstat", "mkdir"]
         assert "pack.path(" not in text and "pack.path_of(" not in text
+    elif name == "files":
+        # 讀寫使用者白名單裡的資料夾（ADR-0010）：open 只有兩個——read_bytes（"rb"）與 write_new_bytes（"xb"＝只建新檔，
+        # 覆寫是寫暫存檔再 os.replace）；os.* 沒有建連結、改權限、開程式；備份與垃圾桶只在 pack.path_of(user, …)（tests/test_files.py 細測）
+        owners = {}
+        for fn in ast.walk(tree):
+            if isinstance(fn, ast.FunctionDef):
+                for n in ast.walk(fn):
+                    owners[id(n)] = fn.name
+        assert sorted(owners.get(id(n)) for n in opens) == ["read_bytes", "write_new_bytes"]
+        assert sorted(ast.literal_eval(n.args[1]) for n in opens) == ["rb", "xb"]
+        assert {n.func.attr for n in os_calls} <= {"lstat", "listdir", "mkdir", "rmdir", "remove", "rename", "replace",
+                                                     "fsync", "fspath"}
+        assert "pack.path(" not in text and "pack.path_of(user" in text
     else:
         assert not opens and not os_calls, f"{name} must not touch files"
         assert "import os" not in text

@@ -20,7 +20,8 @@ CONNECT = ("notion", "todoist", "google-calendar", "google-sheets", "apple-remin
 # 只給擁有者的工具：接外面服務的（用擁有者的帳號）＋叫這台電腦上程式的（video-notes：設定的程式會被 SYNOX 執行）
 # 只給擁有者的本機工具（碰硬體、碰使用者電腦上任意檔案）：權限跟接外面服務的一樣
 # workspace：讀寫你電腦上工作區資料夾（ADR-0009：單人版專用）
-OWNER_ONLY = CONNECT + ("video-notes", "usb-keys", "projects", "workspace")
+# files：讀寫你白名單裡的資料夾（ADR-0010：單人版專用）
+OWNER_ONLY = CONNECT + ("video-notes", "usb-keys", "projects", "workspace", "files")
 MEMBER = 77
 UNKNOWN = "未知指令"
 NO_PERMISSION = "沒有執行此指令的權限"
