@@ -603,7 +603,8 @@ def format_closures(info: dict, county: str = "") -> str:
             lines.append(f"🟢 {county}：目前沒有停班停課訊息。")
         else:
             lines.append(f"🟢 {county}：清單裡沒有列出，表示目前照常上班上課（以縣市政府公告為準）。")
-            others = sorted({c for c, s in rows if any(w in s for w in OFF_WORDS)})
+            others = [c for i, (c, s) in enumerate(rows) if any(w in s for w in OFF_WORDS)
+                      and c not in [x for x, _y in rows[:i]]]           # 照網頁上的順序、不重複
             if others:
                 lines.append("有停班或停課消息的縣市：" + "、".join(others))
     elif info.get("none") or not rows:
