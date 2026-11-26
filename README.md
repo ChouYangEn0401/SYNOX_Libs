@@ -28,6 +28,7 @@
 | [🎬 video-notes](packs/video-notes/README.md) | `/v2n <網址>`、`/v2n_status`、`/v2n_get` | 把影片交給你電腦上另外裝好的 Video Notes 做筆記：看進度、拿 Markdown、列筆記庫、合併好幾支 | 🔧 test | 影片筆記 | （還沒有說明頁） |
 | [🔑 usb-keys](packs/usb-keys/README.md) | `/usb_keys`、`/usb_lock 書桌 明天開會`、`/usb_unlock_check utmsg1:…` | 把很多支隨身碟登記成鑰匙，選一把鎖訊息或檔案；解開時那支碟要插著（用 usbtether 函式庫，要另外裝） | 🧪 alpha | USB 鑰匙 | （還沒有說明頁） |
 | [🗂️ workspace](packs/workspace/README.md) | `/ws_root default`、`/ws my-app`、`/ws_new python-cli my-app` | 只在你指定的一個資料夾裡看檔案、讀文字檔、用內建範本建專案；固定菜單，不執行任何程式（只給擁有者） | 🧪 alpha | 電腦工作區 | （還沒有說明頁） |
+| [🌤️ weather](packs/weather/README.md) | `/wx 台北`、`/wx_wear 上班`、`/wx_typhoon 台北`、`/wx_set 地點 台北` | 現在天氣與預報、依體感與活動給穿衣建議、空氣品質與紫外線、颱風假停班停課；免金鑰（Open-Meteo、人事總處公開頁），要上網、只給擁有者 | 🧪 alpha | 天氣與穿衣 | （還沒有說明頁） |
 
 - `usb-keys`（2026-11-18 新寫）：不連網；只給擁有者（`access: owner`）。加密與驗證隨身碟全部由 usbtether 0.3.0 函式庫做
   （`requires.pip` 釘版本＋雜湊；SYNOX 不替 kind=python 的工具裝套件，要照工具 README 自己裝一次）；解開、登記、撤銷只有本人，密碼只在工具畫面輸入。

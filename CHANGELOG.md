@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **`weather` 0.1.0-alpha.1（新工具，`stage` alpha，alpha（尚未實機驗證））**：🌤️ 天氣與穿衣——`/wx` 現在天氣＋預報、`/wx_wear` 穿衣建議（體感、降雨、風、UV、溫差、活動類型）、`/wx_air` 空氣品質與紫外線、`/wx_typhoon` 人事總處停班停課（寬鬆解析，看不懂附原網址）；設定 `/wx_settings`／`/wx_set`（地點、體感、活動、縣市、天數）＋唯讀設定面板。資料 Open-Meteo（免金鑰），`access: owner`、`capabilities: ["network"]`；`tests/test_weather.py` 全用假 HTTP，`test_gates`／`test_access`（`CONNECT`）、`test_build`（`SMOKE`）、`catalog.json` 一起登記。
 - **發佈 `v0.3.1`（`VERSION` 0.3.0 → 0.3.1）與 `scripts/sign_dist.py`**：簽 `dist/` 裡每個 `.synoxpack`（`synox-sdk sign`，別名＝簽過那一份的複本）、
   每個都 `verify` 要是 official，再用**簽過的檔**重算 `index.json` 每筆 `sha256`／`size`、`SHA256SUMS`、`tools-<VERSION>.zip`／`tools.zip`，最後做一致性檢查；
   全有或全無（先在暫存資料夾做、全過才換進 `dist/`）；密語只從 `SYNOX_PACK_KEY_PASSWORD` 拿。`--check` 上傳前再驗一次。發佈順序見 `docs/RELEASING.md`。
