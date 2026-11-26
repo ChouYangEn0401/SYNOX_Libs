@@ -45,6 +45,11 @@
       "summary": "Notion、Todoist、Google 日曆、Google 試算表（只加列）、Apple 提醒事項（CalDAV）。要連網、要你自己的帳號或 token",
       "packs": ["notion", "todoist", "google-calendar", "google-sheets", "apple-reminders"]
     },
+    "road": {
+      "title": "路況",
+      "summary": "台灣國道即時路況、事故施工（免金鑰），起點到終點的行車時間（要 TDX 或 Google 地圖金鑰），常用路線一次查（只給擁有者）",
+      "packs": ["road"]
+    },
     "video": {
       "title": "影片筆記",
       "summary": "把影片網址交給你電腦上裝好的 Video Notes 整理成筆記（要先另外裝 Video Notes）",

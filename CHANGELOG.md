@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **`road` 0.1.0-alpha.1（新工具，`stage` alpha，alpha（尚未實機驗證））**（[ADR-0012](docs/adr/0012-road-tool.md)）：台灣國道即時路況 `/road 國1 北 林口 五股`（高公局開放資料，免金鑰；XML／JSON／gzip 都讀）、事故施工 `/road_events`、起點到終點 `/road_eta`（TDX 或 Google Routes API，金鑰走 `auth.fields`＋`pack.secret`）、常用路線 `/road_save`／`/road_routes`、設定 `/road_settings`／`/road_set` 與唯讀設定面板；`access: owner`；`tests/test_road.py` 全用假 HTTP，`test_gates`（CONNECT、多准 zlib／json）、`test_access`、`test_build`（SMOKE）、`catalog.json`（「路況」群組）一起登記。
 - **發佈 `v0.3.1`（`VERSION` 0.3.0 → 0.3.1）與 `scripts/sign_dist.py`**：簽 `dist/` 裡每個 `.synoxpack`（`synox-sdk sign`，別名＝簽過那一份的複本）、
   每個都 `verify` 要是 official，再用**簽過的檔**重算 `index.json` 每筆 `sha256`／`size`、`SHA256SUMS`、`tools-<VERSION>.zip`／`tools.zip`，最後做一致性檢查；
   全有或全無（先在暫存資料夾做、全過才換進 `dist/`）；密語只從 `SYNOX_PACK_KEY_PASSWORD` 拿。`--check` 上傳前再驗一次。發佈順序見 `docs/RELEASING.md`。

@@ -28,6 +28,7 @@
 | [🎬 video-notes](packs/video-notes/README.md) | `/v2n <網址>`、`/v2n_status`、`/v2n_get` | 把影片交給你電腦上另外裝好的 Video Notes 做筆記：看進度、拿 Markdown、列筆記庫、合併好幾支 | 🔧 test | 影片筆記 | （還沒有說明頁） |
 | [🔑 usb-keys](packs/usb-keys/README.md) | `/usb_keys`、`/usb_lock 書桌 明天開會`、`/usb_unlock_check utmsg1:…` | 把很多支隨身碟登記成鑰匙，選一把鎖訊息或檔案；解開時那支碟要插著（用 usbtether 函式庫，要另外裝） | 🧪 alpha | USB 鑰匙 | （還沒有說明頁） |
 | [🗂️ workspace](packs/workspace/README.md) | `/ws_root default`、`/ws my-app`、`/ws_new python-cli my-app` | 只在你指定的一個資料夾裡看檔案、讀文字檔、用內建範本建專案；固定菜單，不執行任何程式（只給擁有者） | 🧪 alpha | 電腦工作區 | （還沒有說明頁） |
+| [🚗 road](packs/road/README.md) | `/road 國1 北 林口 五股`、`/road_events 國3`、`/road_eta 台北車站 到 桃園機場`、`/road_routes` | 台灣國道即時路況（速度、旅行時間、壅塞）、事故施工；起點到終點的行車時間（TDX 或 Google 地圖金鑰）；常用路線一次查（只給擁有者） | 🧪 alpha | 路況 | （還沒有說明頁） |
 
 - `usb-keys`（2026-11-18 新寫）：不連網；只給擁有者（`access: owner`）。加密與驗證隨身碟全部由 usbtether 0.3.0 函式庫做
   （`requires.pip` 釘版本＋雜湊；SYNOX 不替 kind=python 的工具裝套件，要照工具 README 自己裝一次）；解開、登記、撤銷只有本人，密碼只在工具畫面輸入。
@@ -38,6 +39,8 @@
   寫入一定要你本人打確認碼。登入用裝置碼（不開埠），權限只有 `drive.file`（只看得到它自己建的試算表）。還沒在真的 Google 帳號上試過。
 - `workspace`（2026-11-19 新寫，[ADR-0009](docs/adr/0009-workspace-tool.md)）：讀寫你指定的**一個工作區資料夾**（所以安裝報告會標「讀寫 pack 以外的檔案」）；
   固定菜單（看、讀、找、用內建範本建專案），不執行任何程式、不刪不改既有的檔；只給擁有者，建東西只能你本人打。還沒在真的 SYNOX 上試過。
+- `road`（2026-11-26 新寫，[ADR-0012](docs/adr/0012-road-tool.md)）：國道路況、事件用高速公路局開放資料（免金鑰）；起點到終點要 TDX 或 Google 地圖金鑰，
+  金鑰在網頁「連接」填（SYNOX 收、`pack.secret` 讀）。只用 `requests`、只給擁有者；只對假資料測過，TDX 的開車路徑規劃還沒拿真的金鑰驗過。
 - 全部先標 **🧪 alpha**（維護者決定），意思與升級條件見下面「穩定度」。
 - **個人版與伺服器（多人）版**（[docs/adr/0006](docs/adr/0006-personal-and-server-mode.md)）：不連網的七個兩種都能用，伺服器版每人一份、互相看不到；
   接外面服務的五個伺服器版也能裝，但**只有擁有者用得到**（成員打了跟不存在一樣），要等密鑰改成每個人在網頁自己「連接」才會開給成員。
