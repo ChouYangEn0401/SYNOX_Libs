@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **`speech` 0.1.0-alpha.1（新工具，`stage` alpha，alpha（尚未實機驗證））**（[ADR-0011](docs/adr/0011-speech-tool.md)）：文字轉語音（`/speech`，音檔用 `send_document` 傳給你、存在自己的語音資料夾 `out/`）與語音轉文字（`/speech_stt`，語音資料夾 `inbox/` 的音檔 → text／srt／vtt），Azure Speech、OpenAI（tts-1＋whisper-1）、Google Cloud 三家都做，`/speech_settings`、`/speech_set` 分別選供應商、語言、聲音、語速、格式；金鑰走 `auth.fields`＋`pack.secret`、只給擁有者；三家都只對假 HTTP 測過（`tests/test_speech.py`）。
 - **發佈 `v0.3.1`（`VERSION` 0.3.0 → 0.3.1）與 `scripts/sign_dist.py`**：簽 `dist/` 裡每個 `.synoxpack`（`synox-sdk sign`，別名＝簽過那一份的複本）、
   每個都 `verify` 要是 official，再用**簽過的檔**重算 `index.json` 每筆 `sha256`／`size`、`SHA256SUMS`、`tools-<VERSION>.zip`／`tools.zip`，最後做一致性檢查；
   全有或全無（先在暫存資料夾做、全過才換進 `dist/`）；密語只從 `SYNOX_PACK_KEY_PASSWORD` 拿。`--check` 上傳前再驗一次。發佈順序見 `docs/RELEASING.md`。
