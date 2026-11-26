@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### Added
+- **`html-snap` 0.1.0-alpha.1（新工具，`stage` alpha，**alpha（尚未在 SYNOX 實機驗證）**；[ADR-0014](docs/adr/0014-first-cli-tool-html-snap.md)）**：網頁轉長圖，工具庫第一個 kind=cli 工具（`runtime.python: "auto"`，T2）；`/snap`、`/snap_settings`、`/snap_set`、`/snap_status`、`/snap_list`；測試基礎設施補上 kind=cli 的最小支援。
 - **發佈 `v0.3.1`（`VERSION` 0.3.0 → 0.3.1）與 `scripts/sign_dist.py`**：簽 `dist/` 裡每個 `.synoxpack`（`synox-sdk sign`，別名＝簽過那一份的複本）、
   每個都 `verify` 要是 official，再用**簽過的檔**重算 `index.json` 每筆 `sha256`／`size`、`SHA256SUMS`、`tools-<VERSION>.zip`／`tools.zip`，最後做一致性檢查；
   全有或全無（先在暫存資料夾做、全過才換進 `dist/`）；密語只從 `SYNOX_PACK_KEY_PASSWORD` 拿。`--check` 上傳前再驗一次。發佈順序見 `docs/RELEASING.md`。

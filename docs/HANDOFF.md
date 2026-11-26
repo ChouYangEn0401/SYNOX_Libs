@@ -88,7 +88,7 @@ tests/test_<name>.py   測試（必要；放 repo 的 tests/，不放在工具�
 |---|---|
 | `name` | ＝資料夾名；小寫英數與 `-`。不准叫 `remind`（SYNOX 的系統指令） |
 | `version`、`stage` | 見第 4 節 |
-| `kind` | 現在只收 `python`（`test_gates.py` 擋）。想做 `cli`／`mcp`：先開 issue 問維護者，測試要一起改 |
+| `kind` | `python`；`cli` 從 html-snap 起也收（[adr/0014](adr/0014-first-cli-tool-html-snap.md)：`{python} ./<腳本>.py`、附 `synox_sdk.py`、`storage: "plain"`、`runtime.python: "auto"` 的測試用假環境 `conftest.build_fake_envs`）。想做 `mcp`：先開 issue 問維護者，測試要一起改 |
 | `access` | 不連網的本機工具 `member`；接外面服務的 `owner`（[adr/0006](adr/0006-personal-and-server-mode.md) 第 4 節） |
 | `surfaces`、`data`、`storage` | 固定 `["dm"]`、`"user"`、`"vault"` |
 | `capabilities` | 沒有也要寫 `[]`；本機寫檔 `["filesystem:own"]`；連網 `["network"]`。宣告什麼要跟靜態掃描結果一模一樣 |

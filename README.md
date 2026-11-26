@@ -28,6 +28,7 @@
 | [🎬 video-notes](packs/video-notes/README.md) | `/v2n <網址>`、`/v2n_status`、`/v2n_get` | 把影片交給你電腦上另外裝好的 Video Notes 做筆記：看進度、拿 Markdown、列筆記庫、合併好幾支 | 🔧 test | 影片筆記 | （還沒有說明頁） |
 | [🔑 usb-keys](packs/usb-keys/README.md) | `/usb_keys`、`/usb_lock 書桌 明天開會`、`/usb_unlock_check utmsg1:…` | 把很多支隨身碟登記成鑰匙，選一把鎖訊息或檔案；解開時那支碟要插著（用 usbtether 函式庫，要另外裝） | 🧪 alpha | USB 鑰匙 | （還沒有說明頁） |
 | [🗂️ workspace](packs/workspace/README.md) | `/ws_root default`、`/ws my-app`、`/ws_new python-cli my-app` | 只在你指定的一個資料夾裡看檔案、讀文字檔、用內建範本建專案；固定菜單，不執行任何程式（只給擁有者） | 🧪 alpha | 電腦工作區 | （還沒有說明頁） |
+| [🖼️ html-snap](packs/html-snap/README.md) | `/snap https://example.com`、`/snap file=report.html`、`/snap_set width 1024` | 把網址或你資料夾裡的網頁檔截成一整張不截斷的長圖（PNG／JPEG）；第一個 kind=cli 工具，安裝時自動建環境（只給擁有者） | 🧪 alpha | 網頁截圖 | （還沒有說明頁） |
 
 - `usb-keys`（2026-11-18 新寫）：不連網；只給擁有者（`access: owner`）。加密與驗證隨身碟全部由 usbtether 0.3.0 函式庫做
   （`requires.pip` 釘版本＋雜湊；SYNOX 不替 kind=python 的工具裝套件，要照工具 README 自己裝一次）；解開、登記、撤銷只有本人，密碼只在工具畫面輸入。
